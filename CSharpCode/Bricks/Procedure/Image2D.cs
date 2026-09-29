@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.Procedure
 {
-    public class UImage2D
+    public class TtImage2D
     {
         [Flags]
         public enum EImageComponent
@@ -49,22 +49,22 @@ namespace EngineNS.Bricks.Procedure
             Components = comps;
             if ((comps & EImageComponent.X) != 0)
             {
-                var creator = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(w, h, 1);
+                var creator = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(w, h, 1);
                 CompX = TtBufferComponent.CreateInstance(in creator) as TtSuperBuffer<float, FFloatOperator>;
             }
             if ((comps & EImageComponent.Y) != 0)
             {
-                var creator = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(w, h, 1);
+                var creator = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(w, h, 1);
                 CompY = TtBufferComponent.CreateInstance(in creator) as TtSuperBuffer<float, FFloatOperator>;
             }
             if ((comps & EImageComponent.Z) != 0)
             {
-                var creator = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(w, h, 1);
+                var creator = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(w, h, 1);
                 CompZ = TtBufferComponent.CreateInstance(in creator) as TtSuperBuffer<float, FFloatOperator>;
             }
             if ((comps & EImageComponent.W) != 0)
             {
-                var creator = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(w, h, 1);
+                var creator = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(w, h, 1);
                 CompW = TtBufferComponent.CreateInstance(in creator) as TtSuperBuffer<float, FFloatOperator>;
             }
         }
@@ -82,7 +82,7 @@ namespace EngineNS.Bricks.Procedure
                 Components |= EImageComponent.W;
             }
 
-            var creator = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(w, h, 1);
+            var creator = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(w, h, 1);
             CompX = TtBufferComponent.CreateInstance(in creator) as TtSuperBuffer<float, FFloatOperator>;
             CompY = TtBufferComponent.CreateInstance(in creator) as TtSuperBuffer<float, FFloatOperator>;
             CompZ = TtBufferComponent.CreateInstance(in creator) as TtSuperBuffer<float, FFloatOperator>;
@@ -131,9 +131,9 @@ namespace EngineNS.Bricks.Procedure
                 Components |= EImageComponent.W;
             }
         }
-        public UImage2D Clone()
+        public TtImage2D Clone()
         {
-            var result = new UImage2D();
+            var result = new TtImage2D();
             result.Initialize(Width, Height, 0, Components);
             if (CompX != null)
             {

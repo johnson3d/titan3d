@@ -39,24 +39,25 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
-            var pipelinPolicy = policy.TagObject as TtRenderPolicy;
-
             var aaNode = drawcall.TagObject as TtFogNode;
             if (aaNode == null)
-                aaNode = pipelinPolicy.FindFirstNode<Common.TtFogNode>();
+                aaNode = policy.FindFirstNode<Common.TtFogNode>();
+            if (aaNode == null)
+                return;
 
-            switch (pipelinPolicy.TypeFog)
+            switch (policy.TypeFog)
             {
                 case TtRenderPolicy.ETypeFog.None:
-                    OnDrawcallEHF(drawcall, pipelinPolicy, aaNode);
+                    OnDrawcallEHF(drawcall, policy, aaNode);
                     break;
                 case TtRenderPolicy.ETypeFog.ExpHeight:
-                    OnDrawcallEHF(drawcall, pipelinPolicy, aaNode);
+                    OnDrawcallEHF(drawcall, policy, aaNode);
                     break;
             }
         }
     }
     [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UFogNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UFogNode" })]
     public partial class TtFogNode : TAuxSceenSpaceNode<TtFogNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
@@ -73,6 +74,8 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             AddInput(DepthPinIn);
 
+            // Noise 允许悬空: volume_cloud.rpolicy 不接 Noise, 不设此标记会让 BuildGraph 报 hasInputError -> CreateRenderPolicy 返回 null
+            NoisePinIn.IsAllowInputNull = true;
             AddInput(NoisePinIn);
 
             base.InitNodePins();
@@ -116,6 +119,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 return;
             }
+            // 每帧把世界主光方向同步到雾的内散射方向(约 1 帧延迟, 对雾无感知影响)
+            SyncSunToFog(world);
             base.Tick(world, policy, frameCmdList, bClear);
         }
         public override void TickSync(TtRenderPolicy policy)

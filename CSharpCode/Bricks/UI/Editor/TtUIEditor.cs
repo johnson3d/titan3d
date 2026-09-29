@@ -844,7 +844,7 @@ namespace EngineNS.UI.Editor
                             element.Name = name;
                         ImGuiAPI.SameLine(0, -1);
                         bool isVariable = element.IsVariable;
-                        if(ImGuiAPI.Checkbox("Is Variable##Details", ref isVariable))
+                        if(ImGuiAPI.Checkbox(TtLocalization.Label("Is Variable", "##Details"), ref isVariable))
                         {
                             element.IsVariable = isVariable;
                             if(isVariable)
@@ -872,7 +872,7 @@ namespace EngineNS.UI.Editor
                     }
                     else
                     {
-                        ImGuiAPI.Text("Nothing selected");
+                        ImGuiAPI.Text(TtLocalization.Tr("Nothing selected"));
                     }
                 }
                 //ImGuiAPI.EndChild();
@@ -1657,7 +1657,7 @@ namespace EngineNS.UI.Editor
             {
                 unsafe
                 {
-                    ImGuiAPI.Text("Custom:");
+                    ImGuiAPI.Text(TtLocalization.Tr("Custom:"));
                     fixed(Vector2i* resPtr = &mDesignResolution)
                     {
                         if(ImGuiAPI.InputInt2("##CustomDesignResolution", (int*)resPtr, ImGuiInputTextFlags_.ImGuiInputTextFlags_None))

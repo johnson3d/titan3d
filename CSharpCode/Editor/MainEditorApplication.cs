@@ -1,4 +1,4 @@
-﻿//#define UseWindowTest
+//#define UseWindowTest
 
 using System;
 using System.Collections.Generic;
@@ -66,7 +66,7 @@ namespace EngineNS.Editor
             if (mMenuProviders.Count == 0)
                 return;
 
-            if (ImGuiAPI.BeginMenu("Plugins", true))
+            if (ImGuiAPI.BeginMenu(TtLocalization.Tr("Plugins"), true))
             {
                 for (int i = 0; i < mMenuProviders.Count; i++)
                 {
@@ -92,7 +92,7 @@ namespace EngineNS.Editor
         }
         public unsafe bool OnDraw(in ImDrawList drawList, in Support.TtAnyPointer drawData)
         {
-            ImGuiAPI.Text("Frames:");
+            ImGuiAPI.Text(TtLocalization.Tr("Frames:"));
             ImGuiAPI.SameLine(0, 4);
             ImGuiAPI.SetNextItemWidth(120);
             int frameCount = TtEngine.Instance.EditorInstance.RenderDocCaptureFrameCount;
@@ -171,7 +171,7 @@ namespace EngineNS.Editor
             await mEditorSettings.Initialize();
             //TtEngine.Instance.Config.PlayGameName = RName.GetRName("utest/test_game01.macross");
 
-            mMainInspector.PropertyGrid.PGName = "MainInspector";
+            mMainInspector.PropertyGrid.PGName = TtLocalization.Label("MainInspector", "###MainInspector");
             mMainInspector.PropertyGrid.Target = EGui.UIProxy.StyleConfig.Instance;// WorldViewportSlate;
 
             TtEngine.Instance.TickableManager.AddTickable(this);
@@ -247,7 +247,7 @@ namespace EngineNS.Editor
             {
                 new EGui.UIProxy.MenuItemProxy()
                 {
-                    MenuName = "File",
+                    MenuName = TtLocalization.Tr("File"),
                     IsTopMenuItem = true,
                     SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
                     {
@@ -257,7 +257,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Load...",
+                            MenuName = TtLocalization.Tr("Load..."),
                             Shortcut = "Ctrl+L",
                             Icon = new EGui.UIProxy.ImageProxy()
                             {
@@ -273,7 +273,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Save...",
+                            MenuName = TtLocalization.Tr("Save..."),
                             Shortcut = "Ctrl+S",
                             Icon = new EGui.UIProxy.ImageProxy()
                             {
@@ -291,13 +291,13 @@ namespace EngineNS.Editor
                 },
                 new EGui.UIProxy.MenuItemProxy()
                 {
-                    MenuName = "Tools",
+                    MenuName = TtLocalization.Tr("Tools"),
                     IsTopMenuItem = true,
                     SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
                     {
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "CompileMacross",
+                            MenuName = TtLocalization.Tr("CompileMacross"),
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 var csFilesPath = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
@@ -315,7 +315,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "PrintAttachmentPool",
+                            MenuName = TtLocalization.Tr("PrintAttachmentPool"),
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 TtEngine.Instance.GfxDevice.AttachBufferManager.PrintCachedBuffer = true;
@@ -323,7 +323,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Cap",
+                            MenuName = TtLocalization.Tr("Cap"),
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 unsafe
@@ -339,7 +339,7 @@ namespace EngineNS.Editor
                         new TtRenderDocFrameCountMenuItem(),
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "CapMem",
+                            MenuName = TtLocalization.Tr("CapMem"),
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 var save = PrevMemCapture;
@@ -356,7 +356,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "ShowConsole",
+                            MenuName = TtLocalization.Tr("ShowConsole"),
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 item.Selected = !item.Selected;
@@ -368,7 +368,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "OpenTracer",
+                            MenuName = TtLocalization.Tr("OpenTracer"),
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 //test and start tracer process...
@@ -421,7 +421,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "CloseTracer",
+                            MenuName = TtLocalization.Tr("CloseTracer"),
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 TtEngine.Instance.Tracer.CloseTrace();
@@ -431,13 +431,13 @@ namespace EngineNS.Editor
                 },
                 new EGui.UIProxy.MenuItemProxy()
                 {
-                    MenuName = "Windows",
+                    MenuName = TtLocalization.Tr("Windows"),
                     IsTopMenuItem = true,
                     SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
                     {
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "GC",
+                            MenuName = TtLocalization.Tr("GC"),
                             Selected = false,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
@@ -446,7 +446,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "ContentBrowser",
+                            MenuName = TtLocalization.Tr("ContentBrowser"),
                             Selected = true,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
@@ -457,7 +457,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "LogWatcher",
+                            MenuName = TtLocalization.Tr("LogWatcher"),
                             Selected = true,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
@@ -468,7 +468,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "CpuProfiler",
+                            MenuName = TtLocalization.Tr("CpuProfiler"),
                             Selected = true,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
@@ -480,7 +480,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "GpuProfiler",
+                            MenuName = TtLocalization.Tr("GpuProfiler"),
                             Selected = true,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
@@ -492,7 +492,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "MemProfiler",
+                            MenuName = TtLocalization.Tr("MemProfiler"),
                             Selected = true,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
@@ -503,7 +503,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "MainInspector",
+                            MenuName = TtLocalization.Tr("MainInspector"),
                             Selected = true,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
@@ -513,7 +513,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "MetaViewer",
+                            MenuName = TtLocalization.Tr("MetaViewer"),
                             Selected = true,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
@@ -523,7 +523,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "BrickManager",
+                            MenuName = TtLocalization.Tr("BrickManager"),
                             Selected = false,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
@@ -537,7 +537,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "PIE Controller",
+                            MenuName = TtLocalization.Tr("PIE Controller"),
                             Selected = false,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
@@ -549,7 +549,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Settings",
+                            MenuName = TtLocalization.Tr("Settings"),
                             Selected = false,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {

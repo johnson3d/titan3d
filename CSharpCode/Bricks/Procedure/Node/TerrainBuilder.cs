@@ -1,16 +1,17 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
 using System.ComponentModel;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
-    [Bricks.CodeBuilder.ContextMenu("MaterialIdMap", "Terrain\\MaterialIdMap", UPgcGraph.PgcEditorKeyword)]
-    public partial class UMaterialIdMapNode : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("MaterialIdMap", "Terrain\\MaterialIdMap", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UMaterialIdMapNode@EngineCore", "EngineNS.Bricks.Procedure.Node.UMaterialIdMapNode" })]
+    public partial class TtMaterialIdMapNode : TtPgcNodeBase
     {
         [System.ComponentModel.Browsable(false)]
         public PinOut IdMapPin { get; set; } = new PinOut();
-        public UMaterialIdMapNode()
+        public TtMaterialIdMapNode()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -29,7 +30,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 ameta.AddReferenceAsset(i.TexNormal);
             }
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             return null;
         }
@@ -46,7 +47,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return Hash160.Emtpy;
         }
-        public override bool InitProcedure(UPgcGraph graph)
+        public override bool InitProcedure(TtPgcGraph graph)
         {
             base.InitProcedure(graph);
             if (MaterialIdManager.MaterialIdArray.Count == 0)
@@ -61,7 +62,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return true;
         }
-        public override bool OnProcedure(UPgcGraph graph)
+        public override bool OnProcedure(TtPgcGraph graph)
         {
             return true;
         }
@@ -77,8 +78,9 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("HeightMapping", "Terrain\\HeightMapping", UPgcGraph.PgcEditorKeyword)]
-    public partial class UHeightMappingNode : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("HeightMapping", "Terrain\\HeightMapping", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UHeightMappingNode@EngineCore", "EngineNS.Bricks.Procedure.Node.UHeightMappingNode" })]
+    public partial class TtHeightMappingNode : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinIn HeightPin { get; set; } = new PinIn();
@@ -88,9 +90,9 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn IdMapPin { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UBufferCreator OutputFloat1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UHeightMappingNode()
+        public TtBufferCreator Float1Desc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public TtBufferCreator OutputFloat1Desc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public TtHeightMappingNode()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -104,11 +106,11 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         [Rtti.Meta("")]
         public int SamplerNum { get; set; } = 20;
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (ResultPin == pin)
             {
-                var graph = ParentGraph as UPgcGraph;
+                var graph = ParentGraph as TtPgcGraph;
                 var buffer = graph.BufferCache.FindBuffer(HeightPin);
                 if (buffer != null)
                 {
@@ -118,10 +120,10 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return null;
         }
-        public override bool OnProcedure(UPgcGraph graph)
+        public override bool OnProcedure(TtPgcGraph graph)
         {
-            var bzNode = GetInputNode(graph, BezierPin) as UBezier;
-            var idMapNode = GetInputNode(graph, IdMapPin) as UMaterialIdMapNode;
+            var bzNode = GetInputNode(graph, BezierPin) as TtBezier;
+            var idMapNode = GetInputNode(graph, IdMapPin) as TtMaterialIdMapNode;
             var heightComp = graph.BufferCache.FindBuffer(HeightPin);
             var resultComp = graph.BufferCache.FindBuffer(ResultPin);
 
@@ -186,7 +188,7 @@ namespace EngineNS.Bricks.Procedure.Node
             public int Num;
         }
 
-        private List<MatIdCounter> Sampler(UBezier bzNode, UMaterialIdMapNode madIdNode, float height, float range, int Nums = 100)
+        private List<MatIdCounter> Sampler(TtBezier bzNode, TtMaterialIdMapNode madIdNode, float height, float range, int Nums = 100)
         {
             var result = new List<MatIdCounter>(Nums);
             float step = range / Nums;
@@ -226,8 +228,9 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("HeightmapPreview", "Terrain\\HeightmapPreview", UPgcGraph.PgcEditorKeyword)]
-    public partial class UHeightmapPreviewNode : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("HeightmapPreview", "Terrain\\HeightmapPreview", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UHeightmapPreviewNode@EngineCore", "EngineNS.Bricks.Procedure.Node.UHeightmapPreviewNode" })]
+    public partial class TtHeightmapPreviewNode : TtPgcNodeBase
     {
         [System.ComponentModel.Browsable(false)]
         public PinIn HMapPin { get; set; } = new PinIn();
@@ -239,9 +242,9 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn MatIdPin { get; set; } = new PinIn();
         [System.ComponentModel.Browsable(false)]
         public PinIn WaterPin { get; set; } = new PinIn();
-        public UBufferCreator NormalBufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UHeightmapPreviewNode()
+        public TtBufferCreator NormalBufferCreator { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public TtBufferCreator Float1Desc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public TtHeightmapPreviewNode()
         {
             PrevSize = new Vector2(100, 60);
 
@@ -258,7 +261,7 @@ namespace EngineNS.Bricks.Procedure.Node
             AddOutput(HMapOutPin, "Height", Float1Desc);
             HMapOutPin.RefInput = HMapPin;
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             return null;
         }
@@ -266,11 +269,11 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             return Hash160.Emtpy;
         }
-        public override bool InitProcedure(UPgcGraph graph)
+        public override bool InitProcedure(TtPgcGraph graph)
         {
             return true;
         }
-        public override bool OnProcedure(UPgcGraph graph)
+        public override bool OnProcedure(TtPgcGraph graph)
         {
             return true;
         }
@@ -309,7 +312,7 @@ namespace EngineNS.Bricks.Procedure.Node
         Bricks.Terrain.CDLOD.TtTerrainNode PreviewTerrainNode;
         public override async System.Threading.Tasks.Task DoPreviewMesh()
         {
-            var graph = this.ParentGraph as UPgcGraph;
+            var graph = this.ParentGraph as TtPgcGraph;
 
             //graph.Compile(this);
 
@@ -420,8 +423,9 @@ namespace EngineNS.Bricks.Procedure.Node
     //https://www.researchgate.net/figure/Wireframe-Representation-of-Modeled-Terrain_fig2_220720125
     //http://www-cs-students.stanford.edu/~amitp/game-programming/polygon-map-generation/
     //https://zhuanlan.zhihu.com/p/95917609?native.theme=1
-    [Bricks.CodeBuilder.ContextMenu("Water", "Terrain\\Water", UPgcGraph.PgcEditorKeyword)]
-    public partial class UWaterNode : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("Water", "Terrain\\Water", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UWaterNode@EngineCore", "EngineNS.Bricks.Procedure.Node.UWaterNode" })]
+    public partial class TtWaterNode : TtPgcNodeBase
     {
         [System.ComponentModel.Browsable(false)]
         public PinIn HMapPin { get; set; } = new PinIn();
@@ -433,10 +437,10 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinOut WaterPin { get; set; } = new PinOut();
         [System.ComponentModel.Browsable(false)]
         public PinOut VelocityPin { get; set; } = new PinOut();
-        public UBufferCreator NormalBufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UBufferCreator VelocityBufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UBufferCreator OutputFloat1Creator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UWaterNode()
+        public TtBufferCreator NormalBufferCreator { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public TtBufferCreator VelocityBufferCreator { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public TtBufferCreator OutputFloat1Creator { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public TtWaterNode()
         {
             PrevSize = new Vector2(100, 60);
 
@@ -451,11 +455,11 @@ namespace EngineNS.Bricks.Procedure.Node
             AddOutput(WaterPin, "Water", OutputFloat1Creator);
             AddOutput(VelocityPin, "Velocity", VelocityBufferCreator);
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (DeepPin == pin || WaterPin == pin)
             {
-                var graph = ParentGraph as UPgcGraph;
+                var graph = ParentGraph as TtPgcGraph;
                 var buffer = graph.BufferCache.FindBuffer(HMapPin);
                 if (buffer != null)
                 {
@@ -465,7 +469,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             else if (VelocityPin == pin)
             {
-                var graph = ParentGraph as UPgcGraph;
+                var graph = ParentGraph as TtPgcGraph;
                 var buffer = graph.BufferCache.FindBuffer(HMapPin);
                 if (buffer != null)
                 {
@@ -542,14 +546,14 @@ namespace EngineNS.Bricks.Procedure.Node
             //}
             return slt.MoveTarget;
         }
-        public override bool OnProcedure(UPgcGraph graph)
+        public override bool OnProcedure(TtPgcGraph graph)
         {
             var height = graph.BufferCache.FindBuffer(HMapPin);
             var deep = graph.BufferCache.FindBuffer(DeepPin);
             var water = graph.BufferCache.FindBuffer(WaterPin);
             var velocity = graph.BufferCache.FindBuffer(VelocityPin);
 
-            var opMapCreator = UBufferCreator.CreateInstance<TtSuperBuffer<Vector2, FFloat2Operator>>(height.Width, height.Height, height.Depth); ;
+            var opMapCreator = TtBufferCreator.CreateInstance<TtSuperBuffer<Vector2, FFloat2Operator>>(height.Width, height.Height, height.Depth); ;
             var curHMap = TtBufferComponent.CreateInstance(opMapCreator);            
             curHMap.DispatchPixels((result, x, y, z) =>
             {
@@ -682,12 +686,13 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("Grass", "Terrain\\Grass", UPgcGraph.PgcEditorKeyword)]
-    public partial class UGrassNode : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("Grass", "Terrain\\Grass", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UGrassNode@EngineCore", "EngineNS.Bricks.Procedure.Node.UGrassNode" })]
+    public partial class TtGrassNode : TtPgcNodeBase
     {
         public class UGrassNodeDefine
         {
-            internal UGrassNode HostNode;
+            internal TtGrassNode HostNode;
             public class UValueEditorAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
             {
                 public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
@@ -713,7 +718,7 @@ namespace EngineNS.Bricks.Procedure.Node
                             }
                         }
                     }
-                    if (ImGuiAPI.Button("UpdatePins"))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("UpdatePins")))
                     {
                         nodeDef.HostNode.UpdateInputs();
                     }
@@ -730,6 +735,7 @@ namespace EngineNS.Bricks.Procedure.Node
         [System.ComponentModel.Browsable(false)]
         public PinOut Grass { get; set; } = new PinOut();
 
+        [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UGrassNode.UGrassPinDefine@EngineCore", "EngineNS.Bricks.Procedure.Node.UGrassNode.UGrassPinDefine" })]
         public class UGrassPinDefine : IO.BaseSerializer
         {
             [Rtti.Meta("")]
@@ -741,7 +747,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
 
         List<UGrassPinDefine> mGrassDefines = new List<UGrassPinDefine>();
-        UBufferCreator mInBufferCreator = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>();
+        TtBufferCreator mInBufferCreator = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>();
         [Rtti.Meta("")]
         public List<UGrassPinDefine> GrassDefines
         {
@@ -753,7 +759,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
 
-        public UGrassNode()
+        public TtGrassNode()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -766,7 +772,7 @@ namespace EngineNS.Bricks.Procedure.Node
             UpdateInputs();
         }
 
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             return null;
         }
@@ -806,7 +812,7 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             if (index < 0 || index >= Inputs.Count)
                 return null;
-            var graph = ParentGraph as UPgcGraph;
+            var graph = ParentGraph as TtPgcGraph;
             return graph.BufferCache.FindBuffer(Inputs[index]);
         }
     }

@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation;
+using EngineNS.Animation;
 using EngineNS.Animation.Macross;
 using EngineNS.Animation.StateMachine;
 using EngineNS.Bricks.CodeBuilder;
@@ -30,10 +30,10 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateAttachment
         public override string Name { get; set; } = "ClipPlay";
         [Rtti.Meta("")]
         [RName.PGRName(FilterExts = EngineNS.Animation.Asset.TtAnimationClip.AssetExt)]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
 
         public RName AnimationClip { get; set; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public bool IsLoop { get; set; } = false;
         public override List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
@@ -85,18 +85,18 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateAttachment
         public override string Name { get; set; } = "BlendSpacePlay";
         [Rtti.Meta("")]
         [RName.PGRName(FilterExts = EngineNS.Animation.Asset.BlendSpace.TtBlendSpace2D.AssetExt)]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName Animation { get; set; }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [PGBlendSpaceValueBindSelect]
         public Guid XBind { get; set; }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [PGBlendSpaceValueBindSelect]
         public Guid YBind { get; set; }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [PGBlendSpaceValueBindSelect]
         public Guid ZBind { get; set; }
         public override List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)

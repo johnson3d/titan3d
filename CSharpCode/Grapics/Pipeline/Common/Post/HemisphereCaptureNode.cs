@@ -34,6 +34,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     }
 
     [Bricks.CodeBuilder.ContextMenu("HemisphereCapture", "Post\\HemisphereCapture", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.Post.UHemisphereCaptureNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.Post.UHemisphereCaptureNode" })]
     public class TtHemisphereCaptureNode : TAuxRenderGraphNode<TtHemisphereCaptureNode>
     {
         // ---------- Pins ----------
@@ -43,23 +44,23 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             EBufferType.BFT_SRV | EBufferType.BFT_UAV);
 
         // ---------- Tunable ----------
-        [Category("HemisphereCapture")]
+        [System.ComponentModel.Category("HemisphereCapture")]
         [Rtti.Meta("")]
         public uint OutputResolution { get; set; } = 256;
 
-        [Category("HemisphereCapture")]
+        [System.ComponentModel.Category("HemisphereCapture")]
         [Rtti.Meta("")]
         public float CaptureIntensity { get; set; } = 1.0f;
 
-        [Category("HemisphereCapture")]
+        [System.ComponentModel.Category("HemisphereCapture")]
         [Rtti.Meta("")]
         public float MaxMipLevel { get; set; } = 5.0f;
 
-        [Category("HemisphereCapture")]
+        [System.ComponentModel.Category("HemisphereCapture")]
         [Rtti.Meta("")]
         public Color4f SkyTintColor { get; set; } = new Color4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-        [Category("HemisphereCapture")]
+        [System.ComponentModel.Category("HemisphereCapture")]
         [Rtti.Meta("")]
         public Matrix CaptureRotation { get; set; } = Matrix.Identity;
 

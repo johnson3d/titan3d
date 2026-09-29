@@ -1,4 +1,4 @@
-﻿using EngineNS.EGui;
+using EngineNS.EGui;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -180,13 +180,13 @@ namespace EngineNS.Editor.Forms
 
             var size = new Vector2(800, 600);
             ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_FirstUseEver);
-            var result = EGui.UIProxy.DockProxy.BeginMainForm("CpuProfiler", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(TtLocalization.Label("CpuProfiler", "###CpuProfiler"), this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (result)
             {
                 var cmdlst = ImGuiAPI.GetWindowDrawList();
                 var stats = TtEngine.Instance.GfxDevice.RenderQueue.QueueStats;
                 var fps = string.Format("fps={0:F2}", TtEngine.Instance.FPS);
-                ImGuiAPI.Text($"Fps({fps}) CmdList = {stats.NumOfCmdlist};Drawcall = {stats.NumOfDrawcall};Primitive = {stats.NumOfPrimitive}; WorkThreads = {Thread.Async.TtContextThreadManager.mAliveThread}");
+                ImGuiAPI.Text(TtLocalization.Format("Fps({0}) CmdList = {1};Drawcall = {2};Primitive = {3}; WorkThreads = {4}", fps, stats.NumOfCmdlist, stats.NumOfDrawcall, stats.NumOfPrimitive, Thread.Async.TtContextThreadManager.mAliveThread));
                 EGui.UIProxy.SearchBarProxy.OnDraw(ref mFilterFocusd, cmdlst, "filter", ref mFilter, ImGuiAPI.GetWindowContentRegionWidth());
                 DockId = ImGuiAPI.GetWindowDockID();
                 if (ImGuiAPI.BeginTabBar("CPU", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
@@ -284,7 +284,7 @@ namespace EngineNS.Editor.Forms
                 ImGuiAPI.TableSetupColumn("Parent", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthStretch, 0, 0);
                 ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_Headers, 0);
                 ImGuiAPI.TableSetColumnIndex(0);
-                ImGuiAPI.Text("Name");
+                ImGuiAPI.Text(TtLocalization.Tr("Name"));
                 if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                 {
                     mSortMode = ESortMode.ByName;
@@ -292,7 +292,7 @@ namespace EngineNS.Editor.Forms
                     CurrentName = null;
                 }
                 ImGuiAPI.TableSetColumnIndex(1);
-                ImGuiAPI.Text("AvgTime");
+                ImGuiAPI.Text(TtLocalization.Tr("AvgTime"));
                 if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                 {
                     mSortMode = ESortMode.ByTime;
@@ -300,11 +300,11 @@ namespace EngineNS.Editor.Forms
                     CurrentName = null;
                 }
                 ImGuiAPI.TableSetColumnIndex(2);
-                ImGuiAPI.Text("AvgHit");
+                ImGuiAPI.Text(TtLocalization.Tr("AvgHit"));
                 ImGuiAPI.TableSetColumnIndex(3);
-                ImGuiAPI.Text("MaxTime");
+                ImGuiAPI.Text(TtLocalization.Tr("MaxTime"));
                 ImGuiAPI.TableSetColumnIndex(4);
-                ImGuiAPI.Text("Parent");
+                ImGuiAPI.Text(TtLocalization.Tr("Parent"));
 
                 foreach (var j in Scopes)
                 {
@@ -358,7 +358,7 @@ namespace EngineNS.Editor.Forms
                         foreach (var k in j.Callers)
                         {
                             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.LinkStringColor);
-                            ImGuiAPI.Text($"[{k.Value}]" + k.Key);
+                            ImGuiAPI.Text(TtLocalization.Format("[{0}]", k.Value) + k.Key);
                             ImGuiAPI.PopStyleColor(1);
                             if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
                             {
@@ -378,7 +378,7 @@ namespace EngineNS.Editor.Forms
                     else
                     {
                         ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextDisableColor);
-                        ImGuiAPI.Text("null");
+                        ImGuiAPI.Text(TtLocalization.Tr("null"));
                         ImGuiAPI.PopStyleColor(1);
                     }
                     if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
@@ -625,7 +625,7 @@ namespace EngineNS.Editor.Forms
                             if (ImGuiAPI.BeginPopupContextWindow(null, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
                             {
                                 mMenuShow = true;
-                                if (ImGuiAPI.MenuItem($"Reset", null, false, true))
+                                if (ImGuiAPI.MenuItem(TtLocalization.Tr("Reset"), null, false, true))
                                 {
                                     var arg = new Profiler.TtRpcProfiler.ResetMaxTimeArg();
                                     arg.ThreadName = watchingThread;
@@ -659,7 +659,7 @@ namespace EngineNS.Editor.Forms
                             if (ImGuiAPI.BeginPopupContextWindow("ScopeGotoSource", ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
                             {
                                 mMenuShow = true;
-                                if (ImGuiAPI.MenuItem($"GotoSource", null, false, true))
+                                if (ImGuiAPI.MenuItem(TtLocalization.Tr("GotoSource"), null, false, true))
                                 {
                                     var plugin = Bricks.DevIDE.TtDevIDEPlugin.FindDevIDEPlugin();
                                     if (plugin!=null)

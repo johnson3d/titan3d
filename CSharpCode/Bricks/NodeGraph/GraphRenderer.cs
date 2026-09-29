@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
+using EngineNS.Bricks.CodeBuilder.MacrossNode;
 using EngineNS.EGui.Controls;
 using NPOI.SS.Formula.Functions;
 using System;
@@ -74,7 +74,7 @@ namespace EngineNS.Bricks.NodeGraph
                 return;
             if (mGraph.AssetName != null)
             {
-                if (ImGuiAPI.Button("Snap"))
+                if (ImGuiAPI.Button(TtLocalization.Tr("Snap")))
                 {
                     var presentWindow = ImGuiAPI.GetWindowViewportData();
                     if (presentWindow != null)
@@ -102,9 +102,29 @@ namespace EngineNS.Bricks.NodeGraph
                     if (i < mGraphInherit.Count - 1)
                     {
                         ImGuiAPI.SameLine(0, -1);
-                        ImGuiAPI.Text("/");
+                        ImGuiAPI.Text(TtLocalization.Tr("/"));
                     }
                 }
+            }
+            // 按名字模糊查找定位节点: 工具栏按钮打开弹窗, 搜索后点击将视图居中到该节点。
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.Button(TtLocalization.Tr("Find Node")))
+            {
+                mFindNodeOpen = true;
+                mFindNodeFirstOpen = true;
+                mFindNodeStr = "";
+            }
+            // 依 DAG 结构自动分层排布整图节点(上游在左、下游在右), 一键整理混乱的图。
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.Button(TtLocalization.Tr("Tidy Up")))
+            {
+                mGraph.AutoLayout();
+            }
+            // 仅整理选中节点; 最接近下游根节点的选中节点保持原位。
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.Button(TtLocalization.Tr("Tidy Selected")))
+            {
+                mGraph.AutoLayoutSelected();
             }
             if (ImGuiAPI.BeginChild("Graph", in Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
             {
@@ -204,6 +224,7 @@ namespace EngineNS.Bricks.NodeGraph
                 DrawPopMenu();
             }
             ImGuiAPI.EndChild();
+            DrawFindNodePopup();
         }
 
         void ProcessKeyboard(in Vector2 screenPt, TtNodeGraph graph)
@@ -896,6 +917,77 @@ namespace EngineNS.Bricks.NodeGraph
         bool mCanvasMenuFilterFocused = false;
         List<Rect> mMouseInvalidAreas = new List<Rect>();
         public string CanvasMenuFilterStr = "";
+
+        // "Find Node" 弹窗状态: 按名字(Name/Label)模糊过滤, 点击结果 FocusToNode 居中+选中。
+        bool mFindNodeOpen = false;
+        bool mFindNodeFirstOpen = false;
+        bool mFindNodeSearchFocused = false;
+        string mFindNodeStr = "";
+        void DrawFindNodePopup()
+        {
+            if (!mFindNodeOpen || mGraph == null)
+                return;
+
+            ImGuiAPI.OpenPopup("FindNodePopup", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+            if (ImGuiAPI.BeginPopup("FindNodePopup",
+                ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize |
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar |
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings |
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
+            {
+                var drawList = ImGuiAPI.GetWindowDrawList();
+                if (mFindNodeFirstOpen)
+                {
+                    ImGuiAPI.SetKeyboardFocusHere(0);
+                    mFindNodeFirstOpen = false;
+                }
+                EGui.UIProxy.SearchBarProxy.OnDraw(ref mFindNodeSearchFocused, in drawList, "node name", ref mFindNodeStr, 260);
+
+                var filter = string.IsNullOrEmpty(mFindNodeStr) ? "" : mFindNodeStr.ToLower();
+                TtNodeBase firstMatch = null;
+                var wsize = new Vector2(260, 320);
+                var id = ImGuiAPI.GetID("FindNodeList");
+                if (ImGuiAPI.BeginChild(id, wsize, ImGuiChildFlags_.ImGuiChildFlags_None,
+                    ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar |
+                    ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
+                {
+                    for (int i = 0; i < mGraph.Nodes.Count; i++)
+                    {
+                        var n = mGraph.Nodes[i];
+                        var name = n.Name ?? "";
+                        var label = n.Label;
+                        if (filter.Length > 0 &&
+                            !name.ToLower().Contains(filter) &&
+                            !(!string.IsNullOrEmpty(label) && label.ToLower().Contains(filter)))
+                            continue;
+                        if (firstMatch == null)
+                            firstMatch = n;
+                        var display = (string.IsNullOrEmpty(label) || label == name) ? name : $"{label} ({name})";
+                        if (ImGuiAPI.Selectable($"{display}##findnode{n.NodeId}", false, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        {
+                            mGraph.FocusToNode(n);
+                            mFindNodeOpen = false;
+                            ImGuiAPI.CloseCurrentPopup();
+                        }
+                    }
+                }
+                ImGuiAPI.EndChild();
+
+                // 回车直接定位到第一个匹配项
+                if (firstMatch != null && ImGuiAPI.IsKeyPressed(ImGuiKey.ImGuiKey_Enter, false))
+                {
+                    mGraph.FocusToNode(firstMatch);
+                    mFindNodeOpen = false;
+                    ImGuiAPI.CloseCurrentPopup();
+                }
+                ImGuiAPI.EndPopup();
+            }
+            else
+            {
+                // 弹窗被点击外部等方式关闭, 同步标志
+                mFindNodeOpen = false;
+            }
+        }
 
         public void DrawPopMenu()
         {

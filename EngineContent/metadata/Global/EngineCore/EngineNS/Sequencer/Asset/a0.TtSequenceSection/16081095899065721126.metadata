@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_16081095899065721126 Type="EngineNS.Sequencer.Asset.TtSequenceSection@EngineCore">
+  <CompletionMode Type="EngineNS.Sequencer.Asset.ESectionCompletionMode@EngineCore" Order="0" />
+  <EaseInDuration Type="System.Int64@Unknown" Order="0" />
+  <EaseOutDuration Type="System.Int64@Unknown" Order="0" />
+  <EndTick Type="System.Int64@Unknown" Order="0" />
+  <OverlapPriority Type="System.Int32@Unknown" Order="0" />
+  <RowIndex Type="System.Int32@Unknown" Order="0" />
+  <StartTick Type="System.Int64@Unknown" Order="0" />
+</Hash_16081095899065721126>

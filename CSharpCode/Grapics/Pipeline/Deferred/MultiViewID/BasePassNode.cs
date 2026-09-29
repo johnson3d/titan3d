@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
@@ -94,7 +94,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
         public TtCpuCullingNode CpuCullNode = null;
         public TtGpuCullingNode GpuCullNode = null;
         public NxRHI.FViewPort[] Viewports = new FViewPort[2];
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public bool ClearMRT
         {
@@ -207,7 +207,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
             return mOpaqueShading;
         }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool EnableHDR { get; set; }
         public override void BeforeTick(TtRenderPolicy policy)
         {
@@ -228,7 +228,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
                 }
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public List<ERenderLayer> LayerFilters { get; set; } = new List<ERenderLayer> { ERenderLayer.RL_Opaque, ERenderLayer.RL_Translucent, ERenderLayer.RL_Sky };
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

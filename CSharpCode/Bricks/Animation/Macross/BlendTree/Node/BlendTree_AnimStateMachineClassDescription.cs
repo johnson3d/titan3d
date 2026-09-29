@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation.Macross;
+using EngineNS.Animation.Macross;
 using EngineNS.Animation.Macross.BlendTree.Node;
 using EngineNS.Animation.StateMachine;
 using EngineNS.Bricks.Animation.Macross.StateMachine;
@@ -24,7 +24,7 @@ namespace EngineNS.Animation.Macross.BlendTree
     {
         public override string Name { get => "BlendTree_StateMachine"; }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [PGStateMachineSelect()]
         public Guid AnimStateMachineId { get; set; } = Guid.Empty;
         public TtBlendTree_AnimStateMachineClassDescription()

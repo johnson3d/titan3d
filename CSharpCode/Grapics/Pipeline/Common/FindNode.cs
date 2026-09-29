@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.Bricks.NodeGraph;
@@ -13,7 +13,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         TtRenderGraphNode mNode;
         public string mProxyNodeName = "";
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string ProxyNodeName
         {
             get => mProxyNodeName;
@@ -144,7 +144,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     bool bSelected = true;
 
                     // 第一项：清空选择
-                    if (ImGuiAPI.Selectable("None", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                    if (ImGuiAPI.Selectable(TtLocalization.Tr("None"), ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                     {
                         newValue = Guid.Empty;
                         if (findNode != null)
@@ -184,7 +184,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         // Setter 里会在当前 RenderGraph 中查到节点，并把它的 Name 同步到 mProxyNodeName，
         // 兼容存量基于 Name 的查找逻辑（GetReferNode / BeforeTick 里的 fallback）。
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [PGFindNodeSelect()]
         public Guid ProxyNodeId
         {
@@ -336,12 +336,12 @@ namespace EngineNS.Graphics.Pipeline.Common
                         }
                         if (numOut == 0)
                         {
-                            ImGuiAPI.TextDisabled("(no output pin)");
+                            ImGuiAPI.TextDisabled(TtLocalization.Tr("(no output pin)"));
                         }
                     }
                     else
                     {
-                        ImGuiAPI.TextDisabled("(select ProxyNodeId first)");
+                        ImGuiAPI.TextDisabled(TtLocalization.Tr("(select ProxyNodeId first)"));
                     }
 
                     EGui.UIProxy.ComboBox.EndCombo();
@@ -352,7 +352,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public string mProxyPinName = "";
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [PGFindPinSelect()]
         public string ProxyPinName
         {

@@ -1,4 +1,4 @@
-﻿using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Mesh;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -30,7 +30,7 @@ namespace EngineNS.GamePlay.Scene
             }
             base.OnParentChanged(prev, cur);
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public TtDirectionLight DirectionLight
         {
@@ -38,7 +38,7 @@ namespace EngineNS.GamePlay.Scene
             set => GetNodeData<TtSunNodeData>().DirectionLight = value;
         }
         Graphics.Pipeline.Shader.TtMaterialInstance SunMaterial;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt)]
         public RName SunMaterialName

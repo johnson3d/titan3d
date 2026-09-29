@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation.SceneNode;
+using EngineNS.Animation.SceneNode;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.Thread.Async;
@@ -36,43 +36,43 @@ namespace EngineNS.GamePlay.Camera
             [Rtti.Meta("")]
             public FRotator InitRotation { get; set; } = new FRotator();
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public DVector3 TargetOffset
         {
             get => (NodeData as TtCameraSpringArmData).TargetOffset;
             set => (NodeData as TtCameraSpringArmData).TargetOffset = value;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float ArmLength
         {
             get => (NodeData as TtCameraSpringArmData).ArmLength;
             set => (NodeData as TtCameraSpringArmData).ArmLength = value;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float ProbeSize
         {
             get => (NodeData as TtCameraSpringArmData).ProbeSize;
             set => (NodeData as TtCameraSpringArmData).ProbeSize = value;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float SpringDamping
         {
             get => (NodeData as TtCameraSpringArmData).SpringDamping;
             set => (NodeData as TtCameraSpringArmData).SpringDamping = value;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool DoCollisionTest
         {
             get => (NodeData as TtCameraSpringArmData).DoCollisionTest;
             set => (NodeData as TtCameraSpringArmData).DoCollisionTest = value;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool AcceptInput
         {
             get => (NodeData as TtCameraSpringArmData).AcceptInput;
             set => (NodeData as TtCameraSpringArmData).AcceptInput = value;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public FRotator InitRotation
         {
             get => (NodeData as TtCameraSpringArmData).InitRotation;

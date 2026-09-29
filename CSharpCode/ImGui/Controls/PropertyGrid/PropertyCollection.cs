@@ -163,17 +163,49 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
 
         }
+
+        // PG 是元数据文本的最终消费方，在这里统一翻译标准 Attribute。
+        static string GetLocalizedDisplayName(IEnumerable attributes)
+        {
+            foreach (var attr in attributes)
+            {
+                if (attr is DisplayNameAttribute displayName)
+                    return TtLocalization.Tr(displayName.DisplayName);
+            }
+            return null;
+        }
+
+        static string GetLocalizedDescription(IEnumerable attributes)
+        {
+            foreach (var attr in attributes)
+            {
+                if (attr is DescriptionAttribute description)
+                    return TtLocalization.Tr(description.Description);
+            }
+            return null;
+        }
+
+        static string GetLocalizedCategory(IEnumerable attributes)
+        {
+            foreach (var attr in attributes)
+            {
+                if (attr is CategoryAttribute category)
+                    return TtLocalization.Tr(category.Category);
+            }
+            return null;
+        }
+
         public void InitValue(object objIns, Rtti.TtTypeDesc insType, PropertyDescriptor property, bool parentIsValueType, int definitionOrder = -1)
         {
             //Propertys.Add(insType);
             Name = property.Name;
             CanCreateNew = true;
-            mDisplayName = property.DisplayName;
+            mDisplayName = GetLocalizedDisplayName(property.Attributes) ?? property.DisplayName;
             mPropertyType = Rtti.TtTypeDesc.TypeOf(property.PropertyType);
             var atts = new Attribute[property.Attributes.Count];
             property.Attributes.CopyTo(atts, 0);
             Attributes = new AttributeCollection(atts);
-            Description = property.Description;
+            Description = GetLocalizedDescription(property.Attributes) ?? property.Description;
             mIsReadonly = property.IsReadOnly;
             IsBrowsable = property.IsBrowsable;
             DefinitionOrder = definitionOrder;
@@ -200,7 +232,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     DisplayOrder = ((TtPropertyOrderAttribute)att).DisplayOrder;
                 }
             }
-            Category = property.Category;
+            Category = GetLocalizedCategory(property.Attributes) ?? property.Category;
             if (parentIsValueType)
                 ParentIsValueType = parentIsValueType;
             else
@@ -214,8 +246,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             Name = field.Name;
             CanCreateNew = true;
             var disNameAtt = field.GetCustomAttributes(typeof(DisplayNameAttribute), true);
-            if (disNameAtt != null && disNameAtt.Length > 0)
-                mDisplayName = ((DisplayNameAttribute)disNameAtt[0]).DisplayName;
+            mDisplayName = GetLocalizedDisplayName(disNameAtt);
             mPropertyType = Rtti.TtTypeDesc.TypeOf(field.FieldType);
             DefinitionOrder = definitionOrder;
             DisplayOrder = 0;
@@ -253,19 +284,12 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             Attributes = new AttributeCollection(tAtts);
             var desAtt = field.GetCustomAttributes(typeof(DescriptionAttribute), true);
-            if (desAtt != null && desAtt.Length > 0)
-                Description = ((DescriptionAttribute)desAtt[0]).Description;
-            else
-            {
-            }
+            Description = GetLocalizedDescription(desAtt);
             //var readOnlyAtt = field.GetCustomAttributes(typeof(ReadOnlyAttribute), true);
             //if (readOnlyAtt != null && readOnlyAtt.Length > 0)
             //    mIsReadonly = ((ReadOnlyAttribute)readOnlyAtt[0]).IsReadOnly;
             var categoryAtt = field.GetCustomAttributes(typeof(CategoryAttribute), true);
-            if (categoryAtt != null && categoryAtt.Length > 0)
-                Category = ((CategoryAttribute)categoryAtt[0]).Category;
-            else
-                Category = "Misc";
+            Category = GetLocalizedCategory(categoryAtt) ?? "Misc";
             if (parentIsValueType)
                 ParentIsValueType = parentIsValueType;
             else

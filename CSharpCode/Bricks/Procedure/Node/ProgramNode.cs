@@ -7,11 +7,11 @@ namespace EngineNS.Bricks.Procedure.Node
     public class UNodePinDefine : NodeGraph.UNodePinDefineBase
     {
         [Rtti.Meta("")]
-        public UBufferCreator BufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, - 1, -1);
+        public TtBufferCreator BufferCreator { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, - 1, -1);
         protected override void InitFromPin<T>(T pin)
         {
             Name = pin.Name;
-            UBufferCreator.CopyTo(pin.Tag as UBufferCreator, BufferCreator);
+            TtBufferCreator.CopyTo(pin.Tag as TtBufferCreator, BufferCreator);
             if (pin.LinkDesc.CanLinks.Count > 0)
                 TypeValue = pin.LinkDesc.CanLinks[0];
         }
@@ -20,12 +20,12 @@ namespace EngineNS.Bricks.Procedure.Node
     public partial class UProgram : Macross.AuxMacrossObject
     {
         [Rtti.Meta("")]
-        public virtual bool InitProcedure(UPgcGraph graph, UProgramNode node)
+        public virtual bool InitProcedure(TtPgcGraph graph, TtProgramNode node)
         {
             return true;
         }
         [Rtti.Meta("")]
-        public virtual bool OnProcedure(UPgcGraph graph, UProgramNode node)
+        public virtual bool OnProcedure(TtPgcGraph graph, TtProgramNode node)
         {
             //graph.BufferCache.FindBuffer()
             //var tmpBuffer = node.FindBuffer("AAA");
@@ -36,7 +36,7 @@ namespace EngineNS.Bricks.Procedure.Node
             return true;
         }
         [Rtti.Meta("")]
-        public unsafe virtual void OnPerPixel(UPgcGraph graph, UProgramNode node, 
+        public unsafe virtual void OnPerPixel(TtPgcGraph graph, TtProgramNode node,
             TtBufferComponent resuilt, int x, int y, int z, object tag)
         {
             //resuilt.GetSuperPixelAddress(x, y, z);
@@ -44,10 +44,11 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("Program", "Program", UPgcGraph.PgcEditorKeyword)]
-    public partial class UProgramNode : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("Program", "Program", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UProgramNode@EngineCore", "EngineNS.Bricks.Procedure.Node.UProgramNode" })]
+    public partial class TtProgramNode : TtPgcNodeBase
     {
-        public UProgramNode()
+        public TtProgramNode()
         {
             PrevSize = new Vector2(100, 60);
             NodeDefine.HostNode = this;
@@ -58,15 +59,15 @@ namespace EngineNS.Bricks.Procedure.Node
 
             UpdateInputOutputs();
         }
-        public class UProgramNodeDefine
+        public class TtProgramNodeDefine
         {
-            internal UProgramNode HostNode;
+            internal TtProgramNode HostNode;
             public class UValueEditorAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
             {
                 public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
                 {
                     newValue = info.Value;
-                    var nodeDef = newValue as UProgramNodeDefine;
+                    var nodeDef = newValue as TtProgramNodeDefine;
                     Vector2i NumOfPin = new Vector2i(nodeDef.HostNode.UserInputs.Count, nodeDef.HostNode.UserOutputs.Count);
                     if (ImGuiAPI.InputInt2("NumOfPin", (int*)&NumOfPin, ImGuiInputTextFlags_.ImGuiInputTextFlags_None))
                     {
@@ -101,7 +102,7 @@ namespace EngineNS.Bricks.Procedure.Node
                             }
                         }
                     }
-                    if (ImGuiAPI.Button("UpdatePins"))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("UpdatePins")))
                     {
                         nodeDef.HostNode.UpdateInputOutputs();
                     }
@@ -109,11 +110,11 @@ namespace EngineNS.Bricks.Procedure.Node
                 }
             }
         }
-        [UProgramNodeDefine.UValueEditor]
-        public UProgramNodeDefine NodeDefine
+        [TtProgramNodeDefine.UValueEditor]
+        public TtProgramNodeDefine NodeDefine
         {
             get;
-        } = new UProgramNodeDefine();
+        } = new TtProgramNodeDefine();
         List<UNodePinDefine> mUserInputs = new List<UNodePinDefine>();
         [Rtti.Meta("")]
         public List<UNodePinDefine> UserInputs
@@ -198,7 +199,7 @@ namespace EngineNS.Bricks.Procedure.Node
             ImGuiAPI.SetCursorPos(in ctrlPos);
             ImGuiAPI.Dummy(in Vector2.Zero);
             ImGuiAPI.PushID($"{this.NodeId.ToString()}");
-            if (ImGuiAPI.Button("OpenMacross"))
+            if (ImGuiAPI.Button(TtLocalization.Tr("OpenMacross")))
             {
                 if (ProgramName != null)
                 {
@@ -215,19 +216,19 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             ImGuiAPI.PopID();
         }
-        public override bool InitProcedure(UPgcGraph graph)
+        public override bool InitProcedure(TtPgcGraph graph)
         {
             if (McProgram == null)
                 return false;
             return McProgram.Get().InitProcedure(graph, this);
         }
-        public override bool OnProcedure(UPgcGraph graph)
+        public override bool OnProcedure(TtPgcGraph graph)
         {
             if (McProgram == null)
                 return false;
             return McProgram.Get().OnProcedure(graph, this);
         }
-        public void DispatchPixels(UPgcGraph graph, TtBufferComponent result, object tag)
+        public void DispatchPixels(TtPgcGraph graph, TtBufferComponent result, object tag)
         {
             var prog = McProgram.Get();
             for (int i = 0; i < result.Depth; i++)
@@ -241,7 +242,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 }
             }
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             for (int i = 0; i < Outputs.Count; i++)
             {
@@ -265,7 +266,7 @@ namespace EngineNS.Bricks.Procedure.Node
 {
 	partial class UProgram
 	{
-		public unsafe bool macross_InitProcedure (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, UProgramNode node) 
+		public unsafe bool macross_InitProcedure (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtPgcGraph graph, TtProgramNode node)
 		{
 			var stackframe = mcStack.TopFrame;
 			{
@@ -276,7 +277,7 @@ namespace EngineNS.Bricks.Procedure.Node
 			var _return_value = InitProcedure(graph, node);
 			return _return_value;
 		}
-		public unsafe bool macross_OnProcedure (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, UProgramNode node) 
+		public unsafe bool macross_OnProcedure (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtPgcGraph graph, TtProgramNode node)
 		{
 			var stackframe = mcStack.TopFrame;
 			{
@@ -287,7 +288,7 @@ namespace EngineNS.Bricks.Procedure.Node
 			var _return_value = OnProcedure(graph, node);
 			return _return_value;
 		}
-		public unsafe void macross_OnPerPixel (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, UProgramNode node, TtBufferComponent resuilt, int x, int y, int z, object tag) 
+		public unsafe void macross_OnPerPixel (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtPgcGraph graph, TtProgramNode node, TtBufferComponent resuilt, int x, int y, int z, object tag)
 		{
 			var stackframe = mcStack.TopFrame;
 			{

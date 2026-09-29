@@ -104,17 +104,7 @@ namespace EngineNS.Graphics.Pipeline
             public NxRHI.FShaderVarDesc ViewPrjInvMtx;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Matrix))]
             public NxRHI.FShaderVarDesc PreFrameViewPrjMtx;
-            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Matrix))]
-            public NxRHI.FShaderVarDesc JitterPrjMtx;
-            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Matrix))]
-            public NxRHI.FShaderVarDesc JitterPrjInvMtx;
-            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Matrix))]
-            public NxRHI.FShaderVarDesc JitterViewPrjMtx;
-            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Matrix))]
-            public NxRHI.FShaderVarDesc JitterViewPrjInvMtx;
-            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Matrix))]
-            public NxRHI.FShaderVarDesc JitterPreFrameViewPrjMtx;
-
+            
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector3))]
             public NxRHI.FShaderVarDesc CameraPosition;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(uint))]

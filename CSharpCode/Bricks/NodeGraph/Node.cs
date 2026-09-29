@@ -1,4 +1,4 @@
-﻿using EngineNS.EGui.Controls;
+using EngineNS.EGui.Controls;
 using EngineNS.EGui.Controls.PropertyGrid;
 using Mono.CompilerServices.SymbolWriter;
 using System;
@@ -169,7 +169,7 @@ namespace EngineNS.Bricks.NodeGraph
     public class PinIn : NodePin
     {
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public UEditableValue EditValue { get; set; } = null;
 
         public override void CopyTo(NodePin pin)
@@ -241,7 +241,7 @@ namespace EngineNS.Bricks.NodeGraph
         }
         string mName = "NoName";
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual string Name 
         {
             get => mName;
@@ -257,7 +257,7 @@ namespace EngineNS.Bricks.NodeGraph
         public virtual string Label { get; set; } = "NoName";
         [Rtti.Meta("")]
         public Guid NodeId { get; set; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string NodeType
         {
             get
@@ -763,10 +763,8 @@ namespace EngineNS.Bricks.NodeGraph
         {
             OnLinkedFromAction?.Invoke(this, iPin, OutNode, oPin, linker);
         }
-        public Action<TtNodeBase> OnDoubleClickAction;
-        public virtual void OnDoubleClick() 
+        public virtual void OnDoubleClick()
         {
-            OnDoubleClickAction?.Invoke(this);
         }
         public Action<TtNodeBase, NodePin> OnOnDoubleClickedPinAction;
         public virtual void OnDoubleClickedPin(NodePin hitPin)

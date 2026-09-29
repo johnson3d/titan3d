@@ -39,9 +39,10 @@ namespace EngineNS.UI
         {
             return true;
         }
+        public const string AssetTypeName = "UI";
         public override string GetAssetTypeName()
         {
-            return "UI";
+            return AssetTypeName;
         }
         public override void OnShowIconTimout(int time)
         {

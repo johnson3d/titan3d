@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -43,14 +43,14 @@ namespace EngineNS.EGui.UIProxy
                 }
 
                 ImGuiAPI.Separator();
-                if(ImGuiAPI.Button("OK", in Vector2.Zero) && string.IsNullOrEmpty(mErrorString))
+                if(ImGuiAPI.Button(TtLocalization.Tr("OK"), in Vector2.Zero) && string.IsNullOrEmpty(mErrorString))
                 {
                     retValue = enResult.OK;
                     ImGuiAPI.CloseCurrentPopup();
                 }
                 ImGuiAPI.SetItemDefaultFocus();
                 ImGuiAPI.SameLine(0, -1);
-                if(ImGuiAPI.Button("Cancel", in Vector2.Zero))
+                if(ImGuiAPI.Button(TtLocalization.Tr("Cancel"), in Vector2.Zero))
                 {
                     retValue = enResult.Cancel;
                     ImGuiAPI.CloseCurrentPopup();

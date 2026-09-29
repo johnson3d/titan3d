@@ -91,7 +91,7 @@ namespace EngineNS.Bricks.Font
                     if (string.IsNullOrEmpty(ContentBrowser.CurrentImporterFile))
                     {
                         var sz = new Vector2(-1, 0);
-                        if (ImGuiAPI.Button("Select Font", in sz))
+                        if (ImGuiAPI.Button(TtLocalization.Tr("Select Font"), in sz))
                         {
                             mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".ttf", ".");
                         }
@@ -116,12 +116,12 @@ namespace EngineNS.Bricks.Font
                     if (bFileExisting)
                     {
                         var clr = new Vector4(1, 0, 0, 1);
-                        ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
+                        ImGuiAPI.TextColored(in clr, TtLocalization.Format("Source:{0}", mSourceFile));
                     }
                     else
                     {
                         var clr = new Vector4(1, 1, 1, 1);
-                        ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
+                        ImGuiAPI.TextColored(in clr, TtLocalization.Format("Source:{0}", mSourceFile));
                     }
                     ImGuiAPI.Separator();
 
@@ -140,7 +140,7 @@ namespace EngineNS.Bricks.Font
                     var btSz = Vector2.Zero;
                     if (bFileExisting == false)
                     {
-                        if (ImGuiAPI.Button("Create Asset", in btSz))
+                        if (ImGuiAPI.Button(TtLocalization.Tr("Create Asset"), in btSz))
                         {
                             if (ImportFont())
                             {
@@ -150,7 +150,7 @@ namespace EngineNS.Bricks.Font
                         }
                         ImGuiAPI.SameLine(0, 20);
                     }
-                    if (ImGuiAPI.Button("Cancel", in btSz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Cancel"), in btSz))
                     {
                         ImGuiAPI.CloseCurrentPopup();
                         retValue = true;

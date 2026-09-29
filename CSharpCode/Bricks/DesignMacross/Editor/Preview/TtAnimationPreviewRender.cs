@@ -15,10 +15,10 @@ namespace EngineNS.DesignMacross.Editor.Preview
 
             try
             {
-                if (ImGuiAPI.CollapsingHeader("Property", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
+                if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("Property"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     ImGuiAPI.AlignTextToFramePadding();
-                    ImGuiAPI.Text("PreviewModel:");
+                    ImGuiAPI.Text(TtLocalization.Tr("PreviewModel:"));
                     ImGuiAPI.SameLine(0, -1);
                     if (previewPanel.ModelSelector.OnDraw(previewPanel.GetCurrentModelRName(), out var newModelRName))
                     {

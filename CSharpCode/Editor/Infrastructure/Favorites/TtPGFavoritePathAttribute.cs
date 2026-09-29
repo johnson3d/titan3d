@@ -65,7 +65,7 @@ namespace EngineNS.Editor.Infrastructure
                 bool already = TtEditorFavoritePaths.Contains(channel, current);
                 bool canAdd = !string.IsNullOrEmpty(channel) && !string.IsNullOrEmpty(current) && !already;
                 // ImGuiAPI 没绑 BeginDisabled, 按现有写法用 "点了也不生效 + tooltip 说明原因" 处理
-                if (ImGuiAPI.Button(already ? "*" : "+", in btSize) && canAdd)
+                if (ImGuiAPI.Button(already ? TtLocalization.Tr("*") : TtLocalization.Tr("+"), in btSize) && canAdd)
                 {
                     TtEditorFavoritePaths.Add(channel, current, MakeDisplay(current), info.Name);
                 }
@@ -86,7 +86,7 @@ namespace EngineNS.Editor.Infrastructure
             {
                 ImGuiAPI.SameLine(0, 4);
                 var list = TtEditorFavoritePaths.Get(channel);
-                if (ImGuiAPI.Button("v", in btSize))
+                if (ImGuiAPI.Button(TtLocalization.Tr("v"), in btSize))
                     ImGuiAPI.OpenPopup("##FavoritePathList", ImGuiPopupFlags_.ImGuiPopupFlags_None);
                 if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
                     EGui.Controls.CtrlUtility.DrawHelper($"Pick from favorites [{channel}] ({list.Count})");
@@ -95,7 +95,7 @@ namespace EngineNS.Editor.Infrastructure
                 {
                     if (list.Count == 0)
                     {
-                        ImGuiAPI.TextDisabled("(favorites empty)");
+                        ImGuiAPI.TextDisabled(TtLocalization.Tr("(favorites empty)"));
                     }
                     else
                     {
@@ -113,7 +113,7 @@ namespace EngineNS.Editor.Infrastructure
                             if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
                                 EGui.Controls.CtrlUtility.DrawHelper(entry.Path);
                             ImGuiAPI.SameLine(0, 8);
-                            if (ImGuiAPI.SmallButton("x##favdel" + i))
+                            if (ImGuiAPI.SmallButton(TtLocalization.Label("x", "##favdel") + i))
                             {
                                 TtEditorFavoritePaths.Remove(channel, entry.Path);
                                 break;

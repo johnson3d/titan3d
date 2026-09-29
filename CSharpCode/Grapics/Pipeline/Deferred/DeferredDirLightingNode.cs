@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.AdvanceShadow;
+using EngineNS.Bricks.AdvanceShadow;
 using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline.Common;
 using EngineNS.Graphics.Pipeline.Shader;
@@ -61,7 +61,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get;
             set;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public EShadowMode ShadowMode
         {
             get
@@ -471,21 +471,21 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
         // Contact shadow mode is owned by the render policy (policy.ContactShadowMode).
         // The connected input node (when present) is resolved in Initialize.
-        [Category("Shading")]
+        [System.ComponentModel.Category("Shading")]
         public TtContactShadowNode ContactShadowNode { get; set; }
 
         // ---- Inline Contact Shadow parameters (used when ContactShadowMode == Inline) ----
-        [Category("Inline Contact Shadow")]
+        [System.ComponentModel.Category("Inline Contact Shadow")]
         public float InlineContactShadowLength { get; set; } = 0.5f;
-        [Category("Inline Contact Shadow")]
+        [System.ComponentModel.Category("Inline Contact Shadow")]
         public int InlineContactShadowNumSteps { get; set; } = 12;
-        [Category("Inline Contact Shadow")]
+        [System.ComponentModel.Category("Inline Contact Shadow")]
         public float InlineContactShadowDepthBias { get; set; } = 0.001f;
-        [Category("Inline Contact Shadow")]
+        [System.ComponentModel.Category("Inline Contact Shadow")]
         public float InlineContactShadowFadeDistance { get; set; } = 50.0f;
-        [Category("Inline Contact Shadow")]
+        [System.ComponentModel.Category("Inline Contact Shadow")]
         public float InlineContactShadowFadeLength { get; set; } = 20.0f;
-        [Category("Inline Contact Shadow")]
+        [System.ComponentModel.Category("Inline Contact Shadow")]
         public float InlineContactShadowIntensity { get; set; } = 0.8f;
         TtCbView mInlineContactShadowCBuffer;
 
@@ -571,7 +571,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
         }
         public TtDeferredDirLightingShading mBasePassShading;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public TtDeferredDirLightingShading BasePassShading
         {
             get
@@ -653,7 +653,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 mBasePassShading.UpdatePermutation().AddWaitTask();
             }
         }
-        [Category("Shading")]
+        [System.ComponentModel.Category("Shading")]
         public EShadowMode ShadowMode
         {
             get => mBasePassShading.ShadowMode;

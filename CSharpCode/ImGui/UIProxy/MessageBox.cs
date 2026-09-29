@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -30,7 +30,7 @@ namespace EngineNS.EGui.UIProxy
                 {
                     case EButtonType.OKCancel:
                         {
-                            if (ImGuiAPI.Button("OK", in Vector2.Zero))
+                            if (ImGuiAPI.Button(TtLocalization.Tr("OK"), in Vector2.Zero))
                             {
                                 if (actions.Length > 0)
                                     actions[0]?.Invoke();
@@ -38,7 +38,7 @@ namespace EngineNS.EGui.UIProxy
                             }
                             ImGuiAPI.SetItemDefaultFocus();
                             ImGuiAPI.SameLine(0, -1);
-                            if (ImGuiAPI.Button("Cancel", in Vector2.Zero))
+                            if (ImGuiAPI.Button(TtLocalization.Tr("Cancel"), in Vector2.Zero))
                             {
                                 if (actions.Length > 1)
                                     actions[1]?.Invoke();
@@ -48,7 +48,7 @@ namespace EngineNS.EGui.UIProxy
                         break;
                     case EButtonType.YesNo:
                         {
-                            if(ImGuiAPI.Button("Yes", in Vector2.Zero))
+                            if(ImGuiAPI.Button(TtLocalization.Tr("Yes"), in Vector2.Zero))
                             {
                                 if (actions.Length > 0)
                                     actions[0]?.Invoke();
@@ -56,7 +56,7 @@ namespace EngineNS.EGui.UIProxy
                             }
                             ImGuiAPI.SetItemDefaultFocus();
                             ImGuiAPI.SameLine(0, -1);
-                            if(ImGuiAPI.Button("No", in Vector2.Zero))
+                            if(ImGuiAPI.Button(TtLocalization.Tr("No"), in Vector2.Zero))
                             {
                                 if (actions.Length > 1)
                                     actions[1]?.Invoke();
@@ -66,7 +66,7 @@ namespace EngineNS.EGui.UIProxy
                         break;
                     case EButtonType.YesNoCancel:
                         {
-                            if (ImGuiAPI.Button("Yes", in Vector2.Zero))
+                            if (ImGuiAPI.Button(TtLocalization.Tr("Yes"), in Vector2.Zero))
                             {
                                 if (actions.Length > 0)
                                     actions[0]?.Invoke();
@@ -74,7 +74,7 @@ namespace EngineNS.EGui.UIProxy
                             }
                             ImGuiAPI.SetItemDefaultFocus();
                             ImGuiAPI.SameLine(0, -1);
-                            if (ImGuiAPI.Button("No", in Vector2.Zero))
+                            if (ImGuiAPI.Button(TtLocalization.Tr("No"), in Vector2.Zero))
                             {
                                 if (actions.Length > 1)
                                     actions[1]?.Invoke();
@@ -82,7 +82,7 @@ namespace EngineNS.EGui.UIProxy
                             }
                             ImGuiAPI.SetItemDefaultFocus();
                             ImGuiAPI.SameLine(0, -1);
-                            if (ImGuiAPI.Button("Cancel", in Vector2.Zero))
+                            if (ImGuiAPI.Button(TtLocalization.Tr("Cancel"), in Vector2.Zero))
                             {
                                 if (actions.Length > 2)
                                     actions[2]?.Invoke();

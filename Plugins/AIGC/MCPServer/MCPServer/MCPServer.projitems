@@ -22,5 +22,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AssetMigrationAction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewportAction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SequencerAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NodePropertyAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SceneGenerationAction.cs" />
   </ItemGroup>
 </Project>

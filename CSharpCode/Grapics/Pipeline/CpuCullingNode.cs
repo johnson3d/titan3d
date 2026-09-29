@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -25,7 +25,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         TtCamera CullCameral = null;
         TtCamera FrozenCullCameral = null;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsFrozenCullCameral
         {
             get

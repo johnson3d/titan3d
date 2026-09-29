@@ -332,5 +332,178 @@ namespace EngineNS.Plugins.MCPServer
         }
 
         #endregion
+
+        #region camera pose (get/set)
+
+        /// <summary>
+        /// 按 filter 选一个活着的视口: 给了 filter 就取标题包含它的第一个, 否则取正在绘制的那个。
+        /// 与 capture_screenshot 的视口选择口径一致。必须在主线程上调用。
+        /// </summary>
+        private static Graphics.Pipeline.TtViewportSlate PickViewport(
+            string viewportFilter, List<string> availableViewports, out string error)
+        {
+            error = null;
+            Graphics.Pipeline.TtViewportSlate picked = null;
+            foreach (var weak in TtEngine.Instance.ViewportSlateManager.Viewports)
+            {
+                Graphics.Pipeline.TtViewportSlate slate;
+                if (weak.TryGetTarget(out slate) == false || slate == null)
+                    continue;
+                var title = slate.Title ?? "";
+                availableViewports.Add(title);
+                if (string.IsNullOrEmpty(viewportFilter) == false)
+                {
+                    if (title.IndexOf(viewportFilter, StringComparison.OrdinalIgnoreCase) >= 0 && picked == null)
+                        picked = slate;
+                }
+                else if (picked == null && slate.IsDrawing)
+                {
+                    // 没给 filter 就取正在绘制的那个: 停靠在后台页签里的视口不会被绘制。
+                    picked = slate;
+                }
+            }
+            if (picked == null)
+            {
+                error = string.IsNullOrEmpty(viewportFilter)
+                    ? "no viewport is currently being drawn; open an asset editor with a viewport first " +
+                      "(open_asset_editor on a .scene), or pass viewportFilter to target one by title"
+                    : $"no live viewport title contains '{viewportFilter}'";
+            }
+            return picked;
+        }
+
+        [Bricks.AIGC.TtMCPTool("get_camera_pose",
+            "Reads a live viewport's camera pose - eye position, look-at target, and the up/forward " +
+            "vectors - so you can record a viewpoint the user framed by hand and restore it later with " +
+            "set_camera_pose, instead of asking them to fly back after every scene or shader reload. " +
+            "Needs a viewport to exist (open_asset_editor on a .scene first). World is left-handed, " +
+            "Y-up; positions are in meters. position and lookAt round-trip straight into set_camera_pose.",
+            returnDescription: "{found: boolean, viewport: string - Title of the viewport read, " +
+            "position: {x,y,z} - Eye in world meters, lookAt: {x,y,z} - Target point, up: {x,y,z}, " +
+            "direction: {x,y,z} - Normalized forward, availableViewports: string[], error: string - " +
+            "Present only on failure}")]
+        public static string GetCameraPose(
+            [Bricks.AIGC.TtMCPParameter("Pick the viewport whose title contains this. Empty picks the one being drawn, e.g. 'Scene:'")] string viewportFilter = "")
+        {
+            LogToolCall("get_camera_pose", $"viewportFilter={viewportFilter}");
+
+            string setupError = null;
+            string viewportTitle = null;
+            var availableViewports = new List<string>();
+            DVector3 pos = default, at = default;
+            Vector3 up = default, dir = default;
+
+            var located = TtMainThreadDispatcher.Invoke(() =>
+            {
+                var picked = PickViewport(viewportFilter, availableViewports, out setupError);
+                if (picked == null)
+                    return;
+                var camera = picked.RenderPolicy?.DefaultCamera;
+                if (camera == null)
+                {
+                    setupError = $"viewport '{picked.Title}' has no camera yet (its RenderPolicy is still initializing)";
+                    return;
+                }
+                viewportTitle = picked.Title;
+                pos = camera.GetPosition();
+                at = camera.GetLookAt();
+                up = camera.GetUp();
+                dir = camera.GetDirection();
+            });
+
+            if (located == false)
+                return FailJson("timed out waiting for the engine main thread to read the camera");
+            if (setupError != null)
+                return JsonSerializer.Serialize(new { error = setupError, availableViewports });
+
+            return JsonSerializer.Serialize(new
+            {
+                found = true,
+                viewport = viewportTitle,
+                position = new { x = pos.X, y = pos.Y, z = pos.Z },
+                lookAt = new { x = at.X, y = at.Y, z = at.Z },
+                up = new { x = up.X, y = up.Y, z = up.Z },
+                direction = new { x = dir.X, y = dir.Y, z = dir.Z },
+                availableViewports,
+            });
+        }
+
+        [Bricks.AIGC.TtMCPTool("set_camera_pose",
+            "Teleports a live viewport's camera to an exact pose given eye position and look-at target " +
+            "(both world meters) plus an optional up vector. Round-trips with get_camera_pose: record a " +
+            "pose the user framed, then restore it after a scene/shader reload without asking them to " +
+            "fly back. The editor camera controller is stateless (it re-reads the camera each frame), " +
+            "so the pose sticks. World is left-handed, Y-up; up defaults to (0,1,0). Needs a viewport " +
+            "(open_asset_editor on a .scene first).",
+            returnDescription: "{applied: boolean, viewport: string, position: {x,y,z}, lookAt: {x,y,z}, " +
+            "up: {x,y,z} - Actual up after orthonormalization, availableViewports: string[], " +
+            "error: string - Present only on failure}")]
+        public static string SetCameraPose(
+            [Bricks.AIGC.TtMCPParameter("Eye position X in world meters")] double posX,
+            [Bricks.AIGC.TtMCPParameter("Eye position Y in world meters")] double posY,
+            [Bricks.AIGC.TtMCPParameter("Eye position Z in world meters")] double posZ,
+            [Bricks.AIGC.TtMCPParameter("Look-at target X in world meters")] double atX,
+            [Bricks.AIGC.TtMCPParameter("Look-at target Y in world meters")] double atY,
+            [Bricks.AIGC.TtMCPParameter("Look-at target Z in world meters")] double atZ,
+            [Bricks.AIGC.TtMCPParameter("Up vector X (default 0)")] double upX = 0,
+            [Bricks.AIGC.TtMCPParameter("Up vector Y (default 1, i.e. world up)")] double upY = 1,
+            [Bricks.AIGC.TtMCPParameter("Up vector Z (default 0)")] double upZ = 0,
+            [Bricks.AIGC.TtMCPParameter("Pick the viewport whose title contains this. Empty picks the one being drawn")] string viewportFilter = "")
+        {
+            LogToolCall("set_camera_pose",
+                $"pos=({posX},{posY},{posZ}), at=({atX},{atY},{atZ}), up=({upX},{upY},{upZ}), viewportFilter={viewportFilter}");
+
+            var eye = new DVector3(posX, posY, posZ);
+            var lookAt = new DVector3(atX, atY, atZ);
+            var up = new Vector3((float)upX, (float)upY, (float)upZ);
+            if (up.Length() < 1e-4f)
+                up = Vector3.UnitY;
+            up.Normalize();
+
+            // eye 与 lookAt 重合时方向无定义, LookAtLH 会造出非法矩阵
+            if ((eye - lookAt).Length() < 1e-4)
+                return FailJson("eye position and look-at target coincide; camera direction would be undefined");
+
+            string setupError = null;
+            string viewportTitle = null;
+            var availableViewports = new List<string>();
+            DVector3 pos = default, at = default;
+            Vector3 appliedUp = default;
+
+            var located = TtMainThreadDispatcher.Invoke(() =>
+            {
+                var picked = PickViewport(viewportFilter, availableViewports, out setupError);
+                if (picked == null)
+                    return;
+                var camera = picked.RenderPolicy?.DefaultCamera;
+                if (camera == null)
+                {
+                    setupError = $"viewport '{picked.Title}' has no camera yet (its RenderPolicy is still initializing)";
+                    return;
+                }
+                camera.LookAtLH(in eye, in lookAt, in up);
+                viewportTitle = picked.Title;
+                pos = camera.GetPosition();
+                at = camera.GetLookAt();
+                appliedUp = camera.GetUp();
+            });
+
+            if (located == false)
+                return FailJson("timed out waiting for the engine main thread to set the camera");
+            if (setupError != null)
+                return JsonSerializer.Serialize(new { error = setupError, availableViewports });
+
+            return JsonSerializer.Serialize(new
+            {
+                applied = true,
+                viewport = viewportTitle,
+                position = new { x = pos.X, y = pos.Y, z = pos.Z },
+                lookAt = new { x = at.X, y = at.Y, z = at.Z },
+                up = new { x = appliedUp.X, y = appliedUp.Y, z = appliedUp.Z },
+                availableViewports,
+            });
+        }
+
+        #endregion
     }
 }

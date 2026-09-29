@@ -1,4 +1,4 @@
-﻿namespace NS_tutorials.viewinstance
+namespace NS_tutorials.viewinstance
 {
     [EngineNS.Macross.TtMacross]
     [EngineNS.Macross.TtMacrossSign(RName_Name = "tutorials/viewinstance/game01.macross", RName_Type = EngineNS.RName.ERNameType.Game)]

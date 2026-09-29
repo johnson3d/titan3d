@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -40,12 +40,12 @@ namespace EngineNS.Editor.Forms
 
             var size = new Vector2(800, 600);
             ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_FirstUseEver);
-            var result = EGui.UIProxy.DockProxy.BeginMainForm("GpuProfiler", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(TtLocalization.Label("GpuProfiler", "###GpuProfiler"), this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (result)
             {
                 var cmdlst = ImGuiAPI.GetWindowDrawList();
                 var stats = TtEngine.Instance.GfxDevice.RenderQueue.QueueStats;
-                ImGuiAPI.Text($"CmdList = {stats.NumOfCmdlist};Drawcall = {stats.NumOfDrawcall};Primitive = {stats.NumOfPrimitive};");
+                ImGuiAPI.Text(TtLocalization.Format("CmdList = {0};Drawcall = {1};Primitive = {2};", stats.NumOfCmdlist, stats.NumOfDrawcall, stats.NumOfPrimitive));
                 EGui.UIProxy.SearchBarProxy.OnDraw(ref mFilterFocusd, cmdlst, "filter", ref mFilter, ImGuiAPI.GetWindowContentRegionWidth());
                 DockId = ImGuiAPI.GetWindowDockID();
                 EGui.UIProxy.StyleConfig.Instance.PushPanelChildStyle(EGui.UIProxy.StyleConfig.Instance.SecondPanelBackground);
@@ -65,13 +65,13 @@ namespace EngineNS.Editor.Forms
                         ImGuiAPI.TableSetupColumn("AvgTime", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed, 100, 0);
                         ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_Headers, 0);
                         ImGuiAPI.TableSetColumnIndex(0);
-                        ImGuiAPI.Text("Name");
+                        ImGuiAPI.Text(TtLocalization.Tr("Name"));
                         if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                         {
                             
                         }
                         ImGuiAPI.TableSetColumnIndex(1);
-                        ImGuiAPI.Text("AvgTime");
+                        ImGuiAPI.Text(TtLocalization.Tr("AvgTime"));
                         if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                         {
                             

@@ -55,6 +55,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Gauss", "Post\\Gauss", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.Post.UGaussNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.Post.UGaussNode" })]
     public class TtGaussNode : TAuxSceenSpaceNode<TtGaussNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
@@ -100,21 +101,21 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             public float BlurSigma;
         }
         FGaussStruct mGaussStruct;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public float Stride
         {
             get => mGaussStruct.Stride;
             set => mGaussStruct.Stride = value;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public int BlurSize
         {
             get => mGaussStruct.BlurSize;
             set => mGaussStruct.BlurSize = value;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public float BlurSigma
         {
@@ -257,6 +258,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
     }
     [Bricks.CodeBuilder.ContextMenu("GaussAdditive", "Post\\GaussAdditive", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.Post.UGaussAdditiveNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.Post.UGaussAdditiveNode" })]
     public class TtGaussAdditiveNode : TAuxSceenSpaceNode<TtGaussAdditiveNode>
     {
         public TtRenderGraphPin Color1PinIn = TtRenderGraphPin.CreateInput("Color1", NxRHI.EBufferType.BFT_SRV);
@@ -306,25 +308,25 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             get => mGaussStruct;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float Stride1
         {
             get => mGaussStruct.Stride1;
             set => mGaussStruct.Stride1 = value;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float Stride2
         {
             get => mGaussStruct.Stride2;
             set => mGaussStruct.Stride2 = value;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public int BlurSize
         {
             get => mGaussStruct.BlurSize;
             set => mGaussStruct.BlurSize = value;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float BlurSigma
         {
             get => mGaussStruct.BlurSigma;

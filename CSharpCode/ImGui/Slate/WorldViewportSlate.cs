@@ -125,6 +125,17 @@ namespace EngineNS.EGui.Slate
 
             return AutoZoomToNodes(new TtNode[] { node }, zoomTimeInSecond);
         }
+        static bool IsFinite(in DVector3 value)
+        {
+            return double.IsFinite(value.X) && double.IsFinite(value.Y) && double.IsFinite(value.Z);
+        }
+        static bool IsValidFocusBox(in DBoundingBox box)
+        {
+            return IsFinite(in box.Minimum) && IsFinite(in box.Maximum) &&
+                   box.Minimum.X < box.Maximum.X &&
+                   box.Minimum.Y < box.Maximum.Y &&
+                   box.Minimum.Z < box.Maximum.Z;
+        }
         public bool AutoZoomToNodes(IList<TtNode> nodes, float zoomTimeInSecond = 0.0f)
         {
             var camera = CameraController?.Camera;
@@ -140,23 +151,39 @@ namespace EngineNS.EGui.Slate
                     continue;
 
                 node.GetWorldSpaceBoundingBox(out var nodeBox);
-                if (nodeBox.IsEmpty())
-                {
-                    var position = node.Placement.AbsTransform.Position;
-                    box.Merge(in position);
-                }
-                else
+                if (IsValidFocusBox(in nodeBox))
                 {
                     box.Merge(in nodeBox);
+                    hasTarget = true;
+                    continue;
                 }
-                hasTarget = true;
+
+                // 没有有效包围盒的逻辑节点按其位置聚焦；位置本身非法则跳过该节点。
+                var position = node.Placement.AbsTransform.Position;
+                if (IsFinite(in position))
+                {
+                    box.Merge(in position);
+                    hasTarget = true;
+                }
             }
 
-            if (hasTarget == false)
+            if (hasTarget == false || !IsFinite(in box.Minimum) || !IsFinite(in box.Maximum))
                 return false;
 
-            var radius = (float)Math.Max(box.GetMaxSide(), 1.0);
-            var sphere = new DBoundingSphere(box.GetCenter(), radius);
+            var size = box.Maximum - box.Minimum;
+            if (!IsFinite(in size))
+                return false;
+            var maxSide = Math.Max(size.X, Math.Max(size.Y, size.Z));
+            if (!double.IsFinite(maxSide) || maxSide > float.MaxValue)
+                return false;
+
+            // 分量分别乘 0.5，避免两个同号大坐标相加时溢出。
+            var center = box.Minimum * 0.5 + box.Maximum * 0.5;
+            if (!IsFinite(in center))
+                return false;
+
+            var radius = (float)Math.Max(maxSide, 1.0);
+            var sphere = new DBoundingSphere(center, radius);
             camera.AutoZoom(in sphere, zoomTimeInSecond);
             return true;
         }

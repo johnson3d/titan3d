@@ -48,21 +48,13 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
-            float scaleFactor = 1.0f;
-            var hitProxyNode = policy.FindFirstNode<TtHitproxyNode>();
-            if (hitProxyNode != null)
-            {
-                scaleFactor = hitProxyNode.ScaleFactor;
-            }
-
-            PickedPinOut.Attachement.Width = (uint)(x * scaleFactor);
-            PickedPinOut.Attachement.Height = (uint)(y * scaleFactor);
-
-            DepthPinOut.Attachement.Width = (uint)(x * scaleFactor);
-            DepthPinOut.Attachement.Height = (uint)(y * scaleFactor);
-
+            const float outlineScaleFactor = 1.0f;
+            PickedPinOut.Attachement.Width = (uint)(x * outlineScaleFactor);
+            PickedPinOut.Attachement.Height = (uint)(y * outlineScaleFactor);
+            DepthPinOut.Attachement.Width = (uint)(x * outlineScaleFactor);
+            DepthPinOut.Attachement.Height = (uint)(y * outlineScaleFactor);
             if (PickedBuffer != null)
-                PickedBuffer.SetSize(x * scaleFactor, y * scaleFactor);
+                PickedBuffer.SetSize(x * outlineScaleFactor, y * outlineScaleFactor);
         }
         public TtPickedProxiableManager PickedManager;
         public TtPickSetupShading PickedShading = null;

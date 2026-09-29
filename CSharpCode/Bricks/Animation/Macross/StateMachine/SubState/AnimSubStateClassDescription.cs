@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation;
+using EngineNS.Animation;
 using EngineNS.Animation.Macross;
 using EngineNS.Animation.StateMachine;
 using EngineNS.Bricks.CodeBuilder;
@@ -24,7 +24,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.SubState
     public class TtAnimSubStateClassDescription : TtTimedSubStateClassDescription, IAnimMacrossClassDescription
     {
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public override string Name { get; set; } = "AnimSubState";
         
         public override List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)

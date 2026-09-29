@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -47,7 +47,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public NxRHI.TtSrView ImageSrv;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName ImageName
         {
             get

@@ -1,4 +1,4 @@
-﻿using EngineNS.Graphics.Pipeline;
+using EngineNS.Graphics.Pipeline;
 using System;
 using System.Collections.Generic;
 using EngineNS.GamePlay.Scene;
@@ -65,7 +65,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                 return true;
             });
         }
-        [Category("Debug")]
+        [System.ComponentModel.Category("Debug")]
         public int AlivePage
         {
             get => MaxPageCount - PageAllocator.Count;
@@ -509,22 +509,22 @@ namespace EngineNS.Bricks.AdvanceShadow
         public class TtAdvanceShadowData : TtNodeData
         {
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             public DVector2 BoxCenter { get; set; } = DVector2.Zero;
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             public double BoxExtent { get; set; } = 1024;
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             public int MaxDeepLevel { get; set; } = 8;
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             public float MaxShadowDistance { get; set; } = 500.0f;
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             public int ShadowMapPage { get; set; } = 512;
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             public int MaxDirtyPagePerFrame { get; set; } = 3;
         }
 
@@ -602,7 +602,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             }
             return true;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float EsmConstant
         {
             get => mShadowMapTree.EsmConstant;
@@ -611,7 +611,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                 mShadowMapTree.EsmConstant = value;
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float MaxExp
         {
             get => mShadowMapTree.MaxExp;
@@ -620,7 +620,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                 mShadowMapTree.MaxExp = value;
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float GaussSigma
         {
             get => mShadowMapTree.GaussSigma;
@@ -630,12 +630,12 @@ namespace EngineNS.Bricks.AdvanceShadow
             }
         }
         TtQTreeVisualDebugger mDebugger;
-        [Category("Debug")]
+        [System.ComponentModel.Category("Debug")]
         public TtQTreeVisualDebugger VisualDebugger
         {
             get => mDebugger;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool ShowDebugger
         {
             get

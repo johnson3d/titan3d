@@ -150,15 +150,15 @@ float3 GetTerrainDiffuse(float2 uvOrig, PS_INPUT input)
 	/*float2 uvLevel = UV_PatchToLevel(uvOrig); 
 	float2 remain = fmod(uvLevel, MaterialIdUVStep);
 	remain = saturate(remain / (MaterialIdUVStep));*/
-	float2 uvLevel = input.vLightMap.xy;
+	float2 uvLevel = input.vExtraUV.xy;
 	float2 remain = fmod(uvLevel, MaterialIdUVStep);
 	remain = saturate(remain / (MaterialIdUVStep));
 	
     uint materailUniqueID = input.Get_vSpecialData().y;
-    uint i0_0 = (uint) (GetMaterialId(input.vLightMap.xy, materailUniqueID).r * 255.0f + 0.1f);
-    uint i1_0 = (uint) (GetMaterialId(input.vLightMap.xy + float2(MaterialIdUVStep, 0), materailUniqueID).r * 255.0f + 0.1f);
-    uint i1_1 = (uint) (GetMaterialId(input.vLightMap.xy + float2(MaterialIdUVStep, MaterialIdUVStep), materailUniqueID).r * 255.0f + 0.1f);
-    uint i0_1 = (uint) (GetMaterialId(input.vLightMap.xy + float2(0, MaterialIdUVStep), materailUniqueID).r * 255.0f + 0.1f);
+    uint i0_0 = (uint) (GetMaterialId(input.vExtraUV.xy, materailUniqueID).r * 255.0f + 0.1f);
+    uint i1_0 = (uint) (GetMaterialId(input.vExtraUV.xy + float2(MaterialIdUVStep, 0), materailUniqueID).r * 255.0f + 0.1f);
+    uint i1_1 = (uint) (GetMaterialId(input.vExtraUV.xy + float2(MaterialIdUVStep, MaterialIdUVStep), materailUniqueID).r * 255.0f + 0.1f);
+    uint i0_1 = (uint) (GetMaterialId(input.vExtraUV.xy + float2(0, MaterialIdUVStep), materailUniqueID).r * 255.0f + 0.1f);
 	
 	float3 clr0_0 = DiffuseTextureArray.Sample(Samp_DiffuseTextureArray, float3(uvOrig.xy, i0_0)).rgb;
 	float3 clr1_0 = DiffuseTextureArray.Sample(Samp_DiffuseTextureArray, float3(uvOrig.xy, i1_0)).rgb;
@@ -182,15 +182,15 @@ float3 GetTerrainNormal(float2 uvOrig, PS_INPUT input)
 	/*float2 uvLevel = UV_PatchToLevel(uvOrig);
 	float2 remain = fmod(uvLevel, MaterialIdUVStep);
 	remain = saturate(remain / (MaterialIdUVStep));*/
-	float2 uvLevel = input.vLightMap.xy;
+	float2 uvLevel = input.vExtraUV.xy;
 	float2 remain = fmod(uvLevel, MaterialIdUVStep);
 	remain = saturate(remain / (MaterialIdUVStep));
 
     uint materailUniqueID = input.Get_vSpecialData().y;
-    uint i0_0 = (uint) (GetMaterialId(input.vLightMap.xy, materailUniqueID).r * 255.0f + 0.1f);
-    uint i1_0 = (uint) (GetMaterialId(input.vLightMap.xy + float2(MaterialIdUVStep, 0), materailUniqueID).r * 255.0f + 0.1f);
-    uint i1_1 = (uint) (GetMaterialId(input.vLightMap.xy + float2(MaterialIdUVStep, MaterialIdUVStep), materailUniqueID).r * 255.0f + 0.1f);
-    uint i0_1 = (uint) (GetMaterialId(input.vLightMap.xy + float2(0, MaterialIdUVStep), materailUniqueID).r * 255.0f + 0.1f);
+    uint i0_0 = (uint) (GetMaterialId(input.vExtraUV.xy, materailUniqueID).r * 255.0f + 0.1f);
+    uint i1_0 = (uint) (GetMaterialId(input.vExtraUV.xy + float2(MaterialIdUVStep, 0), materailUniqueID).r * 255.0f + 0.1f);
+    uint i1_1 = (uint) (GetMaterialId(input.vExtraUV.xy + float2(MaterialIdUVStep, MaterialIdUVStep), materailUniqueID).r * 255.0f + 0.1f);
+    uint i0_1 = (uint) (GetMaterialId(input.vExtraUV.xy + float2(0, MaterialIdUVStep), materailUniqueID).r * 255.0f + 0.1f);
 
 	float3 clr0_0 = NormalTextureArray.Sample(Samp_NormalTextureArray, float3(uvOrig.xy, i0_0)).rgb;
 	float3 clr1_0 = NormalTextureArray.Sample(Samp_NormalTextureArray, float3(uvOrig.xy, i1_0)).rgb;
@@ -272,9 +272,9 @@ void DoTerrainModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 	vert.vNormal = vsOut.vNormal;
 	vert.vUV = vsOut.vUV;
 	
-	//vert.vLightMap.xy = heightUV.xy;
-#if USE_PS_LightMap == 1
-	vsOut.vLightMap.xy = heightUV.xy;
+	//vert.vExtraUV.xy = heightUV.xy;
+#if USE_PS_ExtraUV == 1
+	vsOut.vExtraUV.xy = heightUV.xy;
 #endif
 
     vsOut.Set_vSpecialDataY(materialIdID);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.GamePlay;
@@ -84,6 +84,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
     }
     [Bricks.CodeBuilder.ContextMenu("SunShaftDepthThreshole", "Post\\SunShaftDepthThreshole", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.Post.USunShaftDepthThresholeNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.Post.USunShaftDepthThresholeNode" })]
     public class TtSunShaftDepthThresholeNode : TAuxSceenSpaceNode<TtSunShaftDepthThresholeNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
@@ -114,7 +115,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
 
         FSunShaftStruct mSunShaftStruct = new FSunShaftStruct();
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtValueRange(0, 1)]
         [EGui.Controls.PropertyGrid.TtValueChangeStep(0.001f)]
@@ -123,7 +124,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             get => mSunShaftStruct.DepthThreshole;
             set => mSunShaftStruct.DepthThreshole = value;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtValueRange(0, 32)]
         [EGui.Controls.PropertyGrid.TtValueChangeStep(0.1f)]
@@ -135,7 +136,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 mSunShaftStruct.LumThreshold = value;
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public float MaxBlurRadius
         {
@@ -223,6 +224,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
     }
     [Bricks.CodeBuilder.ContextMenu("SunShaftRadialBlur", "Post\\SunShaftRadialBlur", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.Post.USunShaftRadialBlurNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.Post.USunShaftRadialBlurNode" })]
     public class TtSunShaftRadialBlurNode : TAuxSceenSpaceNode<TtSunShaftRadialBlurNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
@@ -253,7 +255,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
         FSunShaftStruct mSunShaftStruct = new FSunShaftStruct();
         
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtValueRange(0, 1)]
         [EGui.Controls.PropertyGrid.TtValueChangeStep(0.001f)]
@@ -265,7 +267,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 mSunShaftStruct.BlurDecay = value;
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtValueRange(0, 32)]
         [EGui.Controls.PropertyGrid.TtValueChangeStep(0.1f)]

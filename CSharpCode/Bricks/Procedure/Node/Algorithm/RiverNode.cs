@@ -4,8 +4,9 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
-    [Bricks.CodeBuilder.ContextMenu("River", "Water\\River", UPgcGraph.PgcEditorKeyword)]
-    public class TtRiverNode : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("River", "Water\\River", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.URiverNode@EngineCore", "EngineNS.Bricks.Procedure.Node.URiverNode" })]
+    public class TtRiverNode : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinIn HeightPin { get; set; } = new PinIn();
@@ -20,9 +21,9 @@ namespace EngineNS.Bricks.Procedure.Node
         [Browsable(false)]
         public PinOut FillElevationPin { get; set; } = new PinOut();
         [Rtti.Meta("")]
-        public UBufferCreator SourceDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public TtBufferCreator SourceDesc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         [Rtti.Meta("")]
-        public UBufferCreator ResultDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public TtBufferCreator ResultDesc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public TtRiverNode()
         {
             Icon.Size = new Vector2(25, 25);
@@ -31,17 +32,17 @@ namespace EngineNS.Bricks.Procedure.Node
             BackColor = 0x80808080;
 
             AddInput(HeightPin, "Height", SourceDesc);
-            AddInput(DryMaskPin, "DryMask", UBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
-            AddInput(RiverMaskPin, "DryMask", UBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
+            AddInput(DryMaskPin, "DryMask", TtBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
+            AddInput(RiverMaskPin, "DryMask", TtBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
             AddOutput(RiverMapPin, "RiverMap", ResultDesc);
-            AddOutput(FlowMaskMapPin, "FlowMaskMap", UBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
-            AddOutput(FillElevationPin, "FillElevation", UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1)); 
+            AddOutput(FlowMaskMapPin, "FlowMaskMap", TtBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
+            AddOutput(FillElevationPin, "FillElevation", TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1)); 
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (RiverMapPin == pin)
             {
-                var graph = ParentGraph as UPgcGraph;
+                var graph = ParentGraph as TtPgcGraph;
                 var buffer = graph.BufferCache.FindBuffer(HeightPin);
                 if (buffer != null)
                 {
@@ -335,7 +336,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
 
         //public static UBufferComponent GenerateRiver(float[] elevations, int width, int[] dry_mask, int[] river_mask)
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var HeightMap = graph.BufferCache.FindBuffer(HeightPin);
             var DryMaskMap = graph.BufferCache.FindBuffer(DryMaskPin);
@@ -404,8 +405,9 @@ namespace EngineNS.Bricks.Procedure.Node
         
     }
 
-    [Bricks.CodeBuilder.ContextMenu("Lake", "Water\\Lake", UPgcGraph.PgcEditorKeyword)]
-    public class TtLakeNode : Node.UAnyTypeMonocular
+    [Bricks.CodeBuilder.ContextMenu("Lake", "Water\\Lake", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.ULakeNode@EngineCore", "EngineNS.Bricks.Procedure.Node.ULakeNode" })]
+    public class TtLakeNode : Node.TtAnyTypeMonocular
     {
         static int[] dx = { 0, -1, 1, -1, 1, 0, 0, -1, 1 };
         static int[] dy = { 0, -1, -1, 1, 1, -1, 1, 0, 0 };
@@ -414,7 +416,7 @@ namespace EngineNS.Bricks.Procedure.Node
             return x > -1 && x < width && y > -1 && y < height; 
         }
         //public static unsafe void fill_lake(float* elevations, float* fills, int width, int height)
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var Input = graph.BufferCache.FindBuffer(SrcPin);
             var Output = graph.BufferCache.FindBuffer(ResultPin);

@@ -51,6 +51,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Skin3S", "PGC\\Skin3S", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.GpuShading.UGpuSkinLUT3SGenNode@EngineCore", "EngineNS.Bricks.Procedure.Node.GpuShading.UGpuSkinLUT3SGenNode" })]
     public class TtGpuSkinLUT3SGenNode : TAuxRenderGraphNode<TtGpuSkinLUT3SGenNode> 
     {
         public Graphics.Pipeline.TtRenderGraphPin HeightPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInput("Height", NxRHI.EBufferType.BFT_SRV);

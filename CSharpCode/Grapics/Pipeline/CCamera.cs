@@ -84,31 +84,92 @@ namespace EngineNS.Graphics.Pipeline
         DVector3 TargetLookAtMoveSpeed;
         Vector3 TargetUpMoveSpeed;
         float mZoomTime = 0;
+        static bool IsFinite(in DVector3 value)
+        {
+            return double.IsFinite(value.X) && double.IsFinite(value.Y) && double.IsFinite(value.Z);
+        }
+        static bool IsFinite(in Vector3 value)
+        {
+            return float.IsFinite(value.X) && float.IsFinite(value.Y) && float.IsFinite(value.Z);
+        }
+        static bool TryNormalize(ref Vector3 value)
+        {
+            if (!IsFinite(in value))
+                return false;
+
+            var maxComponent = Math.Max(Math.Abs(value.X), Math.Max(Math.Abs(value.Y), Math.Abs(value.Z)));
+            if (!float.IsFinite(maxComponent) || maxComponent <= MathHelper.Epsilon)
+                return false;
+
+            value /= maxComponent;
+            var length = value.Normalize();
+            return float.IsFinite(length) && length > MathHelper.Epsilon && IsFinite(in value);
+        }
         public void AutoZoom(in DBoundingSphere sphere, float zoomTimeInSecond = 0.0f, bool bOptZRange = true)
         {
-            var dist = ((float)sphere.Radius) / (float)Math.Sin((float)this.mCoreObject.mFov);
-            var eye = sphere.Center - this.mCoreObject.GetDirection().AsDVector() * dist;
-            var up = this.mCoreObject.GetUp();
-            if (bOptZRange && this.ZFar < dist)
+            if (!IsFinite(in sphere.Center) || !double.IsFinite(sphere.Radius) || sphere.Radius <= MathHelper.Epsilon)
+                return;
+
+            var fov = mCoreObject.mFov;
+            if (!float.IsFinite(fov))
+                return;
+            var sinFov = Math.Abs(Math.Sin(fov));
+            if (!double.IsFinite(sinFov) || sinFov <= MathHelper.Epsilon)
+                return;
+
+            var dist = sphere.Radius / sinFov;
+            if (!double.IsFinite(dist) || dist <= MathHelper.Epsilon)
+                return;
+
+            var direction = mCoreObject.GetDirection();
+            if (!TryNormalize(ref direction))
+                direction = Vector3.Forward;
+            var eye = sphere.Center - direction.AsDVector() * dist;
+            if (!IsFinite(in eye))
+                return;
+
+            var up = mCoreObject.GetUp();
+            if (!TryNormalize(ref up))
+                up = Vector3.Up;
+
+            if (bOptZRange && (!float.IsFinite(ZFar) || ZFar < dist))
             {
-                SetZRange(this.ZNear, 2.0f * dist);
+                var nextZFar = dist * 2.0;
+                if (double.IsFinite(nextZFar) && nextZFar <= float.MaxValue)
+                {
+                    var nextZNear = float.IsFinite(ZNear) && ZNear > MathHelper.Epsilon ? ZNear : 0.3f;
+                    SetZRange(nextZNear, (float)nextZFar);
+                }
             }
-            if (MathHelper.Abs(zoomTimeInSecond) <= MathHelper.Epsilon)
+
+            var useAnimation = float.IsFinite(zoomTimeInSecond) && zoomTimeInSecond > MathHelper.Epsilon;
+            if (!useAnimation)
             {
                 LookAtLH(eye, sphere.Center, in up);
                 TtEngine.Instance.TickableManager.RemoveTickable(this);
+                return;
             }
-            else
+
+            var currentEye = mCoreObject.GetPosition();
+            var currentLookAt = mCoreObject.GetLookAt();
+            var eyeMoveSpeed = (eye - currentEye) / zoomTimeInSecond;
+            var lookAtMoveSpeed = (sphere.Center - currentLookAt) / zoomTimeInSecond;
+            if (!IsFinite(in currentEye) || !IsFinite(in currentLookAt) ||
+                !IsFinite(in eyeMoveSpeed) || !IsFinite(in lookAtMoveSpeed))
             {
-                mZoomTime = zoomTimeInSecond;
-                TargetEye = eye;
-                TargetLookAt = sphere.Center;
-                TargetUp = up;
-                TargetEyeMoveSpeed = (TargetEye - mCoreObject.GetPosition()) / zoomTimeInSecond;
-                TargetLookAtMoveSpeed = (TargetLookAt - mCoreObject.GetLookAt()) / zoomTimeInSecond;
-                TargetUpMoveSpeed = Vector3.Zero;
-                TtEngine.Instance.TickableManager.AddTickable(this);
+                LookAtLH(eye, sphere.Center, in up);
+                TtEngine.Instance.TickableManager.RemoveTickable(this);
+                return;
             }
+
+            mZoomTime = zoomTimeInSecond;
+            TargetEye = eye;
+            TargetLookAt = sphere.Center;
+            TargetUp = up;
+            TargetEyeMoveSpeed = eyeMoveSpeed;
+            TargetLookAtMoveSpeed = lookAtMoveSpeed;
+            TargetUpMoveSpeed = Vector3.Zero;
+            TtEngine.Instance.TickableManager.AddTickable(this);
         }
         public float GetScaleWithFixSizeInScreen(in DVector3 position, float screenSize, float divValue = -1)
         {
@@ -123,6 +184,13 @@ namespace EngineNS.Graphics.Pipeline
         }
         public void SetZRange(float zNear = 0.3f, float zFar = 1000.0f)
         {
+            if (!float.IsFinite(zNear) || !float.IsFinite(zFar) ||
+                zNear <= MathHelper.Epsilon || zFar <= zNear + MathHelper.Epsilon ||
+                !float.IsFinite(mCoreObject.mFov) || !float.IsFinite(mCoreObject.mWidth) ||
+                !float.IsFinite(mCoreObject.mHeight) || mCoreObject.mWidth <= MathHelper.Epsilon ||
+                mCoreObject.mHeight <= MathHelper.Epsilon)
+                return;
+
             mCoreObject.PerspectiveFovLH(mCoreObject.mFov, mCoreObject.mWidth, mCoreObject.mHeight, zNear, zFar);
         }
         [ThreadStatic]
@@ -241,16 +309,41 @@ namespace EngineNS.Graphics.Pipeline
         }
         public void LookAtLH(in EngineNS.DVector3 eye, in EngineNS.DVector3 lookAt, in EngineNS.Vector3 up)
         {
+            if (!IsFinite(in eye) || !IsFinite(in lookAt))
+                return;
+
+            var delta = lookAt - eye;
+            if (!IsFinite(in delta))
+                return;
+            var maxDelta = Math.Max(Math.Abs(delta.X), Math.Max(Math.Abs(delta.Y), Math.Abs(delta.Z)));
+            if (!double.IsFinite(maxDelta) || maxDelta <= double.Epsilon)
+                return;
+
+            var direction = new Vector3(
+                (float)(delta.X / maxDelta),
+                (float)(delta.Y / maxDelta),
+                (float)(delta.Z / maxDelta));
+            if (!TryNormalize(ref direction))
+                return;
+
+            var safeUp = up;
+            if (!TryNormalize(ref safeUp))
+                safeUp = Vector3.Up;
+            if (Math.Abs(Vector3.Dot(in direction, in safeUp)) > 0.999f)
+                safeUp = Math.Abs(direction.Y) < 0.999f ? Vector3.Up : Vector3.Right;
+
             unsafe
             {
+                var pinned_up = &safeUp;
                 fixed (EngineNS.DVector3* pinned_eye = &eye)
                 fixed (EngineNS.DVector3* pinned_lookAt = &lookAt)
-                fixed (EngineNS.Vector3* pinned_up = &up)
                 {
                     mCoreObject.LookAtLH(pinned_eye, pinned_lookAt, pinned_up);
                 }
                 var quat = Quaternion.RotationMatrix(GetViewMatrix());
-                mEuler = quat.ToEuler();
+                var euler = quat.ToEuler();
+                if (float.IsFinite(euler.Yaw) && float.IsFinite(euler.Pitch) && float.IsFinite(euler.Roll))
+                    mEuler = euler;
             }
         }
         public bool GetPickRay(ref EngineNS.Vector3 pvPickRay, float x, float y, float sw, float sh)

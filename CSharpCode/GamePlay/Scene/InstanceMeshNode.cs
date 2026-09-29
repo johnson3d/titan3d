@@ -39,7 +39,7 @@ namespace EngineNS.GamePlay.Scene
             }
             else if (count == 0)
             {
-                ImGuiAPI.Text("(empty)");
+                ImGuiAPI.Text(TtLocalization.Tr("(empty)"));
             }
 
             // Popup window with the merged nodes list
@@ -68,7 +68,7 @@ namespace EngineNS.GamePlay.Scene
                     // Focus button
                     ImGuiAPI.SameLine(0, 4.0f);
                     var focusBtnSize = new Vector2(focusBtnWidth, 0);
-                    if (ImGuiAPI.Button("\u2192##FocusMergedPopup" + i, in focusBtnSize))
+                    if (ImGuiAPI.Button(TtLocalization.Label("→", "##FocusMergedPopup") + i, in focusBtnSize))
                     {
                         FocusNodeInSceneEditor(instanceNode, node);
                         ImGuiAPI.CloseCurrentPopup();
@@ -76,7 +76,7 @@ namespace EngineNS.GamePlay.Scene
                     if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
                     {
                         ImGuiAPI.BeginTooltip();
-                        ImGuiAPI.Text($"Focus: {nodeName}");
+                        ImGuiAPI.Text(TtLocalization.Format("Focus: {0}", nodeName));
                         ImGuiAPI.EndTooltip();
                     }
                 }
@@ -148,7 +148,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 // "None" option
                 bool isNone = currentTarget == null;
-                if (ImGuiAPI.Selectable("None", isNone, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                if (ImGuiAPI.Selectable(TtLocalization.Tr("None"), isNone, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                 {
                     if (currentTarget != null)
                     {
@@ -183,7 +183,7 @@ namespace EngineNS.GamePlay.Scene
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextDisableColor);
             }
             var btnSize = new Vector2(buttonWidth, 0);
-            if (ImGuiAPI.Button("\u2192##FocusInstanceNode" + info.Name, in btnSize) && !disabled)
+            if (ImGuiAPI.Button(TtLocalization.Label("→", "##FocusInstanceNode") + info.Name, in btnSize) && !disabled)
             {
                 var sceneEditor = meshNode.GetWorld()?.ViewportSlate?.AssetEditor as Editor.Forms.TtSceneEditor;
                 if (sceneEditor != null)
@@ -196,7 +196,7 @@ namespace EngineNS.GamePlay.Scene
             if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
             {
                 ImGuiAPI.BeginTooltip();
-                ImGuiAPI.Text("Focus to InstanceMeshNode");
+                ImGuiAPI.Text(TtLocalization.Tr("Focus to InstanceMeshNode"));
                 ImGuiAPI.EndTooltip();
             }
             if (disabled)
@@ -296,7 +296,7 @@ namespace EngineNS.GamePlay.Scene
         /// MaterialMesh asset to use for instanced rendering.
         /// Changing this in the Detail panel will reload the mesh and rebuild the render pipeline.
         /// </summary>
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
         public RName MeshName
         {
@@ -343,7 +343,7 @@ namespace EngineNS.GamePlay.Scene
         /// <summary>
         /// Whether to use per-instance bounding boxes for culling.
         /// </summary>
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool UseInstanceBounding
         {
             get
@@ -363,7 +363,7 @@ namespace EngineNS.GamePlay.Scene
         /// <summary>
         /// Pre-allocated instance buffer capacity.
         /// </summary>
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public uint Capacity
         {
             get
@@ -386,7 +386,7 @@ namespace EngineNS.GamePlay.Scene
         /// <summary>
         /// Total instance count (manual + merged).
         /// </summary>
-        [Category("Info")]
+        [System.ComponentModel.Category("Info")]
         [ReadOnly(true)]
         public int InstanceCount
         {
@@ -402,7 +402,7 @@ namespace EngineNS.GamePlay.Scene
         /// <summary>
         /// Number of manually placed instances (from InstanceTransforms list).
         /// </summary>
-        [Category("Info")]
+        [System.ComponentModel.Category("Info")]
         [ReadOnly(true)]
         public int ManualInstanceCount
         {
@@ -416,14 +416,14 @@ namespace EngineNS.GamePlay.Scene
         /// <summary>
         /// Number of TtMeshNodes currently merged into this instance group.
         /// </summary>
-        [Category("Info")]
+        [System.ComponentModel.Category("Info")]
         [ReadOnly(true)]
         public int MergedNodeCount => mMergedNodes.Count;
 
         /// <summary>
         /// List of merged nodes displayed in the Detail panel with Focus/Select buttons.
         /// </summary>
-        [Category("Merged Nodes")]
+        [System.ComponentModel.Category("Merged Nodes")]
         [TtPGMergedNodesEditor]
         public IReadOnlyList<TtMeshNode> MergedNodeList => ResolveMergedNodes();
         #endregion

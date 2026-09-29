@@ -16,25 +16,25 @@ namespace EngineNS.Animation.Asset
     [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtMontageSegment : IO.BaseSerializer
     {
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         [RName.PGRName(FilterExts = TtAnimationClip.AssetExt)]
         public RName ClipName { get; set; }
         /// <summary>
         /// 该段落在Montage时间轴上的起始位置(秒)
         /// </summary>
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public float StartPos { get; set; } = 0.0f;
         /// <summary>
         /// 使用动画自身的起始时刻(秒)
         /// </summary>
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public float ClipStartTime { get; set; } = 0.0f;
         /// <summary>
         /// 使用动画自身的结束时刻(秒), 小于等于ClipStartTime时表示用到动画结尾
         /// </summary>
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public float ClipEndTime { get; set; } = 0.0f;
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public float PlayRate { get; set; } = 1.0f;
 
         /// <summary>
@@ -102,9 +102,9 @@ namespace EngineNS.Animation.Asset
     [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtMontageSlotTrack : IO.BaseSerializer
     {
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public string SlotName { get; set; } = "DefaultSlot";
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public List<TtMontageSegment> Segments { get; set; } = new List<TtMontageSegment>();
 
         [Browsable(false)]
@@ -130,11 +130,11 @@ namespace EngineNS.Animation.Asset
     [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtMontageSection : IO.BaseSerializer
     {
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public string Name { get; set; } = "Default";
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public float StartTime { get; set; } = 0.0f;
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public string NextSectionName { get; set; } = null;
     }
 
@@ -177,32 +177,32 @@ namespace EngineNS.Animation.Asset
         [Rtti.Meta("")]
         [Browsable(false)]
         public RName AssetName { get; set; }
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
         public RName PreviewMeshName { get; set; }
 
-        [Rtti.Meta, Category("Slot")]
+        [Rtti.Meta, System.ComponentModel.Category("Slot")]
         public List<TtMontageSlotTrack> SlotTracks { get; set; } = new List<TtMontageSlotTrack>();
-        [Rtti.Meta, Category("Section")]
+        [Rtti.Meta, System.ComponentModel.Category("Section")]
         public List<TtMontageSection> Sections { get; set; } = new List<TtMontageSection>();
-        [Rtti.Meta, Category("Notify")]
+        [Rtti.Meta, System.ComponentModel.Category("Notify")]
         public List<IAnimNotify> Notifies { get; set; } = new List<IAnimNotify>();
 
-        [Rtti.Meta, Category("BlendOption")]
+        [Rtti.Meta, System.ComponentModel.Category("BlendOption")]
         public float BlendInTime { get; set; } = 0.25f;
-        [Rtti.Meta, Category("BlendOption")]
+        [Rtti.Meta, System.ComponentModel.Category("BlendOption")]
         public float BlendOutTime { get; set; } = 0.25f;
         /// <summary>
         /// 距段落结束多久开始BlendOut。小于0表示用BlendOutTime倒推, 使混合正好在结束时完成。
         /// </summary>
-        [Rtti.Meta, Category("BlendOption")]
+        [Rtti.Meta, System.ComponentModel.Category("BlendOption")]
         public float BlendOutTriggerTime { get; set; } = -1.0f;
         /// <summary>
         /// 播到结尾自动BlendOut。关闭时会保持最后一帧直到显式Stop。
         /// </summary>
-        [Rtti.Meta, Category("BlendOption")]
+        [Rtti.Meta, System.ComponentModel.Category("BlendOption")]
         public bool EnableAutoBlendOut { get; set; } = true;
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public float DefaultPlayRate { get; set; } = 1.0f;
 
         /// <summary>

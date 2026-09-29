@@ -2,13 +2,13 @@
 <Root Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyGraph@EngineCore">
   <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,graphics/deferred_simple.rpolicy,d7035653-b8cb-456d-86f8-c230b33bbe96" />
   <GraphName Type="System.String@Unknown" Value="NodeGraph" />
-  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="55">
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="57">
     <e_0 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.TtHitproxyNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="Hitproxy" />
       <Name Type="System.String@Unknown" Value="Hitproxy" />
       <NodeId Type="System.Guid@Unknown" Value="384ae71b-e8ec-4332-8e17-2aabfa2bb26e" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="2324.2268,-62.43863" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="5908.0044,-385.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtHitproxyNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <ScaleFactor Type="System.Single@Unknown" Value="0.5" />
@@ -21,7 +21,7 @@
       <Label Type="System.String@Unknown" Value="GizmosNode" />
       <Name Type="System.String@Unknown" Value="GizmosNode" />
       <NodeId Type="System.Guid@Unknown" Value="44a9f664-b3f8-4d54-afcd-2ddffa3ae2eb" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="2263.025,135.86133" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="5570.804,-289.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Deferred.TtGizmosNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <UniqueId Type="System.Guid@Unknown" Value="42d0b384-09ed-4b67-b67c-6639d8431df3" />
@@ -33,7 +33,7 @@
       <Label Type="System.String@Unknown" Value="ScreenSpaceUINode" />
       <Name Type="System.String@Unknown" Value="ScreenSpaceUINode" />
       <NodeId Type="System.Guid@Unknown" Value="b26a9e42-b257-41f5-b999-4defea70732f" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="2613.7974,143.86125" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="5908.0044,-233.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtScreenSpaceUINode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <OutputScaleFactor Type="System.Single@Unknown" Value="1" />
@@ -46,7 +46,7 @@
       <Label Type="System.String@Unknown" Value="Copy2SwapChainNode" />
       <Name Type="System.String@Unknown" Value="Copy2SwapChainNode" />
       <NodeId Type="System.Guid@Unknown" Value="422a43ad-452a-4f58-a87a-a677f26d8d31" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="2973.425,24.261414" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="6153.6045,-337.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtCopy2SwapChainNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <UniqueId Type="System.Guid@Unknown" Value="1f8ebc7f-d3e2-4603-9658-9a74366a00e5" />
@@ -58,7 +58,7 @@
       <Label Type="System.String@Unknown" Value="BasePassNode" />
       <Name Type="System.String@Unknown" Value="BasePassNode" />
       <NodeId Type="System.Guid@Unknown" Value="9358fdda-ba44-4ca2-a98a-c916784b40dd" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="-600.3534,16.969292" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="-694.39514,-331.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Deferred.TtDeferredBasePassNode@EngineCore">
         <ClearMRT Type="System.Boolean@Unknown" Value="True" />
         <Enable Type="System.Boolean@Unknown" Value="True" />
@@ -73,7 +73,7 @@
       <Label Type="System.String@Unknown" Value="DirLightingNode" />
       <Name Type="System.String@Unknown" Value="DirLightingNode" />
       <NodeId Type="System.Guid@Unknown" Value="62a95973-be65-4dd7-9f5c-40ea339aff2d" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="579.39526,74.55524" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="522.8049,-499.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Deferred.TtDeferredDirLightingNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <OutputScaleFactor Type="System.Single@Unknown" Value="1" />
@@ -86,7 +86,7 @@
       <Label Type="System.String@Unknown" Value="ShadwoMapNode" />
       <Name Type="System.String@Unknown" Value="ShadwoMapNode" />
       <NodeId Type="System.Guid@Unknown" Value="5f5ea5c4-361b-446a-a515-002e55ae2f22" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="159.18814,632.53094" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="155.2049,132.59998" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Shadow.TtShadowMapNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <IsDepth32 Type="System.Boolean@Unknown" Value="False" />
@@ -99,7 +99,7 @@
       <Label Type="System.String@Unknown" Value="EnvMapNode" />
       <Name Type="System.String@Unknown" Value="EnvMapNode" />
       <NodeId Type="System.Guid@Unknown" Value="18beece3-c815-4637-94e5-dd693373430b" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="105.17737,207.32346" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="155.2049,-835.4" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtImageAssetNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <ImageName Type="EngineNS.RName@EngineCore" Value="Engine,texture/hdri_epic_courtyard_daylight.srv,1fbfef87-ba8b-4990-90d0-33d9b0a60e8f" />
@@ -112,7 +112,7 @@
       <Label Type="System.String@Unknown" Value="VignetteNode" />
       <Name Type="System.String@Unknown" Value="VignetteNode" />
       <NodeId Type="System.Guid@Unknown" Value="2195d8e6-4694-47b7-9267-70a25b79b529" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="-55.286194,282.07797" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="155.2049,36.599976" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtImageAssetNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <ImageName Type="EngineNS.RName@EngineCore" Value="Engine,texture/hdri_epic_courtyard_daylight.srv,1fbfef87-ba8b-4990-90d0-33d9b0a60e8f" />
@@ -125,7 +125,7 @@
       <Label Type="System.String@Unknown" Value="GpuSceneNode" />
       <Name Type="System.String@Unknown" Value="GpuSceneNode" />
       <NodeId Type="System.Guid@Unknown" Value="8bbfd4f5-e179-4285-9bee-51f86b833949" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="-594.5124,480.1034" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="-183.19513,-481.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtGpuSceneNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <UniqueId Type="System.Guid@Unknown" Value="29b6cab4-f4e7-4090-82ea-fd970866fd0f" />
@@ -137,7 +137,7 @@
       <Label Type="System.String@Unknown" Value="Hzb" />
       <Name Type="System.String@Unknown" Value="Hzb" />
       <NodeId Type="System.Guid@Unknown" Value="94e785c7-f057-4c0e-a0aa-bbbbe8020fe5" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="-206.49536,-235.02322" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="-410.79517,-247.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtHzbNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <UniqueId Type="System.Guid@Unknown" Value="5f90c03c-9f20-4b74-b32f-68eedb4efba1" />
@@ -149,7 +149,7 @@
       <Label Type="System.String@Unknown" Value="CpuCulling" />
       <Name Type="System.String@Unknown" Value="CpuCulling" />
       <NodeId Type="System.Guid@Unknown" Value="23e73ede-824c-4690-876e-59b19f5c2f10" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="-877.59515,296.90518" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="-877.59515,-247.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.TtCpuCullingNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <UniqueId Type="System.Guid@Unknown" Value="37c6efd5-75ce-494d-a04d-8dc3a76ce7a1" />
@@ -161,7 +161,7 @@
       <Label Type="System.String@Unknown" Value="ToPrevDepth" />
       <Name Type="System.String@Unknown" Value="ToPrevDepth" />
       <NodeId Type="System.Guid@Unknown" Value="766b1d0e-ea7b-405d-a679-725625ed5e33" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1173.5002,51.09987" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="5908.0044,-109.400024" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtCopy2NextFrameNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <UniqueId Type="System.Guid@Unknown" Value="fc455284-e7c9-48fb-b6d4-f55199169797" />
@@ -173,7 +173,7 @@
       <Label Type="System.String@Unknown" Value="ForwordNode" />
       <Name Type="System.String@Unknown" Value="ForwordNode" />
       <NodeId Type="System.Guid@Unknown" Value="fd70ee2e-91b1-4c3e-9803-97ddb28a9c4a" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1441.7999,164.20007" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="2192.805,-289.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Deferred.TtForwordNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <LayerFilters Type="System.Collections.Generic.List&lt;EngineNS.Graphics.Pipeline.ERenderLayer@EngineCore,&gt;@Unknown" Count="2">
@@ -189,7 +189,7 @@
       <Label Type="System.String@Unknown" Value="PickedNode" />
       <Name Type="System.String@Unknown" Value="PickedNode" />
       <NodeId Type="System.Guid@Unknown" Value="69851e7d-5aed-4480-9815-b18677ba39de" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="941.99976,523.9998" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="4494.0044,-199.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtPickedNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <UniqueId Type="System.Guid@Unknown" Value="3dd2135a-9ab3-4c5d-9f1b-1c5e82db9827" />
@@ -201,7 +201,7 @@
       <Label Type="System.String@Unknown" Value="PickBlurNode" />
       <Name Type="System.String@Unknown" Value="PickBlurNode" />
       <NodeId Type="System.Guid@Unknown" Value="7f58e879-27da-4ce3-9f51-89468109d825" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1190.9996,647.99994" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="4788.804,-185.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtPickBlurNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <OutputScaleFactor Type="System.Single@Unknown" Value="1" />
@@ -214,7 +214,7 @@
       <Label Type="System.String@Unknown" Value="PickHollowNode" />
       <Name Type="System.String@Unknown" Value="PickHollowNode" />
       <NodeId Type="System.Guid@Unknown" Value="6c547354-9a73-49fc-ac34-149727105591" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1488.9995,522" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="5036.4043,-213.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtPickHollowNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <OutputScaleFactor Type="System.Single@Unknown" Value="1" />
@@ -227,7 +227,7 @@
       <Label Type="System.String@Unknown" Value="PickHollowBlendNode" />
       <Name Type="System.String@Unknown" Value="PickHollowBlendNode" />
       <NodeId Type="System.Guid@Unknown" Value="7250b955-d252-4ef7-83a8-b62670a411c5" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1832.9996,165.00006" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="5293.204,-323.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtPickHollowBlendNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <OutputScaleFactor Type="System.Single@Unknown" Value="1" />
@@ -240,7 +240,7 @@
       <Label Type="System.String@Unknown" Value="HdrNode" />
       <Name Type="System.String@Unknown" Value="HdrNode" />
       <NodeId Type="System.Guid@Unknown" Value="3b8f2424-18ff-4b95-a9b6-ec3d0b976482" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="2996.6328,-804.5334" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="4788.804,-309.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtHdrNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <OutputScaleFactor Type="System.Single@Unknown" Value="1" />
@@ -253,7 +253,7 @@
       <Label Type="System.String@Unknown" Value="AvgBrightnessNode" />
       <Name Type="System.String@Unknown" Value="AvgBrightnessNode" />
       <NodeId Type="System.Guid@Unknown" Value="b7f45c0a-4116-4eb1-aa1b-7a117eb881f2" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="2668.6997,-805.3667" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="4494.0044,-323.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtAvgBrightnessNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <LuminancePower Type="System.Single@Unknown" Value="0.8" />
@@ -268,7 +268,7 @@
       <Label Type="System.String@Unknown" Value="AdvShadowMap" />
       <Name Type="System.String@Unknown" Value="AdvShadowMap" />
       <NodeId Type="System.Guid@Unknown" Value="8b0cda6f-8d9c-4b0a-9d40-f283ff461ce3" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="165.6,807.50006" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="155.2049,312.59998" />
       <GraphNode Type="EngineNS.Bricks.AdvanceShadow.TtAdvanceShadowMapNode@EngineCore">
         <BoxCenter Type="EngineNS.DVector2@EngineCore" Value="0,0" />
         <BoxExtent Type="System.Double@Unknown" Value="1024" />
@@ -298,7 +298,7 @@
       <Label Type="System.String@Unknown" Value="LuminanceThresholeNode" />
       <Name Type="System.String@Unknown" Value="LuminanceThresholeNode" />
       <NodeId Type="System.Guid@Unknown" Value="17279662-ca46-4775-9bae-99ba346d144a" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1971.1995,-724.90027" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="3655.2048,-247.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.Post.TtLuminanceThresholeNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <OutputScaleFactor Type="System.Single@Unknown" Value="1" />
@@ -312,7 +312,7 @@
       <Label Type="System.String@Unknown" Value="BloomNode" />
       <Name Type="System.String@Unknown" Value="BloomNode" />
       <NodeId Type="System.Guid@Unknown" Value="930caab3-d74c-4333-b956-6e8de84f61f1" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="2229.4995,-724.90027" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="3938.4048,-261.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.Post.TtBloomNode@EngineCore">
         <BlurSize Type="System.Int32@Unknown" Value="5" />
         <DownSampleSigma Type="System.Single@Unknown" Value="1.5" />
@@ -327,7 +327,7 @@
       <Label Type="System.String@Unknown" Value="AdditiveNode" />
       <Name Type="System.String@Unknown" Value="AdditiveNode" />
       <NodeId Type="System.Guid@Unknown" Value="65e6d1b8-12a3-43bf-8316-e86315e560f9" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="2456.9,-692.8003" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="4169.2046,-213.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.Post.TtAdditiveNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <Factor1 Type="System.Single@Unknown" Value="1" />
@@ -342,7 +342,7 @@
       <Label Type="System.String@Unknown" Value="AssitPrevDetph" />
       <Name Type="System.String@Unknown" Value="AssitPrevDetph" />
       <NodeId Type="System.Guid@Unknown" Value="06d00988-2fb3-4d20-8261-d1edaa49d95d" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1381.6001,55.200058" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="6153.6045,-157.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtAssitRootNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <UniqueId Type="System.Guid@Unknown" Value="e94ee23b-00b1-44ad-8751-32b6f4f99a3f" />
@@ -354,7 +354,7 @@
       <Label Type="System.String@Unknown" Value="ReSTIRGINode" />
       <Name Type="System.String@Unknown" Value="ReSTIRGINode" />
       <NodeId Type="System.Guid@Unknown" Value="5e2a70c5-e304-4d29-908c-ab232a629dd8" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="424.00012,-497.761" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="1111.2048,-359.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.GI.ReSTIR.TtReSTIRGINode@EngineCore">
         <DepthThreshold Type="System.Single@Unknown" Value="0.05" />
         <Enable Type="System.Boolean@Unknown" Value="True" />
@@ -385,7 +385,7 @@
       <Label Type="System.String@Unknown" Value="AdditiveNode" />
       <Name Type="System.String@Unknown" Value="AdditiveNode" />
       <NodeId Type="System.Guid@Unknown" Value="a50134d9-524a-4987-8313-041a8ccbe8d1" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1069,-165.85144" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="1644.0049,-143.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.Post.TtAdditiveNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <Factor1 Type="System.Single@Unknown" Value="1" />
@@ -400,7 +400,7 @@
       <Label Type="System.String@Unknown" Value="ToPrevColor" />
       <Name Type="System.String@Unknown" Value="ToPrevColor" />
       <NodeId Type="System.Guid@Unknown" Value="9adba913-1246-49dd-bc00-c6bc6521c322" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="2039,-499.3515" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="5908.0044,-481.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtCopy2NextFrameNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <UniqueId Type="System.Guid@Unknown" Value="a700d9d1-a3cf-437c-9c82-3ce0513ea9f4" />
@@ -412,7 +412,7 @@
       <Label Type="System.String@Unknown" Value="AssitRootNode" />
       <Name Type="System.String@Unknown" Value="AssitRootNode" />
       <NodeId Type="System.Guid@Unknown" Value="cbfd0d75-ff8b-4f61-97e0-f638fc9b92d7" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="2274.5,-499.3516" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="6153.6045,-433.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtAssitRootNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <UniqueId Type="System.Guid@Unknown" Value="3fc9ffeb-e385-443e-be1e-7d52c706379b" />
@@ -424,7 +424,7 @@
       <Label Type="System.String@Unknown" Value="GetPrevColor" />
       <Name Type="System.String@Unknown" Value="GetPrevColor" />
       <NodeId Type="System.Guid@Unknown" Value="dfd55ba1-156a-4a74-9030-11cc73ec920c" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="116.400024,-434.54846" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="806.40485,-151.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtGetPrevFrameNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <PrevNodeName Type="System.String@Unknown" Value="ToPrevColor" />
@@ -437,7 +437,7 @@
       <Label Type="System.String@Unknown" Value="DenoiseNode" />
       <Name Type="System.String@Unknown" Value="DenoiseNode" />
       <NodeId Type="System.Guid@Unknown" Value="7210afde-749e-406b-9a63-446b0b71e424" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="869,-342.34998" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="1406.8049,-379.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.Post.TtDenoiseNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <EnableTemporal Type="System.Boolean@Unknown" Value="True" />
@@ -458,7 +458,7 @@
       <Label Type="System.String@Unknown" Value="ImageAssetNode" />
       <Name Type="System.String@Unknown" Value="ImageAssetNode" />
       <NodeId Type="System.Guid@Unknown" Value="27140467-977a-4275-83be-6650555b7fa4" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="35,-326.65747" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="806.40485,-247.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtImageAssetNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <ImageName Type="EngineNS.RName@EngineCore" Value="Engine,texture/hdri_epic_courtyard_daylight.srv,1fbfef87-ba8b-4990-90d0-33d9b0a60e8f" />
@@ -471,7 +471,7 @@
       <Label Type="System.String@Unknown" Value="Link-&gt;GpuSceneNode:GpuScene" />
       <Name Type="System.String@Unknown" Value="Link-&gt;GpuSceneNode:GpuScene" />
       <NodeId Type="System.Guid@Unknown" Value="1d155cdc-49d8-49ab-ad41-9a42f2a46303" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="2222.1997,-835.4" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="4169.2046,-309.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtPolyLineNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <LinkedNodeName Type="System.String@Unknown" Value="Link-&gt;GpuSceneNode:GpuScene" />
@@ -484,7 +484,7 @@
       <Label Type="System.String@Unknown" Value="Link-&gt;CpuCulling:Visibles" />
       <Name Type="System.String@Unknown" Value="Link-&gt;CpuCulling:Visibles" />
       <NodeId Type="System.Guid@Unknown" Value="b7cd7070-54c8-4c02-8ecb-8afe1028041b" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1982.4998,-64.500244" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="5293.204,-171.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtPolyLineNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <LinkedNodeName Type="System.String@Unknown" Value="Link-&gt;CpuCulling:Visibles" />
@@ -497,7 +497,7 @@
       <Label Type="System.String@Unknown" Value="Link-&gt;DirLightingNode:Result" />
       <Name Type="System.String@Unknown" Value="Link-&gt;DirLightingNode:Result" />
       <NodeId Type="System.Guid@Unknown" Value="adcf6e60-b65a-477c-a959-b15c28a04944" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="70,-554.78253" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="806.40485,-343.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtPolyLineNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <LinkedNodeName Type="System.String@Unknown" Value="Link-&gt;DirLightingNode:Result" />
@@ -510,7 +510,7 @@
       <Label Type="System.String@Unknown" Value="Link-&gt;ForwordNode:Color" />
       <Name Type="System.String@Unknown" Value="Link-&gt;ForwordNode:Color" />
       <NodeId Type="System.Guid@Unknown" Value="df643ed7-6b1b-47df-ac75-206862c54fb8" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1264.9999,-766.7335" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="2482.805,-439.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtPolyLineNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <LinkedNodeName Type="System.String@Unknown" Value="Link-&gt;ForwordNode:Color" />
@@ -523,7 +523,7 @@
       <Label Type="System.String@Unknown" Value="SSSBlurNode" />
       <Name Type="System.String@Unknown" Value="SSSBlurNode" />
       <NodeId Type="System.Guid@Unknown" Value="11985b33-d0ed-4c3f-83cd-c22e78284536" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="879.2999,-56.233643" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="1406.8049,-199.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Deferred.TtSSSBlurNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <OutputScaleFactor Type="System.Single@Unknown" Value="1" />
@@ -537,7 +537,7 @@
       <Label Type="System.String@Unknown" Value="FrustumGrid3DNode" />
       <Name Type="System.String@Unknown" Value="FrustumGrid3DNode" />
       <NodeId Type="System.Guid@Unknown" Value="55c14621-7ccc-4531-8234-5fcdca71c22d" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="-170,440" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="155.2049,-739.4" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtFrustumGrid3DNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <UniqueId Type="System.Guid@Unknown" Value="6dfc8249-72d3-4264-b37e-49ea3d38aca4" />
@@ -549,7 +549,7 @@
       <Label Type="System.String@Unknown" Value="ContactShadowNode" />
       <Name Type="System.String@Unknown" Value="ContactShadowNode" />
       <NodeId Type="System.Guid@Unknown" Value="8007f8f9-6d3f-4d7f-a39c-8b49f7864b17" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="184,996.5" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="155.2049,-267.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Shadow.TtContactShadowNode@EngineCore">
         <ContactShadowLength Type="System.Single@Unknown" Value="0.5" />
         <DepthBias Type="System.Single@Unknown" Value="0.001" />
@@ -567,7 +567,7 @@
       <Label Type="System.String@Unknown" Value="AntiAliasing" />
       <Name Type="System.String@Unknown" Value="AntiAliasing" />
       <NodeId Type="System.Guid@Unknown" Value="51ad56b6-68ed-4e43-a5e2-c132c9b35afe" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1735.4,-683.6484" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="3418.005,-303.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtAntiAliasingNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <OutputScaleFactor Type="System.Single@Unknown" Value="1" />
@@ -580,7 +580,7 @@
       <Label Type="System.String@Unknown" Value="GetPrevColor" />
       <Name Type="System.String@Unknown" Value="GetPrevColor" />
       <NodeId Type="System.Guid@Unknown" Value="6477a598-d911-4bb4-ba20-bcaa02341a9a" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1343.9001,-667.3823" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="2482.805,-151.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtGetPrevFrameNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <PrevNodeName Type="System.String@Unknown" Value="ToPrevColor" />
@@ -593,7 +593,7 @@
       <Label Type="System.String@Unknown" Value="GetPrevDepth" />
       <Name Type="System.String@Unknown" Value="GetPrevDepth" />
       <NodeId Type="System.Guid@Unknown" Value="2fc00bec-8141-4181-bae8-36ab7cf15f39" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1337.099,-483.61346" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="2482.805,-55.400024" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtGetPrevFrameNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <PrevNodeName Type="System.String@Unknown" Value="ToPrevDepth" />
@@ -606,7 +606,7 @@
       <Label Type="System.String@Unknown" Value="Link-&gt;ForwordNode:MotionVector" />
       <Name Type="System.String@Unknown" Value="Link-&gt;ForwordNode:MotionVector" />
       <NodeId Type="System.Guid@Unknown" Value="5d6d9f39-c946-4e9a-8ae2-aead97a72d14" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1219.6995,-384.63342" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="2482.805,-247.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtPolyLineNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <LinkedNodeName Type="System.String@Unknown" Value="Link-&gt;ForwordNode:MotionVector" />
@@ -619,7 +619,7 @@
       <Label Type="System.String@Unknown" Value="Link-&gt;ForwordNode:Depth" />
       <Name Type="System.String@Unknown" Value="Link-&gt;ForwordNode:Depth" />
       <NodeId Type="System.Guid@Unknown" Value="9af582fd-402f-47e9-b34d-e8739290652f" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1289.0997,-576.91016" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="2482.805,-343.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtPolyLineNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <LinkedNodeName Type="System.String@Unknown" Value="Link-&gt;ForwordNode:Depth" />
@@ -632,7 +632,7 @@
       <Label Type="System.String@Unknown" Value="Link-&gt;HdrNode:Result" />
       <Name Type="System.String@Unknown" Value="Link-&gt;HdrNode:Result" />
       <NodeId Type="System.Guid@Unknown" Value="561735cc-3b35-41ea-8ed7-0f927de3b936" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1605.1002,34.80011" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="5036.4043,-309.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtPolyLineNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <LinkedNodeName Type="System.String@Unknown" Value="Link-&gt;HdrNode:Result" />
@@ -645,7 +645,7 @@
       <Label Type="System.String@Unknown" Value="ToPrevSpecular" />
       <Name Type="System.String@Unknown" Value="ToPrevSpecular" />
       <NodeId Type="System.Guid@Unknown" Value="44a623e7-cd0a-4276-b754-2bab99e4f792" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1120.4,365.00018" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="5908.0044,-13.400024" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtCopy2NextFrameNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <UniqueId Type="System.Guid@Unknown" Value="e4203368-c1bc-42bb-8f5c-9fc15f975f20" />
@@ -657,7 +657,7 @@
       <Label Type="System.String@Unknown" Value="AssitRootNode" />
       <Name Type="System.String@Unknown" Value="AssitRootNode" />
       <NodeId Type="System.Guid@Unknown" Value="25ebc5f9-bcab-4ebe-b901-ffd969553213" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1389.1998,390.2" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="6153.6045,-61.400024" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtAssitRootNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <UniqueId Type="System.Guid@Unknown" Value="9f01b04f-e4c2-4a1f-8341-adcd5dba44a3" />
@@ -669,7 +669,7 @@
       <Label Type="System.String@Unknown" Value="SSAONode" />
       <Name Type="System.String@Unknown" Value="SSAONode" />
       <NodeId Type="System.Guid@Unknown" Value="6b38732d-9404-4f48-bbc3-606937a8d713" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="701.5001,1074" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="155.2049,-87.400024" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.Post.TtSSAONode@EngineCore">
         <Bias Type="System.Single@Unknown" Value="0.02" />
         <Enable Type="System.Boolean@Unknown" Value="True" />
@@ -690,7 +690,7 @@
       <Label Type="System.String@Unknown" Value="Link-&gt;BasePassNode:DepthStencil" />
       <Name Type="System.String@Unknown" Value="Link-&gt;BasePassNode:DepthStencil" />
       <NodeId Type="System.Guid@Unknown" Value="397d2a83-9106-4f40-b094-5b2bd25c58c9" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="-331.50012,1249.0001" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="-183.19513,-13.400024" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtPolyLineNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <LinkedNodeName Type="System.String@Unknown" Value="Link-&gt;BasePassNode:DepthStencil" />
@@ -703,7 +703,7 @@
       <Label Type="System.String@Unknown" Value="Link-&gt;BasePassNode:MRT1" />
       <Name Type="System.String@Unknown" Value="Link-&gt;BasePassNode:MRT1" />
       <NodeId Type="System.Guid@Unknown" Value="595be0b9-3622-47a5-826d-9919fb166594" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="-338.00018,941.911" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="-183.19513,-109.400024" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtPolyLineNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <LinkedNodeName Type="System.String@Unknown" Value="Link-&gt;BasePassNode:MRT1" />
@@ -716,7 +716,7 @@
       <Label Type="System.String@Unknown" Value="Link-&gt;BasePassNode:MRT3" />
       <Name Type="System.String@Unknown" Value="Link-&gt;BasePassNode:MRT3" />
       <NodeId Type="System.Guid@Unknown" Value="5c6e6ed3-401b-4061-b87d-a9226958b1ce" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="-355.29993,1034.7778" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="-183.19513,-301.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtPolyLineNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <LinkedNodeName Type="System.String@Unknown" Value="Link-&gt;BasePassNode:MRT3" />
@@ -729,7 +729,7 @@
       <Label Type="System.String@Unknown" Value="Link-&gt;Hzb:Hzb" />
       <Name Type="System.String@Unknown" Value="Link-&gt;Hzb:Hzb" />
       <NodeId Type="System.Guid@Unknown" Value="4ce58c99-2a18-4e28-b3b8-0d84513297e7" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="-331.29993,1129.2778" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="-183.19513,-205.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtPolyLineNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <LinkedNodeName Type="System.String@Unknown" Value="Link-&gt;Hzb:Hzb" />
@@ -742,7 +742,7 @@
       <Label Type="System.String@Unknown" Value="DecalPassNode" />
       <Name Type="System.String@Unknown" Value="DecalPassNode" />
       <NodeId Type="System.Guid@Unknown" Value="b1d4c7e0-3a52-4f18-9c6b-2e7f81a45d10" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="-159.59985,681.6773" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="155.2049,-503.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Deferred.TtDecalPassNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <GlobalIntensity Type="System.Single@Unknown" Value="1" />
@@ -755,7 +755,7 @@
       <Label Type="System.String@Unknown" Value="SSRNode" />
       <Name Type="System.String@Unknown" Value="SSRNode" />
       <NodeId Type="System.Guid@Unknown" Value="d3f6e9a2-5c74-413a-be8d-4a91a3c67f32" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="701,1600" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="1644.0049,-379.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.Post.TtSSRNode@EngineCore">
         <EdgeFadePower Type="System.Single@Unknown" Value="1" />
         <Enable Type="System.Boolean@Unknown" Value="True" />
@@ -777,7 +777,7 @@
       <Label Type="System.String@Unknown" Value="SSRAdditiveNode" />
       <Name Type="System.String@Unknown" Value="SSRAdditiveNode" />
       <NodeId Type="System.Guid@Unknown" Value="f518ab04-7e96-4550-9a0f-6cb3c5e89154" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1069,60" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="1947.605,-261.40002" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.Post.TtAdditiveNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <Factor1 Type="System.Single@Unknown" Value="1" />
@@ -787,6 +787,32 @@
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_54>
+    <e_55 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
+      <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.FX.Weather.TtVolumetricCloudNode@EngineCore" />
+      <Label Type="System.String@Unknown" Value="VolumeCloud" />
+      <Name Type="System.String@Unknown" Value="VolumeCloud" />
+      <NodeId Type="System.Guid@Unknown" Value="4bba5e43-8f4c-4d9d-9ae4-7f0b1837e9b2" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="2755,-439.40002" />
+      <GraphNode Type="EngineNS.Bricks.FX.Weather.TtVolumetricCloudNode@EngineCore">
+        <Enable Type="System.Boolean@Unknown" Value="True" />
+        <OutputScaleFactor Type="System.Single@Unknown" Value="1" />
+        <UniqueId Type="System.Guid@Unknown" Value="7d2ac62e-0c17-4a75-a082-4d592675f34e" />
+      </GraphNode>
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_55>
+    <e_56 Type="EngineNS.Bricks.RenderPolicyEditor.TtPolicyNode@EngineCore">
+      <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.TtFogNode@EngineCore" />
+      <Label Type="System.String@Unknown" Value="FogNode" />
+      <Name Type="System.String@Unknown" Value="FogNode" />
+      <NodeId Type="System.Guid@Unknown" Value="b1c3d7a9-5224-49fe-91e1-c80df2df1e8d" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="3075,-439.40002" />
+      <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtFogNode@EngineCore">
+        <Enable Type="System.Boolean@Unknown" Value="True" />
+        <OutputScaleFactor Type="System.Single@Unknown" Value="1" />
+        <UniqueId Type="System.Guid@Unknown" Value="de88b115-3cde-4b0d-9419-62f7b090467a" />
+      </GraphNode>
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_56>
   </Nodes>
   <PolicyType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore" />
   <RenderPolicy Type="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore">
@@ -797,9 +823,9 @@
     <EnableLocalLights Type="System.Boolean@Unknown" Value="True" />
     <EnableSSR Type="System.Boolean@Unknown" Value="True" />
     <ShadowMode Type="EngineNS.Graphics.Pipeline.EShadowMode@EngineCore" Value="Advance" />
-    <TypeFog Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog@EngineCore" Value="None" />
+    <TypeFog Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog@EngineCore" Value="ExpHeight" />
   </RenderPolicy>
-  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore,&gt;@Unknown" Count="112">
+  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore,&gt;@Unknown" Count="116">
     <e_0 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="422a43ad-452a-4f58-a87a-a677f26d8d31" />
@@ -1405,7 +1431,7 @@
     </e_66>
     <e_67 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
-        <InNodeId Type="System.Guid@Unknown" Value="51ad56b6-68ed-4e43-a5e2-c132c9b35afe" />
+        <InNodeId Type="System.Guid@Unknown" Value="4bba5e43-8f4c-4d9d-9ae4-7f0b1837e9b2" />
         <InPinName Type="System.String@Unknown" Value="Color" />
         <OutNodeId Type="System.Guid@Unknown" Value="df643ed7-6b1b-47df-ac75-206862c54fb8" />
         <OutPinName Type="System.String@Unknown" Value="Line" />
@@ -1808,5 +1834,41 @@
       </SaveData>
       <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
     </e_111>
+    <e_112 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="4bba5e43-8f4c-4d9d-9ae4-7f0b1837e9b2" />
+        <InPinName Type="System.String@Unknown" Value="Depth" />
+        <OutNodeId Type="System.Guid@Unknown" Value="9af582fd-402f-47e9-b34d-e8739290652f" />
+        <OutPinName Type="System.String@Unknown" Value="Line" />
+      </SaveData>
+      <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
+    </e_112>
+    <e_113 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="b1c3d7a9-5224-49fe-91e1-c80df2df1e8d" />
+        <InPinName Type="System.String@Unknown" Value="Color" />
+        <OutNodeId Type="System.Guid@Unknown" Value="4bba5e43-8f4c-4d9d-9ae4-7f0b1837e9b2" />
+        <OutPinName Type="System.String@Unknown" Value="Result" />
+      </SaveData>
+      <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
+    </e_113>
+    <e_114 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="b1c3d7a9-5224-49fe-91e1-c80df2df1e8d" />
+        <InPinName Type="System.String@Unknown" Value="Depth" />
+        <OutNodeId Type="System.Guid@Unknown" Value="9af582fd-402f-47e9-b34d-e8739290652f" />
+        <OutPinName Type="System.String@Unknown" Value="Line" />
+      </SaveData>
+      <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
+    </e_114>
+    <e_115 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="51ad56b6-68ed-4e43-a5e2-c132c9b35afe" />
+        <InPinName Type="System.String@Unknown" Value="Color" />
+        <OutNodeId Type="System.Guid@Unknown" Value="b1c3d7a9-5224-49fe-91e1-c80df2df1e8d" />
+        <OutPinName Type="System.String@Unknown" Value="Result" />
+      </SaveData>
+      <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
+    </e_115>
   </Linkers>
 </Root>

@@ -201,7 +201,7 @@ namespace EngineNS.Editor.Forms
         float mCurrentMeshRadius = 1.0f;
         public float PlaneScale = 5.0f;
         EngineNS.GamePlay.Scene.TtMeshNode PlaneMeshNode;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public TtRenderPolicy RenderPolicy
         {
             get
@@ -211,7 +211,7 @@ namespace EngineNS.Editor.Forms
                 return PreviewViewport.RenderPolicy;
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsCastShadow
         {
             get
@@ -227,7 +227,7 @@ namespace EngineNS.Editor.Forms
                 mCurrentMeshNode.IsCastShadow = value;
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsAcceptShadow
         {
             get
@@ -708,7 +708,7 @@ namespace EngineNS.Editor.Forms
                 Mesh?.ComputeAndApplyTexelFactor();
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Checkbox("Wireframe", ref mWireframe))
+            if (ImGuiAPI.Checkbox(TtLocalization.Tr("Wireframe"), ref mWireframe))
             {
                 SetMeshWireFrame(mWireframe);
             }
@@ -896,10 +896,10 @@ namespace EngineNS.Editor.Forms
                 {
                     // 资产有 morph 但队列没挂 morph modifier —— 把原因和做法直接告诉用户,
                     // 而不是静默什么都不显示。
-                    ImGuiAPI.TextDisabled($"{morphSet.Targets.Count} morph target(s) in asset,");
-                    ImGuiAPI.TextDisabled("but current MdfQueue has no TtMorphModifier.");
-                    ImGuiAPI.TextDisabled("Reimport the mesh, or set MdfQueueType to");
-                    ImGuiAPI.TextDisabled("TtMdfSkinMorphMesh / TtMdfMorphMesh.");
+                    ImGuiAPI.TextDisabled(TtLocalization.Format("{0} morph target(s) in asset,", morphSet.Targets.Count));
+                    ImGuiAPI.TextDisabled(TtLocalization.Tr("but current MdfQueue has no TtMorphModifier."));
+                    ImGuiAPI.TextDisabled(TtLocalization.Tr("Reimport the mesh, or set MdfQueueType to"));
+                    ImGuiAPI.TextDisabled(TtLocalization.Tr("TtMdfSkinMorphMesh / TtMdfMorphMesh."));
                 }
                 else
                 {
@@ -907,7 +907,7 @@ namespace EngineNS.Editor.Forms
                     mMorphNames.Clear();
                     morphModifier.CollectMorphNames(mMorphNames);
 
-                    if (ImGuiAPI.Button("Reset All", in Vector2.Zero))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Reset All"), in Vector2.Zero))
                     {
                         morphModifier.ResetMorphWeights();
                     }
@@ -928,7 +928,7 @@ namespace EngineNS.Editor.Forms
         }
 
         bool ShowEditorPropGrid = true;
-        [Category("Editing")]
+        [System.ComponentModel.Category("Editing")]
         public Color4b MeshColor { get; set; } = Color4b.FromArgb(255, 255, 255, 255);
         protected void DrawEditorDetails()
         {
@@ -936,7 +936,7 @@ namespace EngineNS.Editor.Forms
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "EditorDetails", ref ShowEditorPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                if (ImGuiAPI.Button("SetMeshColor"))
+                if (ImGuiAPI.Button(TtLocalization.Tr("SetMeshColor")))
                 {
                     TtEngine.Instance.EventPoster.RunOn((state) =>
                     {
@@ -968,7 +968,7 @@ namespace EngineNS.Editor.Forms
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "MeshDetails", ref ShowMeshPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                if (ImGuiAPI.Button("Build SDF"))
+                if (ImGuiAPI.Button(TtLocalization.Tr("Build SDF")))
                 {
                     var meshProvider = new TtMeshDataProvider();
                     if (meshProvider.InitFrom(Mesh))
@@ -1478,11 +1478,11 @@ namespace EngineNS.Editor.Forms
             {
                 if (!mQuarkDAGBuilt)
                 {
-                    ImGuiAPI.TextColored(new Vector4(1, 1, 0, 1), "Click [BuildQuarkDAG] to generate DAG data");
+                    ImGuiAPI.TextColored(new Vector4(1, 1, 0, 1), TtLocalization.Tr("Click [BuildQuarkDAG] to generate DAG data"));
                 }
                 else
                 {
-                    ImGuiAPI.Text($"Clusters: {mQuarkClusterCount} | MipLevels: {mQuarkMipLevels}");
+                    ImGuiAPI.Text(TtLocalization.Format("Clusters: {0} | MipLevels: {1}", mQuarkClusterCount, mQuarkMipLevels));
 
                     // MaxGroupSize input + ClusterSize input + Rebuild button
                     ImGuiAPI.SetNextItemWidth(160);
@@ -1494,7 +1494,7 @@ namespace EngineNS.Editor.Forms
                     if (mQuarkClusterSize < 32) mQuarkClusterSize = 32;
                     if (mQuarkClusterSize > 256) mQuarkClusterSize = 256;
                     ImGuiAPI.SameLine(0, 10);
-                    if (ImGuiAPI.Button("Rebuild DAG", in Vector2.Zero))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Rebuild DAG"), in Vector2.Zero))
                     {
                         // Rebuild with new MaxGroupSize
                         BuildQuarkDAG();
@@ -1502,18 +1502,18 @@ namespace EngineNS.Editor.Forms
                         mQuarkLODLevelPrev = -1;
                     }
                     ImGuiAPI.SameLine(0, 20);
-                    ImGuiAPI.Checkbox("Show Stats", ref mShowQuarkOverlay);
+                    ImGuiAPI.Checkbox(TtLocalization.Tr("Show Stats"), ref mShowQuarkOverlay);
 
                     // LOD Mode selector: Fixed MipLevel / BVH Traverse
                     ImGuiAPI.Separator();
-                    ImGuiAPI.Text("LOD Mode:");
+                    ImGuiAPI.Text(TtLocalization.Tr("LOD Mode:"));
                     ImGuiAPI.SameLine(0, 10);
-                    if (ImGuiAPI.RadioButton("Fixed MipLevel", mQuarkLODMode == 0))
+                    if (ImGuiAPI.RadioButton(TtLocalization.Tr("Fixed MipLevel"), mQuarkLODMode == 0))
                     {
                         if (mQuarkLODMode != 0) { mQuarkLODMode = 0; mQuarkLODLevelPrev = -1; }
                     }
                     ImGuiAPI.SameLine(0, 10);
-                    if (ImGuiAPI.RadioButton("BVH Traverse", mQuarkLODMode == 1))
+                    if (ImGuiAPI.RadioButton(TtLocalization.Tr("BVH Traverse"), mQuarkLODMode == 1))
                     {
                         if (mQuarkLODMode != 1) { mQuarkLODMode = 1; mQuarkBVHErrorThresholdPrev = -1.0f; }
                     }
@@ -1548,7 +1548,7 @@ namespace EngineNS.Editor.Forms
                             RebuildQuarkBVHMesh();
                         }
 
-                        if (ImGuiAPI.Button("Refresh BVH", in Vector2.Zero))
+                        if (ImGuiAPI.Button(TtLocalization.Tr("Refresh BVH"), in Vector2.Zero))
                         {
                             RebuildQuarkBVHMesh();
                         }
@@ -1556,7 +1556,7 @@ namespace EngineNS.Editor.Forms
 
                     // --- VisBuffer Preview (above viewport to avoid scrollbar) ---
                     ImGuiAPI.Separator();
-                    if (ImGuiAPI.Checkbox("VisBuffer Preview (SW Raster)", ref mShowVisBuffer))
+                    if (ImGuiAPI.Checkbox(TtLocalization.Tr("VisBuffer Preview (SW Raster)"), ref mShowVisBuffer))
                     {
                         if (mShowVisBuffer && !mVisBufferInitialized)
                             InitVisBufferViewport();
@@ -1566,7 +1566,7 @@ namespace EngineNS.Editor.Forms
                     {
                         // Resolve mode selector
                         ImGuiAPI.SameLine(0, 20);
-                        ImGuiAPI.Text("Mode:");
+                        ImGuiAPI.Text(TtLocalization.Tr("Mode:"));
                         ImGuiAPI.SameLine(0, 5);
                         var modeInt = (int)mVisResolveMode;
                         ImGuiAPI.SetNextItemWidth(120);
@@ -1581,7 +1581,7 @@ namespace EngineNS.Editor.Forms
 
                         // LOD Selection toggle
                         ImGuiAPI.SameLine(0, 20);
-                        if (ImGuiAPI.Checkbox("LOD Selection", ref mLODSelectionEnabled))
+                        if (ImGuiAPI.Checkbox(TtLocalization.Tr("LOD Selection"), ref mLODSelectionEnabled))
                         {
                             var visBufferNode = QuarkVisBufferViewport?.RenderPolicy?.FindNode<Bricks.GpuDriven.TtQuarkVisBufferNode>();
                             if (visBufferNode != null)

@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.Procedure.Node;
+using EngineNS.Bricks.Procedure.Node;
 using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.UI.Bind;
@@ -88,7 +88,7 @@ namespace EngineNS.UI
         //}
         RName mUVAnimAsset;
         [Rtti.Meta, BindProperty]
-        [DisplayName("Texture")]
+        [System.ComponentModel.DisplayName("Texture")]
         [RName.PGRName(FilterExts = EGui.TtUVAnim.AssetExt)]
         public RName UVAnimAsset
         {
@@ -137,7 +137,7 @@ namespace EngineNS.UI
         }
         EBrushType mBrushType = EBrushType.Image;
         [Rtti.Meta, BindProperty]
-        [DisplayName("Type")]
+        [System.ComponentModel.DisplayName("Type")]
         public EBrushType BrushType
         {
             get => mBrushType;

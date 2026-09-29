@@ -24,47 +24,47 @@ namespace EngineNS.Graphics.Mesh
     }
     public class TtMeshImportSetting
     {
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public string SourceFile { get; set; } = "";
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public string IntermediateFile { get; set; } = "";
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public string MaterialManifest { get; set; } = "";
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public string ImportMessage { get; set; } = "";
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public string FileName { get; set; } = "";
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public string FileFormat { get; set; } = "";
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public string FileFormatVersion { get; set; } = "";
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public string Generator { get; set; } = "";
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public int MeshesCount { get; set; } = 0;
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public bool MeshesHaveScale { get; set; } = false;
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public bool MeshesHaveTranslation { get; set; } = false;
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public string UpAxis { get; set; } = "";
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public float UnitScaleFactor { get; set; } = 1;
-        [Category("ImportSetting"), ReadOnly(true)]
+        [System.ComponentModel.Category("ImportSetting"), ReadOnly(true)]
         public string DefaultImportRule { get; } = "Import mesh in Local Space";
-        [Category("ImportSetting")]
+        [System.ComponentModel.Category("ImportSetting")]
         public float UnitScale { get; set; } = 0.01f;
-        [Category("ImportSetting")]
+        [System.ComponentModel.Category("ImportSetting")]
         public bool AsStaticMesh { get; set; } = false;
-        [Category("ImportSetting")]
+        [System.ComponentModel.Category("ImportSetting")]
         public bool ApplyTransformToVertex { get; set; } = false;
-        [Category("ImportSetting")]
+        [System.ComponentModel.Category("ImportSetting")]
         public bool MergeMeshes { get; set; } = false;
-        [Category("ImportSetting")]
+        [System.ComponentModel.Category("ImportSetting")]
         public bool GenerateUMS { get; set; } = true;
-        [Category("ImportSetting")]
+        [System.ComponentModel.Category("ImportSetting")]
         public bool JoinIdenticalVertices { get; set; } = true;
-        [Category("ImportSetting"), Browsable(false)]
+        [System.ComponentModel.Category("ImportSetting"), Browsable(false)]
         public TtAssetImporter AssetImporter { get; set; } = null;
         [Browsable(false)]
         public List<TtImportAssetEntry> PreviewEntries { get; set; } = new List<TtImportAssetEntry>();
@@ -144,31 +144,31 @@ namespace EngineNS.Graphics.Mesh
                     if (ImGuiAPI.BeginCombo("MeshType", MeshType, ImGuiComboFlags_.ImGuiComboFlags_None))
                     {
                         bool bSelected = false;
-                        if (ImGuiAPI.Selectable("FromFile", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        if (ImGuiAPI.Selectable(TtLocalization.Tr("FromFile"), ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                         {
                             MeshType = "FromFile";
                         }
-                        if (ImGuiAPI.Selectable("Box", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        if (ImGuiAPI.Selectable(TtLocalization.Tr("Box"), ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                         {
                             MeshType = "Box";
                         }
-                        if (ImGuiAPI.Selectable("Rect2D", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        if (ImGuiAPI.Selectable(TtLocalization.Tr("Rect2D"), ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                         {
                             MeshType = "Rect2D";
                         }
-                        if (ImGuiAPI.Selectable("Sphere", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        if (ImGuiAPI.Selectable(TtLocalization.Tr("Sphere"), ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                         {
                             MeshType = "Sphere";
                         }
-                        if (ImGuiAPI.Selectable("Cylinder", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        if (ImGuiAPI.Selectable(TtLocalization.Tr("Cylinder"), ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                         {
                             MeshType = "Cylinder";
                         }
-                        if (ImGuiAPI.Selectable("Torus", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        if (ImGuiAPI.Selectable(TtLocalization.Tr("Torus"), ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                         {
                             MeshType = "Torus";
                         }
-                        if (ImGuiAPI.Selectable("Capsule", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        if (ImGuiAPI.Selectable(TtLocalization.Tr("Capsule"), ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                         {
                             MeshType = "Capsule";
                         }
@@ -189,7 +189,7 @@ namespace EngineNS.Graphics.Mesh
                                 }
                                 //PGAsset.Target = null;
                                 var sz = new Vector2(-1, 0);
-                                if (string.IsNullOrEmpty(ContentBrowser.CurrentImporterFile) && ImGuiAPI.Button("Select File", in sz))
+                                if (string.IsNullOrEmpty(ContentBrowser.CurrentImporterFile) && ImGuiAPI.Button(TtLocalization.Tr("Select File"), in sz))
                                 {
                                     mFileDialog.OpenModalWithMutiSelect("ChooseFileDlgKey", "Choose File", ".*", ".", int.MaxValue - 1);
                                 }
@@ -207,12 +207,12 @@ namespace EngineNS.Graphics.Mesh
                                             if (eErrorType != enErrorType.None)
                                             {
                                                 var clr = new Vector4(1, 0, 0, 1);
-                                                ImGuiAPI.TextColored(in clr, $"Source:{path}");
+                                                ImGuiAPI.TextColored(in clr, TtLocalization.Format("Source:{0}", path));
                                             }
                                             else
                                             {
                                                 var clr = new Vector4(1, 1, 1, 1);
-                                                ImGuiAPI.TextColored(in clr, $"Source:{path}");
+                                                ImGuiAPI.TextColored(in clr, TtLocalization.Format("Source:{0}", path));
                                             }
                                         }
                                     }
@@ -274,7 +274,7 @@ namespace EngineNS.Graphics.Mesh
                     }
                     if (canCreateAsset)
                     {
-                        if (ImGuiAPI.Button("Create Asset", in Vector2.Zero))
+                        if (ImGuiAPI.Button(TtLocalization.Tr("Create Asset"), in Vector2.Zero))
                         {
                             switch (MeshType)
                             {
@@ -422,7 +422,7 @@ namespace EngineNS.Graphics.Mesh
                         }
                         ImGuiAPI.SameLine(0, 20);
                     }
-                    if (ImGuiAPI.Button("Cancel", in Vector2.Zero))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Cancel"), in Vector2.Zero))
                     {
                         ContentBrowser.SetImportStatusMessage("Import cancelled.");
                         ImGuiAPI.CloseCurrentPopup();
@@ -553,7 +553,7 @@ namespace EngineNS.Graphics.Mesh
 
             void DrawAssetSelectionList()
             {
-                ImGuiAPI.Text("Assets to Import:");
+                ImGuiAPI.Text(TtLocalization.Tr("Assets to Import:"));
                 var headerColor = new Vector4(0.4f, 0.8f, 1.0f, 1.0f);
 
                 foreach (var setting in MeshImportSettings)
@@ -566,17 +566,17 @@ namespace EngineNS.Graphics.Mesh
                         var sourceLabel = IO.TtFileManager.GetPureName(setting.SourceFile);
                         if (string.IsNullOrWhiteSpace(sourceLabel))
                             sourceLabel = setting.FileName;
-                        ImGuiAPI.TextColored(in headerColor, $"[{sourceLabel}]");
+                        ImGuiAPI.TextColored(in headerColor, TtLocalization.Format("[{0}]", sourceLabel));
                     }
 
                     // Select All / Deselect All buttons
                     var btnSize = new Vector2(0, 0);
-                    if (ImGuiAPI.Button($"Select All##{setting.GetHashCode()}", in btnSize))
+                    if (ImGuiAPI.Button(TtLocalization.Label("Select All", $"##{setting.GetHashCode()}"), in btnSize))
                     {
                         SetAllEntrySelections(setting.PreviewEntries, true);
                     }
                     ImGuiAPI.SameLine(0, 8);
-                    if (ImGuiAPI.Button($"Deselect All##{setting.GetHashCode()}", in btnSize))
+                    if (ImGuiAPI.Button(TtLocalization.Label("Deselect All", $"##{setting.GetHashCode()}"), in btnSize))
                     {
                         SetAllEntrySelections(setting.PreviewEntries, false);
                     }
@@ -622,7 +622,7 @@ namespace EngineNS.Graphics.Mesh
                     {
                         ImGuiAPI.SameLine(0, 8);
                         var detailColor = new Vector4(0.6f, 0.6f, 0.6f, 1.0f);
-                        ImGuiAPI.TextColored(in detailColor, $"({entry.Detail})");
+                        ImGuiAPI.TextColored(in detailColor, TtLocalization.Format("({0})", entry.Detail));
                     }
 
                     // Draw children (e.g. textures under materials, materials under meshes)
@@ -640,7 +640,7 @@ namespace EngineNS.Graphics.Mesh
                             {
                                 ImGuiAPI.SameLine(0, 8);
                                 var detailColor = new Vector4(0.5f, 0.5f, 0.5f, 1.0f);
-                                ImGuiAPI.TextColored(in detailColor, $"({child.Detail})");
+                                ImGuiAPI.TextColored(in detailColor, TtLocalization.Format("({0})", child.Detail));
                             }
                         }
                         ImGuiAPI.Unindent(16);

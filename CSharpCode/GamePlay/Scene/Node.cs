@@ -411,7 +411,7 @@ namespace EngineNS.GamePlay.Scene
             NoPickedDraw = (1 << 8),
             SelfInvisible = (1 << 9),
             ChildrenInvisible = (1 << 10),
-            Reserved_0 = (1 << 11), //SceneManaged = (1 << 11),
+            PgcGenerated = (1 << 11),
             Transient = (1 << 12),
             NoTick = (1 << 13),
             ParallelTick = (1 << 14),
@@ -483,6 +483,7 @@ namespace EngineNS.GamePlay.Scene
             IsSelected = (1 << 1),
             IsPrefab = (1 << 2),
             EditorHidden = (1 << 3),
+            HideInOutliner = (1 << 4),
         }
         public uint RuntimeStyles { get; set; } = 0;
         public ENodeStyles NodeStyles
@@ -550,7 +551,7 @@ namespace EngineNS.GamePlay.Scene
         {
             RuntimeStyles |= (uint)style;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsPrefab
         {
             get => this.HasRuntimeStyle(ENodeRuntimeStyles.IsPrefab);// && (mTemplateNodeData != null);
@@ -621,7 +622,7 @@ namespace EngineNS.GamePlay.Scene
         /// 而节点自己不画树行, 那个眼睛会挤到下一个节点的行首去 (表现为一行两个眼睛)。
         /// </summary>
         [Browsable(false)]
-        public virtual bool IsShowInOutliner => true;
+        public virtual bool IsShowInOutliner => !HasRuntimeStyle(ENodeRuntimeStyles.HideInOutliner);
         [Browsable(false)]
         public bool IsDirty 
         {
@@ -644,7 +645,7 @@ namespace EngineNS.GamePlay.Scene
         }
         #endregion
 
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual bool IsNoTick
         {
             get
@@ -663,7 +664,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual bool IsParallelTick
         {
             get
@@ -682,7 +683,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual bool IsVisibleAlways
         {
             get
@@ -701,7 +702,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual bool IsVisibleFollowParent
         {
             get
@@ -720,7 +721,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual bool IsCastShadow
         {
             get
@@ -739,7 +740,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual bool IsAcceptShadow
         {
             get
@@ -758,7 +759,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual bool IsForceGatherNode
         {
             get
@@ -777,7 +778,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual bool IsBuildNavMesh
         {
             get
@@ -796,7 +797,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual bool IsEnableHitproxyInGame
         {
             get
@@ -815,7 +816,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual bool IsCollide
         {
             get
@@ -824,13 +825,18 @@ namespace EngineNS.GamePlay.Scene
             }
             set
             {
+                if (HasStyle(ENodeStyles.IsCollide) == value)
+                    return;
+
                 if (value)
                 {
                     SetStyle(ENodeStyles.IsCollide);
+                    OnAbsAABBChanged();
                 }
                 else
                 {
                     UnsetStyle(ENodeStyles.IsCollide);
+                    GetWorld()?.CollideOctree?.Remove(this, false);
                 }
             }
         }
@@ -890,7 +896,7 @@ namespace EngineNS.GamePlay.Scene
             return null;
         }
 
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual string NodeName
         {
             get
@@ -1009,7 +1015,7 @@ namespace EngineNS.GamePlay.Scene
         {
 
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public TtNodeData NodeData
         {
             get
@@ -1034,7 +1040,7 @@ namespace EngineNS.GamePlay.Scene
         {
             return NodeData as T;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public DVector3 Location
         {
             get
@@ -1044,12 +1050,12 @@ namespace EngineNS.GamePlay.Scene
                 return Placement.AbsTransform.Position;
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual TtPlacementBase Placement
         {
             get { return NodeData?.Placement; }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public TtBoundVolume BoundVolume
         {
             get { return NodeData?.BoundVolume; }

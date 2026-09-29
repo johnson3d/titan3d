@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_4571578646892385401 Type="EngineNS.Sequencer.Asset.TtSequence@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Bindings Type="System.Collections.Generic.List&lt;EngineNS.Sequencer.Asset.TtSequenceBinding@EngineCore,&gt;@Unknown" Order="0" />
+  <DisplayRate Type="EngineNS.Sequencer.TtFrameRate@EngineCore" Order="0" />
+  <PlaybackEndTick Type="System.Int64@Unknown" Order="0" />
+  <PlaybackStartTick Type="System.Int64@Unknown" Order="0" />
+  <PreviewSceneName Type="EngineNS.RName@EngineCore" Order="0" />
+  <TickResolution Type="EngineNS.Sequencer.TtFrameRate@EngineCore" Order="0" />
+</Hash_4571578646892385401>

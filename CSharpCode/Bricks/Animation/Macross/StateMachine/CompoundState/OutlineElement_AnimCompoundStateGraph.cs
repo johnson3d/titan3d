@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation.Macross.BlendTree;
+using EngineNS.Animation.Macross.BlendTree;
 using EngineNS.Bricks.StateMachine.Macross.CompoundState;
 using EngineNS.DesignMacross.Base.Outline;
 using EngineNS.DesignMacross.Base.Render;
@@ -120,7 +120,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
             if (!elementsList.IsHideTitle)
             {
                 ImGuiAPI.SetNextItemAllowOverlap();
-                treeNodeResult = ImGuiAPI.TreeNodeEx("CompoundStates", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnDoubleClick);
+                treeNodeResult = ImGuiAPI.TreeNodeEx(TtLocalization.Tr("CompoundStates"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnDoubleClick);
             }
             ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
             if (EGui.UIProxy.CustomButton.ToolButton("+", in buttonSize, 0xFF00FF00))
@@ -134,7 +134,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
                 var menuData = new Support.TtAnyPointer();
                 EGui.UIProxy.MenuItemProxy.MenuState newMethodMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
                 newMethodMenuState.Reset();
-                if (EGui.UIProxy.MenuItemProxy.MenuItem("New" + stateVarName, null, false, null, in drawList, in menuData, ref newMethodMenuState))
+                if (EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("New") + stateVarName, null, false, null, in drawList, in menuData, ref newMethodMenuState))
                 {
                     var num = 0;
                     while (true)

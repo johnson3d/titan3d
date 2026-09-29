@@ -118,6 +118,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     /// </summary>
     [Bricks.CodeBuilder.ContextMenu("SSAO", "Post\\SSAO",
         Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.Post.USSAONode@EngineCore", "EngineNS.Graphics.Pipeline.Common.Post.USSAONode" })]
     public class TtSSAONode : TAuxRenderGraphNode<TtSSAONode>
     {
         // ---- Pins ----
@@ -137,39 +138,39 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
         // ---- Parameters ----
         [Rtti.Meta("")]
-        [Category("SSAO")]
+        [System.ComponentModel.Category("SSAO")]
         public float Radius { get; set; } = 0.5f;
 
         [Rtti.Meta("")]
-        [Category("SSAO")]
+        [System.ComponentModel.Category("SSAO")]
         public float Intensity { get; set; } = 1.0f;
 
         [Rtti.Meta("")]
-        [Category("SSAO")]
+        [System.ComponentModel.Category("SSAO")]
         public float Bias { get; set; } = 0.02f;
 
         [Rtti.Meta("")]
-        [Category("SSAO")]
+        [System.ComponentModel.Category("SSAO")]
         public int NumDirections { get; set; } = 4;
 
         [Rtti.Meta("")]
-        [Category("SSAO")]
+        [System.ComponentModel.Category("SSAO")]
         public int NumSteps { get; set; } = 4;
 
         [Rtti.Meta("")]
-        [Category("SSAO")]
+        [System.ComponentModel.Category("SSAO")]
         public float FalloffDistance { get; set; } = 10.0f;
 
         [Rtti.Meta("")]
-        [Category("SSAO")]
+        [System.ComponentModel.Category("SSAO")]
         public bool EnableTemporalRotation { get; set; } = false;
 
         [Rtti.Meta("")]
-        [Category("SSAO")]
+        [System.ComponentModel.Category("SSAO")]
         public bool HalfResolution { get; set; } = true;
 
         [Rtti.Meta("")]
-        [Category("SSAO Filter")]
+        [System.ComponentModel.Category("SSAO Filter")]
         public float FilterSharpness { get; set; } = 100.0f;
 
         // ---- Internal: pass 1 (AO compute) ----

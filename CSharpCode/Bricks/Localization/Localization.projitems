@@ -13,5 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)LocalizationManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Localization.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LocalizationCatalog.cs" />
   </ItemGroup>
 </Project>

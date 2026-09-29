@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.VXGI;
+using EngineNS.Bricks.VXGI;
 using EngineNS.Graphics.Pipeline.Shader;
 using System;
 using System.Collections.Generic;
@@ -27,7 +27,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             AddOutput(ResultPinOut);
         }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float OutputScaleFactor { get; set; } = 1.0f;
         public Graphics.Mesh.TtRenderMesh ScreenMesh;
         public TtGraphicsBuffers GBuffers { get; protected set; } = new TtGraphicsBuffers();

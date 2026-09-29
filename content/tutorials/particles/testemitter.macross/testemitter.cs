@@ -1,4 +1,4 @@
-﻿namespace NS_tutorials.particles
+namespace NS_tutorials.particles
 {
     [EngineNS.Macross.TtMacross]
     [EngineNS.Macross.TtMacrossSign(RName_Name = "tutorials/particles/testemitter.macross", RName_Type = EngineNS.RName.ERNameType.Game)]

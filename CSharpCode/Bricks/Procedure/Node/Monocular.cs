@@ -5,21 +5,22 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
-    public class UMonocular : UPgcNodeBase
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UMonocular@EngineCore", "EngineNS.Bricks.Procedure.Node.UMonocular" })]
+    public class TtMonocular : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinIn SrcPin { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
         [Rtti.Meta("")]
-        public UBufferCreator SourceDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public TtBufferCreator SourceDesc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         [Rtti.Meta("")]
-        public UBufferCreator ResultDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public virtual UBufferCreator GetResultDesc()
+        public TtBufferCreator ResultDesc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public virtual TtBufferCreator GetResultDesc()
         {
             return ResultDesc;
         }
-        public UMonocular()
+        public TtMonocular()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -35,11 +36,11 @@ namespace EngineNS.Bricks.Procedure.Node
             base.OnLinkedFrom(iPin, OutNode, oPin, linker);
         }
 
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (ResultPin == pin)
             {
-                var graph = ParentGraph as UPgcGraph;
+                var graph = ParentGraph as TtPgcGraph;
                 var buffer = graph.BufferCache.FindBuffer(SrcPin);
                 if (buffer != null)
                 {
@@ -50,13 +51,14 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
 
-    public class UMonocularWithMask : UMonocular
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UMonocularWithMask@EngineCore", "EngineNS.Bricks.Procedure.Node.UMonocularWithMask" })]
+    public class TtMonocularWithMask : TtMonocular
     {
         [Browsable(false)]
         public PinIn MaskPin { get; set; } = new PinIn();
-        public UMonocularWithMask()
+        public TtMonocularWithMask()
         {
-            AddInput(MaskPin, "Mask", UBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
+            AddInput(MaskPin, "Mask", TtBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
         }
         public bool IsMask(int x, int y, int z, TtSuperBuffer<sbyte, FSByteOperator> maskBuffer)
         {
@@ -74,9 +76,10 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
 
-    public class UAnyTypeMonocular : UMonocularWithMask
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UAnyTypeMonocular@EngineCore", "EngineNS.Bricks.Procedure.Node.UAnyTypeMonocular" })]
+    public class TtAnyTypeMonocular : TtMonocularWithMask
     {
-        public override bool IsMatchLinkedPin(UBufferCreator input, UBufferCreator output)
+        public override bool IsMatchLinkedPin(TtBufferCreator input, TtBufferCreator output)
         {
             //base.IsMatchLinkedPin(input, output);
             return true;
@@ -85,10 +88,10 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             base.OnLinkedFrom(iPin, OutNode, oPin, linker);
 
-            var input = oPin.Tag as UBufferCreator;
-            var output = ResultPin.Tag as UBufferCreator;
+            var input = oPin.Tag as TtBufferCreator;
+            var output = ResultPin.Tag as TtBufferCreator;
 
-            (SrcPin.Tag as UBufferCreator).BufferType = input.BufferType;
+            (SrcPin.Tag as TtBufferCreator).BufferType = input.BufferType;
             if (output.BufferType != input.BufferType)
             {   
                 output.BufferType = input.BufferType;
@@ -98,8 +101,9 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("CopyRect", "BaseOp\\CopyRect", UPgcGraph.PgcEditorKeyword)]
-    public class UCopyRect : UAnyTypeMonocular
+    [Bricks.CodeBuilder.ContextMenu("CopyRect", "BaseOp\\CopyRect", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UCopyRect@EngineCore", "EngineNS.Bricks.Procedure.Node.UCopyRect" })]
+    public class TtCopyRect : TtAnyTypeMonocular
     {
         [Rtti.Meta("")]
         public int X { get; set; } = 0;
@@ -107,11 +111,11 @@ namespace EngineNS.Bricks.Procedure.Node
         public int Y { get; set; } = 0;
         [Rtti.Meta("")]
         public int Z { get; set; } = 0;
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (ResultPin == pin)
             {
-                var graph = ParentGraph as UPgcGraph;
+                var graph = ParentGraph as TtPgcGraph;
                 var buffer = graph.BufferCache.FindBuffer(SrcPin);
                 if (buffer != null)
                 {
@@ -121,7 +125,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return null;
         }
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var curComp = graph.BufferCache.FindBuffer(SrcPin);
             var resultComp = graph.BufferCache.FindBuffer(ResultPin);
@@ -148,14 +152,15 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("Stretch", "BaseOp\\Stretch", UPgcGraph.PgcEditorKeyword)]
-    public class UStretch : UAnyTypeMonocular
+    [Bricks.CodeBuilder.ContextMenu("Stretch", "BaseOp\\Stretch", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UStretch@EngineCore", "EngineNS.Bricks.Procedure.Node.UStretch" })]
+    public class TtStretch : TtAnyTypeMonocular
     {
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (ResultPin == pin)
             {
-                var graph = ParentGraph as UPgcGraph;
+                var graph = ParentGraph as TtPgcGraph;
                 var buffer = graph.BufferCache.FindBuffer(SrcPin);
                 if (buffer != null)
                 {
@@ -165,7 +170,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return null;
         }
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var left = graph.BufferCache.FindBuffer(SrcPin);
             var resultComp = graph.BufferCache.FindBuffer(ResultPin);
@@ -191,16 +196,17 @@ namespace EngineNS.Bricks.Procedure.Node
             return true;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("MulValue", "BaseOp\\MulValue", UPgcGraph.PgcEditorKeyword)]
-    public class UMulValue : UAnyTypeMonocular
+    [Bricks.CodeBuilder.ContextMenu("MulValue", "BaseOp\\MulValue", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UMulValue@EngineCore", "EngineNS.Bricks.Procedure.Node.UMulValue" })]
+    public class TtMulValue : TtAnyTypeMonocular
     {
-        public UMulValue()
+        public TtMulValue()
         {
             PrevSize = new Vector2(70, 30);
         }
         [Rtti.Meta("")]
         public float Value { get; set; } = 1.0f;
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var mask = graph.BufferCache.FindBuffer(MaskPin) as TtSuperBuffer<sbyte, FSByteOperator>; ;
             var left = graph.BufferCache.FindBuffer(SrcPin);
@@ -241,14 +247,15 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Abs", "BaseOp\\Abs", UPgcGraph.PgcEditorKeyword)]
-    public class UAbsNode : UAnyTypeMonocular
+    [Bricks.CodeBuilder.ContextMenu("Abs", "BaseOp\\Abs", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UAbsNode@EngineCore", "EngineNS.Bricks.Procedure.Node.UAbsNode" })]
+    public class TtAbsNode : TtAnyTypeMonocular
     {
-        public UAbsNode()
+        public TtAbsNode()
         {
             
         }
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var mask = graph.BufferCache.FindBuffer(MaskPin) as TtSuperBuffer<sbyte, FSByteOperator>; ;
             var left = graph.BufferCache.FindBuffer(SrcPin);

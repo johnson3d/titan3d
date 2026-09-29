@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -54,512 +54,512 @@ namespace EngineNS.EGui.UIProxy
         }
 
         // Titan Pro Dark tokens. Colors are stored in ImGui ABGR order.
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 AccentColor = 0xFFCEA34F;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 AccentHoveredColor = 0xFFE2BD6C;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 AccentActiveColor = 0xFFB8882F;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 BorderColor = 0xFF332920;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 BorderActiveColor = 0xFF76624A;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 FrameBackground = 0xFF261F18;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 FrameBackgroundHovered = 0xFF332A20;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 FrameBackgroundActive = 0xFF433627;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 TableRowColor = 0xFF17130F;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 TableRowAltColor = 0xFF1D1812;
 
         // Common
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 ItemSpacing = new Vector2(6, 5);
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 WindowBackground = 0xFF15110F;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PanelBackground = 0xFF221C18;// new Vector4(0.14f, 0.14f, 0.14f, 1.00f);
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 SecondPanelBackground = 0xFF1B1511;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 PanelFramePadding = new Vector2(6, 5);
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 PGNormalItemSpacing = new Vector2(0, 3);
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 GridColor = 0xFF40332A;// new Vector4(0.14f, 0.14f, 0.14f, 1.00f);
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 SeparatorColor = 0xFF30261F;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 WindowsPadding = new Vector2(6, 6);
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PopupColor = 0xFF211A15;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 PopupWindowsPadding = new Vector2(8, 7);
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 PopupItemSpacing = new Vector2(6, 4);
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public float PopupBordersize = 1.0f;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PopupHoverColor = 0xFF332A20;// 38, 186 new Vector4(0.15f, 0.73f, 1.00f, 1.00f)
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 TextColor = 0xFFE8DED6;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 TextHoveredColor = 0xFFFFFFFF;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 TextSelectedColor = 0xFFFFFFFF;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 TextDisableColor = 0xFF998A7F;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ItemHightlightHoveredColor = 0xFF42362B;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 WarningStringColor = 0xFF4CC9F2;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ErrorStringColor = 0xFF6670F9;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PassStringColor = 0xFF83D445;
 
-        [Category("Common")]
+        [System.ComponentModel.Category("Common")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 LinkStringColor = 0xFFD6A76B;
 
         // Menu
-        [Category("Menu")]
+        [System.ComponentModel.Category("Menu")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 NamedMenuSeparatorColor = 0xff8E8072;// new Vector4(0.42f, 0.42f, 0.42f, 1.00f);
 
-        [Category("Menu")]
+        [System.ComponentModel.Category("Menu")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public float NamedMenuSeparatorThickness = 1.0f;// new Vector4(0.42f, 0.42f, 0.42f, 1.00f);
 
-        [Category("Menu")]
+        [System.ComponentModel.Category("Menu")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 MenuHeaderColor = 0xFF2D251D;// 38, 186 new Vector4(0.15f, 0.73f, 1.00f, 1.00f)
 
-        [Category("Menu")]
+        [System.ComponentModel.Category("Menu")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 MenuHeaderHoveredColor = 0xFF3A3025;
 
-        [Category("Menu")]
+        [System.ComponentModel.Category("Menu")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 MenuHeaderActiveColor = 0xFF4A3B2B;
 
-        [Category("Menu")]
+        [System.ComponentModel.Category("Menu")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 MenuBG = 0xFF211A15;// (0.22f, 0.22f, 0.22f, 1.00f)
 
-        [Category("Menu")]
+        [System.ComponentModel.Category("Menu")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 WindowPadding = new Vector2(0, 0);
 
-        [Category("Menu")]
+        [System.ComponentModel.Category("Menu")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 MenuPadding = new Vector2(32, 7);
 
-        [Category("Menu")]
+        [System.ComponentModel.Category("Menu")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 TopMenuWindowPadding = new Vector2(4, 5);
 
-        [Category("Menu")]
+        [System.ComponentModel.Category("Menu")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 TopMenuFramePadding = new Vector2(8, 5);
 
-        [Category("Menu")]
+        [System.ComponentModel.Category("Menu")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 TopMenuItemSpacing = new Vector2(8, 6);
 
-        [Category("Menu")]
+        [System.ComponentModel.Category("Menu")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 MenuItemFramePadding = new Vector2(8, 5);
 
-        [Category("Menu")]
+        [System.ComponentModel.Category("Menu")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 MenuItemSpacing = new Vector2(8, 5);
 
-        [Category("Menu")]
+        [System.ComponentModel.Category("Menu")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public float MenuItemIndent = 12;
 
         // Tab
-        [Category("Tab")]
+        [System.ComponentModel.Category("Tab")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 MainTabFramePadding = new Vector2(10, 6);
 
         // Toolbar
-        [Category("Toolbar")]
+        [System.ComponentModel.Category("Toolbar")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public float ToolbarButtonIconTextSpacing = 4;
 
-        [Category("Toolbar")]
+        [System.ComponentModel.Category("Toolbar")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ToolbarButtonTextColor = 0xFFCFC4BA;// new Vector4(0.75f, 0.75f, 0.75f, 1.00f);
 
-        [Category("Toolbar")]
+        [System.ComponentModel.Category("Toolbar")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ToolbarButtonTextColor_Hover = 0xFFFFFFFF;// new Vector4(1.00f, 1.00f, 1.00f, 1.00f);
 
-        [Category("Toolbar")]
+        [System.ComponentModel.Category("Toolbar")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ToolbarButtonTextColor_Press = 0xFFFFFFFF;// new Vector4(1.00f, 1.00f, 1.00f, 1.00f);
 
-        [Category("Toolbar")]
+        [System.ComponentModel.Category("Toolbar")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ToolbarButtonTextColor_Disable = 0xFF7D7065;// new Vector4(1.00f, 1.00f, 1.00f, 1.00f);
 
-        [Category("Toolbar")]
+        [System.ComponentModel.Category("Toolbar")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public float ToolbarHeight = 40;
 
-        [Category("Toolbar")]
+        [System.ComponentModel.Category("Toolbar")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ToolbarBG = 0xFF1F1914;// new Vector4(0.14f, 0.14f, 0.14f, 1.00f);
 
-        [Category("Toolbar")]
+        [System.ComponentModel.Category("Toolbar")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public float ToolbarSeparatorThickness = 1;
 
         // Content Browser
-        [Category("ContentBrowser")]
+        [System.ComponentModel.Category("ContentBrowser")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ContentBrowserFolderBg = 0xFF19130F;
 
-        [Category("ContentBrowser")]
+        [System.ComponentModel.Category("ContentBrowser")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ContentBrowserAssetPaneBg = 0xFF16110D;
 
-        [Category("ContentBrowser")]
+        [System.ComponentModel.Category("ContentBrowser")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 ContentBrowserFolderItemSpacing = new Vector2(4, 5);
 
-        [Category("ContentBrowser")]
+        [System.ComponentModel.Category("ContentBrowser")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 ContentBrowserFolderFramePadding = new Vector2(5, 5);
 
-        [Category("ContentBrowser")]
+        [System.ComponentModel.Category("ContentBrowser")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public float ContentBrowserFolderIconSize = 18.0f;
 
-        [Category("ContentBrowser")]
+        [System.ComponentModel.Category("ContentBrowser")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public float ContentBrowserFolderIconIndent = 5.0f;
 
-        [Category("ContentBrowser")]
+        [System.ComponentModel.Category("ContentBrowser")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public float ContentBrowserFolderTextSpacing = 5.0f;
 
-        [Category("ContentBrowser")]
+        [System.ComponentModel.Category("ContentBrowser")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ContentBrowserAssetTileBg = 0xFF211A15;
 
-        [Category("ContentBrowser")]
+        [System.ComponentModel.Category("ContentBrowser")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ContentBrowserAssetTileHoveredBg = 0xFF2C241B;
 
-        [Category("ContentBrowser")]
+        [System.ComponentModel.Category("ContentBrowser")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ContentBrowserAssetTileSelectedBg = 0xFF392E22;
 
-        [Category("ContentBrowser")]
+        [System.ComponentModel.Category("ContentBrowser")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ContentBrowserAssetTileBorder = 0xFF30261F;
 
-        [Category("ContentBrowser")]
+        [System.ComponentModel.Category("ContentBrowser")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ContentBrowserAssetTileSelectedBorder = 0xFFE2BD6C;
 
-        [Category("ContentBrowser")]
+        [System.ComponentModel.Category("ContentBrowser")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ContentBrowserStatusBg = 0xFF211A15;
 
-        [Category("ContentBrowser")]
+        [System.ComponentModel.Category("ContentBrowser")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ContentBrowserStatusBorder = 0xFF3E3226;
 
-        [Category("ContentBrowser")]
+        [System.ComponentModel.Category("ContentBrowser")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 ContentBrowserChipPadding = new Vector2(8, 3);
 
-        [Category("ContentBrowser")]
+        [System.ComponentModel.Category("ContentBrowser")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public float ContentBrowserTileRounding = 4.0f;
 
         // Asset Editor
-        [Category("AssetEditor")]
+        [System.ComponentModel.Category("AssetEditor")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 AssetEditorActiveBorder = 0xFFE2BD6C;
 
-        [Category("AssetEditor")]
+        [System.ComponentModel.Category("AssetEditor")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 AssetEditorInactiveBorder = 0xFF30261F;
 
-        [Category("AssetEditor")]
+        [System.ComponentModel.Category("AssetEditor")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 AssetEditorProgressBg = 0xFF211A15;
 
-        [Category("AssetEditor")]
+        [System.ComponentModel.Category("AssetEditor")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 AssetEditorProgressFill = 0xFF83D445;
 
         // Button
-        [Category("Button")]
+        [System.ComponentModel.Category("Button")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ToolButtonTextColor = 0xFFCFC4BA;// new Vector4(0.75f, 0.75f, 0.75f, 1.00f);
 
-        [Category("Button")]
+        [System.ComponentModel.Category("Button")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ToolButtonTextColor_Hover = 0xFFFFFFFF;// new Vector4(1.00f, 1.00f, 1.00f, 1.00f);
 
-        [Category("Button")]
+        [System.ComponentModel.Category("Button")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ToolButtonTextColor_Press = 0xFFE2BD6C;// new Vector4(1.00f, 1.00f, 1.00f, 1.00f);
 
         // PropertyGrid
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 PGWindowPadding = new Vector2(4, 4);
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 PGNormalFramePadding = new Vector2(5, 7);
 
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 PGCheckboxFramePadding = new Vector2(2, 2);
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PGItemHoveredColor = 0xFF2E251D;
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 PGInputFramePadding = new Vector2(8, 6);
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PGCategoryBG = 0xFF261F18;
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 PGCategoryPadding = new Vector2(8, 7);
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public float PGNormalFrameBorderSize = 1.0f;
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public float PGNormalFrameRounding = 3.0f;
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 PGSearchBoxFramePadding = new Vector2(32, 7);
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PGSearchBoxFocusBorderColor = 0xFFE2BD6C;
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PGSearchBoxInfoTextColor = 0xFF817468;
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PGHeadColor = 0xFF211A15;
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PGCellBorderInnerColor = 0xFF30261F;
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PGCellBorderOutterColor = 0xFF30261F;
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 PGCellPadding = new Vector2(8, 5);
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public Vector2 PGColorBoxSize = new Vector2(34, 18);
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public float PGColorBoxRound = 3.0f;
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         public float PGItemBorderThickness = 3.0f;
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PGItemBorderNormalColor = 0xFF30261F;//0xFF454545;
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PGItemBorderHoveredColor = 0xFF76624A;
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PGCreateButtonBGColor = 0xFF73A63A;
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PGCreateButtonBGHoverColor = 0xFF83D445;
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PGCreateButtonBGActiveColor = 0xFF5F8A2F;
 
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PGDeleteButtonBGColor = 0xFF6670F9;
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PGDeleteButtonBGHoverColor = 0xFF8088FF;
-        [Category("PropertyGrid")]
+        [System.ComponentModel.Category("PropertyGrid")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PGDeleteButtonBGActiveColor = 0xFF525CD0;
 
-        [Category("TreeView")]
+        [System.ComponentModel.Category("TreeView")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 TVHeader = 0xFF2D251D;
-        [Category("TreeView")]
+        [System.ComponentModel.Category("TreeView")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 TVHeaderHovered = 0xFF3A3025;
-        [Category("TreeView")]
+        [System.ComponentModel.Category("TreeView")]
         [Controls.PropertyGrid.TtShowInPropertyGrid]
         [Controls.PropertyGrid.TtByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 TVHeaderActive = 0xFF4A3B2B;

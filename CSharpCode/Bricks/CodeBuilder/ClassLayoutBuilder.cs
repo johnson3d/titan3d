@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -96,12 +96,12 @@ namespace EngineNS.Bricks.CodeBuilder
             //    ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
             {
                 var sz = new Vector2();
-                if (ImGuiAPI.Button("Add", in sz))
+                if (ImGuiAPI.Button(TtLocalization.Tr("Add"), in sz))
                 {
                     var tmp = new UVarAttribute();
                     AddAttribute($"Member {NamedAttributes.Count}", NxRHI.EShaderVarType.SVT_Float);
                 }
-                if (ImGuiAPI.Button("Remove", in sz))
+                if (ImGuiAPI.Button(TtLocalization.Tr("Remove"), in sz))
                 {
 
                 }

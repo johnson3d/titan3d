@@ -1,0 +1,48 @@
+{
+  "ScanRoots": [
+    "CSharpCode"
+  ],
+  "ExcludeContains": [
+    "/obj/",
+    "/bin/",
+    ".gen.cs",
+    ".designer.cs",
+    ".g.cs",
+    "/Localization/"
+  ],
+  "UiTextMethods": [
+    "Text",
+    "TextColored",
+    "TextDisabled",
+    "TextWrapped",
+    "TextUnformatted",
+    "BulletText",
+    "LabelText",
+    "Button",
+    "SmallButton",
+    "InvisibleButton",
+    "MenuItem",
+    "BeginMenu",
+    "BeginMenuItem",
+    "AddMenuItem",
+    "InsertMenuItem",
+    "AddMenuDraw",
+    "AddMenuSeparator",
+    "Selectable",
+    "TreeNode",
+    "TreeNodeEx",
+    "CollapsingHeader",
+    "Checkbox",
+    "RadioButton",
+    "SetTooltip"
+  ],
+  "UiTextQualified": [
+    "DockProxy.BeginMainForm",
+    "DockProxy.BeginPanel"
+  ],
+  "UiMetadataAttributes": [
+    "DisplayName",
+    "Description",
+    "Category"
+  ]
+}

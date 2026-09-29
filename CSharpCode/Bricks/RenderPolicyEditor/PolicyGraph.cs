@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.Bricks.CodeBuilder;
@@ -18,7 +18,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         }
         Graphics.Pipeline.TtRenderGraphNode mGraphNode;
         [Rtti.Meta("",Order = 1)]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Graphics.Pipeline.TtRenderGraphNode GraphNode 
         {
             get => mGraphNode;

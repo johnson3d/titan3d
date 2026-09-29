@@ -184,7 +184,7 @@ namespace EngineNS.Graphics.Pipeline.UserParameters
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Parameters", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                if (ImGuiAPI.CollapsingHeader("ParameterDefinitions", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("ParameterDefinitions"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     mParamPropGrid.OnDraw(true, false, false);
                 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.Bricks.NodeGraph;
@@ -6,7 +6,8 @@ using EngineNS.EGui.Controls;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
-    public class UEndPointNode : UPgcNodeBase, IEndPointNode
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UEndPointNode@EngineCore", "EngineNS.Bricks.Procedure.Node.UEndPointNode" })]
+    public class TtEndPointNode : TtPgcNodeBase, IEndPointNode
     {
         [Rtti.Meta("")]
         public bool IsStart { get; set; }
@@ -33,13 +34,13 @@ namespace EngineNS.Bricks.Procedure.Node
                 UpdateOutputs();
             }
         }
-        public UEndPointNode()
+        public TtEndPointNode()
         {
             Icon.Size = new Vector2(25, 25);
         }
         public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
-            var creator = stayPin.Tag as UBufferCreator;
+            var creator = stayPin.Tag as TtBufferCreator;
             if (creator != null)
             {
                 EGui.Controls.CtrlUtility.DrawHelper($"{creator.ElementType.Name}");
@@ -78,12 +79,13 @@ namespace EngineNS.Bricks.Procedure.Node
         {
         }
 
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             throw new NotImplementedException();
         }
     }
-    public class UUnionNode : UPgcNodeBase, IUnionNode, INodeWithContextMenu
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UUnionNode@EngineCore", "EngineNS.Bricks.Procedure.Node.UUnionNode" })]
+    public class TtUnionNode : TtPgcNodeBase, IUnionNode, INodeWithContextMenu
     {
         [Rtti.Meta("")]
         [Browsable(false)]
@@ -122,7 +124,7 @@ namespace EngineNS.Bricks.Procedure.Node
         [Browsable(false)]
         public TtMenuItem ContextMenu { get; set; } = new TtMenuItem();
 
-        public UUnionNode()
+        public TtUnionNode()
         {
             Icon.Size = new Vector2(25, 25);
 
@@ -142,9 +144,9 @@ namespace EngineNS.Bricks.Procedure.Node
                 render.SetGraph(ContentGraph);
             }
         }
-        public override bool InitProcedure(UPgcGraph graph)
+        public override bool InitProcedure(TtPgcGraph graph)
         {
-            var cGraph = ContentGraph as UPgcGraph;
+            var cGraph = ContentGraph as TtPgcGraph;
             cGraph.GraphEditor = graph.GraphEditor;
             cGraph.BufferCache.ResetCache();
 
@@ -183,7 +185,7 @@ namespace EngineNS.Bricks.Procedure.Node
         public void UpdatePinWithDefine(NodePin pin, UNodePinDefineBase pinDef)
         {
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             throw new NotImplementedException();
         }
@@ -298,10 +300,11 @@ namespace EngineNS.Bricks.Procedure.Node
     }
 
 
-    [Bricks.CodeBuilder.ContextMenu("SubGraph", "SubGraph", UPgcGraph.PgcEditorKeyword)]
-    public partial class USubGraphNode : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("SubGraph", "SubGraph", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.USubGraphNode@EngineCore", "EngineNS.Bricks.Procedure.Node.USubGraphNode" })]
+    public partial class TtSubGraphNode : TtPgcNodeBase
     {
-        public USubGraphNode()
+        public TtSubGraphNode()
         {
             PrevSize = new Vector2(100, 60);
             NodeDefine.HostNode = this;
@@ -314,7 +317,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         public class USubGraphNodeDefine
         {
-            internal USubGraphNode HostNode;
+            internal TtSubGraphNode HostNode;
             public class UValueEditorAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
             {
                 public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
@@ -355,7 +358,7 @@ namespace EngineNS.Bricks.Procedure.Node
                             }
                         }
                     }
-                    if (ImGuiAPI.Button("UpdatePins"))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("UpdatePins")))
                     {
                         nodeDef.HostNode.UpdateInputOutputs();
                     }
@@ -391,28 +394,28 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         RName mGraphName;
         [Rtti.Meta("")]
-        [RName.PGRName(FilterExts = UPgcAsset.AssetExt)]
+        [RName.PGRName(FilterExts = TtPgcAsset.AssetExt)]
         public RName GraphName
         {
             get => mGraphName;
             set
             {
                 mGraphName = value;
-                GraphAsset = UPgcAsset.LoadAsset(value);
+                GraphAsset = TtPgcAsset.LoadAsset(value);
                 if (false == SureSubGraphInputOutputs())
                 {
                     Profiler.Log.WriteLine<Profiler.TtPgcGategory>(Profiler.ELogTag.Warning, $"SubGraph({value}) is not match parentNode({this.ParentGraph.GraphName}:{this.Name})");
                 }
             }
         }
-        public UPgcAsset GraphAsset = new UPgcAsset();        
+        public TtPgcAsset GraphAsset = new TtPgcAsset();
         private bool SureSubGraphInputOutputs()
         {
             bool isMatch = true;
-            var subInputs = GraphAsset.AssetGraph.FindFirstNode("SubGraphInputs") as UEndingNode;
+            var subInputs = GraphAsset.AssetGraph.FindFirstNode("SubGraphInputs") as TtEndingNode;
             if (subInputs == null)
             {
-                subInputs = new UEndingNode();
+                subInputs = new TtEndingNode();
                 subInputs.Name = "SubGraphInputs";
                 subInputs.Position = new Vector2(0, 0);
                 GraphAsset.AssetGraph.AddNode(subInputs);
@@ -442,10 +445,10 @@ namespace EngineNS.Bricks.Procedure.Node
                 userInput.BufferCreator.SetSize(UserInputs[i].BufferCreator);
             }
             
-            var subOutputs = GraphAsset.AssetGraph.FindFirstNode("SubGraphOutputs") as UEndingNode;
+            var subOutputs = GraphAsset.AssetGraph.FindFirstNode("SubGraphOutputs") as TtEndingNode;
             if (subOutputs == null)
             {
-                subOutputs = new UEndingNode();
+                subOutputs = new TtEndingNode();
                 subOutputs.Name = "SubGraphOutputs";
                 subOutputs.Position = new Vector2(600, 600);
                 GraphAsset.AssetGraph.AddNode(subOutputs);
@@ -506,7 +509,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             OnPositionChanged();
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             for (int i = 0; i < Outputs.Count; i++)
             {
@@ -521,7 +524,7 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             if (GraphAsset != null)
             {
-                var graph = this.ParentGraph as UPgcGraph;
+                var graph = this.ParentGraph as TtPgcGraph;
                 GraphAsset.AssetGraph.ParentGraph = this.ParentGraph;
                 GraphAsset.AssetGraph.GraphName = this.Name;
                 this.SureSubGraphInputOutputs();
@@ -537,11 +540,11 @@ namespace EngineNS.Bricks.Procedure.Node
             ImGuiAPI.SetCursorPos(in ctrlPos);
             ImGuiAPI.Dummy(in Vector2.Zero);
             ImGuiAPI.PushID($"{this.NodeId.ToString()}");
-            if (ImGuiAPI.Button("OpenSubGraph"))
+            if (ImGuiAPI.Button(TtLocalization.Tr("OpenSubGraph")))
             {
                 if (GraphAsset != null)
                 {
-                    var graph = this.ParentGraph as UPgcGraph;
+                    var graph = this.ParentGraph as TtPgcGraph;
                     GraphAsset.AssetGraph.ParentGraph = this.ParentGraph;
                     GraphAsset.AssetGraph.GraphName = this.Name;
                     this.SureSubGraphInputOutputs();
@@ -552,7 +555,7 @@ namespace EngineNS.Bricks.Procedure.Node
             ctrlPos.Y += btSize.Y;
             ImGuiAPI.SetCursorPos(in ctrlPos);
             ImGuiAPI.Dummy(in Vector2.Zero);
-            if (ImGuiAPI.Button("SaveSubGraph"))
+            if (ImGuiAPI.Button(TtLocalization.Tr("SaveSubGraph")))
             {
                 if (GraphAsset != null)
                 {
@@ -598,7 +601,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 mFileDialog.CloseDialog();
             }
         }
-        public override bool InitProcedure(UPgcGraph graph)
+        public override bool InitProcedure(TtPgcGraph graph)
         {
             GraphAsset.AssetGraph.GraphEditor = graph.GraphEditor;
 
@@ -608,17 +611,17 @@ namespace EngineNS.Bricks.Procedure.Node
 
             return true;
         }
-        public override bool OnProcedure(UPgcGraph graph)
+        public override bool OnProcedure(TtPgcGraph graph)
         {
-            var subInputs = GraphAsset.AssetGraph.FindFirstNode("SubGraphInputs") as UEndingNode;
+            var subInputs = GraphAsset.AssetGraph.FindFirstNode("SubGraphInputs") as TtEndingNode;
             for (int i = 0; i < Inputs.Count; i++)
             {
                 var buffer = graph.BufferCache.FindBuffer(Inputs[i]);
                 var pin = subInputs.FindPinOut(Inputs[i].Name);
                 GraphAsset.AssetGraph.BufferCache.RegBuffer(pin, buffer);
             }
-            var subOutputs = GraphAsset.AssetGraph.FindFirstNode("SubGraphOutputs") as UEndingNode;
-            GraphAsset.AssetGraph.Compile(subOutputs, false);
+            var subOutputs = GraphAsset.AssetGraph.FindFirstNode("SubGraphOutputs") as TtEndingNode;
+            GraphAsset.AssetGraph.Compile(subOutputs, graph.ExecutionContext, false);
             for (int i = 0; i < Outputs.Count; i++)
             {
                 var buffer = subOutputs.FindBuffer(Outputs[i].Name);

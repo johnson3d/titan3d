@@ -974,7 +974,7 @@ namespace NxRHI
 
 		mResultBuffer = nullptr;
 	}
-	bool DX12GpuScope::Init(DX12GpuDevice* device)
+	bool DX12GpuScope::Init(const char* file, int line, DX12GpuDevice* device)
 	{
 		mDeviceRef.FromObject(device);
 
@@ -1006,7 +1006,7 @@ namespace NxRHI
 		resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 		resState = D3D12_RESOURCE_STATE_COPY_DEST;
 		
-		mResultBuffer = MakeWeakRef(device->GetDefaultBufferMemAllocator()->AllocGpuMem(device, &resDesc, &properties, resState, "GpuScopeResult"));
+		mResultBuffer = MakeWeakRef(device->GetDefaultBufferMemAllocator()->AllocGpuMem(file, line, device, &resDesc, &properties, resState, "GpuScopeResult"));
 
 		/*FFenceDesc fcDesc{};
 		mFence = MakeWeakRef(device->CreateFence(&fcDesc, "DX12GpuScope"));*/

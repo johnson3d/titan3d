@@ -51,18 +51,25 @@ namespace EngineNS.Sequencer
             public ISequencePropertyAccessor Accessor;
             public object Value;
             public int Priority;
+            /// <summary>写入者的 CompletionMode 是不是 RestoreState</summary>
+            public bool WantsRestore;
         }
 
         List<FEntry> mEntries = new List<FEntry>();
         Dictionary<FAnimatedPropertyKey, int> mIndices = new Dictionary<FAnimatedPropertyKey, int>();
+        List<FAnimatedPropertyKey> mRestoreScratch = new List<FAnimatedPropertyKey>();
 
         public int Count { get => mEntries.Count; }
 
         /// <summary>
         /// 写入一条求值结果。同一 (target, 属性) 已经有更高或相同 Priority 的结果时忽略本次
         /// —— 相同 Priority 保留先写入的那个, 避免结果随遍历顺序摆动。
+        ///
+        /// wantsRestore 不跟着 Priority 走: 只要本帧有任何一个写入者是 KeepState, 这个属性
+        /// 就不该被恢复。要是让它跟着赢家走, 两个 Section 重叠时输家的 KeepState 意图就
+        /// 悄无声息地丢了。
         /// </summary>
-        public void Write(object target, ISequencePropertyAccessor accessor, object value, int priority)
+        public void Write(object target, ISequencePropertyAccessor accessor, object value, int priority, bool wantsRestore)
         {
             if (target == null || accessor == null || value == null)
                 return;
@@ -71,11 +78,20 @@ namespace EngineNS.Sequencer
             int index;
             if (mIndices.TryGetValue(key, out index))
             {
-                if (priority <= mEntries[index].Priority)
-                    return;
                 var exist = mEntries[index];
+                var merged = exist.WantsRestore && wantsRestore;
+                if (priority <= exist.Priority)
+                {
+                    if (merged != exist.WantsRestore)
+                    {
+                        exist.WantsRestore = merged;
+                        mEntries[index] = exist;
+                    }
+                    return;
+                }
                 exist.Value = value;
                 exist.Priority = priority;
+                exist.WantsRestore = merged;
                 mEntries[index] = exist;
                 return;
             }
@@ -87,11 +103,13 @@ namespace EngineNS.Sequencer
                 Accessor = accessor,
                 Value = value,
                 Priority = priority,
+                WantsRestore = wantsRestore,
             });
         }
         /// <summary>
         /// 把中间表落到目标对象上。落之前先让 store 记住原值, 这样停止播放后能恢复。
-        /// store 传 null 表示不需要恢复 (比如游戏内一次性播放且 CompletionMode 是 KeepState)。
+        /// 落完之后还要处理 RestoreState —— 见下面的注释。
+        /// store 传 null 表示不需要恢复 (比如游戏内一次性播放且所有 Section 都是 KeepState)。
         /// </summary>
         public void Flush(TtPreAnimatedStore store)
         {
@@ -99,8 +117,25 @@ namespace EngineNS.Sequencer
             {
                 var e = mEntries[i];
                 if (store != null)
-                    store.CaptureIfFirst(e.Target, e.Accessor);
+                    store.CaptureIfFirst(e.Target, e.Accessor, e.WantsRestore);
                 e.Accessor.Write(e.Target, e.Value);
+            }
+            if (store == null)
+                return;
+
+            // 本帧没有任何 Section 写、但之前被 RestoreState 的 Section 写过的属性: 把原值写回去。
+            //
+            // 用"本帧有没有人写"的差集来判定, 而不是去检测"哪个 Section 刚从激活变成不激活":
+            // 后者要记住上一帧的状态, 会破掉 TtSequencePlayer 那条"求值只由当前 tick 决定"的
+            // 约定 (拖播放头和顺序播放就会走出不同结果)。差集的写法还顺带盖住了一帧直接
+            // 跳过整个 Section、从来没在它范围内求值过的情况。
+            mRestoreScratch.Clear();
+            store.CollectRestorable(mRestoreScratch);
+            for (int i = 0; i < mRestoreScratch.Count; ++i)
+            {
+                if (mIndices.ContainsKey(mRestoreScratch[i]))
+                    continue;
+                store.RestoreOne(mRestoreScratch[i]);
             }
         }
         public void Clear()

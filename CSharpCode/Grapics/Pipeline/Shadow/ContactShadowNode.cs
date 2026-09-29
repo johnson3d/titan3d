@@ -140,27 +140,27 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
         // ---- Parameters ----
         [Rtti.Meta("")]
-        [Category("Contact Shadow")]
+        [System.ComponentModel.Category("Contact Shadow")]
         public float ContactShadowLength { get; set; } = 0.5f;
 
         [Rtti.Meta("")]
-        [Category("Contact Shadow")]
+        [System.ComponentModel.Category("Contact Shadow")]
         public int NumSteps { get; set; } = 12;
 
         [Rtti.Meta("")]
-        [Category("Contact Shadow")]
+        [System.ComponentModel.Category("Contact Shadow")]
         public float DepthBias { get; set; } = 0.001f;
 
         [Rtti.Meta("")]
-        [Category("Contact Shadow")]
+        [System.ComponentModel.Category("Contact Shadow")]
         public float FadeDistance { get; set; } = 50.0f;
 
         [Rtti.Meta("")]
-        [Category("Contact Shadow")]
+        [System.ComponentModel.Category("Contact Shadow")]
         public float FadeLength { get; set; } = 20.0f;
 
         [Rtti.Meta("")]
-        [Category("Contact Shadow")]
+        [System.ComponentModel.Category("Contact Shadow")]
         public float ShadowIntensity { get; set; } = 0.8f;
 
         // ---- Internal ----

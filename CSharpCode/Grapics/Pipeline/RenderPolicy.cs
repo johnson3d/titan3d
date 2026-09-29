@@ -49,21 +49,21 @@ namespace EngineNS.Graphics.Pipeline
         #endregion
         #region Feature On/Off
         [Rtti.Meta("")]
-        [Category("Feature")]
+        [System.ComponentModel.Category("Feature")]
         public bool EnableLocalLights
         {
             get;
             set;
         } = true;
         [Rtti.Meta("")]
-        [Category("Feature")]
+        [System.ComponentModel.Category("Feature")]
         public bool EnableAO
         {
             get;
             set;
         } = true;
         [Rtti.Meta("")]
-        [Category("Feature")]
+        [System.ComponentModel.Category("Feature")]
         public bool EnableGI
         {
             get;
@@ -74,7 +74,7 @@ namespace EngineNS.Graphics.Pipeline
         /// (alpha = 覆盖权重 = 0, 等价于场景里没有贴花)。
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Feature")]
+        [System.ComponentModel.Category("Feature")]
         public bool EnableDecal
         {
             get;
@@ -84,33 +84,33 @@ namespace EngineNS.Graphics.Pipeline
         /// 屏幕空间反射总开关。关掉时 TtSSRNode 不 dispatch, 反射输出用黑图占位。
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Feature")]
+        [System.ComponentModel.Category("Feature")]
         public bool EnableSSR
         {
             get;
             set;
         } = true;
         [Rtti.Meta("")]
-        [Category("Feature")]
+        [System.ComponentModel.Category("Feature")]
         public EShadowMode ShadowMode
         {
             get;
             set;
         } = EShadowMode.Advance;
         [Rtti.Meta("")]
-        [Category("Feature")]
+        [System.ComponentModel.Category("Feature")]
         public Deferred.EContactShadowMode ContactShadowMode
         {
             get;
             set;
         } = Deferred.EContactShadowMode.InputNode;
-        [Category("Feature")]
+        [System.ComponentModel.Category("Feature")]
         public TtAntiAliasingNode.ETypeAA TypeAA
         {
             get;
             set;
         } = TtAntiAliasingNode.ETypeAA.Taa;
-        [Category("Feature")]
+        [System.ComponentModel.Category("Feature")]
         [ReadOnly(true)]
         public bool EnableSeparatedSSS
         {
@@ -149,9 +149,9 @@ namespace EngineNS.Graphics.Pipeline
             Fences.Clear();
             base.Dispose();
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsSyncBuildDrawcall { get; set; } = false;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsImmediateFlushCBuffer { get; set; } = false;
         public class TtNodeListDefine
         {
@@ -181,12 +181,12 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         [TtNodeListDefine.TtValueEditor]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public TtNodeListDefine NodeList
         {
             get;
         } = new TtNodeListDefine();
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public List<TtRenderGraphNode> GraphNodeList
         {
             get => GraphNodes.Values.ToList();
@@ -314,7 +314,7 @@ namespace EngineNS.Graphics.Pipeline
         }
 
         #region Turn On/Off
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public TtCpuCullingNode CpuCullingNode
         {
             get
@@ -323,7 +323,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         public string mLookNodeName;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string LookNodeName
         {
             get
@@ -338,7 +338,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         protected TtRenderGraphNode mLookNode;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public TtRenderGraphNode LookNode
         {
             get => mLookNode;
@@ -361,7 +361,7 @@ namespace EngineNS.Graphics.Pipeline
             ExpHeight,
             TypeCount,
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public virtual ETypeFog TypeFog { get; set; } = ETypeFog.None;
 
@@ -485,7 +485,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         #endregion
 
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Common.TtFogNode FogNode
         {
             get

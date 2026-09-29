@@ -1,5 +1,6 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Bricks.Procedure.UPgcAssetAMeta@EngineCore">
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.Procedure.TtPgcAssetAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="b987c0a0-d529-4bc5-a171-b961ca62e194" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/meshgen.pgc,b987c0a0-d529-4bc5-a171-b961ca62e194" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.Procedure.UPgcAsset&#xA;Hahah" />
@@ -15,6 +16,6 @@
     <e_0 Value="Engine,texture/checkboard.srv,23521d76-b70d-4d3d-80e3-c5ec4740fc09" />
     <e_1 Value="Game,utest/pgc/testprog.macross,15889cf3-0ce5-4b3d-b65d-1bb774080e19" />
   </RefAssetRNames>
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.UPgcAsset@EngineCore" />
   <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.TtPgcAsset@EngineCore" />
 </Root>

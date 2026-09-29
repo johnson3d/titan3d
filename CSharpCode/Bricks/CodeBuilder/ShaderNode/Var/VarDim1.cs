@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
 using EngineNS.Graphics.Pipeline.Shader;
@@ -17,7 +17,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         }
         private bool mIsUniform = false;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsUniform 
         {
             get => mIsUniform;
@@ -27,7 +27,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 OnAsUniform(mIsUniform);
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string VarName
         {
             get
@@ -96,7 +96,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             }
         }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsHalfPrecision { get; set; } = false;
         public Rtti.TtTypeDesc VarType;
         public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
@@ -196,7 +196,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             return Value.ToString();
         }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float Value { get; set; } = 0;
         [Browsable(false)]
         public PinIn InX { get; set; } = new PinIn();
@@ -281,7 +281,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             return Value.ToString();
         }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public int Value { get; set; } = 0;
         [Browsable(false)]
         public PinIn InX { get; set; } = new PinIn();

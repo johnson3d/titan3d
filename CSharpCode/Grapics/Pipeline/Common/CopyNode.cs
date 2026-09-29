@@ -1,4 +1,4 @@
-﻿using EngineNS.Profiler;
+using EngineNS.Profiler;
 using Jither.OpenEXR.Attributes;
 using System;
 using System.Collections.Generic;
@@ -39,7 +39,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public NxRHI.TtCopyDraw mCopyDrawcall;
         [Rtti.Meta]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public TtAttachBuffer.ELifeMode OutputLifeMode { get; set; } = TtAttachBuffer.ELifeMode.Transient;
         //public TtAttachBuffer DestAttachement = new TtAttachBuffer();
         public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
@@ -158,7 +158,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public TtAttachBuffer ResultBuffer;
         public NxRHI.TtCopyDraw mCopyDrawcall;
         [Rtti.Meta]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public TtAttachBuffer.ELifeMode OutputLifeMode { get; set; } = TtAttachBuffer.ELifeMode.Imported;
         public override void BeforeTick(TtRenderPolicy policy)
         {
@@ -355,7 +355,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         TtCopy2NextFrameNode mCopy2NextFrameNode;
         string mPrevNodeName = "";
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string PrevNodeName
         {
             get => mPrevNodeName;
@@ -496,7 +496,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             Name = "Debugger";
         }
         public TtRDGDebugger mDebugger;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool ShowDebugger
         {
             get

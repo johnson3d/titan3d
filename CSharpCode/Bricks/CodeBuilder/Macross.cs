@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
+using EngineNS.Bricks.CodeBuilder.MacrossNode;
 using EngineNS.EGui.Controls;
 using EngineNS.IO;
 using EngineNS.Rtti;
@@ -78,9 +78,10 @@ namespace EngineNS.Bricks.CodeBuilder
                 return mBaseType;
             }
         }
+        public const string AssetTypeName = "Macross";
         public override string GetAssetTypeName()
         {
-            return "Macross";
+            return AssetTypeName;
         }
         public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
@@ -163,19 +164,19 @@ namespace EngineNS.Bricks.CodeBuilder
                         case enErrorType.IsExisting:
                             {
                                 var clr = new Vector4(1, 0, 0, 1);
-                                ImGuiAPI.TextColored(&clr, $"{mName} is existing");
+                                ImGuiAPI.TextColored(&clr, TtLocalization.Format("{0} is existing", mName));
                             }
                             break;
                         case enErrorType.EmptyName:
                             {
                                 var clr = new Vector4(1, 0, 0, 1);
-                                ImGuiAPI.TextColored(&clr, $"Name is empty");
+                                ImGuiAPI.TextColored(&clr, TtLocalization.Tr("Name is empty"));
                             }
                             break;
                     }
 
                     ImGuiAPI.AlignTextToFramePadding();
-                    ImGuiAPI.Text("Base Type:");
+                    ImGuiAPI.Text(TtLocalization.Tr("Base Type:"));
                     ImGuiAPI.SameLine(0, -1);
                     if(EGui.UIProxy.ComboBox.BeginCombo("##TypeSel", (mSelectedType == null)? "None" : mSelectedType.Name))
                     {
@@ -238,7 +239,7 @@ namespace EngineNS.Bricks.CodeBuilder
                             eErrorType = enErrorType.IsExisting;
                     }
 
-                    if(ImGuiAPI.Button("Create Asset", in Vector2.Zero))
+                    if(ImGuiAPI.Button(TtLocalization.Tr("Create Asset"), in Vector2.Zero))
                     {
                         var rn = RName.GetRName(mDir.Name + mName + ExtName, mDir.RNameType);
                         if(IO.TtFileManager.FileExists(rn.Address) == false && string.IsNullOrWhiteSpace(mName) == false)
@@ -252,7 +253,7 @@ namespace EngineNS.Bricks.CodeBuilder
                         }
                     }
                     ImGuiAPI.SameLine(0, 20);
-                    if(ImGuiAPI.Button("Cancel", in Vector2.Zero))
+                    if(ImGuiAPI.Button(TtLocalization.Tr("Cancel"), in Vector2.Zero))
                     {
                         ImGuiAPI.CloseCurrentPopup();
                         retValue = true;

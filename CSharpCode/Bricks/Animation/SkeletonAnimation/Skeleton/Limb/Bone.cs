@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
+using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,13 +11,13 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton.Limb
     public class TtBoneDesc : IO.BaseSerializer, ILimbDesc
     {
         [Rtti.Meta("")]
-        [Category("General")]
+        [System.ComponentModel.Category("General")]
         [ReadOnly(true)]
         public string Name { get; set; }
         [Rtti.Meta("")]
         public uint NameHash { get; set; }
         [Rtti.Meta("")]
-        [Category("General")]
+        [System.ComponentModel.Category("General")]
         [ReadOnly(true)]
         public string ParentName { get; set; }
         [Rtti.Meta("")]
@@ -33,7 +33,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton.Limb
         [Rtti.Meta("")]
         public EngineNS.Quaternion InvQuat { get; set; }
         [Rtti.Meta("")]
-        [Category("General")]
+        [System.ComponentModel.Category("General")]
         [ReadOnly(true)]
         public EngineNS.Vector3 Position
         {
@@ -43,7 +43,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton.Limb
             }
         }
         [Rtti.Meta("")]
-        [Category("General")]
+        [System.ComponentModel.Category("General")]
         [ReadOnly(true)]
         public EngineNS.FRotator Rotation
         {
@@ -53,7 +53,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton.Limb
             }
         }
         [Rtti.Meta("")]
-        [Category("General")]
+        [System.ComponentModel.Category("General")]
         [ReadOnly(true)]
         public EngineNS.Vector3 Scale
         {

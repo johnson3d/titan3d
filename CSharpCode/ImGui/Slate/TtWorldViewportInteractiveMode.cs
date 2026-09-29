@@ -23,6 +23,12 @@ namespace EngineNS.EGui.Slate
             }
             else if (e.Type == Bricks.Input.EventType.MOUSEMOTION)
             {
+                // 多个世界视口(如同时打开两个场景编辑器)会同时收到同一份全局鼠标事件。
+                // 若不按窗口焦点门控, 隐藏在后面的非激活视口的相机也会跟着一起动。
+                // 与 TtPreviewViewportInteractiveMode 的 MOUSEMOTION 处理保持一致: 非聚焦视口直接跳过相机操作。
+                if (worldViewport.IsFocused == false)
+                    return true;
+
                 if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
                 {
                     if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
@@ -76,7 +82,10 @@ namespace EngineNS.EGui.Slate
                     worldViewport.IsMouseIn &&
                     !worldViewport.PointInOverlappedArea(in viewportPoint))
                 {
-                    worldViewport.ProcessHitproxySelected(e.MouseMotion.X, e.MouseMotion.Y);
+                    if (e.MouseButton.Clicks >= 2)
+                        worldViewport.ProcessHitproxyDoubleClick(e.MouseMotion.X, e.MouseMotion.Y);
+                    else
+                        worldViewport.ProcessHitproxySelected(e.MouseMotion.X, e.MouseMotion.Y);
                 }
             }
             worldViewport.Axis?.OnEvent(worldViewport, in e);

@@ -85,7 +85,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 DrawRangeRow(curve, width - btnW - 4, "Inline", ref changed);
                 ImGuiAPI.SameLine(0, 4);
                 var btnSz = new Vector2(btnW, 0);
-                if (ImGuiAPI.Button("⤢##CurveBigOpen", in btnSz))
+                if (ImGuiAPI.Button(TtLocalization.Label("⤢", "##CurveBigOpen"), in btnSz))
                     wantOpen = true;
                 if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
                     EGui.Controls.CtrlUtility.DrawHelper("Open large editor for precise editing");
@@ -250,7 +250,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             if (boxWidth < 40)
                 boxWidth = 40;
 
-            ImGuiAPI.Text("Y");
+            ImGuiAPI.Text(TtLocalization.Tr("Y"));
             ImGuiAPI.SameLine(0, 4);
             ImGuiAPI.SetNextItemWidth(boxWidth);
             bool minChanged = ImGuiAPI.DragFloat("##CurveYMin" + idSuffix, ref editMin, 0.01f, -1000.0f, 1000.0f, "%.3f",
@@ -304,7 +304,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     DrawRangeRow(curve, canvasW, "Big", ref changed);
 
                 ImGuiAPI.Separator();
-                ImGuiAPI.Text("Keys (Time / Value)");
+                ImGuiAPI.Text(TtLocalization.Tr("Keys (Time / Value)"));
                 int keyCount = curve.KeyCount;
                 int removeIndex = -1;
                 for (int i = 0; i < keyCount; i++)
@@ -321,7 +321,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     bool vChanged = ImGuiAPI.DragFloat("##V", ref v, 0.01f, mViewMin, mViewMax, "v %.3f",
                         ImGuiSliderFlags_.ImGuiSliderFlags_None);
                     ImGuiAPI.SameLine(0, 6);
-                    if (!readOnly && ImGuiAPI.SmallButton("X"))
+                    if (!readOnly && ImGuiAPI.SmallButton(TtLocalization.Tr("X")))
                         removeIndex = i;
                     ImGuiAPI.PopID();
 
@@ -342,14 +342,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 if (!readOnly)
                 {
                     var addSz = new Vector2(0, 0);
-                    if (ImGuiAPI.Button("Add Key", in addSz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Add Key"), in addSz))
                     {
                         // 默认加在链中、中性值 1.0
                         curve.AddKey(0.5f, Math.Clamp(1.0f, mViewMin, mViewMax));
                         changed = true;
                     }
                     ImGuiAPI.SameLine(0, 8);
-                    if (ImGuiAPI.Button("Clear (off)", in addSz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Clear (off)"), in addSz))
                     {
                         while (curve.KeyCount > 0)
                             curve.RemoveKey(0);
@@ -357,7 +357,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         changed = true;
                     }
                     ImGuiAPI.SameLine(0, 8);
-                    if (ImGuiAPI.Button("Close", in addSz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Close"), in addSz))
                     {
                         ImGuiAPI.CloseCurrentPopup();
                         mBigOpen = false;

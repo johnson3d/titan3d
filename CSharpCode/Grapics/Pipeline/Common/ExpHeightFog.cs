@@ -37,12 +37,26 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (index.IsValidPointer)
                     drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
+                // Noise 输入允许悬空: 有则绑定, 无则跳过(volume_cloud.rpolicy 不接 Noise 也能跑)
+                index = drawcall.FindBinder("NoiseBuffer");
+                if (index.IsValidPointer)
+                {
+                    var noiseBuffer = aaNode.GetAttachBuffer(aaNode.NoisePinIn);
+                    if (noiseBuffer != null)
+                        drawcall.BindSRV(index, noiseBuffer.Srv);
+                }
+                index = drawcall.FindBinder("Samp_NoiseBuffer");
+                if (index.IsValidPointer)
+                    drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+
                 index = drawcall.FindBinder("cbShadingEnv");
                 if (index.IsValidPointer)
                 {
                     if (aaNode.CBShadingEnv == null)
                     {
                         aaNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                        // §1.1: CreateCBV 后立即全字段 SetValue + MarkDirty + FlushDirty, 避免首帧读到未初始化数据
+                        aaNode.InitFogCBuffer();
                     }
                     drawcall.BindCBV(index, aaNode.CBShadingEnv);
                 }
@@ -73,7 +87,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             public void SetDefault()
             {
-                FogColor = Color3f.FromColor(Color4b.GreenYellow);
+                FogColor = new Color3f(0.5f, 0.6f, 0.7f);
                 MinFogOpacity = 0.0f;
 
                 FogDensity = 0.004f;
@@ -81,8 +95,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                 FogHeightFalloff = 0.022f;
                 StartDistance = 0.0f;
 
-                InscatterColor = Color3f.FromColor(Color4b.PaleVioletRed);
-                InscatteringExponent = 0.01f;
+                InscatterColor = new Color3f(1.0f, 0.9f, 0.7f);
+                InscatteringExponent = 4.0f;
 
                 LightPosition = Vector3.Zero;
                 InscatterStartDistance = 0;
@@ -103,7 +117,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
 
         FFogStruct mFogStruct;
-        [Category("Exponent")]
+        [System.ComponentModel.Category("Exponent")]
         [EGui.Controls.PropertyGrid.TtColor3PickerEditor()]
         public Color3f FogColor
         {
@@ -113,34 +127,34 @@ namespace EngineNS.Graphics.Pipeline.Common
                 mFogStruct.FogColor = value;
             }
         }
-        [Category("Exponent")]
+        [System.ComponentModel.Category("Exponent")]
         public float MinFogOpacity
         {
             get => mFogStruct.MinFogOpacity;
             set => mFogStruct.MinFogOpacity = value;
         }
 
-        [Category("Exponent")]
+        [System.ComponentModel.Category("Exponent")]
         [EGui.Controls.PropertyGrid.TtValueRange(0, 1000.0)]
         [EGui.Controls.PropertyGrid.TtValueChangeStep(0.0001f)]
         public float FogDensity { get => mFogStruct.FogDensity; set => mFogStruct.FogDensity = value; }
 
-        [Category("Exponent")]
+        [System.ComponentModel.Category("Exponent")]
         public float FogEnd { get => mFogStruct.FogEnd; set => mFogStruct.FogEnd = value; }
         
-        [Category("Exponent")]
+        [System.ComponentModel.Category("Exponent")]
         public float StartDistance { get => mFogStruct.StartDistance; set => mFogStruct.StartDistance = value; }
         
-        [Category("Exponent")]
+        [System.ComponentModel.Category("Exponent")]
         [EGui.Controls.PropertyGrid.TtValueRange(0, 1000.0)]
         [EGui.Controls.PropertyGrid.TtValueChangeStep(0.0001f)]
         public float FogHeightFalloff { get => mFogStruct.FogHeightFalloff; set => mFogStruct.FogHeightFalloff = value; }
 
         #region inscatter
-        [Category("Exponent")]
+        [System.ComponentModel.Category("Exponent")]
         public Vector3 LightPosition { get => mFogStruct.LightPosition; set => mFogStruct.LightPosition = value; }
 
-        [Category("Exponent")]
+        [System.ComponentModel.Category("Exponent")]
         [EGui.Controls.PropertyGrid.TtColor3PickerEditor()]
         public Color3f InscatterColor
         {
@@ -150,11 +164,31 @@ namespace EngineNS.Graphics.Pipeline.Common
                 mFogStruct.InscatterColor = value;
             }
         }
-        [Category("Exponent")]
+        [System.ComponentModel.Category("Exponent")]
         public float InscatteringExponent { get => mFogStruct.InscatteringExponent; set => mFogStruct.InscatteringExponent = value; }
-        [Category("Exponent")]
+        [System.ComponentModel.Category("Exponent")]
         public float InscatterStartDistance { get => mFogStruct.InscatterStartDistance; set => mFogStruct.InscatterStartDistance = value; }
         #endregion
+
+        // §1.1: 首帧创建 cbuffer 后立即把所有字段写满并同步 flush, 避免 GPU 读到未初始化数据
+        internal void InitFogCBuffer()
+        {
+            if (CBShadingEnv == null)
+                return;
+            CBShadingEnv.SetValue("FogStruct", in mFogStruct);
+            CBShadingEnv.MarkDirty();
+            CBShadingEnv.FlushDirty();
+        }
+
+        // 把世界主光方向同步到雾的方向性内散射参数(LightPosition 当作"指向太阳的方向"用)
+        internal void SyncSunToFog(GamePlay.TtWorld world)
+        {
+            var sun = world?.GetSun();
+            if (sun == null)
+                return;
+            // DirectionLight.Direction 是光线传播方向, 取反即为指向太阳的方向
+            mFogStruct.LightPosition = -sun.DirectionLight.Direction;
+        }
 
         private void UpdateFogStruct(TtCamera camera)
         {

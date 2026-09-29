@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
+using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
 using EngineNS.Graphics.Pipeline;
 using System;
 using System.Collections.Generic;
@@ -22,7 +22,7 @@ namespace EngineNS.Editor.Forms
 
         public Graphics.Mesh.TtMaterialMesh Mesh;
         public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public TtRenderPolicy RenderPolicy 
         { 
             get => PreviewViewport.RenderPolicy; 
@@ -37,7 +37,7 @@ namespace EngineNS.Editor.Forms
         Infrastructure.TtEditorHistory mEditorHistory = new Infrastructure.TtEditorHistory();
         Infrastructure.TtEditorHistoryPanel mHistoryPanel = new Infrastructure.TtEditorHistoryPanel();
         #endregion
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsCastShadow
         {
             get
@@ -53,7 +53,7 @@ namespace EngineNS.Editor.Forms
                 mCurrentMeshNode.IsCastShadow = value;
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsAcceptShadow
         {
             get
@@ -307,6 +307,7 @@ namespace EngineNS.Editor.Forms
             DrawEditorDetails();
             DrawMeshDetails();
             DrawSkeleton();
+            DrawMorphTargets();
             if (mEditorHistory != null)
             {
                 mHistoryPanel.OnDraw(in mDockKeyClass, "History", mEditorHistory);
@@ -339,6 +340,7 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Skeleton", mDockKeyClass), leftId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("MorphTargets", mDockKeyClass), leftId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), middleId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("sdfPreview", mDockKeyClass), middleId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("EditorDetails", mDockKeyClass), rightUpId);
@@ -384,6 +386,72 @@ namespace EngineNS.Editor.Forms
                 var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
                 ameta.AutoGenSnapshot().AddWaitTask();
             }
+        }
+
+        bool mShowMorphPanel = true;
+        readonly List<string> mMorphNames = new List<string>();
+
+        /// <summary>
+        /// Material mesh 的 Morph target 运行时权重预览面板。
+        /// 权重只作用于当前预览实例，不修改资产数据，也不进入撤销重做历史。
+        /// </summary>
+        protected void DrawMorphTargets()
+        {
+            var hasMorphTargets = false;
+            var morphTargetCount = 0;
+            if (Mesh?.SubMeshes != null)
+            {
+                for (int i = 0; i < Mesh.SubMeshes.Count; i++)
+                {
+                    var morphSet = Mesh.SubMeshes[i]?.Mesh?.MorphTargets;
+                    if (morphSet == null || morphSet.IsValid == false)
+                        continue;
+
+                    hasMorphTargets = true;
+                    morphTargetCount += morphSet.Targets.Count;
+                }
+            }
+
+            // 面板显隐由资产数据决定。即使自定义 MdfQueue 没有 morph modifier，
+            // 也保留面板并给出明确提示，避免 morph 静默不生效。
+            if (hasMorphTargets == false)
+                return;
+
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "MorphTargets", ref mShowMorphPanel, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                var morphModifier = mCurrentMeshNode?.RenderMesh?.MdfQueue?.FindModifier<Graphics.Mesh.Modifier.TtMorphModifier>();
+                if (morphModifier == null)
+                {
+                    ImGuiAPI.TextDisabled(TtLocalization.Format("{0} morph target(s) in submeshes,", morphTargetCount));
+                    ImGuiAPI.TextDisabled(TtLocalization.Tr("but current MdfQueue has no TtMorphModifier."));
+                    ImGuiAPI.TextDisabled(TtLocalization.Tr("Set the material mesh MdfQueueType to"));
+                    ImGuiAPI.TextDisabled(TtLocalization.Tr("TtMdfSkinMorphMesh / TtMdfMorphMesh."));
+                }
+                else
+                {
+                    // 每帧重新收集，兼容多 SubMesh 以及重导入后的目标列表变化。
+                    mMorphNames.Clear();
+                    morphModifier.CollectMorphNames(mMorphNames);
+
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Reset All"), in Vector2.Zero))
+                    {
+                        morphModifier.ResetMorphWeights();
+                    }
+                    ImGuiAPI.Separator();
+
+                    for (int i = 0; i < mMorphNames.Count; i++)
+                    {
+                        var morphName = mMorphNames[i];
+                        var weight = morphModifier.GetMorphWeight(morphName);
+                        if (ImGuiAPI.SliderFloat(morphName, ref weight, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_.ImGuiSliderFlags_None))
+                        {
+                            morphModifier.SetMorphWeight(morphName, weight);
+                        }
+                    }
+                }
+            }
+            EGui.UIProxy.DockProxy.EndPanel(show);
         }
 
         bool ShowEditorPropGrid = true;

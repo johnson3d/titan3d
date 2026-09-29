@@ -6,7 +6,7 @@
       <Path Type="System.String@Unknown" Value="map01.scene/map01.scene" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="8260bba0b5118b678fd90da54b971c8e333ce58f576c328f60ce6718c7f8ba88" />
+      <Hash Type="System.String@Unknown" Value="8922e2da283ab61c79951e477b739e6a35400ec9fbdceeddb765652ed74f685a" />
       <Path Type="System.String@Unknown" Value="map01.scene/class_graph.dat" />
     </e_1>
   </AssetFiles>

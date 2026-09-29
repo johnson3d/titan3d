@@ -51,8 +51,8 @@ namespace EngineNS.GamePlay.Scene
             if (materialInstance.UsedSamplerStates.Count > 0)
             {
                 var samp = materialInstance.UsedSamplerStates[0].Value;
-                //samp.Filter = NxRHI.ESamplerFilter.SPF_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
-                samp.Filter = NxRHI.ESamplerFilter.SPF_MIN_MAG_LINEAR_MIP_POINT;
+                // Trilinear filtering avoids abrupt mip transitions in the repeated grid pattern.
+                samp.Filter = NxRHI.ESamplerFilter.SPF_MIN_MAG_MIP_LINEAR;
                 samp.m_MaxLOD = float.MaxValue;
 
                 materialInstance.UsedSamplerStates[0].Value = samp;
@@ -118,9 +118,23 @@ namespace EngineNS.GamePlay.Scene
 
             bool bIsPerspective = true;
             float Darken = 0.5f;
+            var camera = ViewportSlate.RenderPolicy.DefaultCamera;
+            var mPreCameraPos = camera.mCoreObject.GetPosition();
+            float antiAliasFade = 1.0f;
             if (bIsPerspective)
             {
-                var gridColor = new EngineNS.Vector4(0.6f * Darken, 0.6f * Darken, 0.6f * Darken, MathHelper.Min(mEditor3DGridFade, GridFade));
+                // The stripe texture's last mip is 4 texels wide. Fade before a grid cell
+                // becomes too small to sample that remaining periodic signal without aliasing.
+                double cameraHeight = System.Math.Abs(mPreCameraPos.Y - GridHeight);
+                double projectedHeight = 2.0 * System.Math.Tan(camera.Fov * 0.5f) * cameraHeight;
+                if (projectedHeight > double.Epsilon && camera.Height > 0.0f)
+                {
+                    float pixelsPerGridCell = (float)(SnapGridSize * camera.Height / projectedHeight);
+                    antiAliasFade = MathHelper.Clamp((pixelsPerGridCell - 2.0f) * 0.5f, 0.0f, 1.0f);
+                    antiAliasFade = antiAliasFade * antiAliasFade * (3.0f - 2.0f * antiAliasFade);
+                }
+
+                var gridColor = new EngineNS.Vector4(0.6f * Darken, 0.6f * Darken, 0.6f * Darken, MathHelper.Min(mEditor3DGridFade, GridFade) * antiAliasFade);
                 mGridlineMaterial.PerMaterialCBuffer.SetValue("GridColor", in gridColor);
             }
             else
@@ -131,8 +145,6 @@ namespace EngineNS.GamePlay.Scene
 
             double SnapTile = (1.0 / WorldToUVScale) / System.Math.Max(1.0, SnapGridSize);
             mGridlineMaterial.PerMaterialCBuffer.SetValue("SnapTile", (float)SnapTile);
-
-            var mPreCameraPos = ViewportSlate.RenderPolicy.DefaultCamera.mCoreObject.GetPosition();
             var UVCameraPos = new DVector2(mPreCameraPos.X, mPreCameraPos.Z);
             var ObjectToWorld = EngineNS.DMatrix.Identity;
             ObjectToWorld.Translation = new DVector3(mPreCameraPos.X, 0, mPreCameraPos.Z);

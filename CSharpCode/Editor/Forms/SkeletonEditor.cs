@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation.Asset;
+using EngineNS.Animation.Asset;
 using EngineNS.Animation.Pipeline;
 using EngineNS.Animation.Player;
 using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
@@ -493,7 +493,7 @@ namespace EngineNS.Editor.Forms
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Left", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                if (ImGuiAPI.CollapsingHeader("Property", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("Property"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     AnimationClipPropGrid.OnDraw(true, false, false);
                 }

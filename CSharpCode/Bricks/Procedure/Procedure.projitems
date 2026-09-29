@@ -41,6 +41,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Node\Monocular.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\FunctionNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\ProgramNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\SplineRegionNodes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\SpawnNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\SurfaceProjectionNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\SubGraphNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\TerrainBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\TransformNode.cs" />
@@ -49,6 +52,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)BufferConponent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PgcAsset.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PgcEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PgcExecutionContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PgcGraph.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PgcNodeBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SceneNodeManager.cs" />

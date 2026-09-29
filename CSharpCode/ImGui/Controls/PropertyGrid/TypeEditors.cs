@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,7 +30,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             bool valueChanged = false;
             newValue = info.Value;
             if (info.Readonly)
-                ImGuiAPI.Text("null");
+                ImGuiAPI.Text(TtLocalization.Tr("null"));
             else if (!info.Type.SystemType.IsSubclassOf(typeof(System.Array)) && info.Readonly == false)
             {
                 var drawList = ImGuiAPI.GetWindowDrawList();
@@ -1107,7 +1107,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
                 if (obj == null)
                 {
-                    ImGuiAPI.Text("null");
+                    ImGuiAPI.Text(TtLocalization.Tr("null"));
                 }
                 else
                 {
@@ -1247,7 +1247,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     ImGuiAPI.Indent(5);
                     bool operated = false;
                     ImGuiAPI.PushID("##ListDel_" + i.ToString());
-                    if (ImGuiAPI.Button("-", in sz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("-"), in sz))
                     {
                         //removeList.Add(i);
                         listOpAtt?.OnPreRemoveAt(i, info.ObjectInstance);
@@ -1266,7 +1266,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     operated = false;
                     ImGuiAPI.SameLine(0, -1);
                     ImGuiAPI.PushID("##ListAdd_" + i.ToString());
-                    if (ImGuiAPI.Button("+", in sz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("+"), in sz))
                     {
                         //addList.Add(new KeyValuePair<int, object>(i, obj));
                         var newItem = Rtti.TtTypeDescManager.CreateInstance(obj.GetType());
@@ -1293,7 +1293,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
                 if (obj == null)
                 {
-                    ImGuiAPI.Text("null");
+                    ImGuiAPI.Text(TtLocalization.Tr("null"));
                 }
                 else
                 {
@@ -1433,7 +1433,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     bool operated = false;
                     ImGuiAPI.Indent(5);
                     ImGuiAPI.PushID("##ListDel_" + name);
-                    if (ImGuiAPI.Button("-", in sz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("-"), in sz))
                     {
                         //removeList.Add(iter.Key);
                         dict.Remove(iter.Key);

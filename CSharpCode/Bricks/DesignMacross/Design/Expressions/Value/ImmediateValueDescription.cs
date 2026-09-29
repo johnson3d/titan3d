@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Design.ConnectingLine;
@@ -11,7 +11,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         [Rtti.Meta("")]
         public TtTypeDesc TypeDesc { get; set; } = TtTypeDesc.TypeOf<bool>();
-        [Rtti.Meta, Category("Option"), DisplayName("Value")]
+        [Rtti.Meta, System.ComponentModel.Category("Option"), System.ComponentModel.DisplayName("Value")]
         public string StrValue { get; set; }
         public TtImmediateValueDescription()
         {

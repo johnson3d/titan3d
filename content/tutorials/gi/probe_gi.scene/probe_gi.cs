@@ -1,4 +1,4 @@
-﻿namespace NS_tutorials.gi
+namespace NS_tutorials.gi
 {
     [EngineNS.Macross.TtMacross]
     [EngineNS.Macross.TtMacrossSign(RName_Name = "tutorials/gi/probe_gi.scene", RName_Type = EngineNS.RName.ERNameType.Game)]

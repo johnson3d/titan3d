@@ -40,10 +40,10 @@ namespace EngineNS.Sequencer.Asset
         [Browsable(false)]
         public Guid TargetNodeId { get; set; } = Guid.Empty;
         /// <summary>相对参照节点的节点名路径, 用 '/' 分隔, 空串表示参照节点自己</summary>
-        [Rtti.Meta, Category("Binding")]
+        [Rtti.Meta, System.ComponentModel.Category("Binding")]
         public string RelativePath { get; set; } = "";
         /// <summary>轨道树上显示的名字, 只影响界面</summary>
-        [Rtti.Meta, Category("Binding")]
+        [Rtti.Meta, System.ComponentModel.Category("Binding")]
         public string DisplayName { get; set; } = "Binding";
 
         [Rtti.Meta, Browsable(false)]
@@ -160,15 +160,15 @@ namespace EngineNS.Sequencer.Asset
         [Browsable(false)]
         public RName AssetName { get; set; }
 
-        [Rtti.Meta, Category("TimeBase")]
+        [Rtti.Meta, System.ComponentModel.Category("TimeBase")]
         [Browsable(false)]
         public TtFrameRate TickResolution { get; set; } = TtFrameRate.DefaultTickResolution;
-        [Rtti.Meta, Category("TimeBase")]
+        [Rtti.Meta, System.ComponentModel.Category("TimeBase")]
         public TtFrameRate DisplayRate { get; set; } = TtFrameRate.DefaultDisplayRate;
 
-        [Rtti.Meta, Category("Playback")]
+        [Rtti.Meta, System.ComponentModel.Category("Playback")]
         public long PlaybackStartTick { get; set; } = 0;
-        [Rtti.Meta, Category("Playback")]
+        [Rtti.Meta, System.ComponentModel.Category("Playback")]
         public long PlaybackEndTick { get; set; } = 0;
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace EngineNS.Sequencer.Asset
         /// 的话, 重开编辑器后所有绑定都会变成 &lt;Unresolved&gt;。
         /// 只影响编辑期预览: 运行时播放时被驱动的节点由序列所在的关卡提供。
         /// </summary>
-        [Rtti.Meta, Category("Preview")]
+        [Rtti.Meta, System.ComponentModel.Category("Preview")]
         [RName.PGRName(FilterExts = GamePlay.Scene.TtScene.AssetExt)]
         public RName PreviewSceneName { get; set; }
 

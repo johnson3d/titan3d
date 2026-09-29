@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation.BlendTree;
+using EngineNS.Animation.BlendTree;
 using EngineNS.Animation;
 using EngineNS.Animation.Macross;
 using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
@@ -21,7 +21,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine
     public class TtAnimStateMachineClassDescription : TtTimedStateMachineClassDescription, IAnimMacrossClassDescription
     {
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public override string Name { get; set; } = "AnimStateMachine";
         [Rtti.Meta("")]
         [OutlineElement_List(typeof(TtOutlineElementsList_AnimCompoundStates), true)]

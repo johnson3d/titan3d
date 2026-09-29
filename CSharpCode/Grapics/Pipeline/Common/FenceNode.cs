@@ -7,6 +7,7 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("FenceIncrease", "Utility\\FenceIncrease", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UFenceIncreaseNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UFenceIncreaseNode" })]
     public class TtFenceIncreaseNode : TAuxRenderGraphNode<TtFenceIncreaseNode>
     {
         public TtRenderGraphPin BeforePinIn = TtRenderGraphPin.CreateInputOutput("Before", NxRHI.EBufferType.BFT_SRV);
@@ -48,6 +49,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
     [Bricks.CodeBuilder.ContextMenu("FenceWait", "Utility\\FenceWait", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UFenceWaitNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UFenceWaitNode" })]
     public class TtFenceWaitNode : TAuxRenderGraphNode<TtFenceWaitNode>
     {
         public TtRenderGraphPin FencePinIn = TtRenderGraphPin.CreateInput("Fence", NxRHI.EBufferType.BFT_SRV);

@@ -1,4 +1,4 @@
-﻿void DoUpdateSystem(TtEmitter emt)
+void DoUpdateSystem(TtEmitter emt)
 {
     uint tmp_r_SetParticleFlags_4124938284 = 0;
     uint tmp_r_Spawn_318270620 = 0;

@@ -1,4 +1,4 @@
-﻿namespace NS_tutorials.material.cbuffer
+namespace NS_tutorials.material.cbuffer
 {
     [EngineNS.Macross.TtMacross]
     [EngineNS.Macross.TtMacrossSign(RName_Name = "tutorials/material/cbuffer/buffer_setter.macross", RName_Type = EngineNS.RName.ERNameType.Game)]

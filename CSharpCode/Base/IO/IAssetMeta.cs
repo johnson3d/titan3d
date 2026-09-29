@@ -86,19 +86,19 @@ namespace EngineNS.IO
             ImGuiAPI.SetNextWindowSize(new Vector2(windowWidth, windowHeight), ImGuiCond_.ImGuiCond_FirstUseEver);
             if (ImGuiAPI.BeginPopupModal($"New {TypeSlt.BaseType.Name}", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                ImGuiAPI.Text($"New {TypeSlt.BaseType.Name}");
+                ImGuiAPI.Text(TtLocalization.Format("New {0}", TypeSlt.BaseType.Name));
                 switch (eErrorType)
                 {
                     case enErrorType.IsExisting:
                         {
                             var clr = new Vector4(1, 0, 0, 1);
-                            ImGuiAPI.TextColored(&clr, $"{mName} is existing");
+                            ImGuiAPI.TextColored(&clr, TtLocalization.Format("{0} is existing", mName));
                         }
                         break;
                     case enErrorType.EmptyName:
                         {
                             var clr = new Vector4(1, 0, 0, 1);
-                            ImGuiAPI.TextColored(&clr, $"Name is empty");
+                            ImGuiAPI.TextColored(&clr, TtLocalization.Tr("Name is empty"));
                         }
                         break;
                 }
@@ -134,7 +134,7 @@ namespace EngineNS.IO
 
                 if (CheckAsset())
                 {
-                    if (ImGuiAPI.Button("Create Asset", &sz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Create Asset"), &sz))
                     {
                         var rn = RName.GetRName(mDir.Name + mName + ExtName, mDir.RNameType);
                         if (IO.TtFileManager.FileExists(rn.Address) == false && string.IsNullOrWhiteSpace(mName) == false)
@@ -148,7 +148,7 @@ namespace EngineNS.IO
                     }
                     ImGuiAPI.SameLine(0, 20);
                 }
-                if (ImGuiAPI.Button("Cancel", &sz))
+                if (ImGuiAPI.Button(TtLocalization.Tr("Cancel"), &sz))
                 {
                     ImGuiAPI.CloseCurrentPopup();
                     retValue = true;
@@ -785,59 +785,59 @@ namespace EngineNS.IO
             var drawList = ImGuiAPI.GetWindowDrawList();
             Support.TtAnyPointer menuData = new Support.TtAnyPointer();
 
-            if (EGui.UIProxy.MenuItemProxy.MenuItem("ExplorerTo", null, false, null, in drawList, in menuData, ref mExplorerToMenuState))
+            if (EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("ExplorerTo"), null, false, null, in drawList, in menuData, ref mExplorerToMenuState))
             {
                 var psi = new System.Diagnostics.ProcessStartInfo("Explorer.exe");
                 psi.Arguments = "/e,/select," + mAssetName.Address.Replace("/", "\\");
                 System.Diagnostics.Process.Start(psi);
             }
-            if (EGui.UIProxy.MenuItemProxy.MenuItem("RefGraph", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
+            if (EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("RefGraph"), null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
             {
                 var rn = RName.GetRName(mAssetName.Name + IAssetMeta.MetaExt, mAssetName.RNameType);
                 Editor.TtAssetEditorManager.TryOpenEditor(typeof(Editor.Forms.TtAssetReferViewer), rn, this, true).AddWaitTask();
             }
-            if (EGui.UIProxy.MenuItemProxy.MenuItem("CopyRName", null, false, null, in drawList, in menuData, ref mCopyRNameMenuState))
+            if (EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("CopyRName"), null, false, null, in drawList, in menuData, ref mCopyRNameMenuState))
             {
                 ImGuiAPI.SetClipboardText(RName.GetRName(mAssetName.Name + IAssetMeta.MetaExt, mAssetName.RNameType).ToString());
             }
             ImGuiAPI.Separator();
-            if (EGui.UIProxy.MenuItemProxy.MenuItem("Delete", null, false, null, in drawList, in menuData, ref mDeleteMenuState))
+            if (EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("Delete"), null, false, null, in drawList, in menuData, ref mDeleteMenuState))
             {
                 ContentBrowser.OperationAsset(this, EGui.Controls.TtContentBrowser.EAssetOperationType.Delete);
                 ContentBrowser.CreateNewAssets = createNewAssetValueStore;
             }
-            if (EGui.UIProxy.MenuItemProxy.MenuItem("Rename", null, false, null, in drawList, in menuData, ref mRenameMenuState))
+            if (EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("Rename"), null, false, null, in drawList, in menuData, ref mRenameMenuState))
             {
                 ContentBrowser.OperationAsset(this, EGui.Controls.TtContentBrowser.EAssetOperationType.Rename);
             }
-            if (EGui.UIProxy.MenuItemProxy.MenuItem("MoveTo", null, false, null, in drawList, in menuData, ref mMoveToMenuState))
+            if (EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("MoveTo"), null, false, null, in drawList, in menuData, ref mMoveToMenuState))
             {
                 ContentBrowser.OperationAsset(this, EGui.Controls.TtContentBrowser.EAssetOperationType.MoveTo);
             }
-            if (EGui.UIProxy.MenuItemProxy.MenuItem("CopyTo", null, false, null, in drawList, in menuData, ref mCopyToMenuState))
+            if (EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("CopyTo"), null, false, null, in drawList, in menuData, ref mCopyToMenuState))
             {
                 ContentBrowser.OperationAsset(this, EGui.Controls.TtContentBrowser.EAssetOperationType.CopyTo);
             }
-            if (EGui.UIProxy.MenuItemProxy.MenuItem("PackTo", null, false, null, in drawList, in menuData, ref mPackToMenuState))
+            if (EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("PackTo"), null, false, null, in drawList, in menuData, ref mPackToMenuState))
             {
                 ContentBrowser.OperationAsset(this, EGui.Controls.TtContentBrowser.EAssetOperationType.PackTo);
             }
-            if (EGui.UIProxy.MenuItemProxy.MenuItem("GenSnapshot", null, false, null, in drawList, in menuData, ref mPackToMenuState))
+            if (EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("GenSnapshot"), null, false, null, in drawList, in menuData, ref mPackToMenuState))
             {
                 this.AutoGenSnapshot().AddWaitTask();
             }
-            if (ImGuiAPI.BeginMenu("SnapshotStorage", true))
+            if (ImGuiAPI.BeginMenu(TtLocalization.Tr("SnapshotStorage"), true))
             {
                 var curStorage = SnapshotStorage;
-                if (ImGuiAPI.MenuItem("Default", null, curStorage == ESnapshotStorage.Default, true))
+                if (ImGuiAPI.MenuItem(TtLocalization.Tr("Default"), null, curStorage == ESnapshotStorage.Default, true))
                 {
                     MigrateSnapshotFile(ESnapshotStorage.Default);
                 }
-                if (ImGuiAPI.MenuItem("InAssetDir", null, curStorage == ESnapshotStorage.InAssetDir, true))
+                if (ImGuiAPI.MenuItem(TtLocalization.Tr("InAssetDir"), null, curStorage == ESnapshotStorage.InAssetDir, true))
                 {
                     MigrateSnapshotFile(ESnapshotStorage.InAssetDir);
                 }
-                if (ImGuiAPI.MenuItem("InCacheDir", null, curStorage == ESnapshotStorage.InCacheDir, true))
+                if (ImGuiAPI.MenuItem(TtLocalization.Tr("InCacheDir"), null, curStorage == ESnapshotStorage.InCacheDir, true))
                 {
                     MigrateSnapshotFile(ESnapshotStorage.InCacheDir);
                 }

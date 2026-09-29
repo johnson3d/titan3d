@@ -40,6 +40,34 @@ void DoMorphModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 	}
 	vsOut.vNormal.xyz = vert.vNormal.xyz;
 #endif
+
+#if USE_PS_Normal == 1 && USE_PS_Tangent == 1
+	// 切线必须跟着一起 morph: CalcNormalMap 直接用 (T, N, ±cross(T,N)) 建 TBN, 不做任何
+	// 正交化 —— 法线换成了 morph 后的朝向而切线还停在基础网格的朝向, TBN 就是歪的,
+	// 形变越大法线贴图的扰动方向偏得越离谱。
+	//
+	// 两步走, 少一步都不够:
+	//   1. 加 DeltaTangent。导入器用形变后的位置配合 UV 重算切线再作差(与法线同源),
+	//      这一项带的是切线绕法线的旋转 —— 各向异性的拉伸/剪切会让 UV 梯度方向在 3D 里
+	//      转一下, 那部分信息只能靠真 delta 拿到, 光靠重投影是变不出来的。
+	//   2. 沿 morph 后的法线做 Gram-Schmidt 重投影。多个 morph 线性叠加、以及重算本身的
+	//      离散误差, 都会让 T 不再严格垂直于 N; 而 B = ±cross(T,N) 天然垂直于 N,
+	//      所以 TBN 里唯一的非正交来源就是 T 自己, 重投影一次就能把它清掉。
+	//
+	// w 是手性, 绝对不能碰: CalcNormalMap 靠它选 ±cross 决定副切线朝向, 改了会让
+	// 法线贴图整体翻面。Set_vTangent 只写 xyz 正是为此。
+	float3 morphedTangent = vert.vTangent.xyz + (float3)delta.DeltaTangent;
+	morphedTangent = morphedTangent - vert.vNormal.xyz * dot(vert.vNormal.xyz, morphedTangent);
+	float morphedTangentLenSq = dot(morphedTangent, morphedTangent);
+	// 重投影结果趋零有两种来路: 形变把切线转到与法线几乎平行, 或者这条管线本就没有
+	// 切线顶点流(vTangent 恒为 0 且 delta 也是 0)。两种情况都保留原值 —— 歪一点也比把
+	// 零向量塞进 TBN 好, 后者会让整块表面的法线输出 NaN。
+	if (morphedTangentLenSq > 1e-12f)
+	{
+		vert.vTangent.xyz = morphedTangent * rsqrt(morphedTangentLenSq);
+	}
+	vsOut.Set_vTangent(vert.vTangent.xyz);
+#endif
 }
 
 #endif //_MorphModifier_cginc_

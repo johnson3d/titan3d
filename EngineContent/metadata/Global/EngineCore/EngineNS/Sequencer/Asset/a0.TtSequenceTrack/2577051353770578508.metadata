@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_2577051353770578508 Type="EngineNS.Sequencer.Asset.TtSequenceTrack@EngineCore">
+  <DisplayName Type="System.String@Unknown" Order="0" />
+  <Muted Type="System.Boolean@Unknown" Order="0" />
+  <Sections Type="System.Collections.Generic.List&lt;EngineNS.Sequencer.Asset.TtSequenceSection@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_2577051353770578508>

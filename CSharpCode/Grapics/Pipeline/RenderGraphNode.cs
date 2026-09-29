@@ -117,7 +117,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public Bricks.RenderPolicyEditor.TtPolicyNode BindingPolicyNode { get; internal set; } = null;
         internal int mMaxLeafDistance = 0;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public int MaxLeafDistance
         {
             get => mMaxLeafDistance;
@@ -128,7 +128,7 @@ namespace EngineNS.Graphics.Pipeline
             get;
             set;
         } = true;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public virtual bool Enable
         {
@@ -136,7 +136,7 @@ namespace EngineNS.Graphics.Pipeline
             set;
         } = true;
         private string mName;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual string Name
         {
             get => mName;
@@ -149,7 +149,7 @@ namespace EngineNS.Graphics.Pipeline
                 //}
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public Guid UniqueId { get; set; } = Guid.NewGuid();
         public virtual Color4b GetTileColor()

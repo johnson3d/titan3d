@@ -5,14 +5,15 @@ using EngineNS.Graphics.Pipeline;
 
 namespace EngineNS.Bricks.Procedure.Node.GpuNode
 {
-    [Bricks.CodeBuilder.ContextMenu("Heigh2Flow", "Float1\\Heigh2Flow", UPgcGraph.PgcEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("Heigh2Flow", "Float1\\Heigh2Flow", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.GpuNode.UHeigh2FlowMapNode@EngineCore", "EngineNS.Bricks.Procedure.Node.GpuNode.UHeigh2FlowMapNode" })]
     public class TtHeigh2FlowMapNode : TtGpuNodeBase
     {
         public TtHeigh2FlowMapNode()
         {
             
         }
-        public override UBufferCreator GetOutBufferCreator(Bricks.NodeGraph.PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(Bricks.NodeGraph.PinOut pin)
         {
             if (ResultPin == pin)
             {
@@ -21,7 +22,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
             return null;
         }
         TtAttachBuffer HeightAttachement = new TtAttachBuffer();
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             if (Policy == null)
                 return false;

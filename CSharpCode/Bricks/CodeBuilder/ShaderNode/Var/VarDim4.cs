@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
 using System.ComponentModel;
@@ -152,7 +152,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         }
         protected Vector4 mValue = Vector4.Zero;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector4 Value { get => mValue; set => mValue = value; }
         [Browsable(false)]
         public PinIn InXYZW { get; set; } = new PinIn();
@@ -236,7 +236,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             this.AddPinOut(OutXYZ);
         }
         [EGui.Controls.PropertyGrid.TtColor4PickerEditor()]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector4 Color { get => mValue; set => mValue = value; }
         public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
@@ -422,7 +422,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         }
         protected Vector4i mValue = Vector4i.Zero;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector4i Value { get => mValue; set => mValue = value; }
         [Browsable(false)]
         public PinIn InXYZW { get; set; } = new PinIn();

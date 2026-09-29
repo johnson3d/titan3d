@@ -155,7 +155,7 @@ FHzbRayCastResult HzbRayCast(
 FHzbRayCastResult HzbRayCastFromWorldRay(
     Texture2D<float> hzbTex, SamplerState hzbSamp,
     float3 rayOriginWorld, float3 rayDirWorld, float rayLength,
-    uint numSteps, float stepOffset, float roughness)
+    uint numSteps, float stepOffset, float roughness, float2 rasterOffsetNDC = float2(0, 0))
 {
     FHzbRayCastResult failResult;
     failResult.bHit = false;
@@ -186,6 +186,10 @@ FHzbRayCastResult HzbRayCastFromWorldRay(
     // NDC = Clip.xyz / Clip.w
     float3 rayStartScreen = startClip.xyz / startClip.w;
     float3 rayEndScreen   = endClip.xyz   / endClip.w;
+    // Callers reconstructing with an unjittered inverse must reapply the
+    // raster offset before sampling HZB. Default preserves other callers.
+    rayStartScreen.xy += rasterOffsetNDC;
+    rayEndScreen.xy += rasterOffsetNDC;
     float3 rayStepScreen  = rayEndScreen - rayStartScreen;
 
     // Clip to screen edge (NDC [-1,1])

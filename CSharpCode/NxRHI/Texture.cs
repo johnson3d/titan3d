@@ -1,4 +1,4 @@
-﻿using Assimp.Unmanaged;
+using Assimp.Unmanaged;
 using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
 using BCnEncoder.Shared.ImageFiles;
@@ -44,9 +44,10 @@ namespace EngineNS.NxRHI
         {
             return TtEngine.Instance.EditorInstance.Config.TextureBoderColor;
         }
+        public const string AssetTypeName = "SrView";
         public override string GetAssetTypeName()
         {
-            return "SrView";
+            return AssetTypeName;
         }
         string mOriginImageAddress = null;
         [Rtti.Meta("")]
@@ -275,7 +276,7 @@ namespace EngineNS.NxRHI
         {
             Support.TtAnyPointer menuData = new Support.TtAnyPointer();
             var drawList = ImGuiAPI.GetWindowDrawList();
-            if(EGui.UIProxy.MenuItemProxy.MenuItem("Create UVAnim", null, false, null, in drawList, in menuData, ref mCreateUVAnimMenuState))
+            if(EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("Create UVAnim"), null, false, null, in drawList, in menuData, ref mCreateUVAnimMenuState))
             {
                 var anim = new EGui.TtUVAnim();
                 var rname = RName.GetRName(AssetName.Name.Replace(TtSrView.AssetExt, EGui.TtUVAnim.AssetExt), AssetName.RNameType);
@@ -294,7 +295,7 @@ namespace EngineNS.NxRHI
             ImGuiAPI.Separator();
             base.OnDrawPopMenu(ContentBrowser);
 
-            if (EGui.UIProxy.MenuItemProxy.MenuItem("ReImport", null, false, null, in drawList, in menuData, ref mReImportMenuState))
+            if (EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("ReImport"), null, false, null, in drawList, in menuData, ref mReImportMenuState))
             {
                 //renwind todo
             }
@@ -342,31 +343,31 @@ namespace EngineNS.NxRHI
             public ETextureCompressFormat CompressFormat { get => Desc.CompressFormat; set => Desc.CompressFormat = value; }
             [ReadOnly(true)]
             public EPixelFormat Format { get => Desc.Format; set => Desc.Format = value; }
-            [Category("General")]
+            [System.ComponentModel.Category("General")]
             public uint CubeFaces { get => Desc.CubeFaces; set => Desc.CubeFaces = value; }
-            [Category("General")]
+            [System.ComponentModel.Category("General")]
             public int MipLevel { get => Desc.MipLevel; set => Desc.MipLevel = value; }
-            [Category("Dimension")]
+            [System.ComponentModel.Category("Dimension")]
             public int Width { get => Desc.Width; set => Desc.Width = value; }
-            [Category("Dimension")]
+            [System.ComponentModel.Category("Dimension")]
             public int Height { get => Desc.Height; set => Desc.Height = value; }
             public byte BitNumRed { get => Desc.BitNumRed; set => Desc.BitNumRed = value; }
             public byte BitNumGreen { get => Desc.BitNumGreen; set => Desc.BitNumGreen = value; }
             public byte BitNumBlue { get => Desc.BitNumBlue; set => Desc.BitNumBlue = value; }
             public byte BitNumAlpha { get => Desc.BitNumAlpha; set => Desc.BitNumAlpha = value; }
-            [Category("General")]
+            [System.ComponentModel.Category("General")]
             public bool DontCompress 
             {
                 get => Desc.DontCompress != 0 ? true : false;
                 set => Desc.DontCompress = value ? 1 : 0;
             }
-            [Category("General")]
+            [System.ComponentModel.Category("General")]
             public bool sRGB
             {
                 get => Desc.sRGB != 0 ? true : false;
                 set => Desc.sRGB = value ? 1 : 0;
             }
-            [Category("General")]
+            [System.ComponentModel.Category("General")]
             public bool IsHdr()
             {
                 switch (Desc.Format)
@@ -393,7 +394,7 @@ namespace EngineNS.NxRHI
                 set => Desc.StripOriginSource = value ? 1 : 0;
             }
             int mDepth = 0;
-            [Category("Dimension")]
+            [System.ComponentModel.Category("Dimension")]
             public int Depth { get => mDepth; set => mDepth = value; }
             public bool IsTexture3D { get => Depth > 0; }
             bool mAutoCheckNormal = true;
@@ -517,7 +518,7 @@ namespace EngineNS.NxRHI
                     if(string.IsNullOrEmpty(ContentBrowser.CurrentImporterFile))
                     {
                         var sz = new Vector2(-1, 0);
-                        if (ImGuiAPI.Button("Select Image", in sz))
+                        if (ImGuiAPI.Button(TtLocalization.Tr("Select Image"), in sz))
                         {
                             mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".png,.jpg,.bmp,.tga,.exr,.hdr", ".");
                         }
@@ -545,12 +546,12 @@ namespace EngineNS.NxRHI
                     if (bFileExisting)
                     {
                         var clr = new Vector4(1, 0, 0, 1);
-                        ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
+                        ImGuiAPI.TextColored(in clr, TtLocalization.Format("Source:{0}", mSourceFile));
                     }
                     else
                     {
                         var clr = new Vector4(1, 1, 1, 1);
-                        ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
+                        ImGuiAPI.TextColored(in clr, TtLocalization.Format("Source:{0}", mSourceFile));
                     }
                     ImGuiAPI.Separator();
 
@@ -569,7 +570,7 @@ namespace EngineNS.NxRHI
                     var btSz = Vector2.Zero;
                     if (bFileExisting == false)
                     {
-                        if (ImGuiAPI.Button("Create Asset", in btSz))
+                        if (ImGuiAPI.Button(TtLocalization.Tr("Create Asset"), in btSz))
                         {
                             if (ImportImage())
                             {
@@ -579,7 +580,7 @@ namespace EngineNS.NxRHI
                         }
                         ImGuiAPI.SameLine(0, 20);
                     }
-                    if (ImGuiAPI.Button("Cancel", in btSz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Cancel"), in btSz))
                     {
                         ImGuiAPI.CloseCurrentPopup();
                         retValue = true;

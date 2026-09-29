@@ -2,11 +2,11 @@
 <Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="d2371b1b3726c1806de33802715a5f7ff78ab02ffd5c19205e72b82659d412d9" />
+      <Hash Type="System.String@Unknown" Value="fea84d133832f8cb39dbe2e3b2b17892fa201f37406eba95768c53d5b84800a0" />
       <Path Type="System.String@Unknown" Value="vcloud_scene.scene/vcloud_scene.scene" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="d33a2b2c2d20924c4e69223c708de4b62acf550f63ec91b1ad1460b6b1529c0a" />
+      <Hash Type="System.String@Unknown" Value="869679651324e9c92c220afbddbc9e82675d45d4e96f0accf6d18392af0fb131" />
       <Path Type="System.String@Unknown" Value="vcloud_scene.scene/class_graph.dat" />
     </e_1>
   </AssetFiles>

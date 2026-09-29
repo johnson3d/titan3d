@@ -335,7 +335,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         [Rtti.Meta("")]
         [RName.PGRName(ReadOnly = true)]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName AssetName
         {
             get;
@@ -348,7 +348,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         #endregion
 
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public EMaterialFunctionEditMode EditMode { get; set; } = EMaterialFunctionEditMode.Graph;
 
         [Rtti.Meta("")]
@@ -360,11 +360,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public Rtti.TtClassMeta.TtMethodMeta MethodMeta { get; set; } = new Rtti.TtClassMeta.TtMethodMeta();
 
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public List<RName> RefMaterialFunctions { get; set; } = new List<RName>();
         private string mCallNodeName = null;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string CallNodeName
         {
             get

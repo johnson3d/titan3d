@@ -6,13 +6,14 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
-    [Bricks.CodeBuilder.ContextMenu("Double3Value", "Float3\\Double3Value", UPgcGraph.PgcEditorKeyword)]
-    public class UDouble3ValueNode : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("Double3Value", "Float3\\Double3Value", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UDouble3ValueNode@EngineCore", "EngineNS.Bricks.Procedure.Node.UDouble3ValueNode" })]
+    public class TtDouble3ValueNode : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<DVector3, FDouble3Operator>>(-1, -1, -1);
-        public UDouble3ValueNode()
+        public TtBufferCreator OutputDesc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<DVector3, FDouble3Operator>>(-1, -1, -1);
+        public TtDouble3ValueNode()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -23,7 +24,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         [Rtti.Meta("")]
         public DVector3 Value { get; set; } = DVector3.One;
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var result = graph.BufferCache.FindBuffer(ResultPin);
 
@@ -39,19 +40,20 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return true;
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             return OutputDesc;
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("QuaternionValue", "Values\\QuaternionValue", UPgcGraph.PgcEditorKeyword)]
-    public class UQuaternionValueNode : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("QuaternionValue", "Values\\QuaternionValue", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UQuaternionValueNode@EngineCore", "EngineNS.Bricks.Procedure.Node.UQuaternionValueNode" })]
+    public class TtQuaternionValueNode : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Quaternion, FQuaternionOperator>>(-1, -1, -1);
-        public UQuaternionValueNode()
+        public TtBufferCreator OutputDesc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<Quaternion, FQuaternionOperator>>(-1, -1, -1);
+        public TtQuaternionValueNode()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -62,7 +64,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         [Rtti.Meta("")]
         public Quaternion Value { get; set; } = Quaternion.Identity;
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var result = graph.BufferCache.FindBuffer(ResultPin);
 
@@ -78,18 +80,19 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return true;
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             return OutputDesc;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("IntValue", "Values\\IntValue", UPgcGraph.PgcEditorKeyword)]
-    public class UIntValueNode : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("IntValue", "Values\\IntValue", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UIntValueNode@EngineCore", "EngineNS.Bricks.Procedure.Node.UIntValueNode" })]
+    public class TtIntValueNode : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<int, FIntOperator>>(-1, -1, -1);
-        public UIntValueNode()
+        public TtBufferCreator OutputDesc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<int, FIntOperator>>(-1, -1, -1);
+        public TtIntValueNode()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -100,7 +103,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         [Rtti.Meta("")]
         public int Value { get; set; } = 0;
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var result = graph.BufferCache.FindBuffer(ResultPin);
 
@@ -116,7 +119,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return true;
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             return OutputDesc;
         }

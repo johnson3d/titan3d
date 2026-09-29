@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -376,7 +376,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossMethodGraph@EngineCore", "EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossMethodGraph" })]
     public partial class TtMacrossMethodGraph : TtNodeGraph, IPropertyCustomization
     {
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public List<TtVariableDeclaration> LocalVars { get; set; } = new List<TtVariableDeclaration>();
         public TtVariableDeclaration FindLocalVar(string name)
         {
@@ -388,17 +388,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return null;
         }
 
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public string CustumCode { get; set; } = null;
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public bool IsUseCustumCode { get; set; } = false;
 
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public bool IsAsync { get; set; } = false;
 
         bool mInputsDirty = true;
         List<TtMethodArgumentDeclaration> mInputs = new List<TtMethodArgumentDeclaration>();
-        [InputsOperationCallback, Category("Params")]
+        [InputsOperationCallback, System.ComponentModel.Category("Params")]
         public List<TtMethodArgumentDeclaration> Inputs
         {
             get
@@ -592,7 +592,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         bool mOutputsDirty = true;
         List<TtMethodArgumentDeclaration> mOutputs = new List<TtMethodArgumentDeclaration>();
-        [OutputsOperationCallback, Category("Params")]
+        [OutputsOperationCallback, System.ComponentModel.Category("Params")]
         public List<TtMethodArgumentDeclaration> Outputs
         {
             get
@@ -1981,7 +1981,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             CSharp,
         }
         EMethodEditMode mMethodEditMode = EMethodEditMode.Graph;
-        [Rtti.Meta(""), Category("Option")]
+        [Rtti.Meta(""), System.ComponentModel.Category("Option")]
         public EMethodEditMode MethodEditMode
         {
             get => mMethodEditMode;

@@ -1,4 +1,4 @@
-﻿using EngineNS.Graphics.Pipeline;
+using EngineNS.Graphics.Pipeline;
 using System;
 using System.ComponentModel;
 using System.Security.Permissions;
@@ -157,10 +157,10 @@ namespace EngineNS.Editor
         {
             base.OnClientChanged(bSizeChanged);
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [ReadOnly(true)]
         public RName PreviewAsset { get; set; } = null;
-        [Category("Studio")]
+        [System.ComponentModel.Category("Studio")]
         public TtPreviewStudioContext StudioContext { get; private set; }
         private static TtEditorConfig EditorConfig => TtEngine.Instance?.EditorInstance?.Config;
         private static string StudioSkyboxImageName => EditorConfig?.StudioSkyboxImageName ?? "editor/studio/sakura_prefiltered_env_12_blur.png";
@@ -180,7 +180,7 @@ namespace EngineNS.Editor
             else
                 node.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.Invisible);
         }
-        [Category("Studio")]
+        [System.ComponentModel.Category("Studio")]
         public bool ShowStudioFloor
         {
             get
@@ -194,7 +194,7 @@ namespace EngineNS.Editor
                 SetStudioNodeVisible(floor, value);
             }
         }
-        [Category("Studio")]
+        [System.ComponentModel.Category("Studio")]
         public bool ShowStudioGrid
         {
             get
@@ -208,7 +208,7 @@ namespace EngineNS.Editor
                 SetStudioNodeVisible(grid, value);
             }
         }
-        [Category("Studio")]
+        [System.ComponentModel.Category("Studio")]
         public bool ShowStudioBackdrop
         {
             get

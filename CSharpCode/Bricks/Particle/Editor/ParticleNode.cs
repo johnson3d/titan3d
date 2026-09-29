@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.Bricks.NodeGraph;
@@ -58,17 +58,17 @@ namespace EngineNS.Bricks.Particle.Editor
             AddPinOut(Shapes);
             AddPinOut(Effectors);
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public bool Enable { get; set; } = true;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
         public RName MeshName
         {
             get; set;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         [RName.PGRName(FilterExts = CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtEmitterMacross))]
         public RName McName
@@ -76,7 +76,7 @@ namespace EngineNS.Bricks.Particle.Editor
             get;
             set;
         } = null;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtShaderAsset.AssetExt, ShaderType = "NebulaEmitter")]
         public RName ShaderName
@@ -84,22 +84,22 @@ namespace EngineNS.Bricks.Particle.Editor
             get;
             set;
         } = null;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public bool IsGpuDriven { get; set; } = true;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public uint MaxParticle { get; set; } = 1024;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public string DefaultCurrentQueue { get; set; } = "Default";
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public string EmitterName { get; set; } = "Default";
 
         public TtEmitter EditingObject = null;
         Vector3 mLocation;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public Vector3 Location
         {
@@ -114,7 +114,7 @@ namespace EngineNS.Bricks.Particle.Editor
             }
         }
         Vector3 mVelocity;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public Vector3 Velocity
         {
@@ -129,7 +129,7 @@ namespace EngineNS.Bricks.Particle.Editor
             }
         }
         float mTimerRemain;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float TimerRemain 
         {
             get => mTimerRemain;
@@ -143,7 +143,7 @@ namespace EngineNS.Bricks.Particle.Editor
             }
         }
         float mTimerInterval;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public float TimerInterval 
         {
@@ -158,7 +158,7 @@ namespace EngineNS.Bricks.Particle.Editor
             }
         }
         EParticleEmitterStyles mEmitterStyles;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public EParticleEmitterStyles EmitterStyles
         {
@@ -235,7 +235,7 @@ namespace EngineNS.Bricks.Particle.Editor
     [Bricks.CodeBuilder.ContextMenu(filterStrings: "EffectorQueue", "EffectorQueue", TtParticleGraph.NebulaEditorKeyword)]
     public class TtEffectorQueueNode : TtParticleNode
     {
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public string QueueName { get; set; } = "Default";
         public PinIn Left { get; set; } = new PinIn()
@@ -316,7 +316,7 @@ namespace EngineNS.Bricks.Particle.Editor
             Name = "BoxShape";
         }
         Vector3 mCenter = Vector3.Zero;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public Vector3 Center 
         { 
@@ -332,7 +332,7 @@ namespace EngineNS.Bricks.Particle.Editor
             }
         }
         Vector3 mHalfExtent = Vector3.One;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public Vector3 HalfExtent 
         { 
@@ -348,7 +348,7 @@ namespace EngineNS.Bricks.Particle.Editor
             }
         }
         float mThinness = 1.0f;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public float Thinness 
         { 
@@ -381,7 +381,7 @@ namespace EngineNS.Bricks.Particle.Editor
             Name = "SphereShape";
         }
         Vector3 mCenter = Vector3.Zero;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public Vector3 Center
         {
@@ -397,7 +397,7 @@ namespace EngineNS.Bricks.Particle.Editor
             }
         }
         float mRadius = 1.0f;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public float Radius
         {
@@ -412,7 +412,7 @@ namespace EngineNS.Bricks.Particle.Editor
                 }
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public float Thinness { get; set; } = 1.0f;
         public override TtShape CreateShape()
@@ -433,7 +433,7 @@ namespace EngineNS.Bricks.Particle.Editor
             Name = "Accelerated";
         }
         Vector3 mAccelerationMin = new Vector3(0, -0.1f, 0);
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public Vector3 AccelerationMin 
         { 
@@ -449,7 +449,7 @@ namespace EngineNS.Bricks.Particle.Editor
             }
         }
         Vector3 mAccelerationRange = new Vector3(0, -0.1f, 0);
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public Vector3 AccelerationRange
         {
@@ -481,7 +481,7 @@ namespace EngineNS.Bricks.Particle.Editor
             Name = "Color";
         }
         Vector4 mOpColorMin = Vector4.Zero;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public Vector4 OpColorMin
         {
@@ -497,7 +497,7 @@ namespace EngineNS.Bricks.Particle.Editor
             }
         }
         Vector4 mOpColorRange = Vector4.Zero;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public Vector4 OpColorRange
         {
@@ -529,7 +529,7 @@ namespace EngineNS.Bricks.Particle.Editor
             Name = "Scale";
         }
         float mOpScaleMin = 0;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public float OpScaleMin
         {
@@ -545,7 +545,7 @@ namespace EngineNS.Bricks.Particle.Editor
             }
         }
         float mOpScaleRange = 0;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public float OpScaleRange
         {

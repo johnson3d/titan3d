@@ -118,7 +118,7 @@ namespace NxRHI
 	{
 	public:
 		~DX12GpuScope();
-		bool Init(DX12GpuDevice* device);
+		bool Init(const char* file, int line, DX12GpuDevice* device);
 
 		virtual bool IsFinished() override;
 		virtual UINT64 GetDeltaTime() override;

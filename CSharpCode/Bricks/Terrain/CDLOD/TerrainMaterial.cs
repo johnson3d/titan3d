@@ -175,7 +175,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     /// 地形材质贴图的场景级覆盖项, 按下标与 UTerrainMaterialIdManager.MaterialIdArray 对齐。
     /// RName 为 null 表示该槽沿用 PGC 图表里的原值。
     /// 只覆盖"表现"(贴图), 不覆盖"生成参数"(TransitionRange / Plants) —— 后者是 PGC 生成 ID 图与撒植被的输入,
-    /// 且计入 UMaterialIdMapNode.GetOutBufferHash, 改了会失效 level 缓存, 必须回 PGC 编辑器改。
+    /// 且计入 TtMaterialIdMapNode.GetOutBufferHash, 改了会失效 level 缓存, 必须回 PGC 编辑器改。
     /// </summary>
     public partial class TtTerrainMaterialTextureOverride : IO.BaseSerializer
     {

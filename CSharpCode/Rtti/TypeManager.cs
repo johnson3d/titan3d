@@ -398,7 +398,7 @@ namespace EngineNS.Rtti
         public static TtTypeDesc TypeOf(string typeStr)
         {
             var result = TtTypeDescManager.Instance.GetTypeDescFromString(typeStr, out var isAlias);
-            if (result == null)
+            if (result == null && !string.IsNullOrEmpty(typeStr))
             {
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Typeof failed:{typeStr}");
             }
@@ -659,11 +659,19 @@ namespace EngineNS.Rtti
         public static TtTypeDescManager Instance { get; } = new TtTypeDescManager();
         public Dictionary<string, ServiceManager> Services { get; } = new Dictionary<string, ServiceManager>();
         public Dictionary<string, TtTypeDesc> NameAliasTypes { get; } = new Dictionary<string, TtTypeDesc>();
+        public Dictionary<string, TtTypeDesc> HitNameAliasTypes { get; } = new Dictionary<string, TtTypeDesc>();
         public TtTypeDesc FindNameAlias(string name)
         {
             TtTypeDesc result;
             if (NameAliasTypes.TryGetValue(name, out result))
+            {
+                if (HitNameAliasTypes.ContainsKey(name) == false)
+                {
+                    HitNameAliasTypes[name] = result;
+                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"FindNameAlias:{name}={result.FullName}");
+                }
                 return result;
+            }
             return null;
         }
         public bool GetInheritTypes(TtTypeDesc baseType, List<TtTypeDesc> types)
@@ -723,6 +731,16 @@ namespace EngineNS.Rtti
                     }
                 }
             }
+        }
+        public TtAssemblyDesc FindAssemblyDesc(System.Reflection.Assembly assembly)
+        {
+            foreach(var i in Services.Values)
+            {
+                var a = i.FindAssemblyDesc(assembly);
+                if (a != null)
+                    return a;
+            }
+            return null;
         }
         public Assembly FindAssemblyInCurrentDomain(string name)
         {
@@ -851,10 +869,14 @@ namespace EngineNS.Rtti
                 {
                     if (tp.IsGenericType == false)
                         return;
-                    var propAssmDesc = FindAssemblyDesc(tp.Assembly);
+                    var propAssmDesc = TtTypeDescManager.Instance.FindAssemblyDesc(tp.Assembly);
                     if (propAssmDesc != null)
                     {
                         RegType(tp, propAssmDesc);
+                    }
+                    else
+                    {
+                        RegType(tp, null);
                     }
                 };
 
@@ -913,20 +935,6 @@ namespace EngineNS.Rtti
                     }
                 }
             }
-        }
-        internal TtAssemblyDesc FindAssemblyDesc(System.Reflection.Assembly assm)
-        {
-            foreach(var i in Services)
-            {
-                foreach(var j in i.Value.Assemblies)
-                {
-                    if(j.Value.UnsafeGetAssembly() == assm)
-                    {
-                        return j.Value;
-                    }
-                }
-            }
-            return null;
         }
         public Dictionary<string, string> StringMap = new Dictionary<string, string>();
         internal string GetTypeStringFromType(Type type, bool tryAdd2Manager = true)

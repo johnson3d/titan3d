@@ -6,7 +6,7 @@
       <Path Type="System.String@Unknown" Value="physicstest.scene/physicstest.scene" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="029cd08890faf055708acbca2719b87ed6d4c584b63679a225774b87b6066d70" />
+      <Hash Type="System.String@Unknown" Value="f7b4867ec607f7635c92e8c3687fab9da7081b48cfb7ba2fe9139bdcc2851e53" />
       <Path Type="System.String@Unknown" Value="physicstest.scene/class_graph.dat" />
     </e_1>
   </AssetFiles>

@@ -581,7 +581,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
         #region Normal
         /// <summary>
-        /// 单点法线, 6 邻域三角形法线累加。算法必须和 PGC 的 UFloat3HeightToNormal 完全一致
+        /// 单点法线, 6 邻域三角形法线累加。算法必须和 PGC 的 TtFloat3HeightToNormal 完全一致
         /// (包括它那处 v4 被用了两次的既有笔误), 否则脏区边界会出现法线突变的接缝。
         /// 调用方保证 (x, y) 不在最外一圈上 (邻域采样不会越界)。
         ///

@@ -56,7 +56,7 @@ namespace EngineNS.GamePlay.Scene
                     if (string.IsNullOrEmpty(ContentBrowser.CurrentImporterFile))
                     {
                         var sz = new Vector2(-1, 0);
-                        if (ImGuiAPI.Button("Select CS", in sz))
+                        if (ImGuiAPI.Button(TtLocalization.Tr("Select CS"), in sz))
                         {
                             mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".cs", ".");
                         }
@@ -92,7 +92,7 @@ namespace EngineNS.GamePlay.Scene
                     //    }
                     //}
                     //ImGuiAPI.SameLine(0, 20);
-                    if (ImGuiAPI.Button("Cancel", in btSz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Cancel"), in btSz))
                     {
                         ImGuiAPI.CloseCurrentPopup();
                         retValue = true;
@@ -107,7 +107,7 @@ namespace EngineNS.GamePlay.Scene
                             mName = name;
                         }
                     }
-                    if (ImGuiAPI.Button("Create", in btSz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Create"), in btSz))
                     {
                         var rn = RName.GetRName(mDir.Name + mName + TtBehavior.AssetExt, mDir.RNameType);
                         CreateCS(rn);
@@ -301,7 +301,7 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         protected TtBehaviorGetter mBehaviorGetter;
-        [Category("User")]
+        [System.ComponentModel.Category("User")]
         [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public TtBehavior Behavior
         {
@@ -314,7 +314,7 @@ namespace EngineNS.GamePlay.Scene
                 return mBehaviorGetter.Get(this);
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         [RName.PGRName(FilterExts = TtBehavior.AssetExt)]
         public RName BehaviorName

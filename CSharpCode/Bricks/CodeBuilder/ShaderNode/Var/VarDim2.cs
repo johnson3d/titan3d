@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
 using System.ComponentModel;
@@ -116,7 +116,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         }
 
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector2 Value { get; set; } = Vector2.Zero;
         [Browsable(false)]
         public PinIn InXY { get; set; } = new PinIn();
@@ -272,7 +272,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         }
 
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector2i Value { get; set; } = Vector2i.Zero;
         [Browsable(false)]
         public PinIn InXY { get; set; } = new PinIn();

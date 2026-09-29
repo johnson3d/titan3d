@@ -4,9 +4,9 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Procedure
 {
-    public class UPgcEditorStyles
+    public class TtPgcEditorStyles
     {
-        public static UPgcEditorStyles Instance = new UPgcEditorStyles();
+        public static TtPgcEditorStyles Instance = new TtPgcEditorStyles();
         public EGui.TtUVAnim FunctionIcon = new EGui.TtUVAnim(0xFF00FF00, 25);
         public uint FunctionTitleColor = 0xFF204020;
         public uint FunctionBGColor = 0x80808080;
@@ -27,7 +27,7 @@ namespace EngineNS.Bricks.Procedure
             return result;
         }
     }
-    public class UPgcEditor : IO.BaseSerializer, Editor.IAssetEditor, IRootForm, ITickable
+    public class TtPgcEditor : IO.BaseSerializer, Editor.IAssetEditor, IRootForm, ITickable
     {
         public int GetTickOrder()
         {
@@ -41,7 +41,7 @@ namespace EngineNS.Bricks.Procedure
         protected ImGuiWindowClass mDockKeyClass;
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
-        public UPgcAsset EditAsset { get; private set; }
+        public TtPgcAsset EditAsset { get; private set; }
         public TtGraphRenderer GraphRenderer { get; } = new TtGraphRenderer();
         public EGui.Controls.PropertyGrid.TtPropertyGrid NodePropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
         public EGui.Controls.PropertyGrid.TtPropertyGrid GraphPropGrid = new EGui.Controls.PropertyGrid.TtPropertyGrid();
@@ -58,16 +58,16 @@ namespace EngineNS.Bricks.Procedure
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
         public Editor.TtPreviewViewport PreviewViewport;
-        [RName.PGRName(FilterExts = UPgcAsset.AssetExt)]
+        [RName.PGRName(FilterExts = TtPgcAsset.AssetExt)]
         public RName PreviewPGC { get; set; }
         public NxRHI.TtGpuSystem GpuSystem { get; private set; }
         public NxRHI.TtGpuDevice GpuDevice { get; private set; }
-        public UPgcEditor()
+        public TtPgcEditor()
         {
             PreviewViewport = new Editor.TtPreviewViewport();
             PreviewPGC = RName.GetRName("template/emptyterrain.pgc", RName.ERNameType.Engine);
         }
-        ~UPgcEditor()
+        ~TtPgcEditor()
         {
             Dispose();
         }
@@ -153,7 +153,7 @@ namespace EngineNS.Bricks.Procedure
 
             IsStarting = true;
 
-            EditAsset = UPgcAsset.LoadAsset(name);
+            EditAsset = TtPgcAsset.LoadAsset(name);
             EditAsset.AssetGraph.GraphEditor = this;
 
             AssetName = name;

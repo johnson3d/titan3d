@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -11,7 +11,10 @@ namespace EngineNS.GamePlay.Scene
         {
             return;
         }
-        [Category("Option")]
+        public virtual void OnDoubleClick()
+        {
+        }
+        [System.ComponentModel.Category("Option")]
         public Graphics.Pipeline.TtHitProxy.EHitproxyType HitproxyType
         {
             get

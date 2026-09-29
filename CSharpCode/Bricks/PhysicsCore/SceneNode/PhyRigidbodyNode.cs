@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Thread.Async;
@@ -34,7 +34,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             get => NodeData as TtPhyRigidbodyNodeData;
         }
         public Bricks.PhysicsCore.TtPhyActor PhyActor { get; set; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public EPhyActorType PhyActorType 
         { 
             get => RigidbodyNodeData.PhyActorType;
@@ -48,11 +48,11 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
                 }
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float Mass { get => RigidbodyNodeData.Mass; set => RigidbodyNodeData.Mass = value; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public FPhyFilterData QueryFilterData { get => RigidbodyNodeData.QueryFilterData; set => RigidbodyNodeData.QueryFilterData = value; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public FPhyFilterData SimulationFilterData { get => RigidbodyNodeData.SimulationFilterData; set => RigidbodyNodeData.SimulationFilterData = value; }
 
         Macross.TtMacrossGetter<TtPhyEventMacrossBase> mMacrossGetter = null;
@@ -81,7 +81,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             }
         }
         [RName.PGMacrossRName<TtPhyEventMacrossBase>(FilterExts = TtMacross.AssetExt)]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName EventMacross
         {
             get

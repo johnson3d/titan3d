@@ -1,8 +1,10 @@
-﻿using System;
+﻿using EngineNS.Bricks.NodeGraph;
+using EngineNS.DesignMacross.Base.Graph;
+using EngineNS.UI.Controls;
+using System;
 using System.Collections.Generic;
-using System.Reflection;
-using EngineNS.Bricks.NodeGraph;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
 {
@@ -102,7 +104,15 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
             if (data.NodeGraph.PinHasLinker(Left))
             {
                 var opPin = data.NodeGraph.GetOppositePin(Left);
-                data.NodeGraph.GetOppositePinNode(Left).BuildStatements(opPin, ref data);
+                var opNode = data.NodeGraph.GetOppositePinNode(Left);
+                if (opNode != null)
+                {
+                    opNode.BuildStatements(opPin, ref data);
+                }
+                else
+                {
+                    Profiler.Log.WriteLine<Profiler.TtMacrossCategory>(Profiler.ELogTag.Warning, $"{data.NodeGraph.AssetName} graph.GetOppositePinNode(Left) == null");
+                }
             }
             if(data.NodeGraph.PinHasLinker(Right))
             {

@@ -27,11 +27,11 @@ namespace EngineNS.Editor.Forms
 
         TtBoneDesc Desc => mLimb?.Desc as TtBoneDesc;
 
-        [Category("General")]
+        [System.ComponentModel.Category("General")]
         [ReadOnly(true)]
         public string Name => Desc?.Name;
 
-        [Category("General")]
+        [System.ComponentModel.Category("General")]
         [ReadOnly(true)]
         public string ParentName => Desc?.ParentName;
 
@@ -39,12 +39,12 @@ namespace EngineNS.Editor.Forms
         /// 当前骨骼的跨编辑器路径 "骨架资产名:骨骼名"。
         /// 右侧 [+] 把它加进全局收藏夹, 其他编辑器(如 DMC 的 KawaiiPhysics 骨骼选择)能直接从收藏夹里挑。
         /// </summary>
-        [Category("General")]
+        [System.ComponentModel.Category("General")]
         [ReadOnly(true)]
         [Infrastructure.TtPGFavoritePath(Channel = Infrastructure.TtEditorFavoritePaths.ChannelBone, AllowPick = false)]
         public string BonePath => Infrastructure.TtEditorFavoritePaths.MakeBonePath(mSkeletonAssetName, Desc?.Name);
 
-        [Category("Transform")]
+        [System.ComponentModel.Category("Transform")]
         public Vector3 Position
         {
             get
@@ -63,7 +63,7 @@ namespace EngineNS.Editor.Forms
             }
         }
 
-        [Category("Transform")]
+        [System.ComponentModel.Category("Transform")]
         public FRotator Rotation
         {
             get
@@ -81,7 +81,7 @@ namespace EngineNS.Editor.Forms
             }
         }
 
-        [Category("Transform")]
+        [System.ComponentModel.Category("Transform")]
         public Vector3 Scale
         {
             get
@@ -340,7 +340,7 @@ namespace EngineNS.Editor.Forms
             var btSize = new Vector2(0, 0);
 
             // ── Row 1: PhysicsAsset 选择 ──
-            ImGuiAPI.Text("PhysAsset:");
+            ImGuiAPI.Text(TtLocalization.Tr("PhysAsset:"));
             ImGuiAPI.SameLine(0, 4);
 
             var displayName = mPhysicsAssetRName != null ? mPhysicsAssetRName.Name : "(None)";
@@ -360,13 +360,13 @@ namespace EngineNS.Editor.Forms
             }
 
             // ── Row 2: ShowBones + EditPhysics + Save ──
-            if (ImGuiAPI.Checkbox("ShowBones", ref mShowBones))
+            if (ImGuiAPI.Checkbox(TtLocalization.Tr("ShowBones"), ref mShowBones))
             {
                 ToggleSkeletonShow(mShowBones);
             }
             ImGuiAPI.SameLine(0, 8);
 
-            if (ImGuiAPI.Checkbox("EditPhysics", ref mEditPhysicsAsset))
+            if (ImGuiAPI.Checkbox(TtLocalization.Tr("EditPhysics"), ref mEditPhysicsAsset))
             {
                 if (mPhysicsAssetNode != null)
                     mPhysicsAssetNode.ShowDebug = mEditPhysicsAsset;
@@ -382,7 +382,7 @@ namespace EngineNS.Editor.Forms
             }
             ImGuiAPI.SameLine(0, 8);
 
-            if (ImGuiAPI.Checkbox("XRay", ref mXRay))
+            if (ImGuiAPI.Checkbox(TtLocalization.Tr("XRay"), ref mXRay))
             {
                 mSkeletonShowNode?.SetXRay(mXRay);
             }
@@ -950,27 +950,27 @@ namespace EngineNS.Editor.Forms
 
                 if (!canAddShape)
                 {
-                    ImGuiAPI.TextDisabled("Load a PhysicsAsset first");
+                    ImGuiAPI.TextDisabled(TtLocalization.Tr("Load a PhysicsAsset first"));
                 }
                 else
                 {
                     var boneName = mRClickedBone.Limb.Desc?.Name ?? "";
-                    ImGuiAPI.TextDisabled($"Bone: {boneName}");
+                    ImGuiAPI.TextDisabled(TtLocalization.Format("Bone: {0}", boneName));
                     ImGuiAPI.Separator();
 
-                    if (ImGuiAPI.Selectable("Add Sphere", false, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                    if (ImGuiAPI.Selectable(TtLocalization.Tr("Add Sphere"), false, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                     {
                         AddShapeToBone(boneName, new TtSphereShape());
                     }
-                    if (ImGuiAPI.Selectable("Add Capsule", false, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                    if (ImGuiAPI.Selectable(TtLocalization.Tr("Add Capsule"), false, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                     {
                         AddShapeToBone(boneName, new TtCapsuleShape());
                     }
-                    if (ImGuiAPI.Selectable("Add Box", false, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                    if (ImGuiAPI.Selectable(TtLocalization.Tr("Add Box"), false, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                     {
                         AddShapeToBone(boneName, new TtBoxShape());
                     }
-                    if (ImGuiAPI.Selectable("Add Plane", false, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                    if (ImGuiAPI.Selectable(TtLocalization.Tr("Add Plane"), false, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                     {
                         AddShapeToBone(boneName, new TtPlaneShape());
                     }

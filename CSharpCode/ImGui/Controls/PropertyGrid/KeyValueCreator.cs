@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -19,7 +19,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
             if (ImGuiAPI.BeginPopup(ctrlId, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
             {
-                if (ImGuiAPI.CollapsingHeader("Key", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("Key"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     KeyTypeSlt.CtrlId = "KeyTypeSlt";
                     var saved = KeyTypeSlt.SelectedType;
@@ -31,7 +31,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
                     ImGuiAPI.Separator();
 
-                    if (ImGuiAPI.TreeNode("Settings"))
+                    if (ImGuiAPI.TreeNode(TtLocalization.Tr("Settings")))
                     {
                         PGKeyData.Target = KeyData;
                         PGKeyData.OnDraw(false, false, false);
@@ -39,7 +39,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     }
                 }
 
-                if (ImGuiAPI.CollapsingHeader("Value", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("Value"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     ValueTypeSlt.CtrlId = "ValueTypeSlt";
                     var saved = ValueTypeSlt.SelectedType;
@@ -51,7 +51,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
                     ImGuiAPI.Separator();
 
-                    if (ImGuiAPI.TreeNode("Settings"))
+                    if (ImGuiAPI.TreeNode(TtLocalization.Tr("Settings")))
                     {
                         PGValueData.Target = ValueData;
                         PGValueData.OnDraw(false, false, false);
@@ -61,7 +61,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
                 ImGuiAPI.Separator();
                 var sz = new Vector2(-1, 0);
-                if (ImGuiAPI.Button("AddItem", in sz))
+                if (ImGuiAPI.Button(TtLocalization.Tr("AddItem"), in sz))
                 {
                     if (KeyData != null && ValueData != null)
                     {

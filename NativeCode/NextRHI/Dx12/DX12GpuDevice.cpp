@@ -645,7 +645,7 @@ namespace NxRHI
 	{
 		ASSERT(file != nullptr);
 		auto result = NewObjectWithInfo<DX12Buffer>(file ? file : __FILE__, line);
-		if (result->Init(this, *desc) == false)
+		if (result->Init(file, line, this, *desc) == false)
 		{
 			result->Release();
 			return nullptr;
@@ -892,7 +892,7 @@ namespace NxRHI
 	IGpuScope* DX12GpuDevice::CreateGpuScope(const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<DX12GpuScope>(file ? file : __FILE__, line);
-		if (result->Init(this) == false)
+		if (result->Init(file, line, this) == false)
 		{
 			result->Release();
 			return nullptr;

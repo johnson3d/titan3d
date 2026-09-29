@@ -8,6 +8,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     //https://zhuanlan.zhihu.com/p/78460344
     //fresnel&schlick
     //https://zhuanlan.zhihu.com/p/303168568
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.Post.ULensFlareNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.Post.ULensFlareNode" })]
     public class TtLensFlareNode
     {
     }

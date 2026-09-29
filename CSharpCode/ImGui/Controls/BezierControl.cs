@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -30,6 +30,7 @@ namespace EngineNS.EGui.Controls
                 }
                 mMinX = value;
                 DefaultControlPointExtension = (mMaxX - mMinX) * 0.1f;
+                ResetView();
             }
         }
         float mMinY = 0.0f;
@@ -53,6 +54,7 @@ namespace EngineNS.EGui.Controls
                     }
                 }
                 mMinY = value;
+                ResetView();
             }
         }
         float mMaxX = 1.0f;
@@ -77,6 +79,7 @@ namespace EngineNS.EGui.Controls
                 }
                 mMaxX = value;
                 DefaultControlPointExtension = (mMaxX - mMinX) * 0.1f;
+                ResetView();
             }
         }
         float mMaxY = 1.0f;
@@ -100,6 +103,7 @@ namespace EngineNS.EGui.Controls
                     }
                 }
                 mMaxY = value;
+                ResetView();
             }
         }
         [Rtti.Meta("")]
@@ -162,6 +166,27 @@ namespace EngineNS.EGui.Controls
         public bool ScalePointRadiusWithSize = true;
         public float DesireWidth = 300;
 
+        public Action<string, Action, Action> HistoryRecorder { get; set; }
+
+        bool mViewInitialized;
+        float mViewMinX;
+        float mViewMaxX;
+        float mViewMinY;
+        float mViewMaxY;
+        int mSelectedPointIdx = -1;
+        bool mSelectedControlPoint;
+        bool mCurveDragActive;
+        List<BezierPointBase> mCurveDragBefore;
+        List<BezierPointBase> mNumericEditBefore;
+
+        enum ESelectedValue
+        {
+            PositionX,
+            PositionY,
+            ControlX,
+            ControlY,
+        }
+
         public void Initialize(float minX, float minY, float maxX, float maxY)
         {
             MinX = minX;
@@ -173,21 +198,237 @@ namespace EngineNS.EGui.Controls
             BezierPoints.Add(new BezierPointBase(new Vector2(maxX, 0.5f * sizeY + minY), new Vector2(maxX - DefaultControlPointExtension * sizeY, 0.5f * sizeY + minY)));
         }
 
+        void EnsureViewRange()
+        {
+            if (mViewInitialized)
+                return;
+            mViewMinX = MinX;
+            mViewMaxX = MaxX;
+            mViewMinY = MinY;
+            mViewMaxY = MaxY;
+            mViewInitialized = true;
+        }
+
+        public void ResetView()
+        {
+            mViewInitialized = false;
+        }
+
         float GetPositionXInCanvas(float bezierPointX, float canvasSizeX, float canvasMinX)
         {
-            return (bezierPointX - MinX) / (MaxX - MinX) * canvasSizeX + canvasMinX;
+            return (bezierPointX - mViewMinX) / (mViewMaxX - mViewMinX) * canvasSizeX + canvasMinX;
         }
         float GetPositionYInCanvas(float bezierPointY, float canvasSizeY, float canvasMinY)
         {
-            return (1 - ((bezierPointY - MinY) / (MaxY - MinY))) * canvasSizeY + canvasMinY;
+            return (1 - ((bezierPointY - mViewMinY) / (mViewMaxY - mViewMinY))) * canvasSizeY + canvasMinY;
         }
         float GetPositionXFromCanvas(float canvasX, float canvasSizeX, float canvasMinX)
         {
-            return (canvasX - canvasMinX) / canvasSizeX * (MaxX - MinX) + MinX;
+            return (canvasX - canvasMinX) / canvasSizeX * (mViewMaxX - mViewMinX) + mViewMinX;
         }
         float GetPositionYFromCanvas(float canvasY, float canvasSizeY, float canvasMinY)
         {
-            return (1 - ((canvasY - canvasMinY) / canvasSizeY)) * (MaxY - MinY) + MinY;
+            return (1 - ((canvasY - canvasMinY) / canvasSizeY)) * (mViewMaxY - mViewMinY) + mViewMinY;
+        }
+
+        static List<BezierPointBase> ClonePoints(List<BezierPointBase> source)
+        {
+            var result = new List<BezierPointBase>();
+            if (source == null)
+                return result;
+            for (int i = 0; i < source.Count; i++)
+            {
+                var point = source[i];
+                result.Add(point == null ? null : new BezierPointBase(point.Position, point.ControlPoint));
+            }
+            return result;
+        }
+
+        static bool PointsEqual(List<BezierPointBase> left, List<BezierPointBase> right)
+        {
+            if (left == null || right == null || left.Count != right.Count)
+                return false;
+            for (int i = 0; i < left.Count; i++)
+            {
+                if (left[i] == null || right[i] == null)
+                {
+                    if (left[i] != right[i])
+                        return false;
+                    continue;
+                }
+                if (left[i].Position != right[i].Position || left[i].ControlPoint != right[i].ControlPoint)
+                    return false;
+            }
+            return true;
+        }
+
+        void RestorePoints(List<BezierPointBase> snapshot)
+        {
+            BezierPoints ??= new List<BezierPointBase>();
+            BezierPoints.Clear();
+            BezierPoints.AddRange(ClonePoints(snapshot));
+            if (mSelectedPointIdx >= BezierPoints.Count)
+                mSelectedPointIdx = -1;
+        }
+
+        void CommitCurveEdit(string name, List<BezierPointBase> before)
+        {
+            var after = ClonePoints(BezierPoints);
+            if (before == null || PointsEqual(before, after))
+                return;
+            var undoSnapshot = ClonePoints(before);
+            var redoSnapshot = ClonePoints(after);
+            HistoryRecorder?.Invoke(name,
+                () => RestorePoints(redoSnapshot),
+                () => RestorePoints(undoSnapshot));
+        }
+
+        void SetAnchorPosition(int index, in Vector2 requestedPosition)
+        {
+            if (index < 0 || index >= BezierPoints.Count)
+                return;
+            var position = requestedPosition;
+            position.Y = MathHelper.Clamp(position.Y, MinY, MaxY);
+            if (index == 0)
+                position.X = MinX;
+            else if (index == BezierPoints.Count - 1)
+                position.X = MaxX;
+            else
+            {
+                int leftCopy = (index & 1) == 1 ? index : index - 1;
+                int rightCopy = leftCopy + 1;
+                position.X = MathHelper.Clamp(position.X,
+                    BezierPoints[leftCopy - 1].Position.X,
+                    BezierPoints[rightCopy + 1].Position.X);
+                var leftPoint = BezierPoints[leftCopy];
+                var rightPoint = BezierPoints[rightCopy];
+                var leftOffset = position - leftPoint.Position;
+                var rightOffset = position - rightPoint.Position;
+                leftPoint.Position = position;
+                leftPoint.ControlPoint += leftOffset;
+                rightPoint.Position = position;
+                rightPoint.ControlPoint += rightOffset;
+                return;
+            }
+            var point = BezierPoints[index];
+            var offset = position - point.Position;
+            point.Position = position;
+            point.ControlPoint += offset;
+        }
+
+        void SetControlPosition(int index, in Vector2 requestedPosition)
+        {
+            if (index < 0 || index >= BezierPoints.Count)
+                return;
+            var position = requestedPosition;
+            var point = BezierPoints[index];
+            if ((index & 1) == 0)
+            {
+                float upper = index + 1 < BezierPoints.Count ?
+                    BezierPoints[index + 1].ControlPoint.X : point.Position.X;
+                position.X = MathHelper.Clamp(position.X, point.Position.X,
+                    Math.Max(point.Position.X, upper));
+            }
+            else
+            {
+                float lower = index > 0 ? BezierPoints[index - 1].ControlPoint.X : point.Position.X;
+                position.X = MathHelper.Clamp(position.X,
+                    Math.Min(lower, point.Position.X), point.Position.X);
+            }
+            point.ControlPoint = position;
+        }
+
+        void ApplySelectedValue(ESelectedValue field, float value)
+        {
+            if (!float.IsFinite(value) || mSelectedPointIdx < 0 || mSelectedPointIdx >= BezierPoints.Count)
+                return;
+            var point = BezierPoints[mSelectedPointIdx];
+            switch (field)
+            {
+                case ESelectedValue.PositionX:
+                    SetAnchorPosition(mSelectedPointIdx, new Vector2(value, point.Position.Y));
+                    break;
+                case ESelectedValue.PositionY:
+                    SetAnchorPosition(mSelectedPointIdx, new Vector2(point.Position.X, value));
+                    break;
+                case ESelectedValue.ControlX:
+                    SetControlPosition(mSelectedPointIdx, new Vector2(value, point.ControlPoint.Y));
+                    break;
+                case ESelectedValue.ControlY:
+                    SetControlPosition(mSelectedPointIdx, new Vector2(point.ControlPoint.X, value));
+                    break;
+            }
+        }
+
+        unsafe void DrawSelectedValue(string label, ESelectedValue field, float value)
+        {
+            var before = ClonePoints(BezierPoints);
+            ImGuiAPI.SetNextItemWidth(120.0f);
+            if (ImGuiAPI.InputFloat(label, ref value, 0.0f, 0.0f, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None))
+            {
+                if (mNumericEditBefore == null)
+                    mNumericEditBefore = before;
+                ApplySelectedValue(field, value);
+            }
+            if (ImGuiAPI.IsItemActivated())
+                mNumericEditBefore = before;
+            if (ImGuiAPI.IsItemDeactivatedAfterEdit())
+            {
+                CommitCurveEdit("Edit Bezier Value", mNumericEditBefore ?? before);
+                mNumericEditBefore = null;
+            }
+        }
+
+        unsafe void DrawSelectedPointEditor()
+        {
+            if (mSelectedPointIdx < 0 || mSelectedPointIdx >= BezierPoints.Count)
+                return;
+            var point = BezierPoints[mSelectedPointIdx];
+            string id = GetHashCode().ToString();
+            DrawSelectedValue($"{TtLocalization.Tr("X")}##BezierX_{id}", ESelectedValue.PositionX, point.Position.X);
+            DrawSelectedValue($"{TtLocalization.Tr("Y")}##BezierY_{id}", ESelectedValue.PositionY, point.Position.Y);
+            DrawSelectedValue($"{TtLocalization.Tr("Handle X")}##BezierControlX_{id}", ESelectedValue.ControlX, point.ControlPoint.X);
+            DrawSelectedValue($"{TtLocalization.Tr("Handle Y")}##BezierControlY_{id}", ESelectedValue.ControlY, point.ControlPoint.Y);
+        }
+
+        void HandleViewNavigation(bool isHovered, in Vector2 canvasP0, in Vector2 canvasSize)
+        {
+            if (!isHovered || canvasSize.X <= 0.0f || canvasSize.Y <= 0.0f)
+                return;
+            var io = ImGuiAPI.GetIO();
+            if (io.MouseWheel != 0.0f)
+            {
+                float xRange = mViewMaxX - mViewMinX;
+                float yRange = mViewMaxY - mViewMinY;
+                float xRatio = MathHelper.Clamp((io.MousePos.X - canvasP0.X) / canvasSize.X, 0.0f, 1.0f);
+                float yRatio = MathHelper.Clamp(1.0f - (io.MousePos.Y - canvasP0.Y) / canvasSize.Y, 0.0f, 1.0f);
+                float mouseX = mViewMinX + xRange * xRatio;
+                float mouseY = mViewMinY + yRange * yRatio;
+                float scale = (float)Math.Pow(0.85, io.MouseWheel);
+                float sourceXRange = Math.Max(1e-5f, MaxX - MinX);
+                float sourceYRange = Math.Max(1e-5f, MaxY - MinY);
+                float minXRange = sourceXRange * 1e-4f;
+                float minYRange = sourceYRange * 1e-4f;
+                float newXRange = MathHelper.Clamp(xRange * scale, minXRange, sourceXRange * 1e4f);
+                float newYRange = MathHelper.Clamp(yRange * scale, minYRange, sourceYRange * 1e4f);
+                mViewMinX = mouseX - newXRange * xRatio;
+                mViewMaxX = mViewMinX + newXRange;
+                mViewMinY = mouseY - newYRange * yRatio;
+                mViewMaxY = mViewMinY + newYRange;
+            }
+            if (ImGuiAPI.IsMouseDragging(ImGuiMouseButton_.ImGuiMouseButton_Middle, 0.0f))
+            {
+                var delta = ImGuiAPI.GetMouseDragDelta(ImGuiMouseButton_.ImGuiMouseButton_Middle, 0.0f);
+                ImGuiAPI.ResetMouseDragDelta(ImGuiMouseButton_.ImGuiMouseButton_Middle);
+                float xRange = mViewMaxX - mViewMinX;
+                float yRange = mViewMaxY - mViewMinY;
+                float offsetX = delta.X / canvasSize.X * xRange;
+                float offsetY = delta.Y / canvasSize.Y * yRange;
+                mViewMinX -= offsetX;
+                mViewMaxX -= offsetX;
+                mViewMinY += offsetY;
+                mViewMaxY += offsetY;
+            }
         }
 
         int mHoverPointIdx = -1;
@@ -200,22 +441,29 @@ namespace EngineNS.EGui.Controls
             UIProxy.CustomButton.ToolButton("?", new Vector2(24));
             if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
             {
-                ImGuiAPI.SetTooltip("How to use\r\n" +
-                    "Add point: Double click to create point in mouse position\r\n" +
-                    "Remove point: Drag point outside to remove it");
+                ImGuiAPI.SetTooltip(TtLocalization.Tr("How to use\r\n") +
+                    TtLocalization.Tr("Add point: Double click to create point in mouse position\r\n") +
+                    TtLocalization.Tr("Remove point: Drag point outside to remove it\r\n") +
+                    TtLocalization.Tr("Pan view: Drag with middle mouse button\r\n") +
+                    TtLocalization.Tr("Zoom view: Use the mouse wheel\r\n") +
+                    TtLocalization.Tr("Precise edit: Right click a point or handle"));
             }
+            DrawSelectedPointEditor();
             var border = new Vector2(15.0f);
             var canvasP0 = ImGuiAPI.GetCursorScreenPos() + border;
             var canvasSize = ImGuiAPI.GetContentRegionAvail() - border * 2;
             if (canvasSize.X < MinSize.X) canvasSize.X = MinSize.X;
             if (canvasSize.Y < MinSize.Y) canvasSize.Y = MinSize.Y;
 
-            ImGuiAPI.InvisibleButton("canvas", canvasSize + border * 2, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonRight);
+            ImGuiAPI.InvisibleButton(TtLocalization.Tr("canvas"), canvasSize + border * 2, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonRight | ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonMiddle);
 
             OnDrawCanvas(in canvasP0, in canvasSize);
         }
         public unsafe void OnDrawCanvas(in Vector2 canvasP0, in Vector2 canvasSize)
         {
+            if (canvasSize.X <= 0.0f || canvasSize.Y <= 0.0f)
+                return;
+            EnsureViewRange();
             var canvasP1 = canvasP0 + canvasSize;
 
             var tempPointRadius = PointRadius;
@@ -238,6 +486,8 @@ namespace EngineNS.EGui.Controls
             }
             bool isActive = true;// ImGuiAPI.IsItemActive();
 
+            BezierPoints ??= new List<BezierPointBase>();
+            HandleViewNavigation(isHovered, in canvasP0, in canvasSize);
             var io = ImGuiAPI.GetIO();
             var drawList = ImGuiAPI.GetWindowDrawList();
             drawList.AddRectFilled(in canvasP0, in canvasP1, UIProxy.StyleConfig.Instance.PanelBackground, 0.0f, ImDrawFlags_.ImDrawFlags_None);
@@ -265,18 +515,33 @@ namespace EngineNS.EGui.Controls
             bool hoverInPoint = false;
 
             var isdragging = isActive && ImGuiAPI.IsMouseDragging(ImGuiMouseButton_.ImGuiMouseButton_Left, 3.0f);
+            if (isdragging && !mCurveDragActive && mHoverPointIdx >= 0 && mHoverPointIdx < BezierPoints.Count)
+            {
+                mCurveDragBefore = ClonePoints(BezierPoints);
+                mCurveDragActive = true;
+                mSelectedPointIdx = mHoverPointIdx;
+                mSelectedControlPoint = mIsHoverControlPoint;
+            }
             if (!isdragging)
             {
-                if (mRemovingPoint)
+                if (mCurveDragActive)
                 {
-                    BezierPoints.RemoveAt(mHoverPointIdx);
-                    BezierPoints.RemoveAt(mHoverPointIdx + (mHoverPointIdx % 2) - 1);
-                    mRemovingPoint = false;
+                    if (mRemovingPoint && mHoverPointIdx > 0 && mHoverPointIdx < BezierPoints.Count - 1)
+                    {
+                        int leftCopy = (mHoverPointIdx & 1) == 1 ? mHoverPointIdx : mHoverPointIdx - 1;
+                        BezierPoints.RemoveAt(leftCopy + 1);
+                        BezierPoints.RemoveAt(leftCopy);
+                        mSelectedPointIdx = -1;
+                    }
+                    CommitCurveEdit(mRemovingPoint ? "Remove Bezier Point" : "Move Bezier Point", mCurveDragBefore);
+                    mCurveDragBefore = null;
+                    mCurveDragActive = false;
                 }
+                mRemovingPoint = false;
                 mHoverPointIdx = -1;
             }
 
-            for (int i=0; i<BezierPoints.Count; i+=2)
+            for (int i = 0; i + 1 < BezierPoints.Count; i += 2)
             {
                 var pt0 = BezierPoints[i];
                 var ctPt0Pos = new Vector2(GetPositionXInCanvas(pt0.ControlPoint.X, canvasSize.X, canvasP0.X), GetPositionYInCanvas(pt0.ControlPoint.Y, canvasSize.Y, canvasP0.Y));
@@ -289,6 +554,20 @@ namespace EngineNS.EGui.Controls
                 var pt0Color = PointColor;
                 var ctPt1Color = ControlPointColor;
                 var pt1Color = PointColor;
+                if (mSelectedPointIdx == i)
+                {
+                    if (mSelectedControlPoint)
+                        ctPt0Color = PointFocusColor;
+                    else
+                        pt0Color = PointFocusColor;
+                }
+                else if (mSelectedPointIdx == i + 1)
+                {
+                    if (mSelectedControlPoint)
+                        ctPt1Color = PointFocusColor;
+                    else
+                        pt1Color = PointFocusColor;
+                }
                 if(isHovered && !isdragging)
                 {
                     var ctPt0Offset = ctPt0Pos - mousePosInCanvas;
@@ -343,6 +622,23 @@ namespace EngineNS.EGui.Controls
                 drawList.AddCircleFilled(pt1Pos, tempPointRadius, pt1Color, 0);
                 drawList.AddCircleFilled(ctPt1Pos, tempCtPointRadius, ctPt1Color, 0);
             }
+
+            string valuePopupName = $"BezierValueEditor##{GetHashCode()}";
+            if (isHovered && !isdragging && hoverInPoint)
+            {
+                if (ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Left, false))
+                {
+                    mSelectedPointIdx = mHoverPointIdx;
+                    mSelectedControlPoint = mIsHoverControlPoint;
+                }
+                if (ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Right, false))
+                {
+                    mSelectedPointIdx = mHoverPointIdx;
+                    mSelectedControlPoint = mIsHoverControlPoint;
+                    ImGuiAPI.OpenPopup(valuePopupName, ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                }
+            }
+
             if(isdragging && mHoverPointIdx >= 0 && mHoverPointIdx < BezierPoints.Count)
             {
                 var pt = BezierPoints[mHoverPointIdx];
@@ -350,81 +646,43 @@ namespace EngineNS.EGui.Controls
                                                    GetPositionYFromCanvas(mousePosInCanvas.Y, canvasSize.Y, canvasP0.Y));
                 if (mIsHoverControlPoint)
                 {
-                    var cpDir = pt.ControlPoint - pt.Position;
-                    var tempVal = mHoverPointIdx % 2;
-                    if(tempVal == 0)
-                    {
-                        mousePosInBezier.X = System.Math.Max(mousePosInBezier.X, pt.Position.X);
-                        pt.ControlPoint = mousePosInBezier;
-                    }
-                    else
-                    {
-                        mousePosInBezier.X = System.Math.Min(mousePosInBezier.X, pt.Position.X);
-                        pt.ControlPoint = mousePosInBezier;
-                    }
+                    SetControlPosition(mHoverPointIdx, in mousePosInBezier);
                     if (mLockLinkedControlPoint && mHoverPointIdx > 0 && mHoverPointIdx < BezierPoints.Count - 1)
                     {
-                        var extPt = BezierPoints[mHoverPointIdx + (mHoverPointIdx % 2 == 0 ? -1 : 1)];
-                        var extPosInCanvas = new Vector2(GetPositionXInCanvas(extPt.Position.X, canvasSize.X, canvasP0.X),
-                                                         GetPositionYInCanvas(extPt.Position.Y, canvasSize.Y, canvasP0.Y));
-                        var extCpPosInCanvas = new Vector2(GetPositionXInCanvas(extPt.ControlPoint.X, canvasSize.X, canvasP0.X),
-                                                           GetPositionYInCanvas(extPt.ControlPoint.Y, canvasSize.Y, canvasP0.Y));
-
-                        var extCpDir = extPt.ControlPoint - extPt.Position;
-                        var rot = Quaternion.GetQuaternionUp(new Vector3(cpDir.X, 0.0f, cpDir.Y), new Vector3(extCpDir.X, 0.0f, extCpDir.Y));
-                        var newCpDir = pt.ControlPoint - pt.Position;
-                        var newExtCpDir = Quaternion.RotateVector3(rot, new Vector3(newCpDir.X, 0.0f, newCpDir.Y));
-                        var newExtCpDirTemp = new Vector2(newExtCpDir.X, newExtCpDir.Z);
-                        newExtCpDirTemp.Normalize();
-                        var newCPPos = newExtCpDirTemp + extPt.Position;
-                        var newCPPosInCanvas = new Vector2(GetPositionXInCanvas(newCPPos.X, canvasSize.X, canvasP0.X),
-                                                           GetPositionYInCanvas(newCPPos.Y, canvasSize.Y, canvasP0.Y));
-                        var dirInCanvas = newCPPosInCanvas - extPosInCanvas;
-                        dirInCanvas.Normalize();
-                        var finalCPPosInCanvas = dirInCanvas * (extCpPosInCanvas - extPosInCanvas).Length() + extPosInCanvas;
-                        var newCp = new Vector2(GetPositionXFromCanvas(finalCPPosInCanvas.X, canvasSize.X, canvasP0.X),
-                                                GetPositionYFromCanvas(finalCPPosInCanvas.Y, canvasSize.Y, canvasP0.Y));
-                        if (tempVal == 0)
-                            newCp.X = System.Math.Min(newCp.X, extPt.Position.X);
-                        else
-                            newCp.X = System.Math.Max(newCp.X, extPt.Position.X);
-                        extPt.ControlPoint = newCp;
+                        int linkedIndex = mHoverPointIdx + ((mHoverPointIdx & 1) == 0 ? -1 : 1);
+                        var linkedPoint = BezierPoints[linkedIndex];
+                        var anchorInCanvas = new Vector2(GetPositionXInCanvas(pt.Position.X, canvasSize.X, canvasP0.X),
+                            GetPositionYInCanvas(pt.Position.Y, canvasSize.Y, canvasP0.Y));
+                        var controlInCanvas = new Vector2(GetPositionXInCanvas(pt.ControlPoint.X, canvasSize.X, canvasP0.X),
+                            GetPositionYInCanvas(pt.ControlPoint.Y, canvasSize.Y, canvasP0.Y));
+                        var linkedControlInCanvas = new Vector2(GetPositionXInCanvas(linkedPoint.ControlPoint.X, canvasSize.X, canvasP0.X),
+                            GetPositionYInCanvas(linkedPoint.ControlPoint.Y, canvasSize.Y, canvasP0.Y));
+                        var oppositeDirection = anchorInCanvas - controlInCanvas;
+                        float directionLength = oppositeDirection.Length();
+                        if (directionLength > 1e-5f)
+                        {
+                            oppositeDirection /= directionLength;
+                            float linkedLength = (linkedControlInCanvas - anchorInCanvas).Length();
+                            var newLinkedControlInCanvas = anchorInCanvas + oppositeDirection * linkedLength;
+                            var newLinkedControl = new Vector2(
+                                GetPositionXFromCanvas(newLinkedControlInCanvas.X, canvasSize.X, canvasP0.X),
+                                GetPositionYFromCanvas(newLinkedControlInCanvas.Y, canvasSize.Y, canvasP0.Y));
+                            SetControlPosition(linkedIndex, in newLinkedControl);
+                        }
                     }
                 }
                 else
                 {
-                    var pos = mousePosInBezier;
-                    if (mHoverPointIdx == 0)
-                    {
-                        //pos = new Vector2(System.Math.Max(System.Math.Min(pt.Position.X, MaxX), MinX),
-                        //                  System.Math.Max(System.Math.Min(mousePosInBezier.Y, MaxY), MinY));
-                        pos.X = MinX;
-                        pos.Y = MathHelper.Clamp(mousePosInBezier.Y, MinY, MaxY);
-                    }
-                    else if(mHoverPointIdx == BezierPoints.Count - 1)
-                    {
-                        //pos = new Vector2(System.Math.Max(System.Math.Min(pt.Position.X, MaxX), MinX),
-                        //                  System.Math.Max(System.Math.Min(mousePosInBezier.Y, MaxY), MinY));
-                        pos.X = MaxX;
-                        pos.Y = MathHelper.Clamp(mousePosInBezier.Y, MinY, MaxY);
-                    }
-                    else
-                    {
-                        pos = new Vector2(System.Math.Max(System.Math.Min(mousePosInBezier.X, MaxX), MinX),
-                                          System.Math.Max(System.Math.Min(mousePosInBezier.Y, MaxY), MinY));
-                        var posInCanvas = new Vector2(GetPositionXInCanvas(pos.X, canvasSize.X, canvasP0.X),
-                                                      GetPositionYInCanvas(pos.Y, canvasSize.Y, canvasP0.Y));
-                        mRemovingPoint = (posInCanvas - mousePosInCanvas).LengthSquared() > 400;
-                    }
-                    var offSet = pos - pt.Position;
-                    pt.Position = pos;
-                    pt.ControlPoint += offSet;
+                    var position = mousePosInBezier;
                     if (mHoverPointIdx > 0 && mHoverPointIdx < BezierPoints.Count - 1)
                     {
-                        BezierPointBase extPt = BezierPoints[mHoverPointIdx + (mHoverPointIdx % 2 == 0 ? -1 : 1)];
-                        extPt.Position = pos;
-                        extPt.ControlPoint += offSet;
+                        position.X = MathHelper.Clamp(position.X, MinX, MaxX);
+                        position.Y = MathHelper.Clamp(position.Y, MinY, MaxY);
+                        var positionInCanvas = new Vector2(GetPositionXInCanvas(position.X, canvasSize.X, canvasP0.X),
+                            GetPositionYInCanvas(position.Y, canvasSize.Y, canvasP0.Y));
+                        mRemovingPoint = (positionInCanvas - mousePosInCanvas).LengthSquared() > 400.0f;
                     }
+                    SetAnchorPosition(mHoverPointIdx, in position);
                 }
             }
             else if (isHovered && !isdragging && !hoverInPoint)
@@ -433,16 +691,30 @@ namespace EngineNS.EGui.Controls
                 {
                     var mousePosInBezier = new Vector2(GetPositionXFromCanvas(mousePosInCanvas.X, canvasSize.X, canvasP0.X),
                                                        GetPositionYFromCanvas(mousePosInCanvas.Y, canvasSize.Y, canvasP0.Y));
-                    for(int i=0; i<BezierPoints.Count; i++)
+                    mousePosInBezier.X = MathHelper.Clamp(mousePosInBezier.X, MinX, MaxX);
+                    mousePosInBezier.Y = MathHelper.Clamp(mousePosInBezier.Y, MinY, MaxY);
+                    for(int i = 1; i < BezierPoints.Count; i++)
                     {
                         if(BezierPoints[i].Position.X > mousePosInBezier.X)
                         {
-                            BezierPoints.Insert(i, new BezierPointBase(new Vector2(mousePosInBezier.X, mousePosInBezier.Y), new Vector2(mousePosInBezier.X + DefaultControlPointExtension, mousePosInBezier.Y)));
-                            BezierPoints.Insert(i, new BezierPointBase(new Vector2(mousePosInBezier.X, mousePosInBezier.Y), new Vector2(mousePosInBezier.X - DefaultControlPointExtension, mousePosInBezier.Y)));
+                            var before = ClonePoints(BezierPoints);
+                            BezierPoints.Insert(i, new BezierPointBase(mousePosInBezier,
+                                new Vector2(mousePosInBezier.X + DefaultControlPointExtension, mousePosInBezier.Y)));
+                            BezierPoints.Insert(i, new BezierPointBase(mousePosInBezier,
+                                new Vector2(mousePosInBezier.X - DefaultControlPointExtension, mousePosInBezier.Y)));
+                            mSelectedPointIdx = i;
+                            mSelectedControlPoint = false;
+                            CommitCurveEdit("Add Bezier Point", before);
                             break;
                         }
                     }
                 }
+            }
+
+            if (ImGuiAPI.BeginPopup(valuePopupName, ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize))
+            {
+                DrawSelectedPointEditor();
+                ImGuiAPI.EndPopup();
             }
         }
     }

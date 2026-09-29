@@ -5,7 +5,8 @@ using EngineNS.Bricks.RenderPolicyEditor;
 
 namespace EngineNS.Bricks.Procedure.Node.GpuNode
 {
-    public class TtGpuNodeBase : Node.UAnyTypeMonocular
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.GpuNode.UGpuNodeBase@EngineCore", "EngineNS.Bricks.Procedure.Node.GpuNode.UGpuNodeBase" })]
+    public class TtGpuNodeBase : Node.TtAnyTypeMonocular
     {
         protected RName mPolicyName;
         [Rtti.Meta("",Order = 2)]

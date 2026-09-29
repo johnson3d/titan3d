@@ -1,4 +1,4 @@
-﻿using EngineNS.EGui.Controls.PropertyGrid;
+using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.UI.Bind;
 using EngineNS.UI.Canvas;
 using EngineNS.UI.Controls;
@@ -13,7 +13,7 @@ namespace EngineNS.UI.Controls
     public partial class TtProgress : TtUIElement, EngineNS.EGui.Controls.PropertyGrid.IPropertyCustomization
     {
         TtBrush mBackgroundBrush;
-        [BindProperty, Rtti.Meta, Category("Appearance")]
+        [BindProperty, Rtti.Meta, System.ComponentModel.Category("Appearance")]
         public TtBrush BackgroundBrush
         {
             get => mBackgroundBrush;
@@ -26,7 +26,7 @@ namespace EngineNS.UI.Controls
         }
 
         TtBrush mProgressBrush;
-        [BindProperty, Rtti.Meta, Category("Appearance")]
+        [BindProperty, Rtti.Meta, System.ComponentModel.Category("Appearance")]
         public TtBrush ProgressBrush
         {
             get => mProgressBrush;
@@ -39,7 +39,7 @@ namespace EngineNS.UI.Controls
         }
 
         float mPercent = 0.0f;
-        [BindProperty, Rtti.Meta, Category("Progress")]
+        [BindProperty, Rtti.Meta, System.ComponentModel.Category("Progress")]
         [EGui.Controls.PropertyGrid.TtValueRange(0, 1)]
         [EGui.Controls.PropertyGrid.TtValueChangeStep(0.01f)]
         public float Percent
@@ -64,7 +64,7 @@ namespace EngineNS.UI.Controls
             PieReverse,
         }
         EFillType mFillType = EFillType.LeftToRight;
-        [BindProperty, Rtti.Meta, Category("Progress")]
+        [BindProperty, Rtti.Meta, System.ComponentModel.Category("Progress")]
         public EFillType FillType
         {
             get => mFillType;
@@ -78,7 +78,7 @@ namespace EngineNS.UI.Controls
         }
 
         float mPieStartAngle = 90.0f;
-        [BindProperty, Rtti.Meta, Category("Progress")]
+        [BindProperty, Rtti.Meta, System.ComponentModel.Category("Progress")]
         [PGShowWithProperty<EFillType>(PropertyName = "FillType", PropertyValue = EFillType.Pie)]
         [PGShowWithProperty<EFillType>(PropertyName = "FillType", PropertyValue = EFillType.PieReverse)]
         public float PieStartAngle

@@ -1,6 +1,13 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Bricks.CodeBuilder.UMacrossAMeta@EngineCore">
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.CodeBuilder.TtMacrossAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="8d2afc08f0a7444b33a322f6a744173d150d426e8c3d6d88cac8e7408c6273bd" />
+      <Path Type="System.String@Unknown" Value="testprog.macross/class_graph.dat" />
+    </e_0>
+  </AssetFiles>
   <AssetId Type="System.Guid@Unknown" Value="15889cf3-0ce5-4b3d-b65d-1bb774080e19" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/pgc/testprog.macross,15889cf3-0ce5-4b3d-b65d-1bb774080e19" />
   <BaseTypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.UProgram@EngineCore" />
   <Description Type="System.String@Unknown" Value="MacrossType:EngineNS.Bricks.Procedure.Node.UProgram@EngineCore&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
@@ -11,7 +18,8 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
+  <IsDisable Type="System.Boolean@Unknown" Value="False" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.CodeBuilder.UMacross@EngineCore" />
   <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.CodeBuilder.UMacross@EngineCore" />
 </Root>

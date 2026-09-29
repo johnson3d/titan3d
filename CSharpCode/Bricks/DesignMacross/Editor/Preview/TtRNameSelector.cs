@@ -108,17 +108,17 @@ namespace EngineNS.DesignMacross.Editor.Preview
             var pos = editorStart + new Vector2(0, ImGuiAPI.GetFrameHeight() + 4);
             ImGuiAPI.SetCursorScreenPos(in pos);
             var sz = new Vector2(0, 0);
-            if (ImGuiAPI.Button("F", in sz))
+            if (ImGuiAPI.Button(TtLocalization.Tr("F"), in sz))
             {
                 EGui.Controls.TtContentBrowser.GlobalFocusAsset = changedValue;
             }
             ImGuiAPI.SameLine(0, 8);
-            if (ImGuiAPI.Button("<", in sz))
+            if (ImGuiAPI.Button(TtLocalization.Tr("<"), in sz))
             {
                 changedValue = EGui.Controls.TtContentBrowser.GlobalSelectedAsset?.GetAssetName();
             }
             ImGuiAPI.SameLine(0, 8);
-            if (ImGuiAPI.Button("-", in sz))
+            if (ImGuiAPI.Button(TtLocalization.Tr("-"), in sz))
             {
                 changedValue = null;
             }

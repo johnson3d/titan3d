@@ -8,7 +8,7 @@ namespace EngineNS.Bricks.Procedure.Node
         static float[] cg = { 0.5f, 0, 0, 1, 1, 0, 1, 0.5f, 0.5f };
         public unsafe static TtBufferComponent GenerateFlowMap_GIS(TtBufferComponent map)
         {
-            var creator = UBufferCreator.CreateInstance<TtSuperBuffer<Vector4, FFloat4Operator>>(map.Width, map.Height, 1);
+            var creator = TtBufferCreator.CreateInstance<TtSuperBuffer<Vector4, FFloat4Operator>>(map.Width, map.Height, 1);
             var flowMap = TtBufferComponent.CreateInstance(creator);
             int width = map.Width;
             int height = map.Height;
@@ -33,7 +33,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
         public static TtBufferComponent GenearteFlowMap_Watershed(TtBufferComponent map, int level = 20, int grad = 5, bool only_slope = true)
         {
-            var creator = UBufferCreator.CreateInstance<TtSuperBuffer<Vector4, FFloat4Operator>>(map.Width, map.Height, 1);
+            var creator = TtBufferCreator.CreateInstance<TtSuperBuffer<Vector4, FFloat4Operator>>(map.Width, map.Height, 1);
             var flowMap = TtBufferComponent.CreateInstance(creator);
             int width = map.Width;
             int count = map.Width * map.Height;

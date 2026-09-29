@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -7,7 +7,7 @@ namespace EngineNS.Bricks.DataSet
 {
     public class TtDataProvider : IO.BaseSerializer
     {
-        [Category("Excel")]
+        [System.ComponentModel.Category("Excel")]
         [Rtti.Meta("")]
         public int RowInSheet { get; set; }
     }

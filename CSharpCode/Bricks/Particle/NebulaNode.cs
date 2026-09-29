@@ -1,4 +1,4 @@
-﻿using EngineNS.GamePlay;
+using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.NxPhysics;
 using System;
@@ -33,7 +33,7 @@ namespace EngineNS.Bricks.Particle
             [Rtti.Meta("")]
             public RName NebulaName { get; set; }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [RName.PGRName(FilterExts = TtNebulaParticle.AssetExt)]
         public RName NebulaName 
         { 

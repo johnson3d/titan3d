@@ -9,25 +9,25 @@ namespace EngineNS.Animation.Asset
 {
     public class TtAnimImportSetting
     {
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public string FileName { get; set; } = "";
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public string FileFormat { get; set; } = "";
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public string FileFormatVersion { get; set; } = "";
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public int AnimationsCount { get; set; } = 0;
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public string UpAxis { get; set; } = "";
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public float UnitScaleFactor { get; set; } = 1;
-        [Category("FileInfo"), ReadOnly(true)]
+        [System.ComponentModel.Category("FileInfo"), ReadOnly(true)]
         public string Generator { get; set; } = "";
-        [Category("ImportSetting")]
+        [System.ComponentModel.Category("ImportSetting")]
         public float UnitScale { get; set; } = 0.01f;
-        [Category("ImportSetting")]
+        [System.ComponentModel.Category("ImportSetting")]
         public bool IgnoreScale { get; set; } = true;
-        [Category("ImportSetting"), Browsable(false)]
+        [System.ComponentModel.Category("ImportSetting"), Browsable(false)]
         public TtAssetImporter AssetImporter = null;
 
         public bool ImportAndSaveAnimation(RName dir)
@@ -50,7 +50,7 @@ namespace EngineNS.Animation.Asset
                 if (ImGuiAPI.BeginPopupModal($"Import Animation", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     var sz = new Vector2(-1, 0);
-                    if (ImGuiAPI.Button("Select FBX", in sz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Select FBX"), in sz))
                     {
                         mFileDialog.OpenModalWithMutiSelect("ChooseFileDlgKey", "Choose File", ".FBX,.fbx", ".", int.MaxValue - 1);
                     }
@@ -113,12 +113,12 @@ namespace EngineNS.Animation.Asset
                     if (eErrorType != enErrorType.None)
                     {
                         var clr = new Vector4(1, 0, 0, 1);
-                        ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
+                        ImGuiAPI.TextColored(in clr, TtLocalization.Format("Source:{0}", mSourceFile));
                     }
                     else
                     {
                         var clr = new Vector4(1, 1, 1, 1);
-                        ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
+                        ImGuiAPI.TextColored(in clr, TtLocalization.Format("Source:{0}", mSourceFile));
                     }
                     ImGuiAPI.Separator();
 
@@ -134,7 +134,7 @@ namespace EngineNS.Animation.Asset
                     sz = new Vector2(0, 0);
                     if (eErrorType == enErrorType.None)
                     {
-                        if (ImGuiAPI.Button("Create Asset", in sz))
+                        if (ImGuiAPI.Button(TtLocalization.Tr("Create Asset"), in sz))
                         {
                             if (DoImport())
                             {
@@ -144,7 +144,7 @@ namespace EngineNS.Animation.Asset
                         }
                         ImGuiAPI.SameLine(0, 20);
                     }
-                    if (ImGuiAPI.Button("Cancel", in sz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Cancel"), in sz))
                     {
                         ImGuiAPI.CloseCurrentPopup();
                         retValue = true;

@@ -5,13 +5,14 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
-    [Bricks.CodeBuilder.ContextMenu("FloatValue", "Float1\\FloatValue", UPgcGraph.PgcEditorKeyword)]
-    public class UFloat1ValueNode : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("FloatValue", "Float1\\FloatValue", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UFloat1ValueNode@EngineCore", "EngineNS.Bricks.Procedure.Node.UFloat1ValueNode" })]
+    public class TtFloat1ValueNode : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UFloat1ValueNode()
+        public TtBufferCreator OutputDesc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public TtFloat1ValueNode()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -22,7 +23,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         [Rtti.Meta("")]
         public float Value { get; set; } = 1.0f;
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var result = graph.BufferCache.FindBuffer(ResultPin);
             
@@ -38,13 +39,14 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return true;
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             return OutputDesc;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("CurveValue", "Float1\\CurveValue", UPgcGraph.PgcEditorKeyword)]
-    public class UFloat1CurveNode : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("CurveValue", "Float1\\CurveValue", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UFloat1CurveNode@EngineCore", "EngineNS.Bricks.Procedure.Node.UFloat1CurveNode" })]
+    public class TtFloat1CurveNode : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinIn ValuePin { get; set; } = new PinIn();
@@ -52,9 +54,9 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn BezierPin { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UFloat1CurveNode()
+        public TtBufferCreator Float1Desc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public TtBufferCreator OutputDesc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public TtFloat1CurveNode()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -65,11 +67,11 @@ namespace EngineNS.Bricks.Procedure.Node
             AddInput(BezierPin, "Bezier", null, "Bezier");
             AddOutput(ResultPin, "Result", OutputDesc);
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (ResultPin == pin)
             {
-                var graph = ParentGraph as UPgcGraph;
+                var graph = ParentGraph as TtPgcGraph;
                 var buffer = graph.BufferCache.FindBuffer(ValuePin);
                 if (buffer != null)
                 {
@@ -79,11 +81,11 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return null;
         }
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var heightComp = graph.BufferCache.FindBuffer(ValuePin);
             var result = graph.BufferCache.FindBuffer(ResultPin);
-            var bzNode = GetInputNode(graph, BezierPin) as UBezier;
+            var bzNode = GetInputNode(graph, BezierPin) as TtBezier;
 
             result.DispatchPixels((target, x, y, z) =>
             {
@@ -96,13 +98,14 @@ namespace EngineNS.Bricks.Procedure.Node
             return true;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Perlin", "Float1\\Perlin", UPgcGraph.PgcEditorKeyword)]
-    public partial class UNoisePerlin : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("Perlin", "Float1\\Perlin", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UNoisePerlin@EngineCore", "EngineNS.Bricks.Procedure.Node.UNoisePerlin" })]
+    public partial class TtNoisePerlin : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator Float1Desc { get; set; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UNoisePerlin()
+        public TtBufferCreator Float1Desc { get; set; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public TtNoisePerlin()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -190,16 +193,16 @@ namespace EngineNS.Bricks.Procedure.Node
             mPerlin = new Support.TtPerlin2(Seed, SamplerSize);
         }
         public DVector3 StartPosition = DVector3.Zero;
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             return Float1Desc;
         }
-        public override bool InitProcedure(UPgcGraph graph)
+        public override bool InitProcedure(TtPgcGraph graph)
         {
             UpdatePerlin();
             return true;
         }
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             if (TryLoadOutBufferFromCache(graph, ResultPin))
                 return true;
@@ -236,19 +239,20 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return Hash160.Emtpy;
         }
-        public override void OnAfterProcedure(UPgcGraph graph)
+        public override void OnAfterProcedure(TtPgcGraph graph)
         {
 
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Normalize", "Float1\\Normalize", UPgcGraph.PgcEditorKeyword)]
-    public class UFloat1Normalize : UMonocular
+    [Bricks.CodeBuilder.ContextMenu("Normalize", "Float1\\Normalize", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UFloat1Normalize@EngineCore", "EngineNS.Bricks.Procedure.Node.UFloat1Normalize" })]
+    public class TtFloat1Normalize : TtMonocular
     {
-        public UFloat1Normalize()
+        public TtFloat1Normalize()
         {
             
         }
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var src = graph.BufferCache.FindBuffer(SrcPin);
             var result = graph.BufferCache.FindBuffer(ResultPin);
@@ -269,15 +273,16 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return true;
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             return ResultDesc;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Clamp", "Float1\\Clamp", UPgcGraph.PgcEditorKeyword)]
-    public class UFloat1Clamp : UMonocular
+    [Bricks.CodeBuilder.ContextMenu("Clamp", "Float1\\Clamp", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UFloat1Clamp@EngineCore", "EngineNS.Bricks.Procedure.Node.UFloat1Clamp" })]
+    public class TtFloat1Clamp : TtMonocular
     {
-        public UFloat1Clamp()
+        public TtFloat1Clamp()
         {
 
         }
@@ -285,7 +290,7 @@ namespace EngineNS.Bricks.Procedure.Node
         public float MinValue { get; set; } = 0.0f;
         [Rtti.Meta("")]
         public float MaxValue { get; set; } = 1.0f;
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var src = graph.BufferCache.FindBuffer(SrcPin);
             var result = graph.BufferCache.FindBuffer(ResultPin);            
@@ -303,13 +308,14 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return true;
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             return ResultDesc;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Smooth", "Float1\\Smooth", UPgcGraph.PgcEditorKeyword)]
-    public class USmoothGaussion : UMonocular
+    [Bricks.CodeBuilder.ContextMenu("Smooth", "Float1\\Smooth", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.USmoothGaussion@EngineCore", "EngineNS.Bricks.Procedure.Node.USmoothGaussion" })]
+    public class TtSmoothGaussion : TtMonocular
     {
         static float[,] BlurMatrix =
         {
@@ -319,7 +325,7 @@ namespace EngineNS.Bricks.Procedure.Node
         };
         [Rtti.Meta("")]
         public bool ClampBorder { get; set; } = true;
-        public override bool OnProcedure(UPgcGraph graph)
+        public override bool OnProcedure(TtPgcGraph graph)
         {
             var curComp = graph.BufferCache.FindBuffer(SrcPin);
             var resultComp = graph.BufferCache.FindBuffer(ResultPin);
@@ -477,8 +483,9 @@ namespace EngineNS.Bricks.Procedure.Node
             return true;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Sobel", "Float1\\Sobel", UPgcGraph.PgcEditorKeyword)]
-    public class USobel : UMonocular
+    [Bricks.CodeBuilder.ContextMenu("Sobel", "Float1\\Sobel", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.USobel@EngineCore", "EngineNS.Bricks.Procedure.Node.USobel" })]
+    public class TtSobel : TtMonocular
     {
         [Browsable(false)]
         public PinOut DDXPin { get; set; } = new PinOut();
@@ -486,17 +493,17 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinOut DDYPin { get; set; } = new PinOut();
         [Browsable(false)]
         public PinOut AnglePin { get; set; } = new PinOut();
-        public USobel()
+        public TtSobel()
         {
             AddOutput(DDXPin, "Dx", ResultDesc);
             AddOutput(DDYPin, "Dy", ResultDesc);
             AddOutput(AnglePin, "Angle", ResultDesc);
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (ResultPin == pin || DDXPin == pin || DDYPin == pin || AnglePin == pin)
             {
-                var graph = ParentGraph as UPgcGraph;
+                var graph = ParentGraph as TtPgcGraph;
                 var buffer = graph.BufferCache.FindBuffer(SrcPin);
                 if (buffer != null)
                 {
@@ -518,7 +525,7 @@ namespace EngineNS.Bricks.Procedure.Node
             { 0, 0, 0 },
             { 1, 2, 1 }
         };
-        public override bool OnProcedure(UPgcGraph graph)
+        public override bool OnProcedure(TtPgcGraph graph)
         {
             var curComp = graph.BufferCache.FindBuffer(SrcPin);
             var resultComp = graph.BufferCache.FindBuffer(ResultPin);
@@ -603,8 +610,9 @@ namespace EngineNS.Bricks.Procedure.Node
             return true;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Stretch", "Float1\\Stretch", UPgcGraph.PgcEditorKeyword)]
-    public class UStretchFloat1 : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("Stretch", "Float1\\Stretch", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UStretchFloat1@EngineCore", "EngineNS.Bricks.Procedure.Node.UStretchFloat1" })]
+    public class TtStretchFloat1 : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinIn TargetPin { get; set; } = new PinIn();
@@ -612,8 +620,8 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn SourcePin { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UStretchFloat1()
+        public TtBufferCreator Float1Desc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public TtStretchFloat1()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -643,11 +651,11 @@ namespace EngineNS.Bricks.Procedure.Node
         public uint DstH { get; set; } = 1;
         [Rtti.Meta("")]
         public TtBufferComponent.EBufferSamplerType SamplerType { get; set; } = TtBufferComponent.EBufferSamplerType.Linear;
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (ResultPin == pin)
             {
-                var graph = ParentGraph as UPgcGraph;
+                var graph = ParentGraph as TtPgcGraph;
                 var buffer = graph.BufferCache.FindBuffer(TargetPin);
                 if (buffer != null)
                 {
@@ -656,7 +664,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return null;
         }
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var left = graph.BufferCache.FindBuffer(TargetPin);
             var right = graph.BufferCache.FindBuffer(SourcePin);
@@ -686,15 +694,16 @@ namespace EngineNS.Bricks.Procedure.Node
             return true;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("UVWBezier", "Float1\\UVWBezier", UPgcGraph.PgcEditorKeyword)]
-    public class UUVWBezierNode : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("UVWBezier", "Float1\\UVWBezier", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UUVWBezierNode@EngineCore", "EngineNS.Bricks.Procedure.Node.UUVWBezierNode" })]
+    public class TtUVWBezierNode : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinIn BezierPin { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UUVWBezierNode()
+        public TtBufferCreator OutputDesc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public TtUVWBezierNode()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -712,9 +721,9 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         [Rtti.Meta("")]
         public ECoord Coord { get; set; } = ECoord.UCoord;
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
-            var bzNode = GetInputNode(graph, BezierPin) as UBezier;
+            var bzNode = GetInputNode(graph, BezierPin) as TtBezier;
             var result = graph.BufferCache.FindBuffer(ResultPin);
 
             for (int i = 0; i < result.Depth; i++)
@@ -746,7 +755,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return true;
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             return OutputDesc;
         }

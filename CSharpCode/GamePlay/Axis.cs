@@ -113,6 +113,7 @@ namespace EngineNS.GamePlay
             Edge = 4,
         }
         enAxisOperationType mAxisOperationType = enAxisOperationType.Select;
+        public enAxisOperationType AxisOperationType => mAxisOperationType;
 
         public enum enAxisSelectMode
         {
@@ -127,6 +128,7 @@ namespace EngineNS.GamePlay
             Local = 1,
         }
         enAxisSpace mAxisSpace = enAxisSpace.Local;
+        public enAxisSpace AxisSpace => mAxisSpace;
         public void SetAxisSpace(enAxisSpace space)
         {
             mAxisSpace = space;
@@ -1081,6 +1083,11 @@ namespace EngineNS.GamePlay
         // 统一Undo/Redo接入点: 宿主编辑器开门时把自己的历史栈挂到这里,
         // gizmo拖动结束(EndTransAxis)时把整次拖动封为一条Transform命令; 为null时行为不变
         public EngineNS.Editor.Infrastructure.TtEditorHistory HistoryHost;
+        // 编辑非节点数据时可暂时关闭代理节点自身的Transform历史，由宿主记录领域命令。
+        public bool EnableTransformHistory { get; set; } = true;
+        public bool IsTransforming => mIsTransAxisOperation;
+        public event Action TransformStarted;
+        public event Action TransformEnded;
         List<FSelectedNodeData> SelectedNodes
         {
             get => mSelectedNodes;
@@ -2011,6 +2018,7 @@ namespace EngineNS.GamePlay
                     mSelectedNodes[i] = tmp;
                 }
             }
+            TransformStarted?.Invoke();
         }
 
         bool mFirstTransAxis = false;
@@ -2755,8 +2763,11 @@ namespace EngineNS.GamePlay
         {
             if (!mInitialized)
                 return;
+            var wasTransforming = mIsTransAxisOperation;
             RecordTransAxisCommand();
             mIsTransAxisOperation = false;
+            if (wasTransforming)
+                TransformEnded?.Invoke();
             mRotArrowAssetNode.Parent = null;
 
             switch(mAxisSpace)
@@ -2770,7 +2781,7 @@ namespace EngineNS.GamePlay
         void RecordTransAxisCommand()
         {
             var history = HistoryHost;
-            if (history == null || history.IsApplying || mIsTransAxisOperation == false || mSelectedNodes == null)
+            if (!EnableTransformHistory || history == null || history.IsApplying || mIsTransAxisOperation == false || mSelectedNodes == null)
                 return;
             var moved = new List<(GamePlay.Scene.TtNode Node, FTransform OldT, FTransform NewT)>();
             for (int i = 0; i < mSelectedNodes.Count; i++)

@@ -91,7 +91,7 @@ namespace EngineNS.Bricks.AdvanceShadow
         public TtRenderGraphPin SelfNodePinOut = TtRenderGraphPin.CreateOutput("Self", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_NONE);
         bool mIsDepth32 = false;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsDepth32
         {
             get => mIsDepth32;
@@ -101,32 +101,32 @@ namespace EngineNS.Bricks.AdvanceShadow
             }
         }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public int PageResolution { get; set; } = 128;
 
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public int PoolDimPages { get; set; } = 16;
 
         /// <summary>
         /// Maximum age (in frames) before an unrequested cached page is evicted.
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public uint PageMaxAge { get; set; } = 30;
 
         /// <summary>
         /// Enable directional light shadow via Clipmap.
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool EnableDirLightShadow { get; set; } = true;
 
         /// <summary>
         /// Enable local light (point/spot/area) shadow via QTree.
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool EnableLocalLightShadow { get; set; } = false;
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace EngineNS.Bricks.AdvanceShadow
         /// Disabling ESM is useful for debugging depth precision issues with R16F.
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool EnableESM
         {
             get => mEnableESM;
@@ -156,56 +156,56 @@ namespace EngineNS.Bricks.AdvanceShadow
         /// PCF kernel half-size when ESM is disabled. 1=3x3, 2=5x5, 3=7x7, etc.
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public int PcfRadius { get; set; } = 2;
 
         /// <summary>
         /// Depth bias for PCF shadow comparison to reduce shadow acne.
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float PcfDepthBias { get; set; } = 0.005f;
 
         // ---- QTree Configuration (moved from TtAdvanceShadowNode) ----
         [Rtti.Meta("")]
-        [Category("QTree")]
+        [System.ComponentModel.Category("QTree")]
         public DVector2 BoxCenter { get; set; } = DVector2.Zero;
 
         [Rtti.Meta("")]
-        [Category("QTree")]
+        [System.ComponentModel.Category("QTree")]
         public double BoxExtent { get; set; } = 1024;
 
         [Rtti.Meta("")]
-        [Category("QTree")]
+        [System.ComponentModel.Category("QTree")]
         public int MaxDeepLevel { get; set; } = 8;
 
         [Rtti.Meta("")]
-        [Category("QTree")]
+        [System.ComponentModel.Category("QTree")]
         public float MaxShadowDistance { get; set; } = 500.0f;
 
         [Rtti.Meta("")]
-        [Category("QTree")]
+        [System.ComponentModel.Category("QTree")]
         public int ShadowMapPage { get; set; } = 512;
 
         [Rtti.Meta("")]
-        [Category("QTree")]
+        [System.ComponentModel.Category("QTree")]
         public int MaxDirtyPagePerFrame { get; set; } = 3;
 
-        [Category("QTree")]
+        [System.ComponentModel.Category("QTree")]
         public float EsmConstant
         {
             get => mShadowQTree?.EsmConstant ?? 80.0f;
             set { if (mShadowQTree != null) mShadowQTree.EsmConstant = value; }
         }
 
-        [Category("QTree")]
+        [System.ComponentModel.Category("QTree")]
         public float MaxExp
         {
             get => mShadowQTree?.MaxExp ?? 50.0f;
             set { if (mShadowQTree != null) mShadowQTree.MaxExp = value; }
         }
 
-        [Category("QTree")]
+        [System.ComponentModel.Category("QTree")]
         public float GaussSigma
         {
             get => mShadowQTree?.GaussSigma ?? 1.5f;
@@ -219,7 +219,7 @@ namespace EngineNS.Bricks.AdvanceShadow
         public TtVSMClipmap Clipmap { get; private set; }
 
         [Rtti.Meta("")]
-        [Category("Clipmap")]
+        [System.ComponentModel.Category("Clipmap")]
         public int ClipmapLevelCount
         {
             get => mClipmapLevelCount;
@@ -234,7 +234,7 @@ namespace EngineNS.Bricks.AdvanceShadow
         private int mClipmapLevelCount = 8;
 
         [Rtti.Meta("")]
-        [Category("Clipmap")]
+        [System.ComponentModel.Category("Clipmap")]
         public float ClipmapBaseHalfExtent
         {
             get => mClipmapBaseHalfExtent;
@@ -249,7 +249,7 @@ namespace EngineNS.Bricks.AdvanceShadow
         private float mClipmapBaseHalfExtent = 8.0f;
 
         [Rtti.Meta("")]
-        [Category("Clipmap")]
+        [System.ComponentModel.Category("Clipmap")]
         public int ClipmapPagesPerDim
         {
             get => mClipmapPagesPerDim;
@@ -264,22 +264,22 @@ namespace EngineNS.Bricks.AdvanceShadow
         private int mClipmapPagesPerDim = 4;
 
         // ---- Clipmap Debug (read-only, shown in Inspector) ----
-        [Category("Clipmap Debug")]
+        [System.ComponentModel.Category("Clipmap Debug")]
         public int ClipmapDirtyPages => Clipmap?.DirtyPageCount ?? 0;
 
-        [Category("Clipmap Debug")]
+        [System.ComponentModel.Category("Clipmap Debug")]
         public int ClipmapMappedPages => Clipmap?.MappedPageCount ?? 0;
 
-        [Category("Clipmap Debug")]
+        [System.ComponentModel.Category("Clipmap Debug")]
         public int ClipmapCachedPages => Clipmap?.CachedPageCount ?? 0;
 
-        [Category("Clipmap Debug")]
+        [System.ComponentModel.Category("Clipmap Debug")]
         public int ClipmapTotalVirtualPages => Clipmap?.TotalVirtualPages ?? 0;
 
-        [Category("Clipmap Debug")]
+        [System.ComponentModel.Category("Clipmap Debug")]
         public int PagePoolAllocated => PagePool?.AllocatedPageCount ?? 0;
 
-        [Category("Clipmap Debug")]
+        [System.ComponentModel.Category("Clipmap Debug")]
         public int PagePoolFree => PagePool?.FreePageCount ?? 0;
 
         // ---- Legacy resources kept for single-page depth pass (per-page rendering scratch) ----

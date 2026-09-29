@@ -4,6 +4,7 @@
   <AssetId Type="System.Guid@Unknown" Value="966bdbaf-6081-4f26-99f8-5b8f0aa6f034" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/fx/hair/hair04.vms,966bdbaf-6081-4f26-99f8-5b8f0aa6f034" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.TtMeshPrimitives&#xA;" />
+  <HasBLAS Type="System.Boolean@Unknown" Value="False" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />

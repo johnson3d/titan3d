@@ -13,7 +13,7 @@ namespace NxRHI
 	public:
 		DX12Buffer();
 		~DX12Buffer();
-		bool Init(DX12GpuDevice* device, const FBufferDesc& desc);
+		bool Init(const char* file, int line, DX12GpuDevice* device, const FBufferDesc& desc);
 
 		virtual void* GetHWBuffer() override{
 			return ((DX12GpuHeap*)mGpuMemory->GpuMem->GpuHeap)->mGpuResource;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -145,7 +145,7 @@ namespace EngineNS.Bricks.PhysicsCore
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Left", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                if (ImGuiAPI.CollapsingHeader("MaterialProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("MaterialProperty"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     MaterialPropGrid.OnDraw(true, false, false);
                 }

@@ -1,4 +1,4 @@
-﻿using Org.BouncyCastle.Asn1.Mozilla;
+using Org.BouncyCastle.Asn1.Mozilla;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -39,7 +39,7 @@ namespace EngineNS.Windows
         public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public Queue<IntPtr> mObjectAllocLogs = new ();
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public int MaxAllocLog { get; set; } = 64;
         ClrString StrName = ClrString.CreateInstance("System.String");
         public unsafe void UpdateLogs()
@@ -90,14 +90,14 @@ namespace EngineNS.Windows
             var bPause = clrMgr.PauseLog;
 
             Vector2 size = new Vector2(0, 0);
-            var result = EGui.UIProxy.DockProxy.BeginMainForm("ClrProfiler", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(TtLocalization.Label("ClrProfiler", "###ClrProfiler"), this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (result)
             {
                 if (ImGuiAPI.BeginTabBar("CLR", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
                 {
                     if (ImGuiAPI.BeginTabItem("ObjectAlloc", null, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
                     {
-                        ImGuiAPI.Checkbox("PauseLog", ref bPause);
+                        ImGuiAPI.Checkbox(TtLocalization.Tr("PauseLog"), ref bPause);
                         clrMgr.PauseLog = bPause;
                         foreach (var i in mObjectAllocLogs)
                         {

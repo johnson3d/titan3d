@@ -105,3 +105,13 @@ typedesc.txt    text eol=lf
 # GraphElementStyles.dat 等节点图数据均为文本），整体标 binary 会丢失 diff 能力。
 # 仅对确认为二进制的单个文件做例外：
 content/tutorials/helloword/hello.ui/editoronlydata.dat binary
+
+# 让 Git 自动处理文本文件的换行符，仓库里统一存 LF
+* text=auto
+
+# 你提到的 .metadata 文件，强制在工作区保持 LF
+*.metadata text eol=lf
+
+# 其他常见类型（按需添加）
+*.bat text eol=crlf
+*.cmd text eol=crlf

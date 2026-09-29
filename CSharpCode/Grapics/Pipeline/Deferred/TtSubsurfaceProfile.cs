@@ -147,21 +147,21 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         #endregion
 
         [Rtti.Meta("")]
-        [Category("Profile")]
+        [System.ComponentModel.Category("Profile")]
         [TtColor3PickerEditor()]
         public Vector3 ScatterColor { get; set; } = new Vector3(0.48f, 0.25f, 0.14f);
 
         [Rtti.Meta("")]
-        [Category("Profile")]
+        [System.ComponentModel.Category("Profile")]
         public float ScatterRadius { get; set; } = 1.0f;
 
         [Rtti.Meta("")]
-        [Category("Profile")]
+        [System.ComponentModel.Category("Profile")]
         [EGui.Controls.PropertyGrid.TtColor3PickerEditor()]
         public Vector3 FalloffColor { get; set; } = new Vector3(1.0f, 0.37f, 0.3f);
 
         [Rtti.Meta("")]
-        [Category("Profile")]
+        [System.ComponentModel.Category("Profile")]
         public float SubsurfaceOpacity { get; set; } = 1.0f;
 
         public FSubsurfaceProfile ToGpuProfile()
@@ -327,7 +327,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Left", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                if (ImGuiAPI.CollapsingHeader("ProfileProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("ProfileProperty"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     ProfilePropGrid.OnDraw(true, false, false);
                 }

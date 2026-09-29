@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -51,14 +51,14 @@ namespace EngineNS.Editor
             FEV4 = 1 << 4,
         }
         public FlagEnum FlagEnumValue { get; set; }
-        [Category("Collections")]
+        [System.ComponentModel.Category("Collections")]
         public int[] ArrayValue { get; set; } = new int[8] { 1, 2, 3, 4, 5, 6, 7, 8 };
-        [Category("Collections")]
+        [System.ComponentModel.Category("Collections")]
         public List<int> ListValue { get; set; } = new List<int>()
         {
             0,1,2,3,4,5
         };
-        [Category("Collections")]
+        [System.ComponentModel.Category("Collections")]
         public Dictionary<int, string> DicValue { get; set; } = new Dictionary<int, string>();
         public Vector2 Vector2Value { get; set; } = new Vector2();
         public Vector3 Vector3Value { get; set; } = new Vector3();
@@ -85,11 +85,11 @@ namespace EngineNS.Editor
             RNameValue = RName.GetRName("UTest/ground.uminst");
         }
 
-        [Category("Ext")]
+        [System.ComponentModel.Category("Ext")]
         public bool ShowExtPro { get; set; } = true;
-        [Category("Ext")]
+        [System.ComponentModel.Category("Ext")]
         public string ExtStringPro { get; set; } = "this is ext property";
-        [Category("Ext")]
+        [System.ComponentModel.Category("Ext")]
         public string ExtCategoryChangeTest { get; set; } = "this origin category is Ext";
 
         [Browsable(false)]
@@ -163,7 +163,7 @@ namespace EngineNS.Editor
             {
                 new EGui.UIProxy.MenuItemProxy()
                 {
-                    MenuName = "File",
+                    MenuName = TtLocalization.Tr("File"),
                     IsTopMenuItem = true,
                     SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
                     {
@@ -173,7 +173,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "New Level...",
+                            MenuName = TtLocalization.Tr("New Level..."),
                             Shortcut = "Ctrl+N",
                             Icon = new EGui.UIProxy.ImageProxy()
                             {
@@ -194,7 +194,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Open Level..",
+                            MenuName = TtLocalization.Tr("Open Level.."),
                             Icon = new EGui.UIProxy.ImageProxy()
                             {
                                 ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
@@ -205,7 +205,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Open Assets...",
+                            MenuName = TtLocalization.Tr("Open Assets..."),
                             Icon = new EGui.UIProxy.ImageProxy()
                             {
                                 ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
@@ -220,7 +220,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Save Current Level",
+                            MenuName = TtLocalization.Tr("Save Current Level"),
                             Icon = new EGui.UIProxy.ImageProxy()
                             {
                                 ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
@@ -231,7 +231,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Save Current Level As...",
+                            MenuName = TtLocalization.Tr("Save Current Level As..."),
                             Icon = new EGui.UIProxy.ImageProxy()
                             {
                                 ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
@@ -244,7 +244,7 @@ namespace EngineNS.Editor
                 },
                 new EGui.UIProxy.MenuItemProxy()
                 {
-                    MenuName = "Edit",
+                    MenuName = TtLocalization.Tr("Edit"),
                     IsTopMenuItem = true,
                     SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
                     {
@@ -254,7 +254,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Undo",
+                            MenuName = TtLocalization.Tr("Undo"),
                             Icon = new EGui.UIProxy.ImageProxy()
                             {
                                 ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
@@ -265,7 +265,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Redo",
+                            MenuName = TtLocalization.Tr("Redo"),
                             Icon = new EGui.UIProxy.ImageProxy()
                             {
                                 ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
@@ -276,7 +276,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Undo History",
+                            MenuName = TtLocalization.Tr("Undo History"),
                             Icon = new EGui.UIProxy.ImageProxy()
                             {
                                 ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
@@ -291,7 +291,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Cut",
+                            MenuName = TtLocalization.Tr("Cut"),
                             Icon = new EGui.UIProxy.ImageProxy()
                             {
                                 ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
@@ -302,7 +302,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Copy",
+                            MenuName = TtLocalization.Tr("Copy"),
                             Icon = new EGui.UIProxy.ImageProxy()
                             {
                                 ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
@@ -313,7 +313,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Paste",
+                            MenuName = TtLocalization.Tr("Paste"),
                             Icon = new EGui.UIProxy.ImageProxy()
                             {
                                 ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
@@ -324,7 +324,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Duplicate",
+                            MenuName = TtLocalization.Tr("Duplicate"),
                             Icon = new EGui.UIProxy.ImageProxy()
                             {
                                 ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
@@ -335,7 +335,7 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Delete",
+                            MenuName = TtLocalization.Tr("Delete"),
                             Icon = new EGui.UIProxy.ImageProxy()
                             {
                                 ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),

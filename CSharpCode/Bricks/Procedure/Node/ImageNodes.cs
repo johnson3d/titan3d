@@ -5,8 +5,9 @@ using System.ComponentModel;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
-    [Bricks.CodeBuilder.ContextMenu("Image", "Image\\Loader", UPgcGraph.PgcEditorKeyword)]
-    public partial class UImageLoader : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("Image", "Image\\Loader", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UImageLoader@EngineCore", "EngineNS.Bricks.Procedure.Node.UImageLoader" })]
+    public partial class TtImageLoader : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinOut RgbPin { get; set; } = new PinOut();
@@ -19,9 +20,9 @@ namespace EngineNS.Bricks.Procedure.Node
         [Browsable(false)]
         public PinOut AlphaPin { get; set; } = new PinOut();
 
-        public UBufferCreator RgbBufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UImageLoader()
+        public TtBufferCreator RgbBufferCreator { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public TtBufferCreator Float1Desc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public TtImageLoader()
         {
             PrevSize = new Vector2(100, 100);
 
@@ -36,7 +37,7 @@ namespace EngineNS.Bricks.Procedure.Node
             AddOutput(BluePin, "B", Float1Desc);
             AddOutput(AlphaPin, "A", Float1Desc);
         }
-        ~UImageLoader()
+        ~TtImageLoader()
         {
             if (TextureSRV != null)
             {
@@ -69,13 +70,13 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             ameta.AddReferenceAsset(ImageName);
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (RgbPin == pin)
                 return RgbBufferCreator;
             return Float1Desc;
         }
-        public override unsafe bool InitProcedure(UPgcGraph graph)
+        public override unsafe bool InitProcedure(TtPgcGraph graph)
         {
             if (ImageName == null)
                 return false;
@@ -126,11 +127,11 @@ namespace EngineNS.Bricks.Procedure.Node
                             Float1Desc.YSize = image.Height;
                             Float1Desc.ZSize = 1;
 
-                            red = TtBufferComponent.CreateInstance(UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
-                            green = TtBufferComponent.CreateInstance(UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
-                            blue = TtBufferComponent.CreateInstance(UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
+                            red = TtBufferComponent.CreateInstance(TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
+                            green = TtBufferComponent.CreateInstance(TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
+                            blue = TtBufferComponent.CreateInstance(TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
 
-                            var rgb = TtBufferComponent.CreateInstance(UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(image.Width, image.Height, 1));
+                            var rgb = TtBufferComponent.CreateInstance(TtBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(image.Width, image.Height, 1));
 
                             graph.BufferCache.RegBuffer(RedPin, red);
                             graph.BufferCache.RegBuffer(GreenPin, green);
@@ -172,12 +173,12 @@ namespace EngineNS.Bricks.Procedure.Node
                             Float1Desc.YSize = image.Height;
                             Float1Desc.ZSize = 1;
 
-                            red = TtBufferComponent.CreateInstance(UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
-                            green = TtBufferComponent.CreateInstance(UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
-                            blue = TtBufferComponent.CreateInstance(UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
-                            alpha = TtBufferComponent.CreateInstance(UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
+                            red = TtBufferComponent.CreateInstance(TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
+                            green = TtBufferComponent.CreateInstance(TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
+                            blue = TtBufferComponent.CreateInstance(TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
+                            alpha = TtBufferComponent.CreateInstance(TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
 
-                            var rgb = TtBufferComponent.CreateInstance(UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(image.Width, image.Height, 1));
+                            var rgb = TtBufferComponent.CreateInstance(TtBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(image.Width, image.Height, 1));
 
                             graph.BufferCache.RegBuffer(RedPin, red);
                             graph.BufferCache.RegBuffer(GreenPin, green);
@@ -232,8 +233,9 @@ namespace EngineNS.Bricks.Procedure.Node
             cmdlist.AddImage(imTextureRef, in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Preview", "Image\\Preview", UPgcGraph.PgcEditorKeyword)]
-    public partial class UPreviewImage : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("Preview", "Image\\Preview", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UPreviewImage@EngineCore", "EngineNS.Bricks.Procedure.Node.UPreviewImage" })]
+    public partial class TtPreviewImage : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinIn InXYZPin { get; set; } = new PinIn();
@@ -252,10 +254,10 @@ namespace EngineNS.Bricks.Procedure.Node
         [Browsable(false)]
         public PinOut ZPin { get; set; } = new PinOut();
 
-        public UBufferCreator XYZBufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UBufferCreator OutputFloat1Desc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UPreviewImage()
+        public TtBufferCreator XYZBufferCreator { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public TtBufferCreator Float1Desc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public TtBufferCreator OutputFloat1Desc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public TtPreviewImage()
         {
             PrevSize = new Vector2(100, 100);
 
@@ -293,7 +295,7 @@ namespace EngineNS.Bricks.Procedure.Node
             imTextureRef.m__TexID = (ulong)PreviewSRV.GetTextureHandle();
             cmdlist.AddImage(imTextureRef, in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (pin == XYZPin)
             {
@@ -301,7 +303,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return OutputFloat1Desc;
         }
-        public override bool OnProcedure(UPgcGraph graph)
+        public override bool OnProcedure(TtPgcGraph graph)
         {
             var xyzSrc = graph.BufferCache.FindBuffer(InXYZPin) as TtSuperBuffer<Vector3, FFloat3Operator>;
             var xSrc = graph.BufferCache.FindBuffer(InXPin) as TtSuperBuffer<float, FFloatOperator>;
@@ -327,7 +329,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
             if (graph.GraphEditor != null)
             {
-                var norMap = new Bricks.Procedure.UImage2D();
+                var norMap = new Bricks.Procedure.TtImage2D();
 
                 if (xyzSrc != null)
                 {
@@ -355,8 +357,9 @@ namespace EngineNS.Bricks.Procedure.Node
             return true;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Surface", "Image\\Surface", UPgcGraph.PgcEditorKeyword)]
-    public partial class UImageSurface : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("Surface", "Image\\Surface", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UImageSurface@EngineCore", "EngineNS.Bricks.Procedure.Node.UImageSurface" })]
+    public partial class TtImageSurface : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinIn HeightPin { get; set; } = new PinIn();
@@ -365,10 +368,10 @@ namespace EngineNS.Bricks.Procedure.Node
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
         
-        public UBufferCreator HeightCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UBufferCreator NormCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UBufferCreator SurfCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<FSquareSurface, FSquareSurfaceOperator>>(-1, -1, -1);
-        public UImageSurface()
+        public TtBufferCreator HeightCreator { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public TtBufferCreator NormCreator { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public TtBufferCreator SurfCreator { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<FSquareSurface, FSquareSurfaceOperator>>(-1, -1, -1);
+        public TtImageSurface()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -379,11 +382,11 @@ namespace EngineNS.Bricks.Procedure.Node
             AddInput(NormPin, "Normal", NormCreator);
             AddOutput(ResultPin, "Surface", HeightCreator, "Surface");
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (pin == ResultPin)
             {
-                var graph = ParentGraph as UPgcGraph;
+                var graph = ParentGraph as TtPgcGraph;
                 var buffer = graph.BufferCache.FindBuffer(HeightPin);
                 if (buffer != null)
                 {
@@ -393,7 +396,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return null;
         }
-        public override bool OnProcedure(UPgcGraph graph)
+        public override bool OnProcedure(TtPgcGraph graph)
         {
             var hMap = graph.BufferCache.FindBuffer(HeightPin) as TtSuperBuffer<float, FFloatOperator>;
             var norMap = graph.BufferCache.FindBuffer(NormPin) as TtSuperBuffer<Vector3, FFloat3Operator>;
@@ -449,8 +452,9 @@ namespace EngineNS.Bricks.Procedure.Node
             return quad.GetPoint(remain_u, remain_v);
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("SamplerSurface", "Image\\SamplerSurface", UPgcGraph.PgcEditorKeyword)]
-    public partial class USamplerSurface : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("SamplerSurface", "Image\\SamplerSurface", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.USamplerSurface@EngineCore", "EngineNS.Bricks.Procedure.Node.USamplerSurface" })]
+    public partial class TtSamplerSurface : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinIn SurfacePin { get; set; } = new PinIn();
@@ -464,8 +468,8 @@ namespace EngineNS.Bricks.Procedure.Node
         public float UEnd { get; set; } = 1;
         [Rtti.Meta("")]
         public float VEnd { get; set; } = 1;
-        public UBufferCreator HeightCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public USamplerSurface()
+        public TtBufferCreator HeightCreator { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public TtSamplerSurface()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -475,11 +479,11 @@ namespace EngineNS.Bricks.Procedure.Node
             AddInput(SurfacePin, "Surface", HeightCreator, "Surface");
             AddOutput(ResultPin, "Result", HeightCreator);
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             return HeightCreator;
         }
-        public override bool OnProcedure(UPgcGraph graph)
+        public override bool OnProcedure(TtPgcGraph graph)
         {
             var result = graph.BufferCache.FindBuffer(ResultPin) as TtSuperBuffer<float, FFloatOperator>;
             var surface = graph.BufferCache.FindBuffer(SurfacePin) as TtSuperBuffer<FSquareSurface, FSquareSurfaceOperator>;
@@ -491,7 +495,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 for (int j = 0; j < result.Width; j++)
                 {
                     float u = j * rangU / result.Width;
-                    var h = UImageSurface.GetHeight(surface, UStart + u, VStart + v);
+                    var h = TtImageSurface.GetHeight(surface, UStart + u, VStart + v);
                     result.SetFloat1(j, i, 0, h.W);
                 }
             }
@@ -646,8 +650,9 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Erosion", "Image\\Erosion", UPgcGraph.PgcEditorKeyword)]
-    public class UErosion : UMonocular
+    [Bricks.CodeBuilder.ContextMenu("Erosion", "Image\\Erosion", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UErosion@EngineCore", "EngineNS.Bricks.Procedure.Node.UErosion" })]
+    public class TtErosion : TtMonocular
     {
         [Rtti.Meta("")]
         public UKernal Kernal { get; set; } = new UKernal();
@@ -656,7 +661,7 @@ namespace EngineNS.Bricks.Procedure.Node
         [Rtti.Meta("")]
         public float DeltaLimit { get; set; } = 0.5f;
         public float ErosionScale { get; set; } = 1.0f;
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var left = graph.BufferCache.FindBuffer(SrcPin);
             var result = graph.BufferCache.FindBuffer(ResultPin);

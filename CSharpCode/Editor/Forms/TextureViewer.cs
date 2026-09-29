@@ -358,7 +358,7 @@ namespace EngineNS.Editor.Forms
             if (CmdParameters != null)
             {
                 ImGuiAPI.SameLine(0, -1);
-                ImGuiAPI.Text("ShowMipLevel");
+                ImGuiAPI.Text(TtLocalization.Tr("ShowMipLevel"));
                 ImGuiAPI.SameLine(0, -1);
                 if (EGui.UIProxy.ComboBox.BeginCombo("##SelectMip", $"{CmdParameters.MipLevel}", 100))
                 {
@@ -366,7 +366,7 @@ namespace EngineNS.Editor.Forms
                     bool bSelected = true;
                     for (int i = 0; i< desc.MipLevels; i++)
                     {
-                        if (ImGuiAPI.Selectable($"{i}", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        if (ImGuiAPI.Selectable(TtLocalization.Format("{0}", i), ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                         {
                             CmdParameters.MipLevel = i;
                         }
@@ -377,7 +377,7 @@ namespace EngineNS.Editor.Forms
             if (CmdParameters.TextureDepth != 0)
             {
                 ImGuiAPI.SameLine(0, -1);
-                ImGuiAPI.Text("ShowSlice3D");
+                ImGuiAPI.Text(TtLocalization.Tr("ShowSlice3D"));
                 ImGuiAPI.SameLine(0, -1);
                 if (EGui.UIProxy.ComboBox.BeginCombo("##SelectSlice", $"{CmdParameters.Slice}", 100))
                 {
@@ -385,7 +385,7 @@ namespace EngineNS.Editor.Forms
                     bool bSelected = true;
                     for (int i = 0; i< desc.Depth; i++)
                     {
-                        if (ImGuiAPI.Selectable($"{i}", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        if (ImGuiAPI.Selectable(TtLocalization.Format("{0}", i), ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                         {
                             CmdParameters.Slice = i;
                         }
@@ -574,7 +574,7 @@ namespace EngineNS.NxRHI
             }
         }
         [TtViewTexture(ButtonText = "ViewTexture")]
-        [Category("Editor")]
+        [System.ComponentModel.Category("Editor")]
         public bool ViewTexture
         {
             get

@@ -73,7 +73,7 @@ namespace EngineNS.GamePlay
         }
         internal DVector3 mCameraOffset = DVector3.Zero;
         internal uint CameralOffsetSerialId = 1;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [ReadOnly(true)]
         public DVector3 CameraOffset 
         {
@@ -108,7 +108,7 @@ namespace EngineNS.GamePlay
             return mSuns[index];
         }
         TtDirectionLight mDirectionLight;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public TtDirectionLight DirectionLight 
         {

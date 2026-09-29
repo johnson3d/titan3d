@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation.Macross.BlendTree;
+using EngineNS.Animation.Macross.BlendTree;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Outline;
@@ -86,7 +86,7 @@ namespace EngineNS.DesignMacross.Design
             Vector2 buttonSize = new Vector2(16, 16);
 
             ImGuiAPI.SetNextItemAllowOverlap();
-            var treeNodeResult = ImGuiAPI.TreeNodeEx("Methods",
+            var treeNodeResult = ImGuiAPI.TreeNodeEx(TtLocalization.Tr("Methods"),
                 ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnDoubleClick |
                 ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen);
             var regionSize = ImGuiAPI.GetContentRegionAvail();
@@ -99,7 +99,7 @@ namespace EngineNS.DesignMacross.Design
             {
                 var drawList = ImGuiAPI.GetWindowDrawList();
                 var menuData = new Support.TtAnyPointer();
-                if (EGui.UIProxy.MenuItemProxy.MenuItem("New Method", null, false, null, in drawList, in menuData, ref mNewMethodMenuState))
+                if (EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("New Method"), null, false, null, in drawList, in menuData, ref mNewMethodMenuState))
                 {
                     const string methodName = "New_Method";
                     var num = 0;

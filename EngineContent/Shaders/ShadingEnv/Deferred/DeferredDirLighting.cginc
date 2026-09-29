@@ -206,10 +206,10 @@ PS_INPUT VS_Main(VS_INPUT input1)
 #if RHI_TYPE == RHI_GL
 	output.vUV.y = 1 - input.vUV.y;
 #endif
-	output.vLightMap.xy = SunPosNDC.xy - input.vPosition.xy;
-	output.vLightMap.z = SunPosNDC.z;
-	output.vLightMap.w = SunPosNDC.w;
-	output.vLightMap.xy = CalcVignetteVS((half2)output.vPosition.xy);
+	output.vExtraUV.xy = SunPosNDC.xy - input.vPosition.xy;
+	output.vExtraUV.z = SunPosNDC.z;
+	output.vExtraUV.w = SunPosNDC.w;
+	output.vExtraUV.xy = CalcVignetteVS((half2)output.vPosition.xy);
 
 	//output.SpecialData.x = input1.vVertexID;
 	return output;

@@ -1,5 +1,6 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Bricks.Procedure.UPgcAssetAMeta@EngineCore">
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.Procedure.TtPgcAssetAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="39025ad5-415f-4585-9357-fac812394c3f" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/terraingen.pgc,39025ad5-415f-4585-9357-fac812394c3f" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.Procedure.UPgcAsset&#xA;Hahah" />
@@ -32,6 +33,6 @@
     <e_7 Value="Game,utest/pgc/terraingen.macross,318c3ff6-c3c8-4e00-bb54-c3c2abaa73a2" />
     <e_8 Value="Game,utest/texture/ground_04.srv,cc988da2-f1c5-4240-a3ec-78bc46536197" />
   </RefAssetRNames>
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.UPgcAsset@EngineCore" />
   <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.TtPgcAsset@EngineCore" />
 </Root>

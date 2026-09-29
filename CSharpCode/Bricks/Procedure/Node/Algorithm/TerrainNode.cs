@@ -7,7 +7,7 @@ namespace EngineNS.Bricks.Procedure.Algorithm
         {
             int size = (1 << exp) + 1;
             int count = size * size;
-            var creator = UBufferCreator.CreateInstance<TtSuperBuffer<Vector4, FFloat4Operator>>(size, size, 1);
+            var creator = TtBufferCreator.CreateInstance<TtSuperBuffer<Vector4, FFloat4Operator>>(size, size, 1);
             var buffer = TtBufferComponent.CreateInstance(creator);
             var result = (float*)buffer.GetSuperPixelAddress(0, 0, 0);
             mpd_init_corner(result, size);

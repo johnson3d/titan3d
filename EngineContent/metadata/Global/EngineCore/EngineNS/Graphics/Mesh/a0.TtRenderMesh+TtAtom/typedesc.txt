@@ -1,2 +1,0 @@
-EngineCore
-EngineNS.Graphics.Mesh.TtRenderMesh.TtAtom@EngineCore

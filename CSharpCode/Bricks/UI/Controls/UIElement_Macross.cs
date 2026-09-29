@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.IO;
 using EngineNS.UI.Bind;
 using EngineNS.UI.Editor;
@@ -114,7 +114,7 @@ namespace EngineNS.UI.Controls
             {
                 Source.Draw(host, drawList);
                 ImGuiAPI.SameLine(0, -1);
-                ImGuiAPI.Text(" (" + Mode.ToString() + ")");
+                ImGuiAPI.Text(TtLocalization.Tr(" (") + Mode.ToString() + TtLocalization.Tr(")"));
             }
             public override void GenerateStatement(TtUIEditor editor, List<TtStatementBase> sequence)
             {
@@ -166,17 +166,17 @@ namespace EngineNS.UI.Controls
             public override void DrawBindInfo(EditorUIHost host, in ImDrawList drawList)
             {
                 ImGuiAPI.AlignTextToFramePadding();
-                ImGuiAPI.Text("MethodBind:");
+                ImGuiAPI.Text(TtLocalization.Tr("MethodBind:"));
                 ImGuiAPI.SameLine(0, -1);
                 ImGuiAPI.BeginGroup();
                 if (!string.IsNullOrEmpty(SetMethodName))
-                    ImGuiAPI.Text("Set " + Target.PropertyName);
+                    ImGuiAPI.Text(TtLocalization.Tr("Set ") + Target.PropertyName);
                 if (!string.IsNullOrEmpty(GetMethodName))
-                    ImGuiAPI.Text("Get " + Target.PropertyName);
+                    ImGuiAPI.Text(TtLocalization.Tr("Get ") + Target.PropertyName);
                 ImGuiAPI.EndGroup();
                 ImGuiAPI.SameLine(0, -1);
                 ImGuiAPI.AlignTextToFramePadding();
-                ImGuiAPI.Text(" (" + Mode.ToString() + ")");
+                ImGuiAPI.Text(TtLocalization.Tr(" (") + Mode.ToString() + TtLocalization.Tr(")"));
             }
 
             public override void GenerateStatement(TtUIEditor editor, List<TtStatementBase> sequence)
@@ -242,14 +242,14 @@ namespace EngineNS.UI.Controls
                 if(prop == null)
                 {
                     ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.ErrorStringColor);
-                    ImGuiAPI.Text("Error bind property: " + PropertyName);
+                    ImGuiAPI.Text(TtLocalization.Tr("Error bind property: ") + PropertyName);
                     ImGuiAPI.PopStyleColor(1);
                 }
                 else
                 {
                     ImGuiAPI.Text(prop.DisplayName);
                     ImGuiAPI.SameLine(0, -1);
-                    ImGuiAPI.Text(" (" + Mode.ToString() + ")");
+                    ImGuiAPI.Text(TtLocalization.Tr(" (") + Mode.ToString() + TtLocalization.Tr(")"));
                 }
             }
             public override void GenerateStatement(TtUIEditor editor, List<TtStatementBase> sequence)

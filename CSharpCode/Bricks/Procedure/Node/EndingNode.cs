@@ -1,14 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
-    [Bricks.CodeBuilder.ContextMenu("RootNode", "RootNode", UPgcGraph.PgcEditorKeyword)]
-    public class UEndingNode : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("RootNode", "RootNode", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UEndingNode@EngineCore", "EngineNS.Bricks.Procedure.Node.UEndingNode" })]
+    public class TtEndingNode : TtPgcNodeBase
     {
-        public UEndingNode()
+        public TtEndingNode()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -21,7 +22,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         public class UEndingNodeDefine
         {
-            internal UEndingNode HostNode;
+            internal TtEndingNode HostNode;
             public class UValueEditorAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
             {
                 public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
@@ -47,7 +48,7 @@ namespace EngineNS.Bricks.Procedure.Node
                             }
                         }
                     }
-                    if (ImGuiAPI.Button("UpdatePins"))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("UpdatePins")))
                     {
                         nodeDef.HostNode.UpdateInputOutputs();
                     }
@@ -105,7 +106,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             OnPositionChanged();
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             return null;
             //var graph = ParentGraph as UPgcGraph;
@@ -118,7 +119,7 @@ namespace EngineNS.Bricks.Procedure.Node
             //}
             //return null;
         }
-        public override bool IsMatchLinkedPin(UBufferCreator input, UBufferCreator output)
+        public override bool IsMatchLinkedPin(TtBufferCreator input, TtBufferCreator output)
         {
             return true;
         }
@@ -126,17 +127,17 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             base.OnLoadLinker(linker);
 
-            var input = linker.OutPin.Tag as UBufferCreator;
+            var input = linker.OutPin.Tag as TtBufferCreator;
             if(input != null)
-                (linker.InPin.Tag as UBufferCreator).BufferType = input.BufferType;
+                (linker.InPin.Tag as TtBufferCreator).BufferType = input.BufferType;
         }
         public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin, TtPinLinker linker)
         {
             base.OnLinkedFrom(iPin, OutNode, oPin, linker);
 
-            var oPT = oPin.Tag as UBufferCreator;
+            var oPT = oPin.Tag as TtBufferCreator;
             if(oPT != null)
-                (iPin.Tag as UBufferCreator).BufferType = oPT.BufferType;
+                (iPin.Tag as TtBufferCreator).BufferType = oPT.BufferType;
         }
         public TtBufferComponent GetResultBuffer(string pinName)
         {
@@ -144,10 +145,10 @@ namespace EngineNS.Bricks.Procedure.Node
             if (pin == null)
                 return null;
 
-            var graph = ParentGraph as UPgcGraph;
+            var graph = ParentGraph as TtPgcGraph;
             return graph.BufferCache.FindBuffer(pin);
         }
-        public override bool OnProcedure(UPgcGraph graph)
+        public override bool OnProcedure(TtPgcGraph graph)
         {
             //for (int i = 0; i < Inputs.Count; i++)
             //{

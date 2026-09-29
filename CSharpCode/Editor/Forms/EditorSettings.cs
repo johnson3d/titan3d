@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -49,11 +49,11 @@ namespace EngineNS.Editor.Forms
 
             Vector2 size = Vector2.Zero;
             var fileDlg = TtEngine.Instance.EditorInstance.FileDialog.mFileDialog;
-            var result = EGui.UIProxy.DockProxy.BeginMainForm("EditorSettings", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(TtLocalization.Label("EditorSettings", "###EditorSettings"), this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (result)
             {
                 DockId = ImGuiAPI.GetWindowDockID();
-                if (ImGuiAPI.Button("Save"))
+                if (ImGuiAPI.Button(TtLocalization.Tr("Save")))
                 {
                     fileDlg.OpenModal("ChooseConfigKey", "Choose Config", ".cfg", TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game));
                 }

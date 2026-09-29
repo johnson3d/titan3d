@@ -14,9 +14,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return TtMaterialInstance.AssetExt;
             }
         }
+        public const string AssetTypeName = "MaterialInstance";
         public override string GetAssetTypeName()
         {
-            return "MInst";
+            return AssetTypeName;
         }
         public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
@@ -367,7 +368,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [RName.PGRName(FilterExts = TtMaterial.AssetExt)]
         public RName MaterialName
         {

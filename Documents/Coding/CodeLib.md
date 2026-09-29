@@ -724,5 +724,81 @@ if (favorites.Count > 0)
 ❗ 新增的 `.cs` 文件要登记到对应 `.projitems` (本机制在 `CSharpCode/Editor/Editor.projitems`),
 projitems 是显式文件列表, 不做通配。
 
+## 14.多国化: 让用户可见文本可翻译
+
+> 强制约束与背后原因见 `CodingGuidelines.md` §10 (键策略 / ImGui ##,### / Dock 标题 /
+> Format 占位符 / 双层目录合并 / LocalizationTool 工作流)。下面只给可直接照抄的写法。
+
+运行时入口 `EngineNS.TtLocalization` (定义 `CSharpCode/Bricks/Localization/Localization.cs`),
+三个 API 按场景选:
+
+```csharp
+// 1. 纯静态可见文本 —— 原文即翻译键
+ImGuiAPI.Text(TtLocalization.Tr("Save"));
+ImGuiAPI.Button(TtLocalization.Tr("Cancel"), in Vector2.Zero);
+
+// 2. 带运行时参数 —— 把插值串改成 composite format, 参数单独传
+//    键为 "Page {0}/{1}", 译文里的 {0}{1} 必须与原文完全一致
+ImGuiAPI.Text(TtLocalization.Format("Page {0}/{1}", pageIndex + 1, pageCount));
+
+// 3. 含 ImGui ## / ### ID 的可见文本 —— 翻译可见部分, 原样保留 ID 后缀
+//    "Prev##ContentBrowserAssetPage" 拆成:
+ImGuiAPI.Button(TtLocalization.Label("Prev", "##ContentBrowserAssetPage"), in Vector2.Zero);
+```
+
+### 14.1 Dock 窗口标题 (BeginMainForm / BeginPanel)
+
+标题既显示又是窗口身份, 必须补 `###原文` 作为稳定 ID, 否则翻译后 Dock 布局错乱:
+
+```csharp
+// ❌ DockProxy.BeginMainForm("CpuProfiler", this, flags);
+// ✓ 可见文字翻译, 窗口身份恒为 ###CpuProfiler (照抄 CpuProfiler.cs / LogWatcher.cs)
+var draw = EGui.UIProxy.DockProxy.BeginMainForm(
+    TtLocalization.Label("CpuProfiler", "###CpuProfiler"), this, flags);
+
+// 多实例窗口: 只对默认实例套 Label, 非空 Name 保留原实例名以区分
+var name = Name;
+if (string.IsNullOrEmpty(name))
+    name = TtLocalization.Label("ContentBrowser", "###ContentBrowser");
+draw = EGui.UIProxy.DockProxy.BeginMainForm(name, this, flags);
+```
+
+### 14.2 菜单项
+
+`MenuItemProxy.MenuName` 直接赋 `Tr(...)`, 扫描器会识别为 UI 文本:
+
+```csharp
+new EGui.UIProxy.MenuItemProxy()
+{
+    MenuName = TtLocalization.Tr("File"),
+    IsTopMenuItem = true,
+};
+```
+
+❗ 菜单在 `InitMainMenu` 构建时缓存文本, 改完 `zh-CN.json` 后要**重启编辑器**才刷新。
+
+### 14.3 PropertyGrid 元数据 attribute —— 保持英文原文, 不写 Tr
+
+```csharp
+// ✓ PG 渲染时统一调用 Tr (PropertyCollection.cs), 这里保持原文即可
+[DisplayName("Color Weight")]
+[Category("Blend")]
+[Description("Blend factor of decal color")]
+public float ColorWeight { get; set; }
+```
+
+### 14.4 补译文
+
+只补译文时**不需要改源码**, 直接编辑 `content/localization/zh-CN.json` (游戏覆盖层):
+
+```json
+"CpuProfiler": { "Translation": "CPU 分析器", "Sources": [ ... ] }
+```
+
+引擎自带译文放 `enginecontent/localization/zh-CN.json`; 游戏层非空译文覆盖引擎层,
+游戏层留空则沿用引擎层。要新增硬编码文本的批量提取, 走 LocalizationTool
+(`content/applocalization.jscfg` 启动): 只更新目录用 Scan → Save Catalog; 同时改源码用
+Scan → Preview Rewrite → Apply Rewrite (Apply 会先自动保存 catalog)。
+
 ## 这是没用的LaTex测试，请忽略
 $$\sum_{i=0}^{^9}{\left(\frac{a_i}{b_i}\right)}$$

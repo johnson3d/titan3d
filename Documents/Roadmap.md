@@ -24,7 +24,7 @@
 - 骨骼动画播放、BlendSpace 1D/2D、动画状态机、动画 Notify（含时间轴编辑 UI）。
 - **RootMotion 与 AnimMontage**：已落地，详见 P0-4 条目（含实际方案与遗留缺口），规划动作类玩法时不要再当作缺口。
 - **Morph Target / BlendShape**：已落地，详见 P0-1。稀疏 delta 存 `.vms`，`TtMorphModifier` + `TtMdfSkinMorphMesh` / `TtMdfMorphMesh`，编辑器有权重滑条。**但权重尚未接动画曲线，且无切线 delta。**
-- **通用时间轴控件** `EGui.Controls.TtTimelineControl`（`CSharpCode/ImGui/Controls/TimelineControl.cs`）：标尺 / 播放头 / 多轨条与打点的选中·拖动·拉伸·右键，Montage 与 Notify 编辑器在用，Sequencer 可以它为基底（但**没有**滚轮缩放 / 滚动 / 轨道树 / 多选 / 曲线绘制，需按 P2-12 阶段 3 扩能）。
+- **通用时间轴控件** `EGui.Controls.TtTimelineControl`（`CSharpCode/ImGui/Controls/TimelineControl.cs`）：标尺 / 播放头 / 多轨条与打点的选中·拖动·拉伸·右键，Montage、Notify 与 Sequencer 编辑器都在用（Sequencer 已以它为基底，轨道层级是用 label 前导空格缩进假装的）。仍**没有**滚轮缩放 / 滚动 / 真正的轨道树 / 多选 / 曲线绘制，需按 P2-12 阶段 3 扩能。
 - Kawaii 次级物理（chain / cloth / rod，XPBD 求解）。
 - 两骨 IK（`TwoBoneIK`）。
 - Actor / Component 体系、CharacterMovement、BehaviorTree、Recast 导航（含 NavCrowd 群体避障）。
@@ -496,15 +496,15 @@ RName），在 `OnPostInitNode` 里 `await InitHitproxyMesh()` 建好 mesh **之
 对标 UE 的 `LevelSequence` + Sequencer 编辑器：一份可保存的 `.sequence` 资产 + 多轨道时间轴编辑器 + 运行时播放器。
 
 - **执行计划**：[design/Sequencer.Plan.md](design/Sequencer.Plan.md) —— 四层数据模型（`Binding → Track → Section → Channel`）、`Int64` tick 双帧率时基、十条硬约束、UE 对标九条结论、可复用设施清单、四阶段任务表与逐阶段验收标准全在那份文档里维护。**本条只维护状态，细节不要往这里搬。**
-- **现状**：阶段 1 代码已全部落地（brick `CSharpCode/Bricks/Sequencer` + `Editor/Forms/SequenceEditor.cs`，`Engine.Window` 与 `MainEditor` 全量重编 0 错误），**未经引擎实跑验收**。前置清理两件已做完：① 从未被调用过的反射式属性 setter 注册表（`TtPropertySetterModule` 一整套）已删除，`Animatable.cs` 309 → 160 行；② 废弃前身 `TtSceneAnimationPlayer` 连同 `Animation.projitems` 的引用行已删除。
+- **现状**：**阶段 1 与阶段 3 的通用属性轨（3.4）已落地，并在编辑器里实跑过**（brick `CSharpCode/Bricks/Sequencer` + `Editor/Forms/SequenceEditor.cs`）。已实证走通的链路：建资产 → 放 mesh → 绑定节点 → 加 Transform 轨与属性轨 → 打点 → 拖播放头帧跟随 → Play → Save 后关闭重开，绑定仍指向同一节点。前置清理两件已做完：① 从未被调用过的反射式属性 setter 注册表（`TtPropertySetterModule` 一整套）已删除，`Animatable.cs` 309 → 160 行；② 废弃前身 `TtSceneAnimationPlayer` 连同 `Animation.projitems` 的引用行已删除。
 - **阶段状态**（每阶段自身可验收，判据见计划文档 §5；阶段 1 的实施偏离见 §8）
-  - [x] **阶段 1｜骨架 + Transform 轨**：资产四层结构、`TtSequencerModule` 驱动、绑定解析（父 Guid + 相对路径）、播放头 scrub、**原值快照与恢复**、Undo/Redo —— 代码完成，**待按计划文档 §5 的 4 条验收标准实跑（含 `UTest_Sequencer` 的 6 组断言）**
-  - [ ] **阶段 2｜镜头 + 动画 + 事件**：相机切换轨、骨骼动画轨、事件轨；顺带修好 `TtGamePlayCamera` 的 tick 与 `NodeId`
-  - [ ] **阶段 3｜编辑体验**：时间轴扩能（缩放/滚动/多选）、曲线与切线编辑、通用属性轨 —— 其中 3.4 通用属性轨的**运行时与资产层已提前完成**（值适配器体系 + `RName` 资产轨 + 反射访问器，见计划文档 §9），**编辑器 UI 未做，界面上还用不起来**
+  - [~] **阶段 1｜骨架 + Transform 轨**：资产四层结构、`TtSequencerModule` 驱动、绑定解析、播放头 scrub、**原值快照与恢复**、Undo/Redo —— 主链路已实跑。计划外补的四件：绑定改成 **Guid 优先 + 名字回退 + 自愈写入**（任务 1.14）、绑定持久化走**预览场景资产**、防 Section 碎片的 **Merge Sections** 菜单、Section 级 **When Finished（KeepState / RestoreState）** 接进求值路径并给了右键菜单入口。**卡在两条验收上所以不算完成**：§5 验收第 3 条“Stop 把目标恢复到进序列前的位置”仍未实跑 —— 恢复路径（`PreAnimatedStore.CaptureIfFirst` / `RestoreAll` + `Player.Stop`）已逐行复核、逻辑成立，剩余风险收窄到 Transform 访问器的 Read/Write 是否对称、以及节点 `Placement` 写回是否真的生效；`UTest_Sequencer` 断言从未实跑。另有一个已知缺口：**KeepState 的 Section 被一帧跨过 `EndTick` 时会粘住中途值**（UE 用 KeepState determinism fence 解决，我们还没做；RestoreState 已被差集恢复顺带盖住）。
+  - [ ] **阶段 2｜镜头 + 动画 + 事件**：相机切换轨、骨骼动画轨、事件轨；顺带修好 `TtGamePlayCamera` 的 tick 与 `NodeId`。**事件轨仍是计划真空**（语义与前两档不同，见计划文档 §11.2）
+  - [~] **阶段 3｜编辑体验**：**3.4 通用属性轨已完整落地**（运行时 + 资产层 + 编辑器 UI）—— 13 个值适配器（含 `Vector2/3/4`、`Color3f/4f`、枚举、`RName`）、反射访问器、`+` 候选属性列表、`Set Value & Key` 打点弹窗与 `Set Key Value` 改值弹窗，界面上已可用。**剩下**：3.1 只做了播放头可视提示与 Section 拖动夹取，滚轮缩放 / 滚动 / 轨道树 / 多选框选未做；3.2 曲线绘制、3.3 插值与切线 UI、3.5 交叉淡化未开始
   - [ ] **阶段 4｜输出**：PIE 与游戏内播放两条路、PNG 图像序列导出
   - [ ] **音轨**：随音频系统（P0-2）落地后补，不阻塞前四阶段
 - **依赖**：音频系统（P0-2）应先落地，否则序列器缺音轨；镜头语言的表现力依赖 P2-13。
-- [~] 进行中（阶段 1 代码完成待实跑验收，阶段 2-4 未开始）
+- [~] 进行中（阶段 1 主链路与 3.4 通用属性轨已落地实跑，Stop 恢复原值与 UTest 待验；阶段 2、阶段 4 与 3.1/3.2/3.3/3.5 未开始）
 
 ### 13. 电影级后处理：DOF 与 MotionBlur
 
@@ -515,10 +515,13 @@ RName），在 `OnPostInitNode` 里 `await InitHitproxyMesh()` 建好 mesh **之
 
 ### 14. 天空与大气：大气散射、体积云、体积雾
 
-- **现状**：`SkyAtmosphere` / `VolumetricCloud` 命中数为 0，现有只有指数高度雾与 SunShaft。
-- **目标**：物理大气散射模型、体积云、真正的体积光照散射雾（区别于当前的屏幕空间高度雾）。
+- **现状**：体积云已落地并重做了效果对齐 —— `CSharpCode/Bricks/FX/Weather/VolumetricCloud.cs`（原 `VolumeCloud.cs`，类 `TtVolumeCloud*` 已重命名为 `TtVolumetricCloud*`，用 `Rtti.Meta.NameAlias` 兼容旧序列化资产）+ `enginecontent/Shaders/Bricks/FX/VolumetricCloud.cginc`。大气散射已新增 —— `CSharpCode/Bricks/FX/Weather/SkyAtmosphere.cs` + `enginecontent/Shaders/Bricks/FX/SkyAtmosphere.cginc`。屏幕空间指数高度雾与 SunShaft 仍在。
+- **已对齐 UE5 的体积云要点**：双叶 Henyey-Greenstein 相位、Beer-Powder 暗边、多散射八度近似、球壳大气分层（非平板盒）、天气图通道修正（r=覆盖率 / g=密度 / b=云类型 / a=海拔）、场景深度剔除、能量守恒解析积分、蓝噪声抖动抑制条带。
+- **已新增的大气散射（Hillaire 2020 单 pass）**：Rayleigh + Mie + Ozone 三层介质、向光二次步进透射率、太阳圆盘、对有几何像素的空气透视、太阳方向/颜色/强度从 `GetSun().DirectionLight` 注入。
+- **目标**：物理大气散射模型 ✔、体积云 ✔、真正的体积光照散射雾（区别于当前的屏幕空间高度雾）—— 体积雾仍未做。
 - **意义**：对主打无限世界的引擎，天空与大气是门面级表现。
-- [ ] 未开始
+- **剩余**：体积雾（真正的 froxel/光线步进体积光照散射）尚未开始；大气散射的天空 LUT 化（transmittance / multi-scatter / sky-view LUT 预计算）可作为后续性能优化。
+- [~] 进行中（体积云已重做并对齐 UE5、大气散射已落地；体积雾未开始）
 
 ### 15. 本地化系统
 
@@ -667,7 +670,7 @@ RName），在 `OnPostInitNode` 里 `await InitHitproxyMesh()` 建好 mesh **之
       残留风险与哨兵：反转后“并行组的产出被同步组消费”变成了会晚一帧的方向，而这种依赖无法静态穷举（`ENodeStyles` 会序列化进资产）。为此在并行收集阶段加了 `TtNode.CheckTickOrderIgnored()`（`GamePlay/Scene/Node.cs`，由 `World.TickLogic` 对并行组节点调用）：一个节点若**同时**带 `ParallelTick` 和非缺省 `GetTickOrder()`，就是自相矛盾的声明（后者在并行组里被静默忽略），会打一次 `ELogTag.Warning` 日志 + `Debug.Assert`，每节点只报一次（靠节点上的非序列化标记去重，首帧之后开销为一次布尔判断）。已核实现有三处 `GetTickOrder` override 均无 `ParallelTick`，因此当前代码不会误触发。**注意这个哨兵只能盖住「声明了顺序却又并行」这一类；若一个并行节点从未 override `GetTickOrder`、却有同步节点暗自依赖它的产出，仍无法检出 —— 彻底解法要等节点层有显式依赖声明。**
       **验收：跑带蒙皮动画的角色，确认姿态与位移不再有一帧错配；并对比 `ScopeTick_SyncTick` / `ScopeTick_ParallelTick` 的耗时，确认并行度没被这次调整意外压缩。**
 - [ ] **骨骼上限 360 硬编码**：`cbSkinMesh` 中 `AbsBonePos[360]` / `AbsBoneQuat[360]` 固定占用较大 CBuffer 空间。若后续要做大规模人群或更精细骨架，考虑改为 StructuredBuffer 或按骨架规模分档 Permutation。同时这也是 Morph 数据不应再挤进该 CBuffer 的原因。
-- [ ] **`TtTrack.AddKeyframeBack` 不排序，但 `Evaluate` 靠 `BinarySearch`**：`Bricks/Animation/Base/Track.cs` 里 `AddKeyframeBack` 自带注释 `//should check time and sort by time` 却直接 `Add`，而 `Evaluate` 用 `KeyFramesList.BinarySearch` 定区间 —— 一旦调用方不按时间递增插入，求值结果就是错的且不报错。应要么在插入时保序，要么改名为 `AddKeyframeUnsafe` 并补一个显式 `Sort`。Sequencer（P2-12）会大量做任意位置打点，这条必须先修。同文件的 `EvaluateClamp` 是 `return default;` 空壳，`FKeyframe.InSlope` / `OutSlope` 与 `FTrackCache.Coeff0..3` 定义了但求值完全不用。
+- [ ] **`TtTrack.AddKeyframeBack` 不排序，但 `Evaluate` 靠 `BinarySearch`**：`Bricks/Animation/Base/Track.cs` 里 `AddKeyframeBack` 自带注释 `//should check time and sort by time` 却直接 `Add`，而 `Evaluate` 用 `KeyFramesList.BinarySearch` 定区间 —— 一旦调用方不按时间递增插入，求值结果就是错的且不报错。应要么在插入时保序，要么改名为 `AddKeyframeUnsafe` 并补一个显式 `Sort`。**这条不再是 Sequencer 的前置** —— Sequencer 最终没有复用 `TtTrack`，而是自建了插入时保序的 `TtScalarChannel` / `TtQuatChannel` / `TtNameChannel`；但 Montage 与 Notify 编辑器仍在用 `TtTrack`，缺陷本身没消失。同文件的 `EvaluateClamp` 是 `return default;` 空壳，`FKeyframe.InSlope` / `OutSlope` 与 `FTrackCache.Coeff0..3` 定义了但求值完全不用。
 - [ ] **`FCurveValue` 是个危险的 explicit union**：`Bricks/Animation/Base/Curve.cs` 中 `[StructLayout(LayoutKind.Explicit, Size = 3)]`，`Nullable<float> FloatValue` 与 `FNullableVector3 Vector3Value` 都在 `FieldOffset(0)`。`Size = 3` 与实际载荷（约 24 字节）自相矛盾，两个字段内存重叠，两个构造函数只是靠写入顺序碰对。目前使用面窄所以未暴露，但任何新增的曲线类型都会踩上。应拆成正常结构体（tag + 分开的字段）或直接改成逐通道 float。另，`TtQuaternionCurve.Evaluate` 用 `Quaternion.Lerp`（非 Slerp）且输出转成 Euler，大角度旋转会失真。
 - [ ] **`TtGamePlayCamera` 的 `OnTickLogic` 被整段注释**：`GamePlay/Camera/Camera.cs:128-133`。后果是**移动相机节点不会改变视图**，节点的 `Placement` 与它持有的 `TtCamera` 完全脱钩；而且 `mCamera` 自己从不创建，只是在 `GameBase.cs:317` / `:387` 被赋为 `RenderPolicy.DefaultCamera`（借用）。同时它继承 `TtLightWeightNodeBase` → `NodeId` 永远是 `Guid.Empty`，无法被持久引用。随 Sequencer（P2-12）一并修。
 - [ ] **README 网络能力措辞**：与 P1-10 同步修正。

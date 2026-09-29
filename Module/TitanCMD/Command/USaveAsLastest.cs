@@ -116,57 +116,57 @@ namespace ProjectCooker.Command
                 {
                     switch (i)
                     {
-                        case Type_Texture:
+                        case EngineNS.NxRHI.TtSrViewAMeta.AssetTypeName:
                             {
                                 await ProcTextures();
                             }
                             break;
-                        case Type_UVAnim:
+                        case EngineNS.EGui.TtUVAnimAMeta.AssetTypeName:
                             {
                                 await ProcUVAnim();
                             }
                             break;
-                        case Type_Mesh:
+                        case EngineNS.Graphics.Mesh.TtMaterialMeshAMeta.AssetTypeName:
                             {
                                 await ProcUMesh();
                             }
                             break;
-                        case Type_MeshPrimitive:
+                        case EngineNS.Graphics.Mesh.TtMeshPrimitivesAMeta.AssetTypeName:
                             {
                                 await ProcMeshPrimitive();
                             }
                             break;
-                        case Type_Material:
+                        case EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta.AssetTypeName:
                             {
                                 await ProcMaterial();
                             }
                             break;
-                        case Type_MaterialInst:
+                        case EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceAMeta.AssetTypeName:
                             {
                                 await ProcMaterialInstance();
                             }
                             break;
-                        case Type_Scene:
+                        case EngineNS.GamePlay.Scene.TtSceneAMeta.AssetTypeName:
                             {
                                 await ProcScene();
                             }
                             break;
-                        case Type_Prefab:
+                        case EngineNS.GamePlay.Scene.TtPrefabAMeta.AssetTypeName:
                             {
                                 await ProcPrefab();
                             }
                             break;
-                        case Type_AnimClip:
+                        case EngineNS.Animation.Asset.TtAnimationClipAMeta.AssetTypeName:
                             {
                                 await ProcAnimClip();
                             }
                             break;
-                        case Type_UI:
+                        case EngineNS.UI.TtUIAssetAMeta.AssetTypeName:
                             {
                                 await ProcUI();
                             }
                             break;
-                        case Type_Macross:
+                        case EngineNS.Bricks.CodeBuilder.TtMacrossAMeta.AssetTypeName:
                             {
                                 await ProcMacross();
                             }

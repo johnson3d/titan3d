@@ -40,6 +40,8 @@
 /binaries/BrickManager/
 /binaries/Tracer/
 /binaries/AloneGame/
+/binaries/LocalizationTool/
+/binaries/cache/
 /binaries/aftermath-shaders/
 /binaries/Core.Window.lib
 /binaries/Core.Window.dll

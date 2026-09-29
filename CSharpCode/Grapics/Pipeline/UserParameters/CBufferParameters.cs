@@ -46,10 +46,10 @@ namespace EngineNS.Graphics.Pipeline.UserParameters
     public class TtCBufferParameterDefinition : IO.BaseSerializer
     {
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         private ECBVarType mVarType = ECBVarType.Float;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public ECBVarType VarType
         {
             get => mVarType;
@@ -63,11 +63,11 @@ namespace EngineNS.Graphics.Pipeline.UserParameters
         }
 
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string ParamName { get; set; } = "Param0";
 
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string DefaultValue { get; set; } = "0";
 
         public static string GetDefaultValueForType(ECBVarType varType)
@@ -170,7 +170,7 @@ namespace EngineNS.Graphics.Pipeline.UserParameters
         }
         [Rtti.Meta("")]
         [RName.PGRName(ReadOnly = true)]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName AssetName { get; set; }
 
         [Rtti.Meta("")]
@@ -277,7 +277,7 @@ namespace EngineNS.Graphics.Pipeline.UserParameters
         #endregion
 
         [Rtti.Meta("")]
-        [Category("Parameters")]
+        [System.ComponentModel.Category("Parameters")]
         public List<TtCBufferParameterDefinition> ParameterDefinitions { get; set; } = new List<TtCBufferParameterDefinition>();
 
         [Rtti.Meta("")]
@@ -289,7 +289,7 @@ namespace EngineNS.Graphics.Pipeline.UserParameters
 
         private string mCallNodeName = null;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string CallNodeName
         {
             get
@@ -564,7 +564,7 @@ namespace EngineNS.Graphics.Pipeline.UserParameters
             public RName CBufferName { get; set; }
 
             [Rtti.Meta("")]
-            [Category("ParameterValues")]
+            [System.ComponentModel.Category("ParameterValues")]
             public List<TtCBufferParameterValue> VarValues { get; set; } = new List<TtCBufferParameterValue>();
         }
 
@@ -576,7 +576,7 @@ namespace EngineNS.Graphics.Pipeline.UserParameters
 
             [Rtti.Meta("")]
             [ReadOnly(true)]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             public ECBVarType VarType { get; set; } = ECBVarType.Float;
 
             public class TtCBufferValueEditorAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
@@ -812,7 +812,7 @@ namespace EngineNS.Graphics.Pipeline.UserParameters
             }
 
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [TtCBufferValueEditor]
             public string Value { get; set; }
 
@@ -826,7 +826,7 @@ namespace EngineNS.Graphics.Pipeline.UserParameters
         public NxRHI.TtCbView CBuffer { get; private set; }
         public TtCBufferParameter CBufferParameter { get; private set; }
 
-        [Category("CBuffer")]
+        [System.ComponentModel.Category("CBuffer")]
         [RName.PGRName(FilterExts = TtCBufferParameter.AssetExt)]
         public RName CBufferName 
         {
@@ -849,7 +849,7 @@ namespace EngineNS.Graphics.Pipeline.UserParameters
                 SyncVarValuesToCBuffer(node);
             }
         }
-        [Category("CBuffer")]
+        [System.ComponentModel.Category("CBuffer")]
         public List<TtCBufferParameterValue> VarValues
         {
             get

@@ -52,7 +52,7 @@ namespace NxRHI
 		mGpuMemory = nullptr;
 	}
 
-	AutoRef<DX12Buffer> CreateUploadBuffer(DX12GpuDevice* device, FMappedSubResource* pData, UINT64 totalSize, UINT size, const char* name)
+	AutoRef<DX12Buffer> CreateUploadBuffer(const char* file, int line, DX12GpuDevice* device, FMappedSubResource* pData, UINT64 totalSize, UINT size, const char* name)
 	{
 		D3D12_HEAP_PROPERTIES properties{};
 		properties.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -82,7 +82,7 @@ namespace NxRHI
 		uploadBuffer->Desc.CpuAccess = (ECpuAccess)(CAS_READ | CAS_WRITE);
 		uploadBuffer->Desc.RowPitch = (UINT)totalSize;
 		uploadBuffer->Desc.Size = size;
-		uploadBuffer->mGpuMemory = MakeWeakRef(device->GetUploadBufferMemAllocator()->AllocGpuMem(device, &resDesc, &properties, D3D12_RESOURCE_STATE_GENERIC_READ, name));
+		uploadBuffer->mGpuMemory = MakeWeakRef(device->GetUploadBufferMemAllocator()->AllocGpuMem(file, line, device, &resDesc, &properties, D3D12_RESOURCE_STATE_GENERIC_READ, name));
 		uploadBuffer->GpuState = GRS_CopySrc;
 		FMappedSubResource mapped;
 		
@@ -97,7 +97,7 @@ namespace NxRHI
 
 		return uploadBuffer;
 	}
-	bool DX12Buffer::Init(DX12GpuDevice* device, const FBufferDesc& desc)
+	bool DX12Buffer::Init(const char* file, int line, DX12GpuDevice* device, const FBufferDesc& desc)
 	{
 		Desc = desc;
 		Desc.InitData = nullptr;
@@ -236,7 +236,7 @@ namespace NxRHI
 			}
 			else*/
 			{
-				mGpuMemory = MakeWeakRef(device->GetDefaultBufferMemAllocator()->AllocGpuMem(device, &resDesc, &properties, resState, "Buffer"));
+				mGpuMemory = MakeWeakRef(device->GetDefaultBufferMemAllocator()->AllocGpuMem(file, line, device, &resDesc, &properties, resState, "Buffer"));
 			}
 			
 			//mGpuMemory->GetDX12GpuHeap()-> mGpuResource->SetName(L"Memory:Pooled");
@@ -265,7 +265,7 @@ namespace NxRHI
 				UINT64 rowSize = 0, totalSize = 0;
 				device->mDevice->GetCopyableFootprints(&resDesc, 0, 1, 0, &footPrint, &numX, &rowSize, &totalSize);
 
-				auto bf = CreateUploadBuffer(device, desc.InitData, totalSize, Desc.Size, "UploadBuffer");
+				auto bf = CreateUploadBuffer(file, line, device, desc.InitData, totalSize, Desc.Size, "UploadBuffer");
 
 				{
 					AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
@@ -545,7 +545,7 @@ namespace NxRHI
 		}
 		return flags;
 	}
-	AutoRef<DX12Buffer> CreateUploadResource(DX12GpuDevice* device, UINT rowPitch, UINT64 uploadSize, UINT64 rowSize, UINT numOfRows, UINT numOfSlice, EPixelFormat format, FMappedSubResource* mappedResource, const char* name)
+	AutoRef<DX12Buffer> CreateUploadResource(const char* file, int line, DX12GpuDevice* device, UINT rowPitch, UINT64 uploadSize, UINT64 rowSize, UINT numOfRows, UINT numOfSlice, EPixelFormat format, FMappedSubResource* mappedResource, const char* name)
 	{
 		D3D12_HEAP_PROPERTIES properties{};
 		properties.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -577,7 +577,7 @@ namespace NxRHI
 		uploadBuffer->Desc.RowPitch = (UINT)rowPitch;
 		uploadBuffer->Desc.DepthPitch = (UINT)rowPitch * numOfRows;
 		uploadBuffer->Desc.Size = (UINT)uploadSize;
-		uploadBuffer->mGpuMemory = MakeWeakRef(device->GetUploadBufferMemAllocator()->AllocGpuMem(device, &resDesc, &properties, D3D12_RESOURCE_STATE_GENERIC_READ, name));
+		uploadBuffer->mGpuMemory = MakeWeakRef(device->GetUploadBufferMemAllocator()->AllocGpuMem(file, line, device, &resDesc, &properties, D3D12_RESOURCE_STATE_GENERIC_READ, name));
 		uploadBuffer->GpuState = GRS_CopySrc;
 
 		if (uploadBuffer != nullptr)
@@ -615,7 +615,7 @@ namespace NxRHI
 	// 把 CPU 侧紧凑排列的区域数据传到纹理的 (X, Y, Z) 偏移处。
 	// D3D12 要求 placed footprint 的 RowPitch 按 D3D12_TEXTURE_DATA_PITCH_ALIGNMENT 对齐,
 	// 故暖区缓冲按对齐后的 pitch 逐行重排 (由 CreateUploadResource 内部完成)。
-	static AutoRef<ICopyDraw> MakeRegionCopyDraw(DX12GpuDevice* device, ITexture* target, UINT subRes, void* pData, const FSubResourceFootPrint* fp, EPixelFormat texFormat)
+	static AutoRef<ICopyDraw> MakeRegionCopyDraw(const char* file, int line, DX12GpuDevice* device, ITexture* target, UINT subRes, void* pData, const FSubResourceFootPrint* fp, EPixelFormat texFormat)
 	{
 		const UINT rowSize = fp->RowPitch;
 		// 行数由 TotalSize / RowPitch 推出, 对块压缩格式得到的是块行数, 同样成立。
@@ -627,7 +627,7 @@ namespace NxRHI
 		initData.pData = pData;
 		initData.RowPitch = rowSize;
 		initData.DepthPitch = rowSize * numOfRows;
-		auto bf = CreateUploadResource(device, alignedRowPitch, uploadSize, rowSize, numOfRows, 1, texFormat, &initData, "Upload Texture Region");
+		auto bf = CreateUploadResource(file, line, device, alignedRowPitch, uploadSize, rowSize, numOfRows, 1, texFormat, &initData, "Upload Texture Region");
 
 		AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 		cpDraw->BindTextureDest(target);
@@ -802,7 +802,7 @@ namespace NxRHI
 					UINT64 rowSize, totalSize;
 					device->mDevice->GetCopyableFootprints(&resDesc, j, 1, 0, &footPrint, &numX, &rowSize, &totalSize);
 
-					auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, d, Desc.Format, &desc.InitData[j], "Upload Texture");
+					auto bf = CreateUploadResource(__FILE__, __LINE__, device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, d, Desc.Format, &desc.InitData[j], "Upload Texture");
 					AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 					cpDraw->BindTextureDest(this); 
 					cpDraw->BindBufferSrc(bf);
@@ -955,7 +955,7 @@ namespace NxRHI
 
 			if (IsPartialRegionFootPrint(pFootPrint))
 			{
-				auto cpDraw = MakeRegionCopyDraw(device, this, subRes, pData, pFootPrint, Desc.Format);
+				auto cpDraw = MakeRegionCopyDraw(__FILE__, __LINE__, device, this, subRes, pData, pFootPrint, Desc.Format);
 				cmd->PushGpuDraw(cpDraw.GetPtr());
 				return;
 			}
@@ -969,7 +969,7 @@ namespace NxRHI
 			initData.pData = pData;
 			initData.RowPitch = pFootPrint->RowPitch;
 			initData.DepthPitch = pFootPrint->TotalSize;
-			auto bf = CreateUploadResource(device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, Desc.Depth, Desc.Format, &initData, "Upload Texture");
+			auto bf = CreateUploadResource(__FILE__, __LINE__, device, footPrint.Footprint.RowPitch, totalSize, rowSize, numX, Desc.Depth, Desc.Format, &initData, "Upload Texture");
 			
 			AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
 			cpDraw->BindTextureDest(this);
@@ -1014,7 +1014,7 @@ namespace NxRHI
 
 			if (IsPartialRegionFootPrint(pFootPrint))
 			{
-				auto cpDraw = MakeRegionCopyDraw(device, this, subRes, pData, pFootPrint, Desc.Format);
+				auto cpDraw = MakeRegionCopyDraw(__FILE__, __LINE__, device, this, subRes, pData, pFootPrint, Desc.Format);
 				FTransientCmd tsCmd(device, EQueueType::QU_Transfer, "Texture.UpdateGpuDataRegion");
 				tsCmd.GetCmdList()->PushGpuDraw(cpDraw.GetPtr());
 				return;

@@ -1,4 +1,4 @@
-﻿using EngineNS.DesignMacross.Base.Description;
+using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.Rtti;
@@ -36,7 +36,7 @@ namespace EngineNS.DesignMacross.Editor.GraphPanel
     {
         public void Draw(TtNavigableGraphsPanel navigableGraphsPanel, FDesignMacrossEditorRenderingContext context)
         {
-            if (ImGuiAPI.Button("Snap"))
+            if (ImGuiAPI.Button(TtLocalization.Tr("Snap")))
             {
                 var presentWindow = ImGuiAPI.GetWindowViewportData();
                 if (presentWindow != null)
@@ -48,7 +48,7 @@ namespace EngineNS.DesignMacross.Editor.GraphPanel
                 }
             }
             ImGuiAPI.SameLine(0, 5);
-            if (ImGuiAPI.Button("<"))
+            if (ImGuiAPI.Button(TtLocalization.Tr("<")))
             {
                 if (navigableGraphsPanel.Navigation.Count > 1)
                 {
@@ -60,7 +60,7 @@ namespace EngineNS.DesignMacross.Editor.GraphPanel
             foreach (var graph in navigableGraphsPanel.Navigation.ToArray().Reverse())
             {
                 ImGuiAPI.SameLine(0, -1);
-                ImGuiAPI.Text("/");
+                ImGuiAPI.Text(TtLocalization.Tr("/"));
                 ImGuiAPI.SameLine(0, -1);
                 if (ImGuiAPI.Button(graph.Name))
                 {

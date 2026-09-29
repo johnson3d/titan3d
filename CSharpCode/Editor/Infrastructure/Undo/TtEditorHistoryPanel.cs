@@ -26,10 +26,10 @@ namespace EngineNS.Editor.Infrastructure
         {
             if (history == null)
             {
-                ImGuiAPI.Text("History is disabled");
+                ImGuiAPI.Text(TtLocalization.Tr("History is disabled"));
                 return;
             }
-            ImGuiAPI.Text($"Steps: {history.CurrentStep}/{history.Commands.Count}{(history.IsDirtyFromHistory ? " *" : "")}");
+            ImGuiAPI.Text(TtLocalization.Format("Steps: {0}/{1}{2}", history.CurrentStep, history.Commands.Count, (history.IsDirtyFromHistory ? " *" : "")));
             ImGuiAPI.SameLine(0, -1);
             var btSize = Vector2.Zero;
             if (EGui.UIProxy.CustomButton.ToolButton("Clear", in btSize))
@@ -39,7 +39,7 @@ namespace EngineNS.Editor.Infrastructure
             ImGuiAPI.Separator();
 
             // 起始状态条目
-            if (ImGuiAPI.Selectable("<Initial State>", history.CurrentStep == 0, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+            if (ImGuiAPI.Selectable(TtLocalization.Tr("<Initial State>"), history.CurrentStep == 0, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
             {
                 history.JumpTo(0);
             }

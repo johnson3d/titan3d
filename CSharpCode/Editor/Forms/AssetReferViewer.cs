@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
 using System.ComponentModel;
@@ -57,7 +57,7 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.SetCursorPos(in ctrlPos);
             ImGuiAPI.Dummy(in Vector2.Zero);
             ImGuiAPI.PushID($"{this.NodeId.ToString()}");
-            if (ImGuiAPI.Button("In"))
+            if (ImGuiAPI.Button(TtLocalization.Tr("In")))
             {
                 if (AMeta != null)
                 {
@@ -98,7 +98,7 @@ namespace EngineNS.Editor.Forms
                 }
             }
             ImGuiAPI.SameLine(0, 10);
-            if (ImGuiAPI.Button("Out"))
+            if (ImGuiAPI.Button(TtLocalization.Tr("Out")))
             {
                 if (AMeta != null)
                 {

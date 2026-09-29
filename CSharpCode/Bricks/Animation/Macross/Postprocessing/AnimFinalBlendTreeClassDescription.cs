@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation.Asset;
+using EngineNS.Animation.Asset;
 using EngineNS.Animation.BlendTree;
 using EngineNS.Animation.Macross.BlendTree;
 using EngineNS.Animation.Macross.BlendTree.Node;
@@ -25,7 +25,7 @@ namespace EngineNS.Animation.Macross.Postprocessing
     public class TtAnimFinalBlendTreeClassDescription : TtBlendTreeClassDescription, IAnimMacrossClassDescription
     {
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public override string Name { get; set; } = "AnimFinalBlendTree";
     }
 }

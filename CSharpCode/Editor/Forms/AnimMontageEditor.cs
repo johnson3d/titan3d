@@ -350,14 +350,14 @@ namespace EngineNS.Editor.Forms
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Left", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                if (ImGuiAPI.CollapsingHeader("Montage", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
+                if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("Montage"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     MontagePropGrid.OnDraw(true, false, false);
                 }
-                if (ImGuiAPI.CollapsingHeader("Selected", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
+                if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("Selected"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     if (mSelectedObject == null)
-                        ImGuiAPI.Text("Select a segment / section / notify in timeline");
+                        ImGuiAPI.Text(TtLocalization.Tr("Select a segment / section / notify in timeline"));
                     else
                         DetailPropGrid.OnDraw(true, false, false);
                 }
@@ -528,7 +528,7 @@ namespace EngineNS.Editor.Forms
 
             if (mPopupForItem)
             {
-                if (ImGuiAPI.MenuItem("Remove", null, false, true))
+                if (ImGuiAPI.MenuItem(TtLocalization.Tr("Remove"), null, false, true))
                 {
                     RemoveSelectedObject();
                 }
@@ -537,22 +537,22 @@ namespace EngineNS.Editor.Forms
             {
                 if (mPopupTrackIndex == SectionTrackOffset)
                 {
-                    if (ImGuiAPI.MenuItem("Add Section Here", null, false, true))
+                    if (ImGuiAPI.MenuItem(TtLocalization.Tr("Add Section Here"), null, false, true))
                         AddSection(mPopupTime);
                 }
                 else if (mPopupTrackIndex == NotifyTrackOffset)
                 {
-                    if (ImGuiAPI.MenuItem("Add Transient Notify", null, false, true))
+                    if (ImGuiAPI.MenuItem(TtLocalization.Tr("Add Transient Notify"), null, false, true))
                         AddNotify(mPopupTime, false);
-                    if (ImGuiAPI.MenuItem("Add Durative Notify", null, false, true))
+                    if (ImGuiAPI.MenuItem(TtLocalization.Tr("Add Durative Notify"), null, false, true))
                         AddNotify(mPopupTime, true);
                 }
                 else
                 {
-                    if (ImGuiAPI.MenuItem("Add Segment Here", null, false, true))
+                    if (ImGuiAPI.MenuItem(TtLocalization.Tr("Add Segment Here"), null, false, true))
                         AddSegment(mPopupTrackIndex - SlotTrackOffset, mPopupTime);
                 }
-                if (ImGuiAPI.MenuItem("Add Slot Track", null, false, true))
+                if (ImGuiAPI.MenuItem(TtLocalization.Tr("Add Slot Track"), null, false, true))
                     AddSlotTrack();
             }
             ImGuiAPI.EndPopup();

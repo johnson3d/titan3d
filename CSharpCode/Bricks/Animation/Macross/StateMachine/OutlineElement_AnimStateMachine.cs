@@ -1,4 +1,4 @@
-﻿using EngineNS.DesignMacross.Base.Render;
+using EngineNS.DesignMacross.Base.Render;
 using EngineNS.DesignMacross.Base.Outline;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.Bricks.StateMachine.Macross;
@@ -61,7 +61,7 @@ namespace EngineNS.Bricks.Animation.Macross
                 var menuData = new Support.TtAnyPointer();
                 EGui.UIProxy.MenuItemProxy.MenuState newMethodMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
                 newMethodMenuState.Reset();
-                if (EGui.UIProxy.MenuItemProxy.MenuItem("New" + menuItemName, null, false, null, in drawList, in menuData, ref newMethodMenuState))
+                if (EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("New") + menuItemName, null, false, null, in drawList, in menuData, ref newMethodMenuState))
                 {
                     var smDesc = stateMachineElement.Description as TtAnimStateMachineClassDescription;
                     var num = 0;

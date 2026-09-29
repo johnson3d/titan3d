@@ -15,8 +15,9 @@
 //   2. 施加镜面 BRDF: 反射辐射度乘上 EnvBRDF(F0, Roughness, NoV), 输出可以直接
 //      被 Additive 节点加到场景色上的能量
 //
-// 输入 SSRTraceInput.a 是置信度 (0 = 未命中), 未命中处输出 0 —— 不做任何补全,
-// 屏幕空间方案取不到的信息就是取不到, 交给 IBL / ReSTIR 去兜。
+// SSRTraceInput.a is confidence (0 = miss). Filter premultiplied radiance
+// over ALL compatible surface samples, including misses, so sparse hits and
+// screen-edge fades retain their coverage instead of becoming full-strength reflections.
 // ---------------------------------------------------------------------------
 
 cbuffer cbSSRResolve DX_AUTOBIND
@@ -119,9 +120,6 @@ void CS_SSRResolve(uint3 dispatchThreadId : SV_DispatchThreadID)
                 continue;
 
             float4 trace = SSRTraceInput.SampleLevel(Samp_SSRTraceInput, sampleUV, 0);
-            if (trace.a <= 0.0)
-                continue;
-
             // 深度权重: 只跟同一个表面上的邻居混, 避免把前景的反射糊到背景上
             float sampleDepth = ResolveDepthBuffer.SampleLevel(Samp_ResolveDepthBuffer, sampleUV, 0).r;
             float sampleLinearZ = LinearFromDepth(sampleDepth);
@@ -137,11 +135,15 @@ void CS_SSRResolve(uint3 dispatchThreadId : SV_DispatchThreadID)
             float normalWeight = saturate(dot(sampleN / sampleNLen, N));
             normalWeight *= normalWeight;
 
-            float w = trace.a * depthWeight * normalWeight;
+            // The denominator must NOT include confidence. Otherwise a lone
+            // hit with confidence 0.001 is promoted to full radiance, while
+            // confidence 0 returns black: a discontinuity that causes flicker.
+            // Misses on the same surface contribute weight and zero radiance.
+            float w = depthWeight * normalWeight;
             if (w <= 0.0)
                 continue;
 
-            sumColor += trace.rgb * w;
+            sumColor += trace.rgb * (saturate(trace.a) * w);
             sumWeight += w;
         }
     }
@@ -157,7 +159,8 @@ void CS_SSRResolve(uint3 dispatchThreadId : SV_DispatchThreadID)
     // F0 = lerp(Specular, Albedo, Metallic), 与 DeferredDirLighting.cginc 的 OptSpecShading 一致
     float3 f0 = specular - specular * metallic + metallic * albedo;
 
-    float3 worldPos = GetWorldPositionFromDepthValue(uv, centerDepth).xyz;
+    float2 unjitteredUV = uv - JitterOffset * float2(1.0, -1.0);
+    float3 worldPos = GetWorldPositionFromDepthValue(unjitteredUV, centerDepth).xyz;
     float3 V = normalize(CameraPosition - worldPos);
     float NoV = saturate(dot(N, V));
 

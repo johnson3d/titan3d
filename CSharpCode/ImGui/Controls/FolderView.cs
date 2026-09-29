@@ -1,4 +1,4 @@
-﻿using EngineNS.Thread;
+using EngineNS.Thread;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -269,7 +269,7 @@ namespace EngineNS.EGui.Controls
             {
                 new UIProxy.MenuItemProxy()
                 {
-                    MenuName = "Browser",
+                    MenuName = TtLocalization.Tr("Browser"),
                     Action = (item, data)=>
                     {
                         var psi = new System.Diagnostics.ProcessStartInfo("Explorer.exe");
@@ -279,7 +279,7 @@ namespace EngineNS.EGui.Controls
                 },
                 new UIProxy.MenuItemProxy()
                 {
-                    MenuName = "Create Folder",
+                    MenuName = TtLocalization.Tr("Create Folder"),
                     Action = (item, data)=>
                     {
                         mCreateFolderDir = data.RefObject.ToString();
@@ -287,7 +287,7 @@ namespace EngineNS.EGui.Controls
                 },
                 new UIProxy.MenuItemProxy()
                 {
-                    MenuName = "Copy Folder Address",
+                    MenuName = TtLocalization.Tr("Copy Folder Address"),
                     Action = (item, data)=>
                     {
                         ImGuiAPI.SetClipboardText(data.RefObject.ToString());

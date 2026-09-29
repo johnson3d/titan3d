@@ -1,4 +1,4 @@
-﻿using EngineNS.EGui.Controls.PropertyGrid;
+using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.Macross;
 using EngineNS.Rtti;
 using NPOI.Util;
@@ -196,22 +196,22 @@ namespace EngineNS
                 if (info.Readonly)
                 {
                     Vector4 color = new Vector4(0.5f, 0.5f, 0.5f, 1.0f);
-                    ImGuiAPI.TextColored(in color, "readonly");
+                    ImGuiAPI.TextColored(in color, TtLocalization.Tr("readonly"));
                 }
                 else
                 {
                     var sz = new Vector2(0, 0);
-                    if (ImGuiAPI.Button("F", in sz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("F"), in sz))
                     {
                         EGui.Controls.TtContentBrowser.GlobalFocusAsset = mDrawData.NewValue;
                     }
                     ImGuiAPI.SameLine(0, 8);
-                    if (ImGuiAPI.Button("<", in sz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("<"), in sz))
                     {
                         mDrawData.NewValue = EGui.Controls.TtContentBrowser.GlobalSelectedAsset?.GetAssetName();
                     }
                     ImGuiAPI.SameLine(0, 8);
-                    if (ImGuiAPI.Button("-", in sz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("-"), in sz))
                     {
                         mDrawData.NewValue = null;
                     }
@@ -325,18 +325,18 @@ namespace EngineNS
                 ImGuiAPI.TableSetColumnIndex(0);
                 var nodeFlags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow |
                                 ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen;
-                bool open = ImGuiAPI.TreeNodeEx(info.Name, nodeFlags, $"{info.Name}");
+                bool open = ImGuiAPI.TreeNodeEx(info.Name, nodeFlags, TtLocalization.Format("{0}", info.Name));
 
                 ImGuiAPI.TableSetColumnIndex(1);
                 ImGuiAPI.AlignTextToFramePadding();
-                ImGuiAPI.Text($"{list.Count} elements");
+                ImGuiAPI.Text(TtLocalization.Format("{0} elements", list.Count));
                 if (!info.Readonly)
                 {
                     var sz = new Vector2(0, 0);
                     if (AllowAdd)
                     {
                         ImGuiAPI.SameLine(0, 8);
-                        if (ImGuiAPI.Button($"+ Add##{info.Name}_AddRoot", in sz))
+                        if (ImGuiAPI.Button(TtLocalization.Label("+ Add", $"##{info.Name}_AddRoot"), in sz))
                         {
                             list.Add(null);
                             changed = true;
@@ -345,7 +345,7 @@ namespace EngineNS
                     if (AllowRemove)
                     {
                         ImGuiAPI.SameLine(0, 8);
-                        if (ImGuiAPI.Button($"Clear##{info.Name}_Clear", in sz))
+                        if (ImGuiAPI.Button(TtLocalization.Label("Clear", $"##{info.Name}_Clear"), in sz))
                         {
                             if (list.Count > 0)
                             {
@@ -392,7 +392,7 @@ namespace EngineNS
                 ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0);
                 ImGuiAPI.TableSetColumnIndex(0);
                 ImGuiAPI.AlignTextToFramePadding();
-                ImGuiAPI.Text($"  [{index}]");
+                ImGuiAPI.Text(TtLocalization.Format("  [{0}]", index));
 
                 ImGuiAPI.TableSetColumnIndex(1);
                 ImGuiAPI.BeginGroup();
@@ -476,16 +476,16 @@ namespace EngineNS
                 if (info.Readonly)
                 {
                     Vector4 ro = new Vector4(0.5f, 0.5f, 0.5f, 1.0f);
-                    ImGuiAPI.TextColored(in ro, "readonly");
+                    ImGuiAPI.TextColored(in ro, TtLocalization.Tr("readonly"));
                 }
                 else
                 {
-                    if (ImGuiAPI.Button("F", in btnSz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("F"), in btnSz))
                     {
                         EGui.Controls.TtContentBrowser.GlobalFocusAsset = list[index] as RName;
                     }
                     ImGuiAPI.SameLine(0, 4);
-                    if (ImGuiAPI.Button("<", in btnSz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("<"), in btnSz))
                     {
                         var picked = EGui.Controls.TtContentBrowser.GlobalSelectedAsset?.GetAssetName();
                         if (picked != list[index] as RName)
@@ -495,7 +495,7 @@ namespace EngineNS
                         }
                     }
                     ImGuiAPI.SameLine(0, 4);
-                    if (ImGuiAPI.Button("-", in btnSz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("-"), in btnSz))
                     {
                         if (list[index] != null)
                         {
@@ -507,7 +507,7 @@ namespace EngineNS
                     if (AllowAdd)
                     {
                         ImGuiAPI.SameLine(0, 12);
-                        if (ImGuiAPI.Button("+", in btnSz))
+                        if (ImGuiAPI.Button(TtLocalization.Tr("+"), in btnSz))
                         {
                             list.Insert(index + 1, null);
                             listMutated = true;
@@ -516,7 +516,7 @@ namespace EngineNS
                     if (AllowRemove)
                     {
                         ImGuiAPI.SameLine(0, 4);
-                        if (ImGuiAPI.Button("X", in btnSz))
+                        if (ImGuiAPI.Button(TtLocalization.Tr("X"), in btnSz))
                         {
                             list.RemoveAt(index);
                             listMutated = true;

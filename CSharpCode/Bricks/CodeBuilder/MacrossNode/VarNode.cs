@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
@@ -12,7 +12,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class VarNode : TtMacrossNodeBase
     {
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [ReadOnly(true)]
         public override string Name { get => base.Name; set => base.Name = value; }
         public TtVariableDeclaration Var;
@@ -22,7 +22,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             MultiLinks = true,
         };
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public UEditableValue InputValue 
         { 
             get
@@ -106,7 +106,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class SelfNode : TtMacrossNodeBase
     {
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [ReadOnly(true)]
         public override string Name { get => base.Name; set => base.Name = value; }
         public PinOut OutPin { get; set; } = new PinOut();
@@ -138,7 +138,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class NullNode : TtMacrossNodeBase
     {
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [ReadOnly(true)]
         public override string Name { get => base.Name; set => base.Name = value; }
         public PinOut OutPin { get; set; } = new PinOut();

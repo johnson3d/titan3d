@@ -4,6 +4,7 @@
   <AssetId Type="System.Guid@Unknown" Value="bec7f39a-94c5-45b6-b032-3e4d24c68c8d" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/mesh/box1.vms,bec7f39a-94c5-45b6-b032-3e4d24c68c8d" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMeshPrimitives&#xA;" />
+  <HasBLAS Type="System.Boolean@Unknown" Value="False" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />

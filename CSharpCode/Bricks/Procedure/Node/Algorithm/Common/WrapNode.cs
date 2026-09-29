@@ -20,7 +20,7 @@ namespace EngineNS.Bricks.Procedure.Algorithm.Common
 
         public static TtBufferComponent Pack(float[] values, int width)
         {
-            var creator = UBufferCreator.CreateInstance<TtSuperBuffer<Vector4, FFloat4Operator>>(width, width, 1);
+            var creator = TtBufferCreator.CreateInstance<TtSuperBuffer<Vector4, FFloat4Operator>>(width, width, 1);
             var output = TtBufferComponent.CreateInstance(creator);
             for (int i = 0; i < width; i++)
             {
@@ -36,7 +36,7 @@ namespace EngineNS.Bricks.Procedure.Algorithm.Common
 
         public static TtBufferComponent PackMask(int[] values, int width)
         {
-            var creator = UBufferCreator.CreateInstance<TtSuperBuffer<Vector4, FFloat4Operator>>(width, width, 1);
+            var creator = TtBufferCreator.CreateInstance<TtSuperBuffer<Vector4, FFloat4Operator>>(width, width, 1);
             var output = TtBufferComponent.CreateInstance(creator);
             for (int i = 0; i < width; i++)
             {

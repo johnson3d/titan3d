@@ -4,12 +4,12 @@ using System.Text;
 
 namespace EngineNS.Bricks.Procedure
 {
-    [Rtti.Meta("")]
-    public class UPgcAssetAMeta : IO.IAssetMeta
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.UPgcAssetAMeta@EngineCore", "EngineNS.Bricks.Procedure.UPgcAssetAMeta" })]
+    public class TtPgcAssetAMeta : IO.IAssetMeta
     {
         public override string TypeExt
         {
-            get => UPgcAsset.AssetExt;
+            get => TtPgcAsset.AssetExt;
         }
         public override Color4b GetBorderColor()
         {
@@ -17,16 +17,20 @@ namespace EngineNS.Bricks.Procedure
         }
         public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
-            //return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
-            return null;
+            return TtPgcAsset.LoadAsset(GetAssetName());
+        }
+        public override async Thread.Async.TtTask<IO.IAsset> CreateAsset(params object[] args)
+        {
+            return TtPgcAsset.LoadAsset(GetAssetName());
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             return true;
         }
+        public const string AssetTypeName = "PGC";
         public override string GetAssetTypeName()
         {
-            return "PGC";
+            return AssetTypeName;
         }
         //public unsafe override void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
         //{
@@ -60,11 +64,11 @@ namespace EngineNS.Bricks.Procedure
             base.OnShowIconTimout(time);
         }
     }
-    [Rtti.Meta("")]
-    [UPgcAsset.Import]
+    [TtPgcAsset.Import]
     [IO.AssetCreateMenu(MenuName = "Procedure")]
-    [Editor.TtAssetEditor(EditorType = typeof(UPgcEditor))]
-    public class UPgcAsset : IO.IAsset
+    [Editor.TtAssetEditor(EditorType = typeof(TtPgcEditor))]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.UPgcAsset@EngineCore", "EngineNS.Bricks.Procedure.UPgcAsset" })]
+    public class TtPgcAsset : IO.IAsset
     {
         public const string AssetExt = ".pgc";
         public string TypeExt { get => AssetExt; }
@@ -75,7 +79,7 @@ namespace EngineNS.Bricks.Procedure
         #region IAsset
         public IO.IAssetMeta CreateAMeta()
         {
-            var result = new UPgcAssetAMeta();
+            var result = new TtPgcAssetAMeta();
             return result;
         }
         public IO.IAssetMeta GetAMeta()
@@ -89,7 +93,7 @@ namespace EngineNS.Bricks.Procedure
             ameta.AddReferenceAsset(AssetGraph.ProgramName);
             foreach (var i in AssetGraph.Nodes)
             {
-                var node = i as UPgcNodeBase;
+                var node = i as TtPgcNodeBase;
                 if (node == null)
                     continue;
                 node.UpdateAMetaReferences(ameta);
@@ -109,7 +113,7 @@ namespace EngineNS.Bricks.Procedure
             var ameta = this.GetAMeta();
             if (ameta == null)
             {
-                var asset = TtEngine.Instance.AssetMetaManager.NewAsset<UPgcAsset>(name);
+                var asset = TtEngine.Instance.AssetMetaManager.NewAsset<TtPgcAsset>(name);
                 ameta = asset.GetAMeta();
             }
             UpdateAMetaReferences(ameta);
@@ -129,11 +133,11 @@ namespace EngineNS.Bricks.Procedure
         #endregion
 
         [Rtti.Meta("")]
-        public UPgcGraph AssetGraph { get; } = new UPgcGraph();
+        public TtPgcGraph AssetGraph { get; } = new TtPgcGraph();
 
-        public static UPgcAsset LoadAsset(RName name)
+        public static TtPgcAsset LoadAsset(RName name)
         {
-            var result = new UPgcAsset();
+            var result = new TtPgcAsset();
 
             if (IO.TtFileManager.LoadXmlToObject(name.Address, result.AssetGraph) == false)
                 return null;
@@ -141,10 +145,10 @@ namespace EngineNS.Bricks.Procedure
             result.AssetName = name;
             result.AssetGraph.AssetName = name;
 
-            result.AssetGraph.Root = result.AssetGraph.FindFirstNode("RootNode", false) as Node.UEndingNode;
+            result.AssetGraph.Root = result.AssetGraph.FindFirstNode("RootNode", false) as Node.TtEndingNode;
             if (result.AssetGraph.Root == null)
             {
-                result.AssetGraph.Root = new Node.UEndingNode();
+                result.AssetGraph.Root = new Node.TtEndingNode();
                 result.AssetGraph.Root.Name = "RootNode";
                 var nodeDef = result.AssetGraph.Root;
                 var inputs = new List<Bricks.Procedure.Node.UNodePinDefine>();
@@ -158,9 +162,14 @@ namespace EngineNS.Bricks.Procedure
             return result;
         }
 
-        public void Compile(UPgcNodeBase root)
+        public void Compile(TtPgcNodeBase root)
         {
             AssetGraph.Compile(root);
+        }
+
+        public void Compile(TtPgcNodeBase root, TtPgcExecutionContext context, bool resetCache = true)
+        {
+            AssetGraph.Compile(root, context, resetCache);
         }
     }
 }

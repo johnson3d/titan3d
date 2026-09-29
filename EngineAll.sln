@@ -536,6 +536,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer", "Module\SlateApp\T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrickManager", "Module\SlateApp\BrickManager\BrickManager.csproj", "{BA469650-316D-49C7-A9ED-B9F7407FE842}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LocalizationTool", "Module\SlateApp\LocalizationTool\LocalizationTool.csproj", "{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MCPServer", "MCPServer", "{47B88D36-3811-0386-0BB7-F9383A3141C4}"
 	ProjectSection(SolutionItems) = preProject
 		Plugins\AIGC\MCPServer\MCPServer.plugin = Plugins\AIGC\MCPServer\MCPServer.plugin
@@ -580,6 +582,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EngineConfig", "EngineConfi
 	ProjectSection(SolutionItems) = preProject
 		content\alonegame.jscfg = content\alonegame.jscfg
 		content\appbrickmanager.jscfg = content\appbrickmanager.jscfg
+		content\applocalization.jscfg = content\applocalization.jscfg
 		content\apptracer.jscfg = content\apptracer.jscfg
 		content\engineconfigdx11.jscfg = content\engineconfigdx11.jscfg
 		content\engineconfigdx12.jscfg = content\engineconfigdx12.jscfg
@@ -1161,6 +1164,24 @@ Global
 		{BA469650-316D-49C7-A9ED-B9F7407FE842}.Release|x64.Build.0 = Release|Any CPU
 		{BA469650-316D-49C7-A9ED-B9F7407FE842}.Release|x86.ActiveCfg = Release|Any CPU
 		{BA469650-316D-49C7-A9ED-B9F7407FE842}.Release|x86.Build.0 = Release|Any CPU
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}.Debug|x64.Build.0 = Debug|Any CPU
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}.Debug|x86.Build.0 = Debug|Any CPU
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}.DebugOnlyCS|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}.DebugOnlyCS|Any CPU.Build.0 = Debug|Any CPU
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}.DebugOnlyCS|x64.ActiveCfg = Debug|Any CPU
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}.DebugOnlyCS|x64.Build.0 = Debug|Any CPU
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}.DebugOnlyCS|x86.ActiveCfg = Debug|Any CPU
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}.DebugOnlyCS|x86.Build.0 = Debug|Any CPU
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}.Release|x64.ActiveCfg = Release|Any CPU
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}.Release|x64.Build.0 = Release|Any CPU
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}.Release|x86.ActiveCfg = Release|Any CPU
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31}.Release|x86.Build.0 = Release|Any CPU
 		{4AF63FFB-9631-4F05-A93D-568A40170062}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4AF63FFB-9631-4F05-A93D-568A40170062}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4AF63FFB-9631-4F05-A93D-568A40170062}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -1446,6 +1467,7 @@ Global
 		{E4022552-8146-2EB7-4483-07213FA3C407} = {6B4A4482-77DE-480A-896A-5DAD2AB44780}
 		{414880B6-68C6-B781-5375-98AEA08F6752} = {6B4A4482-77DE-480A-896A-5DAD2AB44780}
 		{BA469650-316D-49C7-A9ED-B9F7407FE842} = {6B4A4482-77DE-480A-896A-5DAD2AB44780}
+		{7C3E9A20-5D41-4B8E-9F2A-1E6D8C4B0F31} = {6B4A4482-77DE-480A-896A-5DAD2AB44780}
 		{47B88D36-3811-0386-0BB7-F9383A3141C4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{4AF63FFB-9631-4F05-A93D-568A40170062} = {47B88D36-3811-0386-0BB7-F9383A3141C4}
 		{A7B3E2D1-4F6C-4A8B-9D2E-1C3F5A7B9D0E} = {47B88D36-3811-0386-0BB7-F9383A3141C4}

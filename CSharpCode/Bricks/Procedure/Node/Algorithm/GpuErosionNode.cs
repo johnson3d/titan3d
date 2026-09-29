@@ -10,7 +10,8 @@ using System.Text;
 namespace EngineNS.Bricks.Procedure.Node
 {
 
-    [Bricks.CodeBuilder.ContextMenu("GpuErosion", "Float1\\GpuErosion", UPgcGraph.PgcEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("GpuErosion", "Float1\\GpuErosion", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UGpuErosionNode@EngineCore", "EngineNS.Bricks.Procedure.Node.UGpuErosionNode" })]
     public class TtGpuErosionNode : TtGpuNodeBase
     {
         [Rtti.Meta("")]
@@ -21,7 +22,7 @@ namespace EngineNS.Bricks.Procedure.Node
             set;
         }
         TtAttachBuffer WaterAttachement = new TtAttachBuffer();
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             if (Policy == null)
                 return false;

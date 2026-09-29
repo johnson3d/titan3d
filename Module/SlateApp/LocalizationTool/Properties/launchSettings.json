@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "LocalizationTool": {
+      "commandName": "Project",
+      "commandLineArgs": "EngineRoot=$(SolutionDir) config=$(SolutionDir)content\\applocalization.jscfg NativeDLL=debug"
+    }
+  }
+}

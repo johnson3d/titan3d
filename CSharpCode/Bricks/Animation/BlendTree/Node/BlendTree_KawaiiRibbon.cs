@@ -22,6 +22,11 @@ namespace EngineNS.Animation.BlendTree.Node
         {
             if (FromCommand == null)
                 return;
+            if (Desc?.RibbonComponent == null)
+            {
+                TtRuntimePoseUtility.CopyPose(ref mOutPose, FromCommand.OutPose);
+                return;
+            }
 
             TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(ref FromMeshSpaceRuntimePose, FromCommand.OutPose);
             Desc.RibbonComponent.UpdateFromMeshPose(FromMeshSpaceRuntimePose, Desc.ElapseSecond);
@@ -65,9 +70,10 @@ namespace EngineNS.Animation.BlendTree.Node
         {
             mAnimationCommand = new();
             mAnimationCommand.Desc = CommandDesc;
-            mAnimationCommand.OutPose = TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(context.AnimatableSkeletonPose);
-
             var animatablePose = context.AnimatableSkeletonPose;
+            mAnimationCommand.OutPose = TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animatablePose);
+            if (animatablePose == null || animatablePose.LimbPoses.Count == 0)
+                return base.Initialize(context);
             var localPose = TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animatablePose);
             var meshSpacePose = TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(localPose);
             List<Vector3> bonePositions = new();

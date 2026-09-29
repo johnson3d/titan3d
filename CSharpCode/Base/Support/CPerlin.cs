@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -406,20 +406,30 @@ namespace EngineNS.Support
     public class TtWorly3D : IO.BaseSerializer
     {
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public int Octaves { get; set; } = 1;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float Frequency { get; set; } = 1.0f;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float Lacunarity { get; set; } = 2.0f;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float Gain { get; set; } = 0.5f;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public uint NeighborRange { get; set; } = 1;
+        [Rtti.Meta("")]
+        [System.ComponentModel.Category("Option")]
+        // >0 时把特征点的格坐标按该周期取模, 让噪声在每 WrapCells 个格上精确重复.
+        // 体积噪声在 shader 端是按世界坐标 wrap 采样的, 不能精确重复的话
+        // 每一个采样周期就有一层硬接缝, 在天空里表现为一道道垂直拉丝
+        public int WrapCells { get; set; } = 0;
+        [Rtti.Meta("")]
+        [System.ComponentModel.Category("Option")]
+        // 特征点表的随机种子. 固定它同一份资产每次才会生成出一样的噪声
+        public int Seed { get; set; } = 0;
 
         public float GetWorleyValue(float x, float y, float z, float amplitude)
         {
@@ -481,15 +491,17 @@ namespace EngineNS.Support
         private void InitSeedSequencer(int size)
         {
             SeedSequencer = new Vector3[size, size, size];
+            var rd = new TtRandom();
+            rd.mCoreObject.SetSeed(Seed);
             for (int z = 0; z < size; z++)
             {
                 for (int y = 0; y < size; y++)
                 {
                     for (int x = 0; x < size; x++)
                     {
-                        SeedSequencer[z, y, x].X = MathHelper.RandomFloat();
-                        SeedSequencer[z, y, x].Y = MathHelper.RandomFloat();
-                        SeedSequencer[z, y, x].Z = MathHelper.RandomFloat();
+                        SeedSequencer[z, y, x].X = rd.GetNextUInt16() / 65535.0f;
+                        SeedSequencer[z, y, x].Y = rd.GetNextUInt16() / 65535.0f;
+                        SeedSequencer[z, y, x].Z = rd.GetNextUInt16() / 65535.0f;
                     }
                 }
             }
@@ -500,6 +512,12 @@ namespace EngineNS.Support
             if (SeedSequencer==null)
             {
                 InitSeedSequencer(64 + (int)NeighborRange * 2);
+            }
+            if (WrapCells > 0)
+            {
+                cx = ((cx % WrapCells) + WrapCells) % WrapCells;
+                cy = ((cy % WrapCells) + WrapCells) % WrapCells;
+                cz = ((cz % WrapCells) + WrapCells) % WrapCells;
             }
             return SeedSequencer[(cz + (int)NeighborRange)%SeedSequencer.GetLength(0),
                 (cy + (int)NeighborRange)%SeedSequencer.GetLength(1),

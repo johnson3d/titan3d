@@ -364,8 +364,15 @@ namespace EngineNS.Bricks.CodeBuilder
                         sourceCode += " -= ";
                         break;
                 }
-                var rightGen = data.CodeGen.GetCodeObjectGen(binOpExp.Right.GetType());
-                rightGen.GenCodes(binOpExp.Right, ref sourceCode, ref data);
+                if (binOpExp.Right != null)
+                {
+                    var rightGen = data.CodeGen.GetCodeObjectGen(binOpExp.Right.GetType());
+                    rightGen.GenCodes(binOpExp.Right, ref sourceCode, ref data);
+                }
+                else
+                {
+                    Profiler.Log.WriteLine<Profiler.TtMacrossCategory>(Profiler.ELogTag.Warning, "CodeGen", $"BinaryOperatorExpression Right is null, Operation:{binOpExp.Operation}");
+                }
                 if (binOpExp.Cell)
                     sourceCode += ")";
             }

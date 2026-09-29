@@ -9,6 +9,7 @@
     <Import_RootNamespace>EngineNS.Bricks.FX.Weather</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)VolumeCloud.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VolumetricCloud.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SkyAtmosphere.cs" />
   </ItemGroup>
 </Project>

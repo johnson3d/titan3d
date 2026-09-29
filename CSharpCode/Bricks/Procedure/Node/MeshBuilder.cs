@@ -1,12 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
 using System.ComponentModel;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
-    [Bricks.CodeBuilder.ContextMenu("MeshLoader", "Mesh\\Loader", UPgcGraph.PgcEditorKeyword)]
-    public class UMeshLoader : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("MeshLoader", "Mesh\\Loader", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UMeshLoader@EngineCore", "EngineNS.Bricks.Procedure.Node.UMeshLoader" })]
+    public class TtMeshLoader : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinOut IndicesPin { get; set; } = new PinOut();
@@ -24,11 +25,11 @@ namespace EngineNS.Bricks.Procedure.Node
                 mPreviewResultIndex = -1;
             }
         }
-        public UBufferCreator IndexBufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3i, FInt3Operator>>(-1, -1, -1);
-        public UBufferCreator Vec3BufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public TtBufferCreator IndexBufferCreator { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<Vector3i, FInt3Operator>>(-1, -1, -1);
+        public TtBufferCreator Vec3BufferCreator { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
 
         public Graphics.Mesh.TtMaterialMesh PreviewMesh;
-        public UMeshLoader()
+        public TtMeshLoader()
         {
             PrevSize = new Vector2(100, 100);
 
@@ -42,7 +43,7 @@ namespace EngineNS.Bricks.Procedure.Node
             AddOutput(NorPin, "Nor", Vec3BufferCreator);
             AddOutput(UVPin, "UV", Vec3BufferCreator);
         }
-        ~UMeshLoader()
+        ~TtMeshLoader()
         {
             if (Task != null && Task.Value.DirectResult != null)
             {
@@ -68,13 +69,13 @@ namespace EngineNS.Bricks.Procedure.Node
                 exec();
             }
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (pin == IndicesPin)
                 return IndexBufferCreator;
             return Vec3BufferCreator;
         }
-        public unsafe override bool InitProcedure(UPgcGraph graph)
+        public unsafe override bool InitProcedure(TtPgcGraph graph)
         {
             if (Mesh == null)
                 return false;
@@ -93,7 +94,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 NunPfTrian += (int)desc.NumPrimitives;
             }
             
-            var idxBuffer = TtBufferComponent.CreateInstance(UBufferCreator.CreateInstance<TtSuperBuffer<Vector3i, FInt3Operator>>(NunPfTrian, 1, 1));
+            var idxBuffer = TtBufferComponent.CreateInstance(TtBufferCreator.CreateInstance<TtSuperBuffer<Vector3i, FInt3Operator>>(NunPfTrian, 1, 1));
             
             if (Mesh.GetMeshPrimitives(0).MeshDataProvider.mCoreObject.IsIndex32)
             {
@@ -120,9 +121,9 @@ namespace EngineNS.Bricks.Procedure.Node
                 }
             }
 
-            var posBuffer = TtBufferComponent.CreateInstance(UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>((int)builder.VertexNumber, 1, 1));
-            var norBuffer = TtBufferComponent.CreateInstance(UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>((int)builder.VertexNumber, 1, 1));
-            var uvBuffer = TtBufferComponent.CreateInstance(UBufferCreator.CreateInstance<TtSuperBuffer<Vector2, FFloat2Operator>>((int)builder.VertexNumber, 1, 1));
+            var posBuffer = TtBufferComponent.CreateInstance(TtBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>((int)builder.VertexNumber, 1, 1));
+            var norBuffer = TtBufferComponent.CreateInstance(TtBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>((int)builder.VertexNumber, 1, 1));
+            var uvBuffer = TtBufferComponent.CreateInstance(TtBufferCreator.CreateInstance<TtSuperBuffer<Vector2, FFloat2Operator>>((int)builder.VertexNumber, 1, 1));
 
             graph.BufferCache.RegBuffer(IndicesPin, idxBuffer);
             graph.BufferCache.RegBuffer(PosPin, posBuffer);
@@ -179,8 +180,9 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("PreviewMesh", "Mesh\\Preview", UPgcGraph.PgcEditorKeyword)]
-    public class UPreviewMesh : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("PreviewMesh", "Mesh\\Preview", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UPreviewMesh@EngineCore", "EngineNS.Bricks.Procedure.Node.UPreviewMesh" })]
+    public class TtPreviewMesh : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinIn InIndices { get; set; } = new PinIn();
@@ -195,9 +197,9 @@ namespace EngineNS.Bricks.Procedure.Node
         [Browsable(false)]
         public PinOut NorPin { get; set; } = new PinOut();
 
-        public UBufferCreator IndexBufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3i, FInt3Operator>>(-1, -1, -1);
-        public UBufferCreator XYZBufferCreator { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UPreviewMesh()
+        public TtBufferCreator IndexBufferCreator { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<Vector3i, FInt3Operator>>(-1, -1, -1);
+        public TtBufferCreator XYZBufferCreator { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public TtPreviewMesh()
         {
             PrevSize = new Vector2(100, 100);
 
@@ -222,7 +224,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 mPreviewResultIndex = -1;
             }
         }
-        protected unsafe void CreatePreviewMesh(RName rn, UPgcGraph graph)
+        protected unsafe void CreatePreviewMesh(RName rn, TtPgcGraph graph)
         {
             var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             {
@@ -284,7 +286,7 @@ namespace EngineNS.Bricks.Procedure.Node
             ImGuiAPI.SetCursorPos(in ctrlPos);
             ImGuiAPI.Dummy(in Vector2.Zero);
             ImGuiAPI.PushID($"{this.NodeId.ToString()}");
-            if (ImGuiAPI.Button("ShowMesh"))
+            if (ImGuiAPI.Button(TtLocalization.Tr("ShowMesh")))
             {
                 var task = DoPreview();
             }
@@ -311,7 +313,7 @@ namespace EngineNS.Bricks.Procedure.Node
             //    var task = mainEditor.AssetEditorManager.OpenEditor(mainEditor, typeof(Editor.Forms.UMeshEditor), rn, PreviewMesh);
             //}
 
-            var graph = this.ParentGraph as UPgcGraph;
+            var graph = this.ParentGraph as TtPgcGraph;
             graph.Compile(this);
 
             graph.GraphEditor.PreviewRoot.ClearChildren();
@@ -328,11 +330,11 @@ namespace EngineNS.Bricks.Procedure.Node
                 meshNode.IsCastShadow = true;
             }
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             return null;
         }
-        public override bool OnProcedure(UPgcGraph graph)
+        public override bool OnProcedure(TtPgcGraph graph)
         {
             var indices = graph.BufferCache.FindBuffer(InIndices) as TtSuperBuffer<Vector3i, FInt3Operator>;
             var pos = graph.BufferCache.FindBuffer(InPos) as TtSuperBuffer<Vector3, FFloat3Operator>;

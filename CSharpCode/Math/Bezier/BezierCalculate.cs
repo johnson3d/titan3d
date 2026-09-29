@@ -56,89 +56,131 @@ namespace EngineNS
                                                                 double MinBezierY, double MaxBezierY,
                                                                 bool bLoopX)
         {
-            if (bezierPtList.Count < 2)
+            if (bezierPtList == null || bezierPtList.Count < 2 ||
+                !double.IsFinite(xValue) || !double.IsFinite(MinX) || !double.IsFinite(MaxX) ||
+                !double.IsFinite(MinY) || !double.IsFinite(MaxY) ||
+                !double.IsFinite(MinBezierX) || !double.IsFinite(MaxBezierX) ||
+                !double.IsFinite(MinBezierY) || !double.IsFinite(MaxBezierY))
                 return 0;
 
-            //var bezierMinX = bezierPtList[0].Position.X;
-            //var bezierMaxX = bezierPtList[bezierPtList.Count - 1].Position.X;
+            double inputRange = MaxX - MinX;
+            double bezierRangeX = MaxBezierX - MinBezierX;
+            double bezierRangeY = MaxBezierY - MinBezierY;
+            if (Math.Abs(inputRange) <= double.Epsilon || Math.Abs(bezierRangeY) <= double.Epsilon)
+                return 0;
 
-            var xValueWithMinMax = xValue;  // 在MinX,MaxX之间的值
-            var xValueWithBezier = xValue;  // 在贝塞尔曲线X范围的值
+            double mappedX;
             if (!bLoopX)
             {
                 if (xValue < MinX || xValue > MaxX)
                     return 0;
-
-                xValueWithBezier = (xValue - MinX) / (MaxX - MinX) * (MaxBezierX - MinBezierX);
+                mappedX = (xValue - MinX) / inputRange * bezierRangeX + MinBezierX;
             }
             else
             {
-                xValueWithMinMax = xValue % (MaxX - MinX) + MinX;
-                xValueWithBezier = (xValueWithMinMax - MinX) / (MaxX - MinX) * (MaxBezierX - MinBezierX);
+                double wrapped = (xValue - MinX) % inputRange;
+                if (wrapped < 0)
+                    wrapped += inputRange;
+                mappedX = wrapped / inputRange * bezierRangeX + MinBezierX;
             }
 
-            var pt = ValueOnBezier(bezierPtList, xValueWithBezier);
-
-            return (pt.Y - MinBezierY) / (MaxBezierY - MinBezierY) * (MaxY - MinY) + MinY;
+            var pt = ValueOnBezier(bezierPtList, mappedX);
+            return (pt.Y - MinBezierY) / bezierRangeY * (MaxY - MinY) + MinY;
         }
 
         // xValue范围从bezierPtList起始点到结束点
         public static EngineNS.Vector2 ValueOnBezier(List<BezierPointBase> bezierPtList, double xValue, bool bAlongValue = false)
         {
-            int i = 0;
-            foreach (var pt in bezierPtList)
-            {
-                if (pt.Position.X > xValue)
-                {
-                    break;
-                }
-                i++;
-            }
+            if (bezierPtList == null || bezierPtList.Count < 2 || !double.IsFinite(xValue))
+                return EngineNS.Vector2.Zero;
 
-            //EngineNS.Vector2 retPt;
+            int pairedCount = bezierPtList.Count & ~1;
+            if (pairedCount < 2)
+                return EngineNS.Vector2.Zero;
+            var first = bezierPtList[0];
+            var last = bezierPtList[pairedCount - 1];
+            if (!IsFinite(first) || !IsFinite(last))
+                return EngineNS.Vector2.Zero;
 
-            if (i == 0 || i >= bezierPtList.Count)
+            if (xValue < first.Position.X)
+                return bAlongValue ? first.Position : EngineNS.Vector2.Zero;
+            if (xValue > last.Position.X)
+                return bAlongValue ? last.Position : EngineNS.Vector2.Zero;
+
+            for (int i = 0; i + 1 < pairedCount; i += 2)
             {
-                if(bAlongValue && bezierPtList.Count > 0)
-                {
-                    if (i == 0)
-                        return bezierPtList[0].Position;
-                    else if (i >= bezierPtList.Count)
-                        return bezierPtList[bezierPtList.Count - 1].Position;
-                }
-                else
+                var pt0 = bezierPtList[i];
+                var pt1 = bezierPtList[i + 1];
+                if (!IsFinite(pt0) || !IsFinite(pt1))
                     return EngineNS.Vector2.Zero;
+
+                double minX = Math.Min(pt0.Position.X, pt1.Position.X);
+                double maxX = Math.Max(pt0.Position.X, pt1.Position.X);
+                if (xValue < minX || xValue > maxX)
+                    continue;
+
+                if (!TrySolveBezierX(pt0, pt1, (float)xValue, out float t))
+                    return Math.Abs(xValue - pt0.Position.X) <= Math.Abs(xValue - pt1.Position.X) ?
+                        pt0.Position : pt1.Position;
+                return ValueOnBezierSegment(pt0, pt1, t);
             }
 
-            var pt0 = bezierPtList[i - 1];
-            var pt1 = bezierPtList[i];
-            var t = ((float)xValue - pt0.Position.X) / (pt1.Position.X - pt0.Position.X);
-            return ValueOnBezierSegment(pt0, pt1, t);
-            //var t = (xValue - pt0.Position.X) / (pt1.Position.X - pt0.Position.X);
+            return bAlongValue ?
+                (xValue <= first.Position.X ? first.Position : last.Position) : EngineNS.Vector2.Zero;
+        }
 
-            ////var cx = 3 * (pt0.ControlPoint.X - pt0.Position.X);
-            ////var bx = 3 * (pt1.ControlPoint.X - pt0.ControlPoint.X) - cx;
-            ////var ax = pt1.Position.X - pt0.Position.X - cx - bx;
-            ////var cy = 3 * (pt0.ControlPoint.Y - pt0.Position.Y);
-            ////var by = 3 * (pt1.ControlPoint.Y - pt0.ControlPoint.Y) - cy;
-            ////var ay = pt1.Position.Y - pt0.Position.Y - cy - by;
-            ////var tSquared = t * t;
-            ////var tCubed = tSquared * t;
+        static bool TrySolveBezierX(BezierPointBase pt0, BezierPointBase pt1, float xValue, out float t)
+        {
+            t = 0.0f;
+            float x0 = pt0.Position.X;
+            float x1 = pt1.Position.X;
+            float range = x1 - x0;
+            float tolerance = Math.Max(1e-6f, Math.Abs(range) * 1e-5f);
+            if (Math.Abs(range) <= tolerance)
+                return Math.Abs(xValue - x0) <= tolerance;
 
-            ////var resultX = (ax * tCubed) + (bx * tSquared) + (cx * t) + pt0.Position.X;
-            ////var resultY = (ay * tCubed) + (by * tSquared) + (cy * t) + pt0.Position.Y;
+            float low = 0.0f;
+            float high = 1.0f;
+            t = MathHelper.Clamp((xValue - x0) / range, 0.0f, 1.0f);
+            bool ascending = range > 0.0f;
+            for (int iteration = 0; iteration < 20; iteration++)
+            {
+                float value = ValueOnBezierSegment(pt0, pt1, t).X;
+                float error = value - xValue;
+                if (!float.IsFinite(value) || !float.IsFinite(error))
+                    return false;
+                if (Math.Abs(error) <= tolerance)
+                    return true;
 
-            //var yt = 1 - t;
-            //retPt.X = (float)(pt0.Position.X * yt * yt * yt +
-            //          3 * pt0.ControlPoint.X * yt * yt * t +
-            //          3 * pt1.ControlPoint.X * yt * t * t +
-            //          pt1.Position.X * t * t * t);
-            //retPt.Y = (float)(pt0.Position.Y * yt * yt * yt +
-            //              3 * pt0.ControlPoint.Y * yt * yt * t +
-            //              3 * pt1.ControlPoint.Y * yt * t * t +
-            //              pt1.Position.Y * t * t * t);
+                if ((error < 0.0f) == ascending)
+                    low = t;
+                else
+                    high = t;
 
-            //return retPt;
+                float derivative = BezierDerivativeX(pt0, pt1, t);
+                float candidate = float.NaN;
+                if (float.IsFinite(derivative) && Math.Abs(derivative) > 1e-7f)
+                    candidate = t - error / derivative;
+                if (!float.IsFinite(candidate) || candidate <= low || candidate >= high)
+                    candidate = (low + high) * 0.5f;
+                t = candidate;
+            }
+            t = (low + high) * 0.5f;
+            return true;
+        }
+
+        static float BezierDerivativeX(BezierPointBase pt0, BezierPointBase pt1, float t)
+        {
+            float oneMinusT = 1.0f - t;
+            return 3.0f * ((pt0.ControlPoint.X - pt0.Position.X) * oneMinusT * oneMinusT +
+                2.0f * (pt1.ControlPoint.X - pt0.ControlPoint.X) * oneMinusT * t +
+                (pt1.Position.X - pt1.ControlPoint.X) * t * t);
+        }
+
+        static bool IsFinite(BezierPointBase point)
+        {
+            return point != null && float.IsFinite(point.Position.X) && float.IsFinite(point.Position.Y) &&
+                float.IsFinite(point.ControlPoint.X) && float.IsFinite(point.ControlPoint.Y);
         }
 
         public static Vector2 ValueOnBezierSegment(BezierPointBase pt0, BezierPointBase pt1, float t)

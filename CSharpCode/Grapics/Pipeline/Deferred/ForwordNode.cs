@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.VXGI;
+using EngineNS.Bricks.VXGI;
 using System;
 using System.Collections.Generic;
 using EngineNS.Graphics.Pipeline.Shader;
@@ -213,7 +213,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 }
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public List<ERenderLayer> LayerFilters { get; set; } = new List<ERenderLayer> { ERenderLayer.RL_Opaque, ERenderLayer.RL_Translucent, ERenderLayer.RL_Sky };
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

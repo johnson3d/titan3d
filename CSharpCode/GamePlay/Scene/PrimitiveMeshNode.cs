@@ -1,4 +1,4 @@
-﻿using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Mesh.Modifier;
 using EngineNS.Rtti;
 using System;
@@ -46,6 +46,9 @@ namespace EngineNS.GamePlay.Scene
             [Rtti.Meta]
             [RName.PGRName(FilterExts = Graphics.Mesh.TtMeshPrimitives.AssetExt)]
             public RName CollideName { get; set; }
+
+            [Rtti.Meta]
+            public EMeshCollisionMode CollisionMode { get; set; } = EMeshCollisionMode.Auto;
 
             /// <summary>
             /// 逐 Atom 的材质资源 (.material / TtMaterial)。
@@ -103,6 +106,9 @@ namespace EngineNS.GamePlay.Scene
                 if (mesh != null)
                     this.RenderMesh = mesh;
             }
+
+            if (IsCollide)
+                await ReloadCollisionDataProvider();
 
             this.SetStyle(ENodeStyles.ParallelTick);
 
@@ -168,8 +174,27 @@ namespace EngineNS.GamePlay.Scene
                 materials[i] = mtl;
             }
 
+            var mdfQueueType = meshData.MdfQueue;
+            if (mdfQueueType == null)
+            {
+                bool hasSkin = primitives.PartialSkeleton != null;
+                bool hasMorph = primitives.MorphTargets != null && primitives.MorphTargets.IsValid;
+                if (hasSkin)
+                {
+                    mdfQueueType = hasMorph
+                        ? Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfSkinMorphMesh>.TypeDesc
+                        : Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfSkinMesh>.TypeDesc;
+                }
+                else
+                {
+                    mdfQueueType = hasMorph
+                        ? Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfMorphMesh>.TypeDesc
+                        : Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc;
+                }
+            }
+            
             var renderMesh = new Graphics.Mesh.TtRenderMesh();
-            var ok = renderMesh.Initialize(primitives, materials, meshData.MdfQueue, meshData.Atom);
+            var ok = renderMesh.Initialize(primitives, materials, mdfQueueType, meshData.Atom);
             if (!ok)
                 return null;
 
@@ -296,7 +321,7 @@ namespace EngineNS.GamePlay.Scene
         /// 编辑器侧的几何资源属性。改这个会触发整体重建（mesh + 材质数组按新 atom 数对齐）。
         /// </summary>
         [RName.PGRName(FilterExts = Graphics.Mesh.TtMeshPrimitives.AssetExt)]
-        [Category("Assets")]
+        [System.ComponentModel.Category("Assets")]
         public RName MeshName
         {
             get
@@ -312,6 +337,7 @@ namespace EngineNS.GamePlay.Scene
                 if (meshData.MeshName == value)
                     return;
                 meshData.MeshName = value;
+                ReloadCollisionDataProvider().AddWaitTask();
                 if (meshData.MeshName == null)
                     return;
 
@@ -329,11 +355,52 @@ namespace EngineNS.GamePlay.Scene
             }
         }
 
+        [RName.PGRName(FilterExts = Graphics.Mesh.TtMeshPrimitives.AssetExt)]
+        [System.ComponentModel.Category("Collision")]
+        public RName CollideName
+        {
+            get => (NodeData as TtPrimitiveMeshNodeData)?.CollideName;
+            set
+            {
+                var meshData = NodeData as TtPrimitiveMeshNodeData;
+                if (meshData == null || meshData.CollideName == value)
+                    return;
+                meshData.CollideName = value;
+                ReloadCollisionDataProvider().AddWaitTask();
+            }
+        }
+
+        [System.ComponentModel.Category("Collision")]
+        public EMeshCollisionMode CollisionMode
+        {
+            get => (NodeData as TtPrimitiveMeshNodeData)?.CollisionMode ?? EMeshCollisionMode.Auto;
+            set
+            {
+                var meshData = NodeData as TtPrimitiveMeshNodeData;
+                if (meshData == null || meshData.CollisionMode == value)
+                    return;
+                meshData.CollisionMode = value;
+                ReloadCollisionDataProvider().AddWaitTask();
+            }
+        }
+
+        public override bool IsCollide
+        {
+            get => base.IsCollide;
+            set
+            {
+                if (base.IsCollide == value)
+                    return;
+                base.IsCollide = value;
+                ReloadCollisionDataProvider().AddWaitTask();
+            }
+        }
+
         /// <summary>
         /// 编辑器侧的逐 Atom 材质列表。改这个会按新材质重建 RenderMesh。
         /// PG 里使用 PGRNameList 自定义编辑器，每行选资产时按 mtl/uinst 扩展名过滤。
         /// </summary>
-        [Category("Assets")]
+        [System.ComponentModel.Category("Assets")]
         [RName.PGRNameList(false, false,
             FilterExts = Graphics.Pipeline.Shader.TtMaterial.AssetExt + "," + Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt)]
         public List<RName> MaterialNames
@@ -366,7 +433,7 @@ namespace EngineNS.GamePlay.Scene
             }
         }
 
-        [Category("Assets")]
+        [System.ComponentModel.Category("Assets")]
         [EGui.Controls.PropertyGrid.TtPGTypeEditor(typeof(Graphics.Pipeline.Shader.TtMdfQueueBase))]
         public Rtti.TtTypeDesc MdfQueue
         {
@@ -440,15 +507,55 @@ namespace EngineNS.GamePlay.Scene
 
         // —— 碰撞 / Linecheck，与 TtMeshNode 行为对齐 ——
         Graphics.Mesh.TtMeshDataProvider mMeshDataProvider;
+        int mCollisionLoadVersion;
         public Graphics.Mesh.TtMeshDataProvider MeshDataProvider
         {
             get => mMeshDataProvider;
             set => mMeshDataProvider = value;
         }
 
+        async Thread.Async.TtTask ReloadCollisionDataProvider()
+        {
+            int loadVersion = ++mCollisionLoadVersion;
+            if (!IsCollide)
+            {
+                mMeshDataProvider = null;
+                return;
+            }
+
+            var meshData = NodeData as TtPrimitiveMeshNodeData;
+            if (meshData == null)
+                return;
+
+            RName sourceName;
+            if (meshData.CollisionMode == EMeshCollisionMode.RenderMesh)
+                sourceName = meshData.MeshName;
+            else if (meshData.CollideName != null)
+                sourceName = meshData.CollideName;
+            else if (meshData.CollisionMode == EMeshCollisionMode.CollisionMesh)
+                sourceName = null;
+            else
+                sourceName = meshData.MeshName;
+
+            Graphics.Mesh.TtMeshDataProvider provider = null;
+            if (sourceName != null)
+            {
+                var primitives = await sourceName.GetAsset<Graphics.Mesh.TtMeshPrimitives>();
+                if (primitives != null)
+                {
+                    await primitives.LoadMeshDataProvider();
+                    provider = primitives.MeshDataProvider;
+                }
+            }
+
+            if (loadVersion != mCollisionLoadVersion || !IsCollide)
+                return;
+            mMeshDataProvider = provider;
+        }
+
         public unsafe override bool OnLineCheckTriangle(in DVector3 start, in DVector3 end, ref VHitResult result)
         {
-            if (mMeshDataProvider == null)
+            if (!IsCollide || mMeshDataProvider == null)
                 return false;
 
             var startf = start.ToSingleVector3();
@@ -460,15 +567,9 @@ namespace EngineNS.GamePlay.Scene
                 if (Placement.HasScale)
                 {
                     Vector3 scale = Placement.Scale;
-                    if (-1 != mMeshDataProvider.mCoreObject.IntersectTriangle(&scale, pStart, pEnd, pResult))
-                        return true;
+                    return -1 != mMeshDataProvider.mCoreObject.IntersectTriangle(&scale, pStart, pEnd, pResult);
                 }
-                else
-                {
-                    if (-1 != mMeshDataProvider.mCoreObject.IntersectTriangle((Vector3*)0, pStart, pEnd, pResult))
-                        return true;
-                }
-                return false;
+                return -1 != mMeshDataProvider.mCoreObject.IntersectTriangle((Vector3*)0, pStart, pEnd, pResult);
             }
         }
 

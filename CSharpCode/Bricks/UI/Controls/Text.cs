@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.Font;
+using EngineNS.Bricks.Font;
 using EngineNS.Canvas;
 using EngineNS.Localization;
 using EngineNS.Support;
@@ -54,7 +54,7 @@ namespace EngineNS.UI.Controls
         }
 
         ClipType mClipType = ClipType.Inherit;
-        [Rtti.Meta, Category("Clip")]
+        [Rtti.Meta, System.ComponentModel.Category("Clip")]
         public ClipType ClipType
         {
             get => mClipType;
@@ -85,7 +85,7 @@ namespace EngineNS.UI.Controls
         bool mFontDirty = true;
         protected RName mFont = RName.GetRName("fonts/simli.fontsdf", RName.ERNameType.Engine);
         [Rtti.Meta, BindProperty]
-        [DisplayName("Font"), Category("Text")]
+        [System.ComponentModel.DisplayName("Font"), System.ComponentModel.Category("Text")]
         [RName.PGRName(FilterExts = TtFontManager.FontSDFAssetExt + "," + TtFontManager.FontAssetExt)]
         public RName Font
         {
@@ -102,7 +102,7 @@ namespace EngineNS.UI.Controls
 
         protected int mFontSize = 64;
         [Rtti.Meta, BindProperty]
-        [Category("Text")]
+        [System.ComponentModel.Category("Text")]
         public int FontSize
         {
             get => mFontSize;
@@ -117,7 +117,7 @@ namespace EngineNS.UI.Controls
 
         protected string mText = "Text";
         [Rtti.Meta, BindProperty(DefaultMode = EBindingMode.TwoWay)]
-        [Category("Text")]
+        [System.ComponentModel.Category("Text")]
         public string Text
         {
             get => mText;
@@ -131,7 +131,7 @@ namespace EngineNS.UI.Controls
         }
 
         EngineNS.Color4b mColor = EngineNS.Color4b.White;
-        [Rtti.Meta, BindProperty, Category("Text")]
+        [Rtti.Meta, BindProperty, System.ComponentModel.Category("Text")]
         [EGui.Controls.PropertyGrid.TtColor4PickerEditor()]
         public EngineNS.Color4b Color
         {
@@ -168,7 +168,7 @@ namespace EngineNS.UI.Controls
             WordEllipsis = ETextFlag.WordEllipsis,
         }
         [BindProperty]
-        [Category("Text")]
+        [System.ComponentModel.Category("Text")]
         public ETextTrimming TextTrimming
         {
             get
@@ -185,7 +185,7 @@ namespace EngineNS.UI.Controls
             }
         }
 
-        [Rtti.Meta, BindProperty, Category("Text")]
+        [Rtti.Meta, BindProperty, System.ComponentModel.Category("Text")]
         public string TrimmingText
         {
             get;
@@ -199,7 +199,7 @@ namespace EngineNS.UI.Controls
             WrapWithOverflow = ETextFlag.WrapWithOverflow,  // 按词折行，放不下则裁剪
         }
         [BindProperty]
-        [Category("Text")]
+        [System.ComponentModel.Category("Text")]
         public ETextWrapping TextWrapping
         {
             get
@@ -218,7 +218,7 @@ namespace EngineNS.UI.Controls
 
         protected float mLineSpacingScale = 1.0f;
         [Rtti.Meta, BindProperty]
-        [Category("Text")]
+        [System.ComponentModel.Category("Text")]
         public float LineSpacingScale
         {
             get => mLineSpacingScale;
@@ -263,7 +263,7 @@ namespace EngineNS.UI.Controls
             RightToLeft = ETextFlag.RightToLeft,
             Center = ETextFlag.Center,
         }
-        [Rtti.Meta, BindProperty, Category("Text")]
+        [Rtti.Meta, BindProperty, System.ComponentModel.Category("Text")]
         public ETextDirection FlowDirection
         {
             get

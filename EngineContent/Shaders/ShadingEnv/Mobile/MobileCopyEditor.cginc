@@ -47,10 +47,10 @@ PS_INPUT VS_Main(VS_INPUT input1)
 #if RHI_TYPE == RHI_GL
 	output.vUV.y = 1 - input.vUV.y;
 #endif
-	output.vLightMap.xy = SunPosNDC.xy - input.vPosition.xy;
-	output.vLightMap.z = SunPosNDC.z;
-	output.vLightMap.w = SunPosNDC.w;
-	output.vLightMap.xy = CalcVignetteVS(output.vPosition.xy);
+	output.vExtraUV.xy = SunPosNDC.xy - input.vPosition.xy;
+	output.vExtraUV.z = SunPosNDC.z;
+	output.vExtraUV.w = SunPosNDC.w;
+	output.vExtraUV.xy = CalcVignetteVS(output.vPosition.xy);
 
 	return output;
 }
@@ -102,7 +102,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 #else
 	//sun shaft
 	half3 DirLightColor = (half3)DirLight.SunLightColor.rgb;
-	half4 SunShaftParam = (half4)input.vLightMap;
+	half4 SunShaftParam = (half4)input.vExtraUV;
 	if (SunShaftParam.w > 0)
 	{
 		half2 SunShaftM = (half2)gSunShaft.Sample(Samp_gSunShaft, input.vUV.xy).rg;
@@ -135,7 +135,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 #else
 	half LumHdr = CalcLuminanceYCbCr(Color);
 	half VignetteWeight = max(1.0h - LumHdr, 0.0h);
-	//half VignetteMask =1.0h - CalcVignettePS(input.vLightMap.xy, 0.5h);
+	//half VignetteMask =1.0h - CalcVignettePS(input.vExtraUV.xy, 0.5h);
 	half VignetteMask = 1.0h - GVignette.Sample(Samp_GVignette, input.vUV.xy).r;
 	Color = (1.0h - VignetteMask * VignetteWeight) * Color;
 

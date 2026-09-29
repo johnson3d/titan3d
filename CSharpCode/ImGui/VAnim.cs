@@ -19,9 +19,10 @@ namespace EngineNS.EGui
         public Vector2 SnapUVStart { get; set; }
         [Rtti.Meta("")]
         public Vector2 SnapUVEnd { get; set; } = new Vector2(1, 1);
+        public const string AssetTypeName = "UVAnim";
         public override string GetAssetTypeName()
         {
-            return "UVAnim";
+            return AssetTypeName;
         }
         public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {

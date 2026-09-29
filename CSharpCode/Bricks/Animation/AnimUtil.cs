@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
+using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
 using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
 using EngineNS.Bricks.Animation.Macross.StateMachine;
 using EngineNS.DesignMacross;
@@ -36,24 +36,27 @@ namespace EngineNS.Animation
                 return GetParentMeshNode(node.Parent);
             }
         }
+        private static TtAnimatableSkeletonPose CreateAnimatableSkeletonPose(TtMeshNode meshNode)
+        {
+            var materialMesh = meshNode?.RenderMesh?.MaterialMesh;
+            if (materialMesh == null)
+                return null;
+            // MaterialMesh显式绑定的骨架资产是动画系统的权威骨架。部分网格的
+            // PartialSkeleton可能尚未加载或第0个SubMesh本身不带骨骼，不能只依赖它。
+            var skeletonAsset = materialMesh.GetSkeletonAsset().GetResultUntilCompleted();
+            var skeleton = skeletonAsset?.Skeleton ?? materialMesh.GetMainSkeleton();
+            return skeleton?.CreateSkeletonPose();
+        }
         public static TtAnimatableSkeletonPose CreateAnimatableSkeletonPoseFromeNode(TtNode node)
         {
-            var meshNode = GetParentMeshNode(node);
-            if (meshNode != null)
-            {
-                var animatablePose = meshNode?.RenderMesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
-                return animatablePose;
-            }
-            return null;
+            return CreateAnimatableSkeletonPose(GetParentMeshNode(node));
         }
         public static TtLocalSpaceRuntimePose BindRuntimeSkeletonPoseToNode(TtNode node)
         {
             var meshNode = GetParentMeshNode(node);
             if (meshNode != null && meshNode.HasSkin)
             {
-                //var animatablePose = meshNode?.MaterialMesh?.GetSubMeshPrimitives(0)?.PartialSkeleton?.CreateSkeletonPose();
-                var animatablePose = meshNode?.MaterialMesh?.GetMainSkeleton()?.CreateSkeletonPose();
-                //var skinMDfQueue = meshNode.RenderMesh.MdfQueue as Graphics.Mesh.TtMdfSkinMesh;
+                var animatablePose = CreateAnimatableSkeletonPose(meshNode);
                 var animatedPose = SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animatablePose);
                 meshNode.RuntimePose = animatedPose;
                 return meshNode.RuntimePose;
@@ -389,7 +392,7 @@ namespace EngineNS.Animation
                     Editor.Infrastructure.TtEditorFavoritePaths.ChannelBone);
                 if (favorites.Count > 0)
                 {
-                    ImGuiAPI.TextDisabled("Favorites");
+                    ImGuiAPI.TextDisabled(TtLocalization.Tr("Favorites"));
                     for (int fi = 0; fi < favorites.Count; fi++)
                     {
                         var fav = favorites[fi];

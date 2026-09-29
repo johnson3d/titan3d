@@ -29,7 +29,7 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
         public override Vector3ui DispatchArg => new Vector3ui(8, 8, 1);
 
         public TtPermutationItem EnableHWRT { get; set; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsEnableHWRT
         {
             get { return EnableHWRT.GetValue() == (int)EPermutation_Bool.TrueValue; }
@@ -41,7 +41,7 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
         // EnvMap binder 仅在 1 的编译产物里出现, 因此 OnDrawCall 无脑 FindBinder 即可,
         // SS 变体下 IsValidPointer=false 自动跳过 (与 SceneTLAS 同一套保护机制).
         public TtPermutationItem EnableSkyCube { get; set; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsEnableSkyCube
         {
             get { return EnableSkyCube.GetValue() == (int)EPermutation_Bool.TrueValue; }
@@ -54,7 +54,7 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
         // + IsValidPointer 双重保护; HzbPinIn 悬空时, C# 端会强制保持 0.
         // 仅 ENV_USE_HW_RT == 0 的 SS 变体下生效, HW RT 路径不走 hzb.
         public TtPermutationItem EnableHzbAccel { get; set; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsEnableHzbAccel
         {
             get { return EnableHzbAccel.GetValue() == (int)EPermutation_Bool.TrueValue; }
@@ -66,7 +66,7 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
         // ProbeVolume buffer 仅在 1 的编译产物里存在 binder, OnDrawCall 用 FindBinder
         // + IsValidPointer 双重保护; ProbeVolumeNode 为 null 时, C# 端会强制保持 0.
         public TtPermutationItem EnableProbeFallback { get; set; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsEnableProbeFallback
         {
             get { return EnableProbeFallback.GetValue() == (int)EPermutation_Bool.TrueValue; }
@@ -78,7 +78,7 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
         // GBufferRT3 binder 仅在 1 的编译产物里存在, OnDrawCall 用 FindAttachBuffer
         // + binder 保护; MRT3 pin 悬空时, C# 端会强制保持 0.
         public TtPermutationItem EnableUnlitSkip { get; set; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsEnableUnlitSkip
         {
             get { return EnableUnlitSkip.GetValue() == (int)EPermutation_Bool.TrueValue; }
@@ -242,7 +242,7 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
         // ENV_USE_UNLIT_SKIP: 与 InitialSampling 同一套 permutation, 同步开关.
         // GBufferRT3 binder 仅在 1 的编译产物里存在.
         public TtPermutationItem EnableUnlitSkip { get; set; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsEnableUnlitSkip
         {
             get { return EnableUnlitSkip.GetValue() == (int)EPermutation_Bool.TrueValue; }
@@ -378,51 +378,51 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
             EBufferType.BFT_SRV | EBufferType.BFT_UAV);
 
         // ---------- Tunable ----------
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public float Intensity { get; set; } = 1.0f;
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public float MaxRayDistance { get; set; } = 50.0f;
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public uint  MaxRayMarchSteps { get; set; } = 32u;
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public float ThicknessBias { get; set; } = 0.05f;
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public float TemporalMaxM { get; set; } = 20.0f;
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public float NormalThreshold { get; set; } = 0.9f;
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public float DepthThreshold { get; set; } = 0.05f;
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public uint  SpatialSampleCount { get; set; } = 5u;
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public float SpatialRadius { get; set; } = 16.0f;
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public float MaxRadiance { get; set; } = 10.0f;
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public uint  InitialSampleCount { get; set; } = 16u;
         // 天光 fallback 颜色 (linear), 当 ENV_USE_SKY_CUBE=0 时, miss 方向使用此颜色 * SkyIntensity
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public Vector3 SkyColor { get; set; } = new Vector3(0.5f, 0.7f, 1.0f);
         // 天光强度倍率, 设为 0 等于完全禁用 miss 时的天光贡献
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public float SkyIntensity { get; set; } = 1.0f;
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public bool  EnableTemporal { get; set; } = true;
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public bool  EnableSpatial { get; set; } = true;
         // ENV_USE_HW_RT permutation 开关: 配置型切换, 启动期/质量档调节, 不应每帧切换.
@@ -431,7 +431,7 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
         // 因此此 setter 直接通过 IsEnableHWRT setter 触发 mInitial.UpdatePermutation 即可,
         // 无需节点端再实现一份 RecreateInitialShadingAsync.
         bool mEnableHardwareRT = false;
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public bool EnableHardwareRT
         {
@@ -452,7 +452,7 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
         // 用户必须先把 EnvMap pin 接入再开此开关, 否则 shader 端虽然走 cube 分支
         // 但 OnDrawCall 因 pin 悬空而跳过 EnvMap 绑定 -> 采到的是上一次绑定的脏数据.
         bool mEnableEnvMap = false;
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public bool EnableEnvMap
         {
@@ -473,7 +473,7 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
         // 用户主动接入 HzbPinIn -> Initialize 阶段自动设为 true, 后续可以通过 setter
         // 在质量档之间切换 (off/on), 但不要每帧切换 (会触发 effect 重新编译).
         bool mEnableHzbAccel = false;
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public bool EnableHzbAccel
         {
@@ -498,7 +498,7 @@ namespace EngineNS.Graphics.Pipeline.GI.ReSTIR
         // ProbeVolumeSource 为 null 或未 Ready 时, setter 会被 Tick 覆盖回 false.
         // 用户主动注入 ProbeVolumeSource -> 自动设为 true.
         bool mEnableProbeFallback = false;
-        [Category("ReSTIR")]
+        [System.ComponentModel.Category("ReSTIR")]
         [Rtti.Meta("")]
         public bool EnableProbeFallback
         {

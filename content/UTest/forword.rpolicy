@@ -147,6 +147,7 @@
       <Position Type="EngineNS.Vector2@EngineCore" Value="-119.00006,197.99997" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtImageAssetNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
+        <ImageName Type="EngineNS.RName@EngineCore" Value="Engine,texture/hdri_epic_courtyard_daylight.srv,1fbfef87-ba8b-4990-90d0-33d9b0a60e8f" />
         <UniqueId Type="System.Guid@Unknown" Value="94211021-62aa-410a-a63d-eb5fb3554aef" />
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
@@ -159,6 +160,7 @@
       <Position Type="EngineNS.Vector2@EngineCore" Value="-111,100.00001" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtImageAssetNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
+        <ImageName Type="EngineNS.RName@EngineCore" Value="Engine,texture/hdri_epic_courtyard_daylight.srv,1fbfef87-ba8b-4990-90d0-33d9b0a60e8f" />
         <UniqueId Type="System.Guid@Unknown" Value="8d74e843-f248-46b1-ac40-b2c860e4fe4a" />
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
@@ -209,8 +211,10 @@
   <RenderPolicy Type="EngineNS.Graphics.Pipeline.TtForwordPolicyBase@EngineCore">
     <ContactShadowMode Type="EngineNS.Graphics.Pipeline.Deferred.EContactShadowMode@EngineCore" Value="InputNode" />
     <EnableAO Type="System.Boolean@Unknown" Value="True" />
+    <EnableDecal Type="System.Boolean@Unknown" Value="True" />
     <EnableGI Type="System.Boolean@Unknown" Value="True" />
     <EnableLocalLights Type="System.Boolean@Unknown" Value="True" />
+    <EnableSSR Type="System.Boolean@Unknown" Value="True" />
     <ShadowMode Type="EngineNS.Graphics.Pipeline.EShadowMode@EngineCore" Value="Csm" />
     <TypeFog Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog@EngineCore" Value="None" />
   </RenderPolicy>

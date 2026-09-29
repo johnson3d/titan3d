@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_16120303726382549981 Type="EngineNS.Sequencer.TtScalarChannel@EngineCore">
+  <DefaultValue Type="System.Double@Unknown" Order="0" />
+  <PostExtrap Type="EngineNS.Sequencer.EChannelExtrapMode@EngineCore" Order="0" />
+  <PreExtrap Type="EngineNS.Sequencer.EChannelExtrapMode@EngineCore" Order="0" />
+  <Times Type="System.Collections.Generic.List&lt;System.Int64@Unknown,&gt;@Unknown" Order="0" />
+  <Values Type="System.Collections.Generic.List&lt;EngineNS.Sequencer.FScalarKey@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_16120303726382549981>

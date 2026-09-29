@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_12512548530979017061 Type="EngineNS.Sequencer.Asset.TtPropertySection@EngineCore">
+  <AdapterId Type="System.String@Unknown" Order="0" />
+  <CompletionMode Type="EngineNS.Sequencer.Asset.ESectionCompletionMode@EngineCore" Order="0" />
+  <EaseInDuration Type="System.Int64@Unknown" Order="0" />
+  <EaseOutDuration Type="System.Int64@Unknown" Order="0" />
+  <EndTick Type="System.Int64@Unknown" Order="0" />
+  <NameChannel Type="EngineNS.Sequencer.TtNameChannel@EngineCore" Order="0" />
+  <OverlapPriority Type="System.Int32@Unknown" Order="0" />
+  <PropertyId Type="System.String@Unknown" Order="0" />
+  <QuatChannel Type="EngineNS.Sequencer.TtQuatChannel@EngineCore" Order="0" />
+  <RowIndex Type="System.Int32@Unknown" Order="0" />
+  <ScalarChannels Type="System.Collections.Generic.List&lt;EngineNS.Sequencer.TtScalarChannel@EngineCore,&gt;@Unknown" Order="0" />
+  <StartTick Type="System.Int64@Unknown" Order="0" />
+</Hash_12512548530979017061>

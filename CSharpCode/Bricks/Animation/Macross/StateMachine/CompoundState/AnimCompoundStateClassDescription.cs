@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation.Macross;
+using EngineNS.Animation.Macross;
 using EngineNS.Animation.StateMachine;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.StateMachine.Macross.CompoundState;
@@ -20,7 +20,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
     public class TtAnimCompoundStateClassDescription : TtTimedCompoundStateClassDescription, IAnimMacrossClassDescription
     {
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public override string Name { get; set; } = "TimedStatesHub";
 
         public TtAnimCompoundStateClassDescription()

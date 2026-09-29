@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_13333038483827225360 Type="EngineNS.TtBezier3DPoint@EngineCore">
+  <LeftControl Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <Position Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <RightControl Type="EngineNS.Vector3@EngineCore" Order="0" />
+</Hash_13333038483827225360>

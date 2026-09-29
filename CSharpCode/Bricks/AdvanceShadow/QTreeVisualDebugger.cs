@@ -1,4 +1,4 @@
-﻿using EngineNS.Graphics.Pipeline;
+using EngineNS.Graphics.Pipeline;
 using System;
 using System.Collections.Generic;
 using EngineNS.GamePlay.Scene;
@@ -92,7 +92,7 @@ namespace EngineNS.Bricks.AdvanceShadow
         }
         public TtAdvanceShadowNode mAdanceShadowNode;
         public TtCpuCullingNode mCullingNode;
-        [Category("Debug")]
+        [System.ComponentModel.Category("Debug")]
         public TtQTree QTree
         {
             get => mAdanceShadowNode.mShadowMapTree;

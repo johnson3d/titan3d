@@ -1,4 +1,4 @@
-﻿using EngineNS.DesignMacross;
+using EngineNS.DesignMacross;
 using EngineNS.DesignMacross.Design.Statement;
 using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
@@ -387,7 +387,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
 
         [RName.PGMacrossRName<TtSceneNodeMacrossBase>(FilterExts = TtMacross.AssetExt)]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public RName MacrossName
         {

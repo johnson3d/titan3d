@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace EngineNS
 {
@@ -43,25 +43,25 @@ namespace EngineNS
                     var maxValue = float.MaxValue;
                     var v = (Thickness)info.Value;
                     ImGuiAPI.SetNextItemWidth(titleWidth);
-                    ImGuiAPI.Text("L");
+                    ImGuiAPI.Text(TtLocalization.Tr("L"));
                     ImGuiAPI.SameLine(0, -1);
                     ImGuiAPI.SetNextItemWidth(width);
                     var changed = ImGuiAPI.DragScalar2("##L", ImGuiDataType_.ImGuiDataType_Float, (float*)&v.mLeft, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                     ImGuiAPI.SameLine(0, -1);
                     ImGuiAPI.SetNextItemWidth(titleWidth);
-                    ImGuiAPI.Text("R");
+                    ImGuiAPI.Text(TtLocalization.Tr("R"));
                     ImGuiAPI.SameLine(0, -1);
                     ImGuiAPI.SetNextItemWidth(width);
                     changed = changed || ImGuiAPI.DragScalar2("##R", ImGuiDataType_.ImGuiDataType_Float, (float*)&v.mRight, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                     ImGuiAPI.SetNextItemWidth(titleWidth);
                     ImGuiAPI.AlignTextToFramePadding();
-                    ImGuiAPI.Text("T");
+                    ImGuiAPI.Text(TtLocalization.Tr("T"));
                     ImGuiAPI.SameLine(0, -1);
                     ImGuiAPI.SetNextItemWidth(width);
                     changed = changed || ImGuiAPI.DragScalar2("##T", ImGuiDataType_.ImGuiDataType_Float, (float*)&v.mTop, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                     ImGuiAPI.SameLine(0, -1);
                     ImGuiAPI.SetNextItemWidth(titleWidth);
-                    ImGuiAPI.Text("B");
+                    ImGuiAPI.Text(TtLocalization.Tr("B"));
                     ImGuiAPI.SameLine(0, -1);
                     ImGuiAPI.SetNextItemWidth(width);
                     changed = changed || ImGuiAPI.DragScalar2("##B", ImGuiDataType_.ImGuiDataType_Float, (float*)&v.mBottom, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);

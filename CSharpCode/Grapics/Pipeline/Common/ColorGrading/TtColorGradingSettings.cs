@@ -12,138 +12,138 @@ namespace EngineNS.Graphics.Pipeline.Common.ColorGrading
     public class TtColorGradingSettings : IO.BaseSerializer
     {
         // ── White Balance ──
-        [Category("WhiteBalance")]
+        [System.ComponentModel.Category("WhiteBalance")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtValueChangeStep(100f)]
         public float WhiteTemp { get; set; } = 6500.0f;
 
-        [Category("WhiteBalance")]
+        [System.ComponentModel.Category("WhiteBalance")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtValueChangeStep(0.1f)]
         public float WhiteTint { get; set; } = 0.0f;
 
         // ── Global ──
-        [Category("Global")]
+        [System.ComponentModel.Category("Global")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorSaturation { get; set; } = new Vector4(1, 1, 1, 1);
 
-        [Category("Global")]
+        [System.ComponentModel.Category("Global")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorContrast { get; set; } = new Vector4(1, 1, 1, 1);
 
-        [Category("Global")]
+        [System.ComponentModel.Category("Global")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorGamma { get; set; } = new Vector4(1, 1, 1, 1);
 
-        [Category("Global")]
+        [System.ComponentModel.Category("Global")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorGain { get; set; } = new Vector4(1, 1, 1, 1);
 
-        [Category("Global")]
+        [System.ComponentModel.Category("Global")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorOffset { get; set; } = new Vector4(0, 0, 0, 0);
 
         // ── Shadows ──
-        [Category("Shadows")]
+        [System.ComponentModel.Category("Shadows")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorSaturationShadows { get; set; } = new Vector4(1, 1, 1, 1);
 
-        [Category("Shadows")]
+        [System.ComponentModel.Category("Shadows")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorContrastShadows { get; set; } = new Vector4(1, 1, 1, 1);
 
-        [Category("Shadows")]
+        [System.ComponentModel.Category("Shadows")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorGammaShadows { get; set; } = new Vector4(1, 1, 1, 1);
 
-        [Category("Shadows")]
+        [System.ComponentModel.Category("Shadows")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorGainShadows { get; set; } = new Vector4(1, 1, 1, 1);
 
-        [Category("Shadows")]
+        [System.ComponentModel.Category("Shadows")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorOffsetShadows { get; set; } = new Vector4(0, 0, 0, 0);
 
         // ── Midtones ──
-        [Category("Midtones")]
+        [System.ComponentModel.Category("Midtones")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorSaturationMidtones { get; set; } = new Vector4(1, 1, 1, 1);
 
-        [Category("Midtones")]
+        [System.ComponentModel.Category("Midtones")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorContrastMidtones { get; set; } = new Vector4(1, 1, 1, 1);
 
-        [Category("Midtones")]
+        [System.ComponentModel.Category("Midtones")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorGammaMidtones { get; set; } = new Vector4(1, 1, 1, 1);
 
-        [Category("Midtones")]
+        [System.ComponentModel.Category("Midtones")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorGainMidtones { get; set; } = new Vector4(1, 1, 1, 1);
 
-        [Category("Midtones")]
+        [System.ComponentModel.Category("Midtones")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorOffsetMidtones { get; set; } = new Vector4(0, 0, 0, 0);
 
         // ── Highlights ──
-        [Category("Highlights")]
+        [System.ComponentModel.Category("Highlights")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorSaturationHighlights { get; set; } = new Vector4(1, 1, 1, 1);
 
-        [Category("Highlights")]
+        [System.ComponentModel.Category("Highlights")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorContrastHighlights { get; set; } = new Vector4(1, 1, 1, 1);
 
-        [Category("Highlights")]
+        [System.ComponentModel.Category("Highlights")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorGammaHighlights { get; set; } = new Vector4(1, 1, 1, 1);
 
-        [Category("Highlights")]
+        [System.ComponentModel.Category("Highlights")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorGainHighlights { get; set; } = new Vector4(1, 1, 1, 1);
 
-        [Category("Highlights")]
+        [System.ComponentModel.Category("Highlights")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtColorGradingWheelEditor]
         public Vector4 ColorOffsetHighlights { get; set; } = new Vector4(0, 0, 0, 0);
 
         // ── Shadow/Midtone/Highlight boundaries ──
-        [Category("Misc")]
+        [System.ComponentModel.Category("Misc")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtValueChangeStep(0.01f)]
         public float ShadowsMax { get; set; } = 0.09f;
 
-        [Category("Misc")]
+        [System.ComponentModel.Category("Misc")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtValueChangeStep(0.01f)]
         public float HighlightsMin { get; set; } = 0.5f;
 
-        [Category("Misc")]
+        [System.ComponentModel.Category("Misc")]
         [Rtti.Meta("")]
         [EGui.Controls.PropertyGrid.TtValueChangeStep(0.01f)]
         public float HighlightsMax { get; set; } = 1.0f;
 
         // ── LUT configuration ──
-        [Category("Misc")]
+        [System.ComponentModel.Category("Misc")]
         [Rtti.Meta("")]
         public int LutSize { get; set; } = 32;
 

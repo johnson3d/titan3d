@@ -36,13 +36,13 @@ namespace EngineNS.Animation.Macross.BlendTree
 
         /// <summary> 提供 driven pose 的 PoseAsset。 </summary>
         [Rtti.Meta("")]
-        [Category("PoseDriver")]
+        [System.ComponentModel.Category("PoseDriver")]
         [RName.PGRName(FilterExts = EngineNS.Animation.Asset.TtPoseAsset.AssetExt)]
         public RName PoseAsset { get; set; }
 
         /// <summary> 源骨骼: 用它的当前姿态作为 RBF 输入。 </summary>
         [Rtti.Meta("")]
-        [Category("PoseDriver")]
+        [System.ComponentModel.Category("PoseDriver")]
         [TtSkeletonBoneIndexPickerEditor]
         public LimbIndexInSkeleton SourceBone { get; set; } = LimbIndexInSkeleton.CrteateDefault();
 
@@ -52,59 +52,59 @@ namespace EngineNS.Animation.Macross.BlendTree
         /// 上限 3 根: target 内不能用集合字段(GenCode 不支持), 故用固定字段。
         /// </summary>
         [Rtti.Meta("")]
-        [Category("PoseDriver")]
+        [System.ComponentModel.Category("PoseDriver")]
         [TtSkeletonBoneIndexPickerEditor]
         public LimbIndexInSkeleton SourceBone2 { get; set; } = LimbIndexInSkeleton.CrteateDefault();
 
         /// <summary> 第 3 根源骨骼(可选)。 </summary>
         [Rtti.Meta("")]
-        [Category("PoseDriver")]
+        [System.ComponentModel.Category("PoseDriver")]
         [TtSkeletonBoneIndexPickerEditor]
         public LimbIndexInSkeleton SourceBone3 { get; set; } = LimbIndexInSkeleton.CrteateDefault();
 
         /// <summary> 用源骨骼的旋转还是位移作为驱动量。 </summary>
         [Rtti.Meta("")]
-        [Category("PoseDriver")]
+        [System.ComponentModel.Category("PoseDriver")]
         public EPoseDriverSource DriveSource { get; set; } = EPoseDriverSource.Rotation;
 
         /// <summary> RBF target 列表: 每个 target 是一个采样姿态 + 它驱动的 pose 名。 </summary>
         [Rtti.Meta("")]
-        [Category("PoseDriver")]
+        [System.ComponentModel.Category("PoseDriver")]
         public List<TtPoseDriverTarget> PoseTargets { get; set; } = new();
 
         // ─── RBF 参数 ─────────────────────────────────────────────────────
         [Rtti.Meta("")]
-        [Category("RBF")]
+        [System.ComponentModel.Category("RBF")]
         public ERBFSolverType SolverType { get; set; } = ERBFSolverType.Additive;
 
         /// <summary> 各 target 的影响半径, 单位为度。AutomaticRadius 为真时忽略。 </summary>
         [Rtti.Meta("")]
-        [Category("RBF")]
+        [System.ComponentModel.Category("RBF")]
         public float Radius { get; set; } = 45.0f;
 
         [Rtti.Meta("")]
-        [Category("RBF")]
+        [System.ComponentModel.Category("RBF")]
         public bool AutomaticRadius { get; set; } = false;
 
         [Rtti.Meta("")]
-        [Category("RBF")]
+        [System.ComponentModel.Category("RBF")]
         public ERBFFunctionType Function { get; set; } = ERBFFunctionType.Gaussian;
 
         [Rtti.Meta("")]
-        [Category("RBF")]
+        [System.ComponentModel.Category("RBF")]
         public ERBFDistanceMethod DistanceMethod { get; set; } = ERBFDistanceMethod.SwingAngle;
 
         /// <summary> SwingAngle / TwistAngle 使用的扭转轴。 </summary>
         [Rtti.Meta("")]
-        [Category("RBF")]
+        [System.ComponentModel.Category("RBF")]
         public ERBFTwistAxis TwistAxis { get; set; } = ERBFTwistAxis.X;
 
         [Rtti.Meta("")]
-        [Category("RBF")]
+        [System.ComponentModel.Category("RBF")]
         public float WeightThreshold { get; set; } = 0.0001f;
 
         [Rtti.Meta("")]
-        [Category("RBF")]
+        [System.ComponentModel.Category("RBF")]
         public ERBFNormalizeMethod NormalizeMethod { get; set; } = ERBFNormalizeMethod.OnlyNormalizeAboveOne;
 
         // ─── 驱动范围(bone mask) ─────────────────────────────────
@@ -117,24 +117,24 @@ namespace EngineNS.Animation.Macross.BlendTree
         /// 用于矫正型 pose(例如只影响肩部)不干扰全身动作。
         /// </summary>
         [Rtti.Meta("")]
-        [Category("DriveScope")]
+        [System.ComponentModel.Category("DriveScope")]
         public bool OnlyDriveSelectedBones { get; set; } = false;
 
         /// <summary> 驱动范围根骨骼 1(含其全部子骨骼)。 </summary>
         [Rtti.Meta("")]
-        [Category("DriveScope")]
+        [System.ComponentModel.Category("DriveScope")]
         [TtSkeletonBoneIndexPickerEditor]
         public LimbIndexInSkeleton DriveBoneRoot1 { get; set; } = LimbIndexInSkeleton.CrteateDefault();
 
         /// <summary> 驱动范围根骨骼 2。 </summary>
         [Rtti.Meta("")]
-        [Category("DriveScope")]
+        [System.ComponentModel.Category("DriveScope")]
         [TtSkeletonBoneIndexPickerEditor]
         public LimbIndexInSkeleton DriveBoneRoot2 { get; set; } = LimbIndexInSkeleton.CrteateDefault();
 
         /// <summary> 驱动范围根骨骼 3。 </summary>
         [Rtti.Meta("")]
-        [Category("DriveScope")]
+        [System.ComponentModel.Category("DriveScope")]
         [TtSkeletonBoneIndexPickerEditor]
         public LimbIndexInSkeleton DriveBoneRoot3 { get; set; } = LimbIndexInSkeleton.CrteateDefault();
 
@@ -143,7 +143,7 @@ namespace EngineNS.Animation.Macross.BlendTree
             get { return PoseInPins[0]; }
         }
 
-        [Category("Pins"), DisplayName("Alpha")]
+        [System.ComponentModel.Category("Pins"), System.ComponentModel.DisplayName("Alpha")]
         public TtDataInPinDescription AlphaPin { get => DataInPins[0]; }
 
         public TtBlendTree_PoseDriverClassDescription()

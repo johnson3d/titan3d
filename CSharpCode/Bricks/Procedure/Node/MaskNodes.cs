@@ -5,17 +5,18 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
-    public class UMaskBase : UBinocularWithMask
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UMaskBase@EngineCore", "EngineNS.Bricks.Procedure.Node.UMaskBase" })]
+    public class TtMaskBase : TtBinocularWithMask
     {
-        public UMaskBase()
+        public TtMaskBase()
         {
             OutputDesc.BufferType = Rtti.TtTypeDesc.TypeOf<TtSuperBuffer<sbyte, FSByteOperator>>();
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (ResultPin == pin)
             {
-                var graph = ParentGraph as UPgcGraph;
+                var graph = ParentGraph as TtPgcGraph;
                 var buffer = graph.BufferCache.FindBuffer(LeftPin);
                 if (buffer != null)
                 {
@@ -31,10 +32,10 @@ namespace EngineNS.Bricks.Procedure.Node
 
             if (iPin == LeftPin)
             {
-                var left = oPin.Tag as UBufferCreator;
-                var right = RightPin.Tag as UBufferCreator;
+                var left = oPin.Tag as TtBufferCreator;
+                var right = RightPin.Tag as TtBufferCreator;
 
-                (LeftPin.Tag as UBufferCreator).BufferType = left.BufferType;
+                (LeftPin.Tag as TtBufferCreator).BufferType = left.BufferType;
                 if (right.BufferType != left.BufferType)
                 {
                     right.BufferType = left.BufferType;
@@ -44,10 +45,11 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("GreatEqual", "Mask\\GreatEqual", UPgcGraph.PgcEditorKeyword)]
-    public class UGreatEqual : UMaskBase
+    [Bricks.CodeBuilder.ContextMenu("GreatEqual", "Mask\\GreatEqual", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UGreatEqual@EngineCore", "EngineNS.Bricks.Procedure.Node.UGreatEqual" })]
+    public class TtGreatEqual : TtMaskBase
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(TtPgcGraph graph, TtPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -73,10 +75,11 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Great", "Mask\\Great", UPgcGraph.PgcEditorKeyword)]
-    public class UGreat : UMaskBase
+    [Bricks.CodeBuilder.ContextMenu("Great", "Mask\\Great", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UGreat@EngineCore", "EngineNS.Bricks.Procedure.Node.UGreat" })]
+    public class TtGreat : TtMaskBase
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(TtPgcGraph graph, TtPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -102,10 +105,11 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("LessEqual", "Mask\\LessEqual", UPgcGraph.PgcEditorKeyword)]
-    public class ULessEqual : UMaskBase
+    [Bricks.CodeBuilder.ContextMenu("LessEqual", "Mask\\LessEqual", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.ULessEqual@EngineCore", "EngineNS.Bricks.Procedure.Node.ULessEqual" })]
+    public class TtLessEqual : TtMaskBase
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(TtPgcGraph graph, TtPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -131,10 +135,11 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Less", "Mask\\Less", UPgcGraph.PgcEditorKeyword)]
-    public class ULess : UMaskBase
+    [Bricks.CodeBuilder.ContextMenu("Less", "Mask\\Less", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.ULess@EngineCore", "EngineNS.Bricks.Procedure.Node.ULess" })]
+    public class TtLess : TtMaskBase
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(TtPgcGraph graph, TtPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -160,10 +165,11 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Equal", "Mask\\Equal", UPgcGraph.PgcEditorKeyword)]
-    public class UEqual : UMaskBase
+    [Bricks.CodeBuilder.ContextMenu("Equal", "Mask\\Equal", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UEqual@EngineCore", "EngineNS.Bricks.Procedure.Node.UEqual" })]
+    public class TtEqual : TtMaskBase
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(TtPgcGraph graph, TtPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -189,10 +195,11 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("NotEqual", "Mask\\NotEqual", UPgcGraph.PgcEditorKeyword)]
-    public class UNotEqual : UMaskBase
+    [Bricks.CodeBuilder.ContextMenu("NotEqual", "Mask\\NotEqual", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UNotEqual@EngineCore", "EngineNS.Bricks.Procedure.Node.UNotEqual" })]
+    public class TtNotEqual : TtMaskBase
     {
-        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
+        public unsafe override void OnPerPixel(TtPgcGraph graph, TtPgcNodeBase node, TtBufferComponent result, int x, int y, int z, object tag)
         {
             var arg = tag as ULeftRightBuffer;
             var left = arg.Left;
@@ -219,7 +226,8 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
     
-    public class ULogicBoolean : UPgcNodeBase
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.ULogicBoolean@EngineCore", "EngineNS.Bricks.Procedure.Node.ULogicBoolean" })]
+    public class TtLogicBoolean : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinIn LeftPin { get; set; } = new PinIn();
@@ -227,9 +235,9 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn RightPin { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator InputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
-        public ULogicBoolean()
+        public TtBufferCreator InputDesc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
+        public TtBufferCreator OutputDesc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
+        public TtLogicBoolean()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -240,11 +248,11 @@ namespace EngineNS.Bricks.Procedure.Node
             AddInput(RightPin, "Right", InputDesc);
             AddOutput(ResultPin, "Result", OutputDesc);
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (ResultPin == pin)
             {
-                var graph = ParentGraph as UPgcGraph;
+                var graph = ParentGraph as TtPgcGraph;
                 var buffer = graph.BufferCache.FindBuffer(LeftPin);
                 if (buffer != null)
                 {
@@ -255,10 +263,11 @@ namespace EngineNS.Bricks.Procedure.Node
             return null;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("And", "Mask\\Bool\\And", UPgcGraph.PgcEditorKeyword)]
-    public class UBooleanAnd : ULogicBoolean
+    [Bricks.CodeBuilder.ContextMenu("And", "Mask\\Bool\\And", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UBooleanAnd@EngineCore", "EngineNS.Bricks.Procedure.Node.UBooleanAnd" })]
+    public class TtBooleanAnd : TtLogicBoolean
     {
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var left = graph.BufferCache.FindBuffer(LeftPin);
             var right = graph.BufferCache.FindBuffer(RightPin);
@@ -284,10 +293,11 @@ namespace EngineNS.Bricks.Procedure.Node
             return true;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Or", "Mask\\Bool\\Or", UPgcGraph.PgcEditorKeyword)]
-    public class UBooleanOr : ULogicBoolean
+    [Bricks.CodeBuilder.ContextMenu("Or", "Mask\\Bool\\Or", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UBooleanOr@EngineCore", "EngineNS.Bricks.Procedure.Node.UBooleanOr" })]
+    public class TtBooleanOr : TtLogicBoolean
     {
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var left = graph.BufferCache.FindBuffer(LeftPin);
             var right = graph.BufferCache.FindBuffer(RightPin);
@@ -313,10 +323,11 @@ namespace EngineNS.Bricks.Procedure.Node
             return true;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("XOr", "Mask\\Bool\\XOr", UPgcGraph.PgcEditorKeyword)]
-    public class UBooleanXOr : ULogicBoolean
+    [Bricks.CodeBuilder.ContextMenu("XOr", "Mask\\Bool\\XOr", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UBooleanXOr@EngineCore", "EngineNS.Bricks.Procedure.Node.UBooleanXOr" })]
+    public class TtBooleanXOr : TtLogicBoolean
     {
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var left = graph.BufferCache.FindBuffer(LeftPin);
             var right = graph.BufferCache.FindBuffer(RightPin);
@@ -342,16 +353,17 @@ namespace EngineNS.Bricks.Procedure.Node
             return true;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("Not", "Mask\\Bool\\Not", UPgcGraph.PgcEditorKeyword)]
-    public class UBooleanNot : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("Not", "Mask\\Bool\\Not", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UBooleanNot@EngineCore", "EngineNS.Bricks.Procedure.Node.UBooleanNot" })]
+    public class TtBooleanNot : TtPgcNodeBase
     {
         [Browsable(false)]
         public PinIn SrcPin { get; set; } = new PinIn();
         [Browsable(false)]
         public PinOut ResultPin { get; set; } = new PinOut();
-        public UBufferCreator InputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
-        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
-        public UBooleanNot()
+        public TtBufferCreator InputDesc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
+        public TtBufferCreator OutputDesc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1);
+        public TtBooleanNot()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -361,11 +373,11 @@ namespace EngineNS.Bricks.Procedure.Node
             AddInput(SrcPin, "Src", InputDesc);
             AddOutput(ResultPin, "Result", OutputDesc);
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (ResultPin == pin)
             {
-                var graph = ParentGraph as UPgcGraph;
+                var graph = ParentGraph as TtPgcGraph;
                 var buffer = graph.BufferCache.FindBuffer(SrcPin);
                 if (buffer != null)
                 {
@@ -375,7 +387,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return null;
         }
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var left = graph.BufferCache.FindBuffer(SrcPin);
             var result = graph.BufferCache.FindBuffer(ResultPin);
@@ -394,23 +406,24 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
 
-    [Bricks.CodeBuilder.ContextMenu("Sdf", "Mask\\Sdf", UPgcGraph.PgcEditorKeyword)]
-    public partial class USdfCalculator : UMonocular
+    [Bricks.CodeBuilder.ContextMenu("Sdf", "Mask\\Sdf", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.USdfCalculator@EngineCore", "EngineNS.Bricks.Procedure.Node.USdfCalculator" })]
+    public partial class TtSdfCalculator : TtMonocular
     {
         [Browsable(false)]
         public PinOut ClosestPin { get; set; } = new PinOut();
-        public UBufferCreator ClosestDesc { get; } = UBufferCreator.CreateInstance<TtSuperBuffer<Vector3i, FInt3Operator>>(-1, -1, -1);
-        public USdfCalculator()
+        public TtBufferCreator ClosestDesc { get; } = TtBufferCreator.CreateInstance<TtSuperBuffer<Vector3i, FInt3Operator>>(-1, -1, -1);
+        public TtSdfCalculator()
         {
             SourceDesc.BufferType = Rtti.TtTypeDescGetter<TtSuperBuffer<sbyte, FSByteOperator>>.TypeDesc;
 
             AddOutput(ClosestPin, "Closest", ClosestDesc);
         }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public override TtBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (ResultPin == pin)
             {
-                var graph = ParentGraph as UPgcGraph;
+                var graph = ParentGraph as TtPgcGraph;
                 var buffer = graph.BufferCache.FindBuffer(SrcPin);
                 if (buffer != null)
                 {
@@ -420,7 +433,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             else if (ClosestPin == pin)
             {
-                var graph = ParentGraph as UPgcGraph;
+                var graph = ParentGraph as TtPgcGraph;
                 var buffer = graph.BufferCache.FindBuffer(SrcPin);
                 if (buffer != null)
                 {
@@ -430,7 +443,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return null;
         }
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var curComp = graph.BufferCache.FindBuffer(SrcPin);
             var resultComp = graph.BufferCache.FindBuffer(ResultPin);

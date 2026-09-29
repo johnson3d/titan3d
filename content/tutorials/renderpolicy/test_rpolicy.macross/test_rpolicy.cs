@@ -1,4 +1,4 @@
-﻿namespace NS_tutorials.renderpolicy
+namespace NS_tutorials.renderpolicy
 {
     [EngineNS.Macross.TtMacross]
     [EngineNS.Macross.TtMacrossSign(RName_Name = "tutorials/renderpolicy/test_rpolicy.macross", RName_Type = EngineNS.RName.ERNameType.Game)]

@@ -16,7 +16,7 @@ namespace EngineNS.GamePlay.Scene
             internal TtPostProcessVolumeNode HostNode;
 
             TtColorGradingSettings mColorGradingSettings = new TtColorGradingSettings();
-            [Category("ColorGrading")]
+            [System.ComponentModel.Category("ColorGrading")]
             [Rtti.Meta("")]
             public TtColorGradingSettings ColorGradingSettings
             {
@@ -24,7 +24,7 @@ namespace EngineNS.GamePlay.Scene
                 set => mColorGradingSettings = value ?? new TtColorGradingSettings();
             }
 
-            [Category("ColorGrading")]
+            [System.ComponentModel.Category("ColorGrading")]
             [Rtti.Meta("")]
             public bool EnableColorGrading { get; set; } = true;
         }
@@ -62,7 +62,7 @@ namespace EngineNS.GamePlay.Scene
             return ret;
         }
 
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public TtPostProcessVolumeData PostProcessData
         {
             get => GetNodeData<TtPostProcessVolumeData>();

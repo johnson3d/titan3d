@@ -1,4 +1,4 @@
-﻿using EngineNS.IO;
+using EngineNS.IO;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -775,24 +775,24 @@ namespace EngineNS.EGui.Controls
 
             if (mAssetPageIndex > 0)
             {
-                if (ImGuiAPI.Button("Prev##ContentBrowserAssetPage", in Vector2.Zero))
+                if (ImGuiAPI.Button(TtLocalization.Label("Prev", "##ContentBrowserAssetPage"), in Vector2.Zero))
                     mAssetPageIndex--;
             }
             else
             {
-                ImGuiAPI.Text("Prev");
+                ImGuiAPI.Text(TtLocalization.Tr("Prev"));
             }
             ImGuiAPI.SameLine(0, -1);
-            ImGuiAPI.Text($"Page {mAssetPageIndex + 1}  {shownCount}/{AssetPageSize}");
+            ImGuiAPI.Text(TtLocalization.Format("Page {0}  {1}/{2}", mAssetPageIndex + 1, shownCount, AssetPageSize));
             ImGuiAPI.SameLine(0, -1);
             if (hasNext)
             {
-                if (ImGuiAPI.Button("Next##ContentBrowserAssetPage", in Vector2.Zero))
+                if (ImGuiAPI.Button(TtLocalization.Label("Next", "##ContentBrowserAssetPage"), in Vector2.Zero))
                     mAssetPageIndex++;
             }
             else
             {
-                ImGuiAPI.Text("Next");
+                ImGuiAPI.Text(TtLocalization.Tr("Next"));
             }
         }
 
@@ -846,15 +846,15 @@ namespace EngineNS.EGui.Controls
 
                     ImGuiAPI.TableHeadersRow();
                     ImGuiAPI.TableSetColumnIndex(0);
-                    ImGuiAPI.Selectable("Icon", mSortedAssetsColumn == 0, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, Vector2.Zero);
+                    ImGuiAPI.Selectable(TtLocalization.Tr("Icon"), mSortedAssetsColumn == 0, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, Vector2.Zero);
                     ImGuiAPI.TableSetColumnIndex(1);
-                    if(ImGuiAPI.Selectable("Type", mSortedAssetsColumn == 1, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, Vector2.Zero))
+                    if(ImGuiAPI.Selectable(TtLocalization.Tr("Type"), mSortedAssetsColumn == 1, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, Vector2.Zero))
                     {
                         mSortedAssetsColumn = 1;
                         ApplyAssetSort();
                     }
                     ImGuiAPI.TableSetColumnIndex(2);
-                    if (ImGuiAPI.Selectable("Name", mSortedAssetsColumn == 2, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, Vector2.Zero))
+                    if (ImGuiAPI.Selectable(TtLocalization.Tr("Name"), mSortedAssetsColumn == 2, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, Vector2.Zero))
                     {
                         mSortedAssetsColumn = 2;
                         ApplyAssetSort();
@@ -1219,7 +1219,7 @@ namespace EngineNS.EGui.Controls
                         }
                         var posY = ImGuiAPI.GetCursorPosY();
                         ImGuiAPI.SetCursorPosY(posY + winSize.Y - 20);
-                        ImGuiAPI.Text(SelectedAssets.Count + " items");
+                        ImGuiAPI.Text(SelectedAssets.Count + TtLocalization.Tr(" items"));
                     }
                     ImGuiAPI.EndChild();
                 }
@@ -1295,7 +1295,7 @@ namespace EngineNS.EGui.Controls
             };
             mFilterMenus["##Tiles"] = new UIProxy.MenuItemProxy()
             {
-                MenuName = "Tiles",
+                MenuName = TtLocalization.Tr("Tiles"),
                 Selected = (mViewType == EViewType.Tiles),
                 Action = (item, data) =>
                 {
@@ -1306,7 +1306,7 @@ namespace EngineNS.EGui.Controls
             };
             mFilterMenus["##Columns"] = new UIProxy.MenuItemProxy()
             {
-                MenuName = "Columns",
+                MenuName = TtLocalization.Tr("Columns"),
                 Selected = (mViewType == EViewType.Columns),
                 Action = (item, data) =>
                 {
@@ -1321,7 +1321,7 @@ namespace EngineNS.EGui.Controls
             };
             mFilterMenus["##null"] = new UIProxy.MenuItemProxy()
             {
-                MenuName = "Clear Filters",
+                MenuName = TtLocalization.Tr("Clear Filters"),
                 Action = (item, data)=>
                 {
                     foreach(var menuItem in mFilterMenus)
@@ -1338,7 +1338,7 @@ namespace EngineNS.EGui.Controls
             };
             mFilterMenus["##show child"] = new UIProxy.MenuItemProxy()
             {
-                MenuName = "With child folders",
+                MenuName = TtLocalization.Tr("With child folders"),
                 Action = (item, data)=>
                 {
                     mWithChildFolders = !mWithChildFolders;
@@ -1639,7 +1639,7 @@ namespace EngineNS.EGui.Controls
             //            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             var name = Name;
             if (string.IsNullOrEmpty(name))
-                name = "ContentBrowser";
+                name = TtLocalization.Label("ContentBrowser", "###ContentBrowser");
             bool draw = true;
             if (DrawInWindow)
             {
@@ -1936,7 +1936,7 @@ namespace EngineNS.EGui.Controls
                         }
                     }
 
-                    if (ImGuiAPI.Button("OK", in Vector2.Zero))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("OK"), in Vector2.Zero))
                     {
                         try
                         {
@@ -2007,7 +2007,7 @@ namespace EngineNS.EGui.Controls
                     mSelectFolderOKButtonHeight = ImGuiAPI.GetItemRectSize().Y;
                     ImGuiAPI.SetItemDefaultFocus();
                     ImGuiAPI.SameLine(0, -1);
-                    if (ImGuiAPI.Button("Cancel", in Vector2.Zero))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Cancel"), in Vector2.Zero))
                     {
                         mOperationAsset = null;
                         mOperationType = EAssetOperationType.None;
@@ -2048,7 +2048,7 @@ namespace EngineNS.EGui.Controls
             UIProxy.StyleConfig.Instance.PushPopupStyle();
             if (ImGuiAPI.BeginPopupModal(keyName, (bool*)0, ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize))
             {
-                ImGuiAPI.Text(deleteCount > 1 ? $"Delete {deleteCount} selected assets?" : "Delete this asset?");
+                ImGuiAPI.Text(deleteCount > 1 ? TtLocalization.Format("Delete {0} selected assets?", deleteCount) : TtLocalization.Tr("Delete this asset?"));
                 var previewCount = Math.Min(deleteCount, 5);
                 for (int i = 0; i < previewCount; i++)
                 {
@@ -2058,11 +2058,11 @@ namespace EngineNS.EGui.Controls
                 }
                 if (deleteCount > previewCount)
                 {
-                    ImGuiAPI.Text($"... and {deleteCount - previewCount} more");
+                    ImGuiAPI.Text(TtLocalization.Format("... and {0} more", deleteCount - previewCount));
                 }
                 ImGuiAPI.Separator();
 
-                if (ImGuiAPI.Button("Delete", in Vector2.Zero))
+                if (ImGuiAPI.Button(TtLocalization.Tr("Delete"), in Vector2.Zero))
                 {
                     var deletedAssets = new List<IO.IAssetMeta>();
                     var deletedNames = new List<RName>();
@@ -2103,7 +2103,7 @@ namespace EngineNS.EGui.Controls
                     ImGuiAPI.CloseCurrentPopup();
                 }
                 ImGuiAPI.SameLine(0, -1);
-                if (ImGuiAPI.Button("Cancel", in Vector2.Zero))
+                if (ImGuiAPI.Button(TtLocalization.Tr("Cancel"), in Vector2.Zero))
                 {
                     mOperationAsset = null;
                     mOperationAssets.Clear();

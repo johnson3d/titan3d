@@ -47,7 +47,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
     {
         RName mCBufferParameterName;
         [Rtti.Meta("", Order = 1)]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [RName.PGRName(FilterExts = TtCBufferParameter.AssetExt)]
         public RName CBufferParameterName
         {
@@ -92,7 +92,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
         [Rtti.Meta("", Order = 1)]
         [RName.PGRName(FilterExts = EngineNS.Bricks.CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtCBufferSetter))]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName McName
         {
             get

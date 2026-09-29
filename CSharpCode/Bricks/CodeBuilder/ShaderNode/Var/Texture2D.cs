@@ -14,7 +14,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         RName mAssetName;
         [Rtti.Meta("")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName AssetName
         {
             get
@@ -63,17 +63,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
 
         bool mIsDynamic = false;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsDynamic { get => mIsDynamic; set => mIsDynamic = value; }
 
         string mDynamicSrvName;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string DynamicSrvName { get => mDynamicSrvName; set => mDynamicSrvName = value; }
         private NxRHI.TtSrView TextureSRV;
         public static unsafe void PreviewDraw(ref Editor.Forms.TtTextureViewerCmdParams CmdParameters, TtGraphicsEffect mSlateEffect, NxRHI.TtSrView TextureSRV, 

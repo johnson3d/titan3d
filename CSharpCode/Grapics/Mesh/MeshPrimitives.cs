@@ -1,3 +1,6 @@
+using EngineNS.GamePlay;
+using EngineNS.GamePlay.Scene;
+using EngineNS.Graphics.Pipeline;
 using EngineNS.IO;
 using EngineNS.Thread.Async;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,9 +18,10 @@ namespace EngineNS.Graphics.Mesh
         {
             get => TtMeshPrimitives.AssetExt;
         }
+        public const string AssetTypeName = "VMS";
         public override string GetAssetTypeName()
         {
-            return "VMS";
+            return AssetTypeName;
         }
         public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
@@ -61,7 +65,114 @@ namespace EngineNS.Graphics.Mesh
         {
             return TtEngine.Instance.ConfigManager.GetConfig<Editor.TtEditorConfig>().MeshPrimitivesBoderColor;
         }
-
+        
+        unsafe DVector3 CalculateDragPosition(TtViewportSlate vpSlate)
+        {
+            var worldViewport = vpSlate as EGui.Slate.TtWorldViewportSlate;
+            if (worldViewport != null)
+            {
+                var start = worldViewport.CameraController.Camera.GetPosition();
+                Vector3 dir = Vector3.Zero;
+                var msPt = new Vector2(TtEngine.Instance.InputSystem.Mouse.EventMouseX, TtEngine.Instance.InputSystem.Mouse.EventMouseY) - vpSlate.ViewportPos;
+                msPt = worldViewport.Window2Viewport(msPt);
+                worldViewport.CameraController.Camera.GetPickRay(ref dir, msPt.X, msPt.Y, worldViewport.ClientSize.X, worldViewport.ClientSize.Y);
+                var end = start + dir.AsDVector() * 1000.0f;
+                VHitResult hitResult = new VHitResult();
+                List<TtNode> candidates = null;
+                DVector3 hitPos;
+                if (worldViewport.World.CollideOctree.OctreeHitTest(in start, in end, ref candidates, &hitResult))
+                {
+                    hitPos = hitResult.Position;
+                }
+                else
+                {
+                    var ray = new DRay()
+                    {
+                        Position = start,
+                        Direction = dir,
+                    };
+                    var plane = new DPlane(DVector3.Zero, DVector3.Up);
+                    double distance;
+                    if (DRay.Intersects(in ray, in plane, out distance))
+                        hitPos = start + dir.AsDVector() * distance;
+                    else
+                        hitPos = start + dir.AsDVector() * 10.0f;
+                }
+                return hitPos;
+            }
+            return DVector3.Zero;
+        }
+        public override bool DraggingInViewport
+        {
+            get => base.DraggingInViewport;
+            set
+            {
+                base.DraggingInViewport = value;
+                if (!value && mPreviewNode != null)
+                {
+                    mPreviewNode.Parent = null;
+                }
+            }
+        }
+        async Thread.Async.TtTask<TtPrimitiveMeshNode.TtPrimitiveMeshNodeData> CreatePrimitiveMeshNodeData()
+        {
+            var meshNodeData = new TtPrimitiveMeshNode.TtPrimitiveMeshNodeData();
+            meshNodeData.Name = mAssetName.PureName;
+            meshNodeData.MeshName = mAssetName;
+        
+            var primitives = await mAssetName.GetAsset<TtMeshPrimitives>();
+            int atomCount = primitives == null ? 1 : Math.Max(1, (int)primitives.NumAtom);
+            var defaultMaterial = TtEngine.Instance.Config?.DefaultMaterial;
+            for (int i = 0; i < atomCount; i++)
+            {
+                meshNodeData.MaterialNames.Add(defaultMaterial);
+            }
+            return meshNodeData;
+        }
+        public override async Thread.Async.TtTask OnDragTo(TtViewportSlate vpSlate)
+        {
+            DraggingInViewport = false;
+            var worldViewport = vpSlate as EGui.Slate.TtWorldViewportSlate;
+            if (worldViewport != null)
+            {
+                var hitPos = CalculateDragPosition(vpSlate);
+                var meshNodeData = await CreatePrimitiveMeshNodeData();
+                await TtNode.SpawnNode<TtPrimitiveMeshNode>(worldViewport.World.Root, async (nd) =>
+                {
+                    nd.Parent = worldViewport.World.Root;
+                    nd.Placement.Position = hitPos;
+                    nd.HitproxyType = TtHitProxy.EHitproxyType.Root;
+                }, meshNodeData);
+        
+                if (mPreviewNode != null)
+                {
+                    mPreviewNode.Parent = null;
+                }
+            }
+        }
+        TtPrimitiveMeshNode mPreviewNode;
+        public override async Thread.Async.TtTask OnDragging(TtViewportSlate vpSlate)
+        {
+            var worldViewport = vpSlate as EGui.Slate.TtWorldViewportSlate;
+            if (worldViewport == null)
+                return;
+        
+            if (mPreviewNode == null)
+            {
+                var meshNodeData = await CreatePrimitiveMeshNodeData();
+                mPreviewNode = await TtNode.SpawnNode<TtPrimitiveMeshNode>(worldViewport.World.Root, async (nd) =>
+                {
+            
+                }, meshNodeData, EBoundVolumeType.Box, typeof(TtPlacement));
+            }
+        
+            if (mPreviewNode.Parent != worldViewport.World.Root)
+                mPreviewNode.Parent = worldViewport.World.Root;
+        
+            var hitPos = CalculateDragPosition(vpSlate);
+            mPreviewNode.Placement.Position = hitPos;
+        }
+        
         [Rtti.Meta("")]
         public bool IsClustered { get; set; } = false;
 
@@ -417,7 +528,7 @@ namespace EngineNS.Graphics.Mesh
         /// <summary>
         /// 编辑器代理属性: 读写 AMeta.HasBLAS, 标记该 Mesh 是否需要构建 BLAS.
         /// </summary>
-        [Category("RayTracing")]
+        [System.ComponentModel.Category("RayTracing")]
         public bool HasBLAS
         {
             get

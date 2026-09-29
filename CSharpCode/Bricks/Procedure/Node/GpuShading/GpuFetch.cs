@@ -7,6 +7,7 @@ using System.Collections.Generic;
 namespace EngineNS.Bricks.Procedure.Node.GpuShading
 {
     [Bricks.CodeBuilder.ContextMenu("GpuFetch", "PGC\\GpuFetch", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.GpuShading.UGpuFetchNode@EngineCore", "EngineNS.Bricks.Procedure.Node.GpuShading.UGpuFetchNode" })]
     public class TtGpuFetchNode : Graphics.Pipeline.Common.TtEndingNode
     {
         public Graphics.Pipeline.TtRenderGraphPin SrcPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInput("Src", NxRHI.EBufferType.BFT_SRV);

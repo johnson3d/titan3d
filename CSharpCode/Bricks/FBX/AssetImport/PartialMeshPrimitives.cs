@@ -36,31 +36,31 @@ namespace EngineNS.Graphics.Mesh
                     if (ImGuiAPI.BeginCombo("MeshType", MeshType, ImGuiComboFlags_.ImGuiComboFlags_None))
                     {
                         bool bSelected = false;
-                        if (ImGuiAPI.Selectable("FBX", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        if (ImGuiAPI.Selectable(TtLocalization.Tr("FBX"), ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                         {
                             MeshType = "FBX";
                         }
-                        if (ImGuiAPI.Selectable("Box", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        if (ImGuiAPI.Selectable(TtLocalization.Tr("Box"), ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                         {
                             MeshType = "Box";
                         }
-                        if (ImGuiAPI.Selectable("Rect2D", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        if (ImGuiAPI.Selectable(TtLocalization.Tr("Rect2D"), ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                         {
                             MeshType = "Rect2D";
                         }
-                        if (ImGuiAPI.Selectable("Sphere", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        if (ImGuiAPI.Selectable(TtLocalization.Tr("Sphere"), ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                         {
                             MeshType = "Sphere";
                         }
-                        if (ImGuiAPI.Selectable("Cylinder", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        if (ImGuiAPI.Selectable(TtLocalization.Tr("Cylinder"), ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                         {
                             MeshType = "Cylinder";
                         }
-                        if (ImGuiAPI.Selectable("Torus", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        if (ImGuiAPI.Selectable(TtLocalization.Tr("Torus"), ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                         {
                             MeshType = "Torus";
                         }
-                        if (ImGuiAPI.Selectable("Capsule", ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                        if (ImGuiAPI.Selectable(TtLocalization.Tr("Capsule"), ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                         {
                             MeshType = "Capsule";
                         }
@@ -72,7 +72,7 @@ namespace EngineNS.Graphics.Mesh
                             {
                                 //PGAsset.Target = null;
                                 var sz = new Vector2(-1, 0);
-                                if (ImGuiAPI.Button("Select FBX", in sz))
+                                if (ImGuiAPI.Button(TtLocalization.Tr("Select FBX"), in sz))
                                 {
                                     mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".fbx", ".");
                                 }
@@ -98,12 +98,12 @@ namespace EngineNS.Graphics.Mesh
                                 if (eErrorType != enErrorType.None)
                                 {
                                     var clr = new Vector4(1, 0, 0, 1);
-                                    ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
+                                    ImGuiAPI.TextColored(in clr, TtLocalization.Format("Source:{0}", mSourceFile));
                                 }
                                 else
                                 {
                                     var clr = new Vector4(1, 1, 1, 1);
-                                    ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
+                                    ImGuiAPI.TextColored(in clr, TtLocalization.Format("Source:{0}", mSourceFile));
                                 }
                             }
                             break;
@@ -139,7 +139,7 @@ namespace EngineNS.Graphics.Mesh
 
                     if (eErrorType == enErrorType.None)
                     {
-                        if (ImGuiAPI.Button("Create Asset", in Vector2.Zero))
+                        if (ImGuiAPI.Button(TtLocalization.Tr("Create Asset"), in Vector2.Zero))
                         {
                             switch (MeshType)
                             {
@@ -268,7 +268,7 @@ namespace EngineNS.Graphics.Mesh
                         }
                         ImGuiAPI.SameLine(0, 20);
                     }
-                    if (ImGuiAPI.Button("Cancel", in Vector2.Zero))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Cancel"), in Vector2.Zero))
                     {
                         ImGuiAPI.CloseCurrentPopup();
                         retValue = true;

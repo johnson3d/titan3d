@@ -1,4 +1,4 @@
-﻿using EngineNS.Rtti;
+using EngineNS.Rtti;
 using EngineNS.Thread.Async;
 using EngineNS.UI.Bind;
 using EngineNS.UI.Canvas;
@@ -21,7 +21,7 @@ namespace EngineNS.UI.Controls
         }
         EClickType mClickType = EClickType.Release;
         [Rtti.Meta, BindProperty]
-        [Category("Behavior")]
+        [System.ComponentModel.Category("Behavior")]
         public EClickType ClickType
         {
             get => mClickType;
@@ -33,7 +33,7 @@ namespace EngineNS.UI.Controls
         }
 
         [Browsable(false), ReadOnly(true)]
-        [Category("Behavior"), BindProperty]
+        [System.ComponentModel.Category("Behavior"), BindProperty]
         public bool IsPressed
         {
             get => GetValue<bool>();

@@ -1,4 +1,4 @@
-﻿using EngineNS.GamePlay;
+using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Mesh;
 using System.ComponentModel;
@@ -41,7 +41,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
                 return null;
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName Material { get => CollisionNodeData.PxMaterial; set => CollisionNodeData.PxMaterial = value; }
         public TtPhyMaterial PhyMaterial
         {
@@ -55,11 +55,11 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
                 return mtl;
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector3 Center { get => CollisionNodeData.Center; set => CollisionNodeData.Center = value; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public FRotator Rotator { get => CollisionNodeData.Rotator; set => CollisionNodeData.Rotator = value; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsTrigger
         {
             get => CollisionNodeData.IsTrigger;
@@ -69,9 +69,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
                 SetTriggerFlag(value, PhyShape);
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public FPhyFilterData QueryFilterData { get => CollisionNodeData.QueryFilterData; set => CollisionNodeData.QueryFilterData = value; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public FPhyFilterData SimulationFilterData { get => CollisionNodeData.SimulationFilterData; set => CollisionNodeData.SimulationFilterData = value; }
         protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
@@ -145,7 +145,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         {
             get => NodeData as TtPhySphereCollisionNodeData;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float Radius
         {
             get => SphereCollisionNodeData.Radius;
@@ -179,7 +179,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         {
             get => NodeData as TtPhyBoxCollisionNodeData;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector3 HalfExtent
         {
             get => BoxCollisionNodeData.HalfExtent;
@@ -237,7 +237,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         {
             get => NodeData as TtPhyCapsuleCollisionNodeData;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float Radius
         {
             get => CapsuleCollisionNodeData.Radius;
@@ -249,7 +249,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
                 ChangeShape();
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float HalfHeight
         {
             get => CapsuleCollisionNodeData.HalfHeight;
@@ -283,7 +283,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         {
             get => NodeData as TtPhyConvexCollisionNodeData;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName ConvexSource
         {
             get => ConvexCollisionNodeData.ConvexSource;
@@ -319,7 +319,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         {
             get => NodeData as TtPhyTriMeshCollisionNodeData;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName TriMeshSource
         {
             get => TriMeshCollisionNodeData.TriMeshSource;

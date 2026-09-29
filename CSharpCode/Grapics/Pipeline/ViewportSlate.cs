@@ -51,7 +51,7 @@ namespace EngineNS.Graphics.Pipeline
         public NxRHI.FScissorRect ScissorRect { get => mScissorRect; }
         GamePlay.TtWorld mWorld = null;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public GamePlay.TtWorld World { get => mWorld; protected set => mWorld = value; }
         public async TtTask InitWorld()
         {
@@ -96,7 +96,7 @@ namespace EngineNS.Graphics.Pipeline
         protected Graphics.Pipeline.TtRenderPolicy mRenderPolicy;
         [ReadOnly(true)]
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Graphics.Pipeline.TtRenderPolicy RenderPolicy 
         { 
             get => mRenderPolicy; 
@@ -443,6 +443,16 @@ namespace EngineNS.Graphics.Pipeline
                 OnHitproxySelected(hitObj);
             }
         }
+        public void ProcessHitproxyDoubleClick(float mouseX, float mouseY)
+        {
+            var editorPolicy = RenderPolicy as Graphics.Pipeline.TtRenderPolicy;
+            if (editorPolicy != null)
+            {
+                var pos = Window2Viewport(new Vector2(mouseX, mouseY));
+                var hitObj = editorPolicy.GetHitproxy((uint)pos.X, (uint)pos.Y);
+                OnHitproxyDoubleClick(hitObj);
+            }
+        }
         public unsafe virtual bool OnEvent(in Bricks.Input.Event e)
         {
             if (e.Type == Bricks.Input.EventType.KEYDOWN &&
@@ -490,6 +500,11 @@ namespace EngineNS.Graphics.Pipeline
                     edtorPolicy.PickedProxiableManager.Selected(proxy);
                 }
             }
+        }
+        public virtual void OnHitproxyDoubleClick(Graphics.Pipeline.IProxiable proxy)
+        {
+            if (proxy is TtNode node)
+                node.OnDoubleClick();
         }
         public virtual void OnHitproxySelectedMulti(bool clearPre, params Graphics.Pipeline.IProxiable[] proxies)
         {
@@ -597,7 +612,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly | Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public UI.TtUIHost HUD
         {
             get

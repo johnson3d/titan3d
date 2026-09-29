@@ -1,4 +1,4 @@
-﻿using Assimp;
+using Assimp;
 using EngineNS.Rtti;
 using System;
 using System.Collections.Generic;
@@ -76,7 +76,7 @@ namespace EngineNS.GamePlay.Scene
         }
         bool bNeedUpdateMeshMatrix = false;
         int meshCount = 10;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public int MeshCount
         {
             get => meshCount;
@@ -87,7 +87,7 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         float meshSpacing = 1.5f;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float MeshSpacing
         {
             get => meshSpacing;

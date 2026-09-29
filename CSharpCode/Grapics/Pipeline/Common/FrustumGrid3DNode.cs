@@ -5,6 +5,7 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("FrustumGrid3D", "FrustumGrid3D", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UFrustumGrid3DNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UFrustumGrid3DNode" })]
     public class TtFrustumGrid3DNode : TAuxRenderGraphNode<TtFrustumGrid3DNode>
     {
         public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth", NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);

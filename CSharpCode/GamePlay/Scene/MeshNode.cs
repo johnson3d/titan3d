@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
+using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
 using EngineNS.Animation.SkeletonAnimation.Skeleton;
 using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Mesh.Modifier;
@@ -11,6 +11,19 @@ using System.Formats.Asn1;
 
 namespace EngineNS.GamePlay.Scene
 {
+    /// <summary>
+    /// Mesh 节点的精确碰撞几何来源。IsCollide 仍作为总开关，以兼容已有场景的 NodeStyles。
+    /// </summary>
+    public enum EMeshCollisionMode : byte
+    {
+        /// <summary>有 CollideName 时优先使用专用碰撞网格，否则回退到渲染网格。</summary>
+        Auto,
+        /// <summary>仅使用 CollideName 指定的专用碰撞网格。</summary>
+        CollisionMesh,
+        /// <summary>忽略 CollideName，使用渲染网格。</summary>
+        RenderMesh,
+    }
+
     [Bricks.CodeBuilder.ContextMenu("MeshNode", "Graphics\\MeshNode", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtMeshNode.TtMeshNodeData), DefaultNamePrefix = "Mesh")]
     [Rtti.Meta("", NameAlias = new string[] { "EngineNS.GamePlay.Scene.UMeshNode@EngineCore", "EngineNS.GamePlay.Scene.UMeshNode" })]
@@ -33,8 +46,10 @@ namespace EngineNS.GamePlay.Scene
             [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
             public RName MeshName { get; set; }
             [Rtti.Meta("")]
-            [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
+            [RName.PGRName(FilterExts = Graphics.Mesh.TtMeshPrimitives.AssetExt)]
             public RName CollideName { get; set; }
+            [Rtti.Meta("")]
+            public EMeshCollisionMode CollisionMode { get; set; } = EMeshCollisionMode.Auto;
             /// <summary>
             /// 为 null 表示"本节点不指定", 交由 TtRenderMesh.Initialize 按 .ums 上的 MdfQueueType
             /// 或资产内容 (骨骼 / morph) 自动选型 (见 CodingGuidelines.md §7.7)。
@@ -107,6 +122,9 @@ namespace EngineNS.GamePlay.Scene
                     //await materialMesh.Mesh.TryLoadClusteredMesh();
                 }
             }
+
+            if (IsCollide)
+                await ReloadCollisionDataProviders();
 
             this.SetStyle(ENodeStyles.ParallelTick);
 
@@ -212,20 +230,7 @@ namespace EngineNS.GamePlay.Scene
             if (ok == false)
                 return null;
 
-            var meshNode = await AddMeshNode(world, parent, data, placementType, mesh, pos, scale, quat);
-            if (meshData.CollideName != null)
-            {
-                var collideMesh = await meshData.CollideName.GetAsset<Graphics.Mesh.TtMeshPrimitives>();
-                if (collideMesh != null)
-                {
-                    if (collideMesh.MeshDataProvider == null)
-                    {
-                        await collideMesh.LoadMeshDataProvider();
-                    }
-                    meshNode.mMeshDataProvider = collideMesh.MeshDataProvider;
-                }
-            }
-            return meshNode;
+            return await AddMeshNode(world, parent, data, placementType, mesh, pos, scale, quat);
         }
         public UBoxBV GetBoxBV()
         {
@@ -292,7 +297,7 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName MeshName
         {
             get
@@ -308,6 +313,7 @@ namespace EngineNS.GamePlay.Scene
                 if (meshData == null)
                     return;
                 meshData.MeshName = value;
+                ReloadCollisionDataProviders().AddWaitTask();
                 if (meshData.MeshName == null)
                     return;
                 System.Action action = async () =>
@@ -338,7 +344,48 @@ namespace EngineNS.GamePlay.Scene
             }
         }
 
-        [Category("Option")]
+        [RName.PGRName(FilterExts = Graphics.Mesh.TtMeshPrimitives.AssetExt)]
+        [System.ComponentModel.Category("Collision")]
+        public RName CollideName
+        {
+            get => (NodeData as TtMeshNodeData)?.CollideName;
+            set
+            {
+                var meshData = NodeData as TtMeshNodeData;
+                if (meshData == null || meshData.CollideName == value)
+                    return;
+                meshData.CollideName = value;
+                ReloadCollisionDataProviders().AddWaitTask();
+            }
+        }
+
+        [System.ComponentModel.Category("Collision")]
+        public EMeshCollisionMode CollisionMode
+        {
+            get => (NodeData as TtMeshNodeData)?.CollisionMode ?? EMeshCollisionMode.Auto;
+            set
+            {
+                var meshData = NodeData as TtMeshNodeData;
+                if (meshData == null || meshData.CollisionMode == value)
+                    return;
+                meshData.CollisionMode = value;
+                ReloadCollisionDataProviders().AddWaitTask();
+            }
+        }
+
+        public override bool IsCollide
+        {
+            get => base.IsCollide;
+            set
+            {
+                if (base.IsCollide == value)
+                    return;
+                base.IsCollide = value;
+                ReloadCollisionDataProviders().AddWaitTask();
+            }
+        }
+
+        [System.ComponentModel.Category("Option")]
         [EGui.Controls.PropertyGrid.TtPGTypeEditor(typeof(Graphics.Pipeline.Shader.TtMdfQueueBase))]
         public Rtti.TtTypeDesc MdfQueue
         {
@@ -438,7 +485,7 @@ namespace EngineNS.GamePlay.Scene
         #region Instancing
         private TtInstanceMeshNode mInstanceGroupNode = null;
 
-        [Category("Instancing")]
+        [System.ComponentModel.Category("Instancing")]
         [TtPGInstanceNodeSelector]
         public TtInstanceMeshNode InstanceGroupNode
         {
@@ -600,44 +647,110 @@ namespace EngineNS.GamePlay.Scene
             return true;
         }
 
-        Graphics.Mesh.TtMeshDataProvider mMeshDataProvider;
+        Graphics.Mesh.TtMeshDataProvider[] mMeshDataProviders = Array.Empty<Graphics.Mesh.TtMeshDataProvider>();
+        int mCollisionLoadVersion;
         public Graphics.Mesh.TtMeshDataProvider MeshDataProvider
         {
-            get => mMeshDataProvider;
-            set => mMeshDataProvider = value;
+            get => mMeshDataProviders.Length > 0 ? mMeshDataProviders[0] : null;
+            set => mMeshDataProviders = value == null
+                ? Array.Empty<Graphics.Mesh.TtMeshDataProvider>()
+                : new Graphics.Mesh.TtMeshDataProvider[] { value };
         }
+
+        async Thread.Async.TtTask ReloadCollisionDataProviders()
+        {
+            int loadVersion = ++mCollisionLoadVersion;
+            if (!IsCollide)
+            {
+                mMeshDataProviders = Array.Empty<Graphics.Mesh.TtMeshDataProvider>();
+                return;
+            }
+
+            var meshData = NodeData as TtMeshNodeData;
+            if (meshData == null)
+                return;
+
+            var providers = new List<Graphics.Mesh.TtMeshDataProvider>();
+            bool useCollisionMesh = meshData.CollisionMode != EMeshCollisionMode.RenderMesh && meshData.CollideName != null;
+            if (useCollisionMesh)
+            {
+                var collisionMesh = await meshData.CollideName.GetAsset<Graphics.Mesh.TtMeshPrimitives>();
+                if (collisionMesh != null)
+                {
+                    await collisionMesh.LoadMeshDataProvider();
+                    if (collisionMesh.MeshDataProvider != null)
+                        providers.Add(collisionMesh.MeshDataProvider);
+                }
+            }
+            else if (meshData.CollisionMode != EMeshCollisionMode.CollisionMesh)
+            {
+                Graphics.Mesh.TtMaterialMesh materialMesh = null;
+                if (meshData.MeshName != null)
+                {
+                    materialMesh = MaterialMesh;
+                    if (materialMesh == null || materialMesh.AssetName != meshData.MeshName)
+                        materialMesh = await meshData.MeshName.GetAsset<Graphics.Mesh.TtMaterialMesh>();
+                }
+                if (materialMesh != null)
+                {
+                    for (int i = 0; i < materialMesh.SubMeshes.Count; i++)
+                    {
+                        var primitives = materialMesh.SubMeshes[i].Mesh;
+                        if (primitives == null)
+                            continue;
+                        await primitives.LoadMeshDataProvider();
+                        if (primitives.MeshDataProvider != null)
+                            providers.Add(primitives.MeshDataProvider);
+                    }
+                }
+            }
+
+            if (loadVersion != mCollisionLoadVersion || !IsCollide)
+                return;
+            mMeshDataProviders = providers.ToArray();
+        }
+
         public unsafe override bool OnLineCheckTriangle(in DVector3 start, in DVector3 end, ref VHitResult result)
         {
-            if (mMeshDataProvider == null)
+            var providers = mMeshDataProviders;
+            if (!IsCollide || providers.Length == 0)
                 return false;
 
             var startf = start.ToSingleVector3();
             var endf = end.ToSingleVector3();
             var pStart = &startf;
             var pEnd = &endf;
-            //fixed (DVector3* pStart = &start)
-            //fixed (DVector3* pEnd = &end)
-            fixed (VHitResult* pResult = &result)
+            bool hasHit = false;
+            double closestDistSq = double.MaxValue;
+            VHitResult closestResult = new VHitResult();
+            Vector3 scale = Placement.Scale;
+            Vector3* pScale = Placement.HasScale ? &scale : (Vector3*)0;
+
+            for (int i = 0; i < providers.Length; i++)
             {
-                if (Placement.HasScale)
+                var providerResult = new VHitResult();
+                if (-1 == providers[i].mCoreObject.IntersectTriangle(pScale, pStart, pEnd, &providerResult))
+                    continue;
+                var hitDistSq = (providerResult.m_Position - start).LengthSquared();
+                if (hitDistSq < closestDistSq)
                 {
-                    Vector3 scale = Placement.Scale;
-                    if (-1 != mMeshDataProvider.mCoreObject.IntersectTriangle(&scale, pStart, pEnd, pResult))
-                        return true;
+                    closestDistSq = hitDistSq;
+                    closestResult = providerResult;
+                    hasHit = true;
                 }
-                else
-                {
-                    if (-1 != mMeshDataProvider.mCoreObject.IntersectTriangle((Vector3*)0, pStart, pEnd, pResult))
-                        return true;
-                }
-                return false;
             }
+
+            if (hasHit)
+                result = closestResult;
+            return hasHit;
         }
 
         public override void AddAssetReferences(IO.IAssetMeta ameta)
         {
             if (MeshName != null)
                 ameta.AddReferenceAsset(MeshName);
+            if (CollideName != null)
+                ameta.AddReferenceAsset(CollideName);
         }
     }
 }

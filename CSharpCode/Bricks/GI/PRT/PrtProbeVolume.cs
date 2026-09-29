@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.Collision.Embree;
+using EngineNS.Bricks.Collision.Embree;
 using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
@@ -51,7 +51,7 @@ namespace EngineNS.Bricks.GI.PRT
             CoreSDK.DisposeObject(ref mEmbreeManager);
             base.Dispose();
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta]
         public Vector3 Extend
         {
@@ -175,7 +175,7 @@ namespace EngineNS.Bricks.GI.PRT
             public TtEmbreeGeometry Geometry;
             public TtBlobObject FaceBuffer;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool TestBuildProbe
         {
             get => false;

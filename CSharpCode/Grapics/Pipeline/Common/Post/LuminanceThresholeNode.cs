@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.GamePlay;
@@ -58,6 +58,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
     }
     [Bricks.CodeBuilder.ContextMenu("LuminanceThreshole", "Post\\LuminanceThreshole", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.Post.ULuminanceThresholeNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.Post.ULuminanceThresholeNode" })]
     public class TtLuminanceThresholeNode : TAuxSceenSpaceNode<TtLuminanceThresholeNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
@@ -93,7 +94,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             public float Threshole;
         }
         FLuminanceThresholeStruct mLuminanceThresholeStruct = new FLuminanceThresholeStruct();
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public float Threshole
         {
@@ -139,6 +140,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
     }
     [Bricks.CodeBuilder.ContextMenu("LuminanceThresholeOutLum", "Post\\LuminanceThresholeOutLum", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.Post.ULuminanceThresholeOutLumNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.Post.ULuminanceThresholeOutLumNode" })]
     public class TtLuminanceThresholeOutLumNode : TtLuminanceThresholeNode
     {
         public TtLuminanceThresholeOutLumNode()

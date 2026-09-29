@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using EngineNS;
@@ -45,18 +45,18 @@ namespace EngineNS.EGui.UIEditor
                     if (ImGuiAPI.BeginChild("ContentWindow", in clientSize, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
                     {
                         var sz = new Vector2(0, 0);
-                        if(ImGuiAPI.Button("GenCode", in sz))
+                        if(ImGuiAPI.Button(TtLocalization.Tr("GenCode"), in sz))
                         {
                             EditableFormData.Instance.CurrentForm.GenCode();
                         }
                         ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet;
-                        ImGuiAPI.TreeNodeEx("WinForm", flags, "WinForm");
+                        ImGuiAPI.TreeNodeEx(TtLocalization.Tr("WinForm"), flags, TtLocalization.Tr("WinForm"));
                         if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                         {
                             PGrid.Target = EditableFormData.Instance.CurrentForm;
                             mMenuType = EMenuType.None;
                         }
-                        if (ImGuiAPI.TreeNode("ElementsLayout", "ElementsLayout"))
+                        if (ImGuiAPI.TreeNode(TtLocalization.Tr("ElementsLayout"), TtLocalization.Tr("ElementsLayout")))
                         {
                             if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
                             {
@@ -212,9 +212,9 @@ namespace EngineNS.EGui.UIEditor
         {
             if (mMenuType == EMenuType.None)
                 return false;
-            if (ImGuiAPI.BeginMenu("Control", true))
+            if (ImGuiAPI.BeginMenu(TtLocalization.Tr("Control"), true))
             {
-                if (ImGuiAPI.MenuItem($"Delete", null, false, true))
+                if (ImGuiAPI.MenuItem(TtLocalization.Tr("Delete"), null, false, true))
                 {
                     PopTarget.DeleteTarget();
                 }
@@ -226,11 +226,11 @@ namespace EngineNS.EGui.UIEditor
         {
             if (mMenuType == EMenuType.None)
                 return false;
-            if (ImGuiAPI.BeginMenu("Container", true))
+            if (ImGuiAPI.BeginMenu(TtLocalization.Tr("Container"), true))
             {
-                if (ImGuiAPI.BeginMenu("NewElement", true))
+                if (ImGuiAPI.BeginMenu(TtLocalization.Tr("NewElement"), true))
                 {
-                    if (ImGuiAPI.MenuItem($"Text", null, false, true))
+                    if (ImGuiAPI.MenuItem(TtLocalization.Tr("Text"), null, false, true))
                     {
                         if (PopTarget.AsContainer() != null)
                         {
@@ -241,7 +241,7 @@ namespace EngineNS.EGui.UIEditor
                             mMenuType = EMenuType.None;
                         }
                     }
-                    if (ImGuiAPI.MenuItem($"InputText", null, false, true))
+                    if (ImGuiAPI.MenuItem(TtLocalization.Tr("InputText"), null, false, true))
                     {
                         if (PopTarget.AsContainer() != null)
                         {
@@ -252,7 +252,7 @@ namespace EngineNS.EGui.UIEditor
                             mMenuType = EMenuType.None;
                         }
                     }
-                    if (ImGuiAPI.MenuItem($"Separator", null, false, true))
+                    if (ImGuiAPI.MenuItem(TtLocalization.Tr("Separator"), null, false, true))
                     {
                         if (PopTarget.AsContainer() != null)
                         {
@@ -262,9 +262,9 @@ namespace EngineNS.EGui.UIEditor
                             mMenuType = EMenuType.None;
                         }
                     }
-                    if (ImGuiAPI.BeginMenu($"Container", true))
+                    if (ImGuiAPI.BeginMenu(TtLocalization.Tr("Container"), true))
                     {
-                        if (ImGuiAPI.MenuItem($"Columns", null, false, true))
+                        if (ImGuiAPI.MenuItem(TtLocalization.Tr("Columns"), null, false, true))
                         {
                             if (PopTarget.AsContainer() != null)
                             {
@@ -280,7 +280,7 @@ namespace EngineNS.EGui.UIEditor
                 }
                 if (PopTarget.AsContainer() != EditableFormData.Instance.CurrentForm)
                 {
-                    if (ImGuiAPI.MenuItem($"Delete", null, false, true))
+                    if (ImGuiAPI.MenuItem(TtLocalization.Tr("Delete"), null, false, true))
                     {
                         PopTarget.DeleteTarget();
                     }

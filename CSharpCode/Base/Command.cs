@@ -143,7 +143,7 @@ namespace EngineNS
             CmdName = "McCmd";
             CmdHelp = "McCmd Macross=(string) OnGameThread=(bool)";
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         [RName.PGRName(FilterExts = EngineNS.Bricks.CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtCommandMacross))]
         public RName McName

@@ -97,14 +97,14 @@ namespace NxRHI
 		D3D12_HEAP_PROPERTIES		mHeapProperties{};
 		D3D12_RESOURCE_STATES		mResState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
 
-		AutoRef<FGpuMemory> Alloc(IGpuDevice* device, const D3D12_RESOURCE_DESC* resDesc, const D3D12_HEAP_PROPERTIES* heapDesc, D3D12_RESOURCE_STATES resState, const char* debugName);
+		AutoRef<FGpuMemory> Alloc(const char* file, int line, IGpuDevice* device, const D3D12_RESOURCE_DESC* resDesc, const D3D12_HEAP_PROPERTIES* heapDesc, D3D12_RESOURCE_STATES resState, const char* debugName);
 		virtual AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT64 size, const char* name);
 		virtual void Free(FGpuMemory* memory);
 
-		FGpuMemHolder* AllocGpuMem(IGpuDevice* device, const D3D12_RESOURCE_DESC* resDesc, const D3D12_HEAP_PROPERTIES* heapDesc, D3D12_RESOURCE_STATES resState, const char* debugName) {
-			auto result = new FGpuMemHolder();
+		FGpuMemHolder* AllocGpuMem(const char* file, int line, IGpuDevice* device, const D3D12_RESOURCE_DESC* resDesc, const D3D12_HEAP_PROPERTIES* heapDesc, D3D12_RESOURCE_STATES resState, const char* debugName) {
+			auto result = new(file, line) FGpuMemHolder();
 			result->Allocator = this;
-			result->GpuMem = Alloc(device, resDesc, heapDesc, resState, debugName);
+			result->GpuMem = Alloc(file, line, device, resDesc, heapDesc, resState, debugName);
 			return result;
 		}
 		UINT64 GetAllocSize() {

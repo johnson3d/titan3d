@@ -1,4 +1,4 @@
-﻿using EngineNS.Thread.Async;
+using EngineNS.Thread.Async;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -32,7 +32,7 @@ namespace EngineNS.GamePlay.Scene
                 return NodeData as TtPrefabNodeData;
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [RName.PGRName(FilterExts = TtPrefab.AssetExt)]
         public RName PrefabName
         {
@@ -211,9 +211,10 @@ namespace EngineNS.GamePlay.Scene
         {
             get => TtPrefab.AssetExt;
         }
+        public const string AssetTypeName = "Prefab";
         public override string GetAssetTypeName()
         {
-            return "Prefab";
+            return AssetTypeName;
         }
         public override Color4b GetBorderColor()
         {
@@ -256,7 +257,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public const string AssetExt = ".prefab";
         public string TypeExt { get => AssetExt; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]
         public RName RPolicyName
@@ -300,7 +301,7 @@ namespace EngineNS.GamePlay.Scene
                     , EBoundVolumeType.Box, typeof(GamePlay.TtPlacement), world);
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName AssetName { get; set; }
         public bool IsAlloc { get ; set ; }
 

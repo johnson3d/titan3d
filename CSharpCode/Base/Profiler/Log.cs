@@ -10,13 +10,13 @@ namespace EngineNS.Profiler
     [Flags]
     public enum ELogTag : byte
     {
-        [Description("消息")]
+        [System.ComponentModel.Description("消息")]
         Info = 1,
-        [Description("警告")]
+        [System.ComponentModel.Description("警告")]
         Warning = 1 << 1,
-        [Description("错误")]
+        [System.ComponentModel.Description("错误")]
         Error = 1 << 2,
-        [Description("严重")]
+        [System.ComponentModel.Description("严重")]
         Fatal = 1 << 3,
         All = Info | Warning | Error | Fatal,
     }

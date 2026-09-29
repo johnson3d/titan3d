@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -22,7 +22,7 @@ namespace EngineNS.GamePlay.Scene
             internal TtPointLightNode HostNode;
             Vector3 mColor;
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [EGui.Controls.PropertyGrid.TtColor3PickerEditor()]
             public Vector3 Color 
             { 
@@ -34,10 +34,10 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             public float Intensity { get; set; }
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             public float Radius { get; set; }
         }
         protected override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
@@ -54,7 +54,7 @@ namespace EngineNS.GamePlay.Scene
             this.IsForceGatherNode = true;
             return ret;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public TtLightNodeData LightData
         {
             get => GetNodeData<TtLightNodeData>();

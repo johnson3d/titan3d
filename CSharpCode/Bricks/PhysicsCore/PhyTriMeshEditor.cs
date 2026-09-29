@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -206,7 +206,7 @@ namespace EngineNS.Bricks.PhysicsCore
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "LeftView", ref mLeftDraw, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                if (ImGuiAPI.CollapsingHeader("MeshProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("MeshProperty"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     TriMeshPropGrid.OnDraw(true, false, false);
                 }

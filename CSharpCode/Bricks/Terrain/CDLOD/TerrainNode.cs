@@ -48,32 +48,32 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 //MaterialName = RName.GetRName("utest/material/terrainidmap.material");
                 MaterialName = RName.GetRName("material/terrainidmap.material", RName.ERNameType.Engine);
             }
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [Rtti.Meta("")]
             public int MipLevels { get; set; } = 6;
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [Rtti.Meta("")]
             public int NumOfLevelX { get; set; } = 100;
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [Rtti.Meta("")]
             public int NumOfLevelZ { get; set; } = 100;
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [Rtti.Meta("")]
             public int PatchSide { get; set; } = 16;
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [Rtti.Meta("")]
             public float PatchSize { get; set; } = 64.0f;
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [Rtti.Meta("")]
             public int ActiveLevel { get; set; } = 1;
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [Rtti.Meta("")]
             public List<float> LODRangeFloat { get; set; } = new List<float>();
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [Rtti.Meta("")]
-            [RName.PGRName(FilterExts = Procedure.UPgcAsset.AssetExt)]
+            [RName.PGRName(FilterExts = Procedure.TtPgcAsset.AssetExt)]
             public RName PgcName { get; set; }
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [Rtti.Meta("")]
             [RName.PGRName(FilterExts = TtMaterial.AssetExt)]
             public RName MaterialName { get; set; }
@@ -81,7 +81,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             /// 地形材质贴图的场景级覆盖, 按下标与 PGC 图表 MatIdMapping 节点的 MaterialIdArray 对齐。
             /// 长度由 TtTerrainNode.EnsureMaterialTextures 跟随维护, 手动增删无意义。
             /// </summary>
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [Rtti.Meta("")]
             public List<TtTerrainMaterialTextureOverride> MaterialTextureOverrides { get; set; } = new List<TtTerrainMaterialTextureOverride>();
 
@@ -148,8 +148,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 return mTerrainGenHash;
             }
         }
-        Bricks.Procedure.UPgcAsset mTerrainGen;
-        public Bricks.Procedure.UPgcAsset TerrainGen
+        Bricks.Procedure.TtPgcAsset mTerrainGen;
+        public Bricks.Procedure.TtPgcAsset TerrainGen
         {
             get
             {
@@ -167,7 +167,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// 所以每个地形节点持有自己那份副本)。在 Details 里改它只影响本节点的内存副本, 不落盘;
         /// 要持久化贴图改动用 MaterialTextureOverrides。
         /// </summary>
-        [Category("TerrainMaterial")]
+        [System.ComponentModel.Category("TerrainMaterial")]
         public UTerrainMaterialIdManager TerrainMaterialIdManager { get; set; }
         /// <summary>
         /// 地形材质贴图的场景级覆盖, 与 TerrainMaterialIdManager.MaterialIdArray 按下标对齐,
@@ -175,7 +175,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// 注意: 材质的"数量"以及 TransitionRange / Plants 是 PGC 生成 ID 图的输入 (并计入 level 缓存 hash),
         /// 只能在 PGC 编辑器里改。
         /// </summary>
-        [Category("TerrainMaterial")]
+        [System.ComponentModel.Category("TerrainMaterial")]
         public List<TtTerrainMaterialTextureOverride> MaterialTextureOverrides
         {
             get => TerrainData?.MaterialTextureOverrides;
@@ -339,7 +339,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             if(trData.PgcName==null)
                 trData.PgcName = RName.GetRName("UTest/terraingen.pgc");
 
-            mTerrainGen = Procedure.UPgcAsset.LoadAsset(trData.PgcName);// RName.GetRName("UTest/terraingen.pgc"));            
+            mTerrainGen = Procedure.TtPgcAsset.LoadAsset(trData.PgcName);// RName.GetRName("UTest/terraingen.pgc"));            
             {
                 var pgcText = IO.TtFileManager.ReadAllText(trData.PgcName.Address);
                 var refAssets = mTerrainGen.GetAMeta().RefAssetRNames;
@@ -350,7 +350,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 }
                 mTerrainGenHash = Hash160.CreateHash160(pgcText);
             }
-            var hmNode = mTerrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.UMaterialIdMapNode;
+            var hmNode = mTerrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.TtMaterialIdMapNode;
             if (hmNode != null)
             {
                 TerrainMaterialIdManager = hmNode.MaterialIdManager;

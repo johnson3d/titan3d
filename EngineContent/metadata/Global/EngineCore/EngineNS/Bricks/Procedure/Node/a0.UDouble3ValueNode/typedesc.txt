@@ -1,2 +1,0 @@
-EngineCore
-EngineNS.Bricks.Procedure.Node.UDouble3ValueNode@EngineCore

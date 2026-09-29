@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_9624915591915763987 Type="EngineNS.TtBezier3DSpline@EngineCore">
+  <IsClosed Type="System.Boolean@Unknown" Order="0" />
+  <Points Type="System.Collections.Generic.List&lt;EngineNS.TtBezier3DPoint@EngineCore,&gt;@Unknown" Order="0" />
+  <Segments Type="System.Int32@Unknown" Order="0" />
+</Hash_9624915591915763987>

@@ -25,38 +25,38 @@ namespace EngineNS.Bricks.FX.Water
         public class TtSWEWaterNodeData : TtNodeData
         {
             [Rtti.Meta]
-            [Category("SWE")]
+            [System.ComponentModel.Category("SWE")]
             public uint SimResolution { get; set; } = 128;
 
             [Rtti.Meta]
-            [Category("SWE")]
+            [System.ComponentModel.Category("SWE")]
             public float DomainSize { get; set; } = 128.0f;
 
             [Rtti.Meta]
-            [Category("SWE")]
+            [System.ComponentModel.Category("SWE")]
             public float Gravity { get; set; } = 9.81f;
 
             [Rtti.Meta]
-            [Category("SWE")]
+            [System.ComponentModel.Category("SWE")]
             public float Damping { get; set; } = 0.995f;
 
             [Rtti.Meta]
-            [Category("SWE")]
+            [System.ComponentModel.Category("SWE")]
             public ESWEBoundaryMode BoundaryMode { get; set; } = ESWEBoundaryMode.Open;
 
             [Rtti.Meta]
-            [Category("SWE")]
+            [System.ComponentModel.Category("SWE")]
             public float BaseWaterHeight { get; set; } = 1.0f;
 
             /// <summary>
             /// 动态 SRV 注册名。材质采样节点的 DynamicSrvName 填写此值即可采样 HeightMap。
             /// </summary>
             [Rtti.Meta]
-            [Category("SWE")]
+            [System.ComponentModel.Category("SWE")]
             public string HeightMapSrvName { get; set; } = "SWEHeightMap";
 
             [Rtti.Meta]
-            [Category("Material")]
+            [System.ComponentModel.Category("Material")]
             [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtMaterial.AssetExt)]
             public RName WaterMaterialName { get; set; }
         }
@@ -375,7 +375,7 @@ namespace EngineNS.Bricks.FX.Water
                     if (cmd?.HostNode == null)
                         return false;
 
-                    if (ImGuiAPI.Button("Random Disturb"))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Random Disturb")))
                     {
                         var sweData = cmd.HostNode.NodeData as TtSWEWaterNodeData;
                         if (sweData != null)
@@ -398,56 +398,56 @@ namespace EngineNS.Bricks.FX.Water
         // =====================================================================
         // NodeData 属性包装 — 直接在 Node Detail 面板上设置
         // =====================================================================
-        [Category("SWE")]
+        [System.ComponentModel.Category("SWE")]
         public uint SimResolution
         {
             get => (NodeData as TtSWEWaterNodeData)?.SimResolution ?? 128;
             set { var d = NodeData as TtSWEWaterNodeData; if (d != null) d.SimResolution = value; }
         }
 
-        [Category("SWE")]
+        [System.ComponentModel.Category("SWE")]
         public float DomainSize
         {
             get => (NodeData as TtSWEWaterNodeData)?.DomainSize ?? 128.0f;
             set { var d = NodeData as TtSWEWaterNodeData; if (d != null) d.DomainSize = value; }
         }
 
-        [Category("SWE")]
+        [System.ComponentModel.Category("SWE")]
         public float Gravity
         {
             get => (NodeData as TtSWEWaterNodeData)?.Gravity ?? 9.81f;
             set { var d = NodeData as TtSWEWaterNodeData; if (d != null) d.Gravity = value; }
         }
 
-        [Category("SWE")]
+        [System.ComponentModel.Category("SWE")]
         public float Damping
         {
             get => (NodeData as TtSWEWaterNodeData)?.Damping ?? 0.995f;
             set { var d = NodeData as TtSWEWaterNodeData; if (d != null) d.Damping = value; }
         }
 
-        [Category("SWE")]
+        [System.ComponentModel.Category("SWE")]
         public ESWEBoundaryMode BoundaryMode
         {
             get => (NodeData as TtSWEWaterNodeData)?.BoundaryMode ?? ESWEBoundaryMode.Open;
             set { var d = NodeData as TtSWEWaterNodeData; if (d != null) d.BoundaryMode = value; }
         }
 
-        [Category("SWE")]
+        [System.ComponentModel.Category("SWE")]
         public float BaseWaterHeight
         {
             get => (NodeData as TtSWEWaterNodeData)?.BaseWaterHeight ?? 1.0f;
             set { var d = NodeData as TtSWEWaterNodeData; if (d != null) d.BaseWaterHeight = value; }
         }
 
-        [Category("SWE")]
+        [System.ComponentModel.Category("SWE")]
         public string HeightMapSrvName
         {
             get => (NodeData as TtSWEWaterNodeData)?.HeightMapSrvName ?? "SWEHeightMap";
             set { var d = NodeData as TtSWEWaterNodeData; if (d != null) d.HeightMapSrvName = value; }
         }
 
-        [Category("Material")]
+        [System.ComponentModel.Category("Material")]
         [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtMaterial.AssetExt)]
         public RName WaterMaterialName
         {
@@ -468,7 +468,7 @@ namespace EngineNS.Bricks.FX.Water
 
         TtTestDisturbCmd mTestDisturbCmd;
         [TtTestDisturbCmd.TtValueEditor]
-        [Category("Debug")]
+        [System.ComponentModel.Category("Debug")]
         public TtTestDisturbCmd TestDisturb
         {
             get

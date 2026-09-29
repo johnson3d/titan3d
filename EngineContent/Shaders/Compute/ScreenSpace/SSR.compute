@@ -37,7 +37,7 @@ cbuffer cbSSR DX_AUTOBIND
     int    SSRNumSteps;         // 步进次数
     float  SSRThickness;        // 深度相交的厚度容差 (米), 仅线性 fallback 用
     float  SSREdgeFadePower;     // 屏幕边缘淡出的指数
-    uint   SSRFrameIndex;       // 时域抖动用
+    uint   SSRFrameIndex;       // Reserved for layout compatibility; spatial-only resolve uses a stable pattern.
 
     float  SSRRayJitter;        // 按粗糙度扰动反射方向的强度 (0 = 纯镜面)
     float  SSRPad0;
@@ -65,10 +65,10 @@ SamplerState Samp_HzbTexture DX_AUTOBIND;
 
 RWTexture2D<float4> SSRTraceOutput DX_AUTOBIND;
 
-// Interleaved gradient noise, 与 ContactShadow 用同一个式子保持抖动风格一致
-float SSR_IGN(float2 pixelPos, float frameId)
+// A spatial pattern, not temporal noise. There is no SSR history/reprojection
+// pass to integrate independently changing rays; scene TAA alone is insufficient.
+float SSR_IGN(float2 pixelPos)
 {
-    pixelPos += frameId * float2(47.0, 17.0) * 0.695f;
     float3 magic = float3(0.06711056, 0.00583715, 52.9829189);
     return frac(magic.z * frac(dot(pixelPos, magic.xy)));
 }
@@ -107,6 +107,9 @@ bool SSR_LinearMarch(float3 rayOriginWorld, float3 rayDirWorld, float rayLength,
 
     float3 startNDC = startClip.xyz / startClip.w;
     float3 endNDC = endClip.xyz / endClip.w;
+    // DepthBuffer was rasterized with clip.xy += 2*w*JitterOffset.
+    startNDC.xy += 2.0 * JitterOffset;
+    endNDC.xy += 2.0 * JitterOffset;
 
     float2 startUV = float2(startNDC.x * 0.5 + 0.5, 0.5 - startNDC.y * 0.5);
     float2 endUV = float2(endNDC.x * 0.5 + 0.5, 0.5 - endNDC.y * 0.5);
@@ -176,7 +179,10 @@ void CS_SSRTrace(uint3 dispatchThreadId : SV_DispatchThreadID)
         return;
     N /= nLen;
 
-    float3 worldPos = GetWorldPositionFromDepthValue(uv, rawDepth).xyz;
+    // Camera matrices are unjittered. Undo the raster offset (UV Y is down)
+    // before reconstruction, then add it back when projecting into scene depth.
+    float2 unjitteredUV = uv - JitterOffset * float2(1.0, -1.0);
+    float3 worldPos = GetWorldPositionFromDepthValue(unjitteredUV, rawDepth).xyz;
     float3 V = normalize(CameraPosition - worldPos);
     float NoV = dot(N, V);
     if (NoV <= 0.0)
@@ -184,7 +190,7 @@ void CS_SSRTrace(uint3 dispatchThreadId : SV_DispatchThreadID)
 
     float3 R = reflect(-V, N);
 
-    float dither = SSR_IGN(float2(pixelCoord) + 0.5, (float)SSRFrameIndex);
+    float dither = SSR_IGN(float2(pixelCoord) + 0.5);
 
     // 粗糙表面把反射方向按粗糙度做一点扰动, 单像素一条线, 由 Resolve pass 做空间复用降噪。
     // 这不是严格的 GGX 重要性采样, 但成本恒定且视觉上足够 (业界半分辨率 SSR 常见做法)。
@@ -192,7 +198,7 @@ void CS_SSRTrace(uint3 dispatchThreadId : SV_DispatchThreadID)
     {
         float jitterAmount = roughness * roughness * SSRRayJitter;
         float a1 = dither * 6.2831853;
-        float a2 = SSR_IGN(float2(pixelCoord) * 1.37 + 11.3, (float)SSRFrameIndex + 3.0) * 2.0 - 1.0;
+        float a2 = SSR_IGN(float2(pixelCoord) * 1.37 + 11.3) * 2.0 - 1.0;
         // 构造 R 的一组正交基, 在切平面上偏移
         float3 t = abs(R.y) < 0.99 ? float3(0, 1, 0) : float3(1, 0, 0);
         float3 b1 = normalize(cross(t, R));
@@ -213,7 +219,7 @@ void CS_SSRTrace(uint3 dispatchThreadId : SV_DispatchThreadID)
     FHzbRayCastResult r = HzbRayCastFromWorldRay(
         HzbTexture, Samp_HzbTexture,
         rayOrigin, R, SSRMaxDistance,
-        (uint)max(SSRNumSteps, 1), dither, roughness);
+        (uint)max(SSRNumSteps, 1), dither, roughness, 2.0 * JitterOffset);
     bHit = r.bHit;
     hitUV = r.HitUV;
 #else

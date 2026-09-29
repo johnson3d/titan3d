@@ -1,4 +1,4 @@
-﻿using EngineNS;
+using EngineNS;
 using EngineNS.UI.Bind;
 using System;
 using System.Collections.Generic;
@@ -211,7 +211,7 @@ namespace EngineNS.UI.Controls
 
         Thickness mMargin = Thickness.Empty;
         [Rtti.Meta("")]
-        [BindProperty, Category("Layout")]
+        [BindProperty, System.ComponentModel.Category("Layout")]
         public Thickness Margin
         {
             get => mMargin;
@@ -225,7 +225,7 @@ namespace EngineNS.UI.Controls
 
         float mMinWidth = 0.0f;
         [Rtti.Meta("")]
-        [BindProperty, Category("Layout")]
+        [BindProperty, System.ComponentModel.Category("Layout")]
         public float MinWidth
         {
             get => mMinWidth;
@@ -238,7 +238,7 @@ namespace EngineNS.UI.Controls
         }
         float mMinHeight = 0.0f;
         [Rtti.Meta("")]
-        [BindProperty, Category("Layout")]
+        [BindProperty, System.ComponentModel.Category("Layout")]
         public float MinHeight
         {
             get => mMinHeight;
@@ -251,7 +251,7 @@ namespace EngineNS.UI.Controls
         }
         float mMaxWidth = float.MaxValue;
         [Rtti.Meta("")]
-        [BindProperty, Category("Layout")]
+        [BindProperty, System.ComponentModel.Category("Layout")]
         public float MaxWidth
         {
             get => mMaxWidth;
@@ -264,7 +264,7 @@ namespace EngineNS.UI.Controls
         }
         float mMaxHeight = float.MaxValue;
         [Rtti.Meta("")]
-        [BindProperty, Category("Layout")]
+        [BindProperty, System.ComponentModel.Category("Layout")]
         public float MaxHeight
         {
             get => mMaxHeight;
@@ -277,7 +277,7 @@ namespace EngineNS.UI.Controls
         }
         float mWidth = 100;
         [Rtti.Meta("")]
-        [BindProperty, Category("Layout")]
+        [BindProperty, System.ComponentModel.Category("Layout")]
         public float Width
         {
             get => mWidth;
@@ -292,7 +292,7 @@ namespace EngineNS.UI.Controls
         }
         bool mWidthAuto = true;
         [Rtti.Meta("")]
-        [BindProperty, Category("Layout")]
+        [BindProperty, System.ComponentModel.Category("Layout")]
         public bool WidthAuto
         {
             get => mWidthAuto;
@@ -307,7 +307,7 @@ namespace EngineNS.UI.Controls
         }
         float mHeight = 100;
         [Rtti.Meta("")]
-        [BindProperty, Category("Layout")]
+        [BindProperty, System.ComponentModel.Category("Layout")]
         public float Height
         {
             get => mHeight;
@@ -322,7 +322,7 @@ namespace EngineNS.UI.Controls
         }
         bool mHeightAuto = true;
         [Rtti.Meta("")]
-        [BindProperty, Category("Layout")]
+        [BindProperty, System.ComponentModel.Category("Layout")]
         public bool HeightAuto
         {
             get => mHeightAuto;

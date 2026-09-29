@@ -88,17 +88,10 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
-            float scaleFactor = 1.0f;
-            var hitProxyNode = policy.FindFirstNode<TtHitproxyNode>();
-            if (hitProxyNode != null)
-            {
-                scaleFactor = hitProxyNode.ScaleFactor;
-            }
-
-            ResultPinOut.Attachement.Width = (uint)(x * scaleFactor);
-            ResultPinOut.Attachement.Height = (uint)(y * scaleFactor);
-
-            base.OnResize(policy, x * scaleFactor, y * scaleFactor);
+            const float outlineScaleFactor = 1.0f;
+            ResultPinOut.Attachement.Width = (uint)(x * outlineScaleFactor);
+            ResultPinOut.Attachement.Height = (uint)(y * outlineScaleFactor);
+            base.OnResize(policy, x * outlineScaleFactor, y * outlineScaleFactor);
         }
         public override void Tick(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {

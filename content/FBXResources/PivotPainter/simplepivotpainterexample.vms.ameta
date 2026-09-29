@@ -4,6 +4,7 @@
   <AssetId Type="System.Guid@Unknown" Value="7af963fb-77dc-4517-8107-75ece5c37536" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,fbxresources/pivotpainter/simplepivotpainterexample.vms,7af963fb-77dc-4517-8107-75ece5c37536" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMeshPrimitives&#xA;" />
+  <HasBLAS Type="System.Boolean@Unknown" Value="False" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />

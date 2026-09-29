@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation.RootMotion;
+using EngineNS.Animation.RootMotion;
 using EngineNS.GamePlay.Camera;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
@@ -33,7 +33,7 @@ namespace EngineNS.GamePlay.Movemnet
         public TtMovementData MovementData { get=> NodeData as TtMovementData;}
         public float Speed { get=>MovementData.Speed; }
         public Vector3 LinearVelocity { get; private set; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector3 DesiredLinearVelocity { get; set; } = Vector3.Zero;
         public void SetLinearVelocity(Vector3 linearVelocity)
         {
@@ -46,11 +46,11 @@ namespace EngineNS.GamePlay.Movemnet
         {
             SettedAngularVelocity = angularVelocity;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool EnableGravity { get=>MovementData.EnableGravity; set=> MovementData.EnableGravity = value; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector3 GravityAcceleration { get => MovementData.GravityAcceleration; set => MovementData.GravityAcceleration = value; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public ERootMotionMode RootMotionMode { get => MovementData.RootMotionMode; set => MovementData.RootMotionMode = value; }
         protected Vector3 GravityVelocity = Vector3.Zero;
         public float MaxGravitySpeed = 10;

@@ -62,7 +62,7 @@ namespace EngineNS.Sequencer.Asset
                         pos.Y = PositionY.Evaluate(ctx.Time, ctx.TickResolution);
                     if (PositionZ.KeyCount > 0)
                         pos.Z = PositionZ.Evaluate(ctx.Time, ctx.TickResolution);
-                    ctx.Table.Write(target, accessor, pos, OverlapPriority);
+                    ctx.Table.Write(target, accessor, pos, OverlapPriority, WantsRestoreState);
                 }
             }
             if (HasScaleKey)
@@ -76,14 +76,14 @@ namespace EngineNS.Sequencer.Asset
                         scale.Y = (float)ScaleY.Evaluate(ctx.Time, ctx.TickResolution);
                     if (ScaleZ.KeyCount > 0)
                         scale.Z = (float)ScaleZ.Evaluate(ctx.Time, ctx.TickResolution);
-                    ctx.Table.Write(target, accessor, scale, OverlapPriority);
+                    ctx.Table.Write(target, accessor, scale, OverlapPriority, WantsRestoreState);
                 }
             }
             if (HasRotationKey)
             {
                 var accessor = ctx.Registry.Find(TtNodeTransformAccessors.QuatId);
                 if (accessor != null)
-                    ctx.Table.Write(target, accessor, Rotation.Evaluate(ctx.Time), OverlapPriority);
+                    ctx.Table.Write(target, accessor, Rotation.Evaluate(ctx.Time), OverlapPriority, WantsRestoreState);
             }
         }
         public override long GetMaxKeyTime()

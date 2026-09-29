@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
-  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="4ee00567cb54d1a9a30b6258cad4f1712add9b3ef4c9c40a16bed9dae3d204a7" />
+      <Path Type="System.String@Unknown" Value="pbr_role.material" />
+    </e_0>
+  </AssetFiles>
   <AssetId Type="System.Guid@Unknown" Value="13e877a1-aba6-4b7b-83a9-a852d111baff" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/puppet/pbr_role.material,13e877a1-aba6-4b7b-83a9-a852d111baff" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterial&#xA;Hahah" />

@@ -4,7 +4,6 @@ using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.Profiler;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using NPOI.POIFS.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,9 +19,10 @@ namespace EngineNS.Graphics.Mesh
         {
             get => TtMaterialMesh.AssetExt;
         }
+        public const string AssetTypeName = "UMS";
         public override string GetAssetTypeName()
         {
-            return "UMS";
+            return AssetTypeName;
         }
         public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
@@ -63,7 +63,7 @@ namespace EngineNS.Graphics.Mesh
         {
             return TtEngine.Instance.EditorInstance.Config.MaterialMeshBoderColor;
         }
-        DVector3 CalculateDragPosition(Graphics.Pipeline.TtViewportSlate vpSlate)
+        unsafe DVector3 CalculateDragPosition(Graphics.Pipeline.TtViewportSlate vpSlate)
         {
             var worldViewport = vpSlate as EGui.Slate.TtWorldViewportSlate;
             if (worldViewport != null)
@@ -75,8 +75,9 @@ namespace EngineNS.Graphics.Mesh
                 worldViewport.CameraController.Camera.GetPickRay(ref dir, msPt.X, msPt.Y, worldViewport.ClientSize.X, worldViewport.ClientSize.Y);
                 var end = start + dir.AsDVector() * 1000.0f;
                 VHitResult hitResult = new VHitResult();
+                List<TtNode> candidates = null;
                 DVector3 hitPos;
-                if (worldViewport.World.Root.LineCheck(in start, in end, ref hitResult))
+                if (worldViewport.World.CollideOctree.OctreeHitTest(in start, in end, ref candidates, &hitResult))
                 {
                     hitPos = hitResult.Position;
                 }

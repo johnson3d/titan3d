@@ -1,4 +1,4 @@
-﻿using EngineNS.NxRHI;
+using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -55,49 +55,49 @@ namespace EngineNS.Bricks.Collision.BVH
             }
 
             [Rtti.Meta]
-            [Category("BVH")]
+            [System.ComponentModel.Category("BVH")]
             public int NumLeaves { get; set; } = 20;
 
             [Rtti.Meta]
-            [Category("BVH")]
+            [System.ComponentModel.Category("BVH")]
             public int Seed { get; set; } = 1234;
 
             [Rtti.Meta]
-            [Category("BVH")]
+            [System.ComponentModel.Category("BVH")]
             public Vector3 SpaceExtent { get; set; } = new Vector3(50, 20, 50);
 
             [Rtti.Meta]
-            [Category("BVH")]
+            [System.ComponentModel.Category("BVH")]
             public Vector3 LeafMinSize { get; set; } = new Vector3(1, 1, 1);
 
             [Rtti.Meta]
-            [Category("BVH")]
+            [System.ComponentModel.Category("BVH")]
             public Vector3 LeafMaxSize { get; set; } = new Vector3(5, 5, 5);
 
             [Rtti.Meta]
-            [Category("BVH")]
+            [System.ComponentModel.Category("BVH")]
             public float Margin { get; set; } = 0.5f;
 
             [Rtti.Meta]
-            [Category("BVH")]
+            [System.ComponentModel.Category("BVH")]
             public EBuildMode BuildMode { get; set; } = EBuildMode.Bulk;
 
             [Rtti.Meta]
-            [Category("BVH")]
+            [System.ComponentModel.Category("BVH")]
             public int OptimizeIterations { get; set; } = 0;
 
             // -1 = unlimited (show every internal level). N >= 0 = only show
             // internal nodes whose depth lies in [0, N]. Leaves always honor
             // mDrawLeafNodes regardless of this value.
             [Rtti.Meta]
-            [Category("BVH/Display")]
+            [System.ComponentModel.Category("BVH/Display")]
             public int MaxDisplayDepth { get; set; } = -1;
 
             // When true, internal-node AABBs use a per-depth color ramp so the
             // tree's level structure is visually obvious. When false, every
             // internal node uses the legacy single color (ColorInternal).
             [Rtti.Meta]
-            [Category("BVH/Display")]
+            [System.ComponentModel.Category("BVH/Display")]
             public bool ColorByDepth { get; set; } = true;
 
             // ----------------------------------------------------------------
@@ -106,11 +106,11 @@ namespace EngineNS.Bricks.Collision.BVH
             // users reproduce the same ray batch across runs.
             // ----------------------------------------------------------------
             [Rtti.Meta]
-            [Category("BVH/GPU")]
+            [System.ComponentModel.Category("BVH/GPU")]
             public int RayCount { get; set; } = 64;
 
             [Rtti.Meta]
-            [Category("BVH/GPU")]
+            [System.ComponentModel.Category("BVH/GPU")]
             public int RaySeed { get; set; } = 5678;
         }
 
@@ -226,56 +226,56 @@ namespace EngineNS.Bricks.Collision.BVH
         // PG properties
         // ==================================================================
 
-        [Category("BVH")]
+        [System.ComponentModel.Category("BVH")]
         public int NumLeaves
         {
             get => (NodeData as TtBVHDebugNodeData)?.NumLeaves ?? 0;
             set { var d = NodeData as TtBVHDebugNodeData; if (d != null) d.NumLeaves = Math.Max(1, value); }
         }
 
-        [Category("BVH")]
+        [System.ComponentModel.Category("BVH")]
         public int Seed
         {
             get => (NodeData as TtBVHDebugNodeData)?.Seed ?? 0;
             set { var d = NodeData as TtBVHDebugNodeData; if (d != null) d.Seed = value; }
         }
 
-        [Category("BVH")]
+        [System.ComponentModel.Category("BVH")]
         public Vector3 SpaceExtent
         {
             get => (NodeData as TtBVHDebugNodeData)?.SpaceExtent ?? Vector3.One;
             set { var d = NodeData as TtBVHDebugNodeData; if (d != null) d.SpaceExtent = value; }
         }
 
-        [Category("BVH")]
+        [System.ComponentModel.Category("BVH")]
         public Vector3 LeafMinSize
         {
             get => (NodeData as TtBVHDebugNodeData)?.LeafMinSize ?? Vector3.One;
             set { var d = NodeData as TtBVHDebugNodeData; if (d != null) d.LeafMinSize = value; }
         }
 
-        [Category("BVH")]
+        [System.ComponentModel.Category("BVH")]
         public Vector3 LeafMaxSize
         {
             get => (NodeData as TtBVHDebugNodeData)?.LeafMaxSize ?? Vector3.One;
             set { var d = NodeData as TtBVHDebugNodeData; if (d != null) d.LeafMaxSize = value; }
         }
 
-        [Category("BVH")]
+        [System.ComponentModel.Category("BVH")]
         public float Margin
         {
             get => (NodeData as TtBVHDebugNodeData)?.Margin ?? 0;
             set { var d = NodeData as TtBVHDebugNodeData; if (d != null) d.Margin = Math.Max(0, value); }
         }
 
-        [Category("BVH")]
+        [System.ComponentModel.Category("BVH")]
         public EBuildMode BuildMode
         {
             get => (NodeData as TtBVHDebugNodeData)?.BuildMode ?? EBuildMode.Bulk;
             set { var d = NodeData as TtBVHDebugNodeData; if (d != null) d.BuildMode = value; }
         }
 
-        [Category("BVH")]
+        [System.ComponentModel.Category("BVH")]
         public int OptimizeIterations
         {
             get => (NodeData as TtBVHDebugNodeData)?.OptimizeIterations ?? 0;
@@ -286,7 +286,7 @@ namespace EngineNS.Bricks.Collision.BVH
         // depth (root = 0). Pure filter; cache stays valid because nodeId →
         // depth and depth → color are both deterministic for a given tree, so
         // changing this value never invalidates a cached mesh.
-        [Category("BVH/Display")]
+        [System.ComponentModel.Category("BVH/Display")]
         public int MaxDisplayDepth
         {
             get => (NodeData as TtBVHDebugNodeData)?.MaxDisplayDepth ?? -1;
@@ -296,7 +296,7 @@ namespace EngineNS.Bricks.Collision.BVH
         // When true, internal nodes use the per-depth color ramp; when false,
         // they all use ColorInternal. Toggling this DOES invalidate cached
         // mesh colors, so we tear the cache down on change.
-        [Category("BVH/Display")]
+        [System.ComponentModel.Category("BVH/Display")]
         public bool ColorByDepth
         {
             get => (NodeData as TtBVHDebugNodeData)?.ColorByDepth ?? true;
@@ -310,14 +310,14 @@ namespace EngineNS.Bricks.Collision.BVH
         }
 
         // GPU dispatch demo parameters (mirrored to NodeData for serialization).
-        [Category("BVH/GPU")]
+        [System.ComponentModel.Category("BVH/GPU")]
         public int RayCount
         {
             get => (NodeData as TtBVHDebugNodeData)?.RayCount ?? 64;
             set { var d = NodeData as TtBVHDebugNodeData; if (d != null) d.RayCount = Math.Max(1, value); }
         }
 
-        [Category("BVH/GPU")]
+        [System.ComponentModel.Category("BVH/GPU")]
         public int RaySeed
         {
             get => (NodeData as TtBVHDebugNodeData)?.RaySeed ?? 5678;
@@ -325,35 +325,35 @@ namespace EngineNS.Bricks.Collision.BVH
         }
 
         // Read-only stats.
-        [Category("BVH/Stats")]
+        [System.ComponentModel.Category("BVH/Stats")]
         [ReadOnly(true)]
         public int Stat_ProxyCount { get => mStatProxyCount; set { } }
 
-        [Category("BVH/Stats")]
+        [System.ComponentModel.Category("BVH/Stats")]
         [ReadOnly(true)]
         public int Stat_TreeHeight { get => mStatHeight; set { } }
 
-        [Category("BVH/Stats")]
+        [System.ComponentModel.Category("BVH/Stats")]
         [ReadOnly(true)]
         public double Stat_SAHCost { get => mStatSAHCost; set { } }
 
-        [Category("BVH/Stats")]
+        [System.ComponentModel.Category("BVH/Stats")]
         [ReadOnly(true)]
         public int Stat_LastQueryHits { get => mStatLastQueryHits; set { } }
 
-        [Category("BVH/Stats")]
+        [System.ComponentModel.Category("BVH/Stats")]
         [ReadOnly(true)]
         public string Stat_BuildSummary { get => mStatBuildSummary; set { } }
 
-        [Category("BVH/Stats")]
+        [System.ComponentModel.Category("BVH/Stats")]
         [ReadOnly(true)]
         public int Stat_GpuNodeCount { get => mGpuBvh != null ? mGpuBvh.NodeCount : 0; set { } }
 
-        [Category("BVH/Stats")]
+        [System.ComponentModel.Category("BVH/Stats")]
         [ReadOnly(true)]
         public int Stat_GpuLeafCount { get => mGpuBvh != null ? mGpuBvh.LeafCount : 0; set { } }
 
-        [Category("BVH/Stats")]
+        [System.ComponentModel.Category("BVH/Stats")]
         [ReadOnly(true)]
         public string Stat_GpuStatus { get => mStatGpuStatus; set { } }
 
@@ -363,8 +363,8 @@ namespace EngineNS.Bricks.Collision.BVH
         // false so the button can be clicked again.
         // ------------------------------------------------------------------
 
-        [Category("BVH/Commands")]
-        [DisplayName("[Cmd] BuildDynamic")]
+        [System.ComponentModel.Category("BVH/Commands")]
+        [System.ComponentModel.DisplayName("[Cmd] BuildDynamic")]
         public bool CmdBuildDynamic
         {
             get => false;
@@ -376,8 +376,8 @@ namespace EngineNS.Bricks.Collision.BVH
             }
         }
 
-        [Category("BVH/Commands")]
-        [DisplayName("[Cmd] BuildBulk (Morton/LBVH)")]
+        [System.ComponentModel.Category("BVH/Commands")]
+        [System.ComponentModel.DisplayName("[Cmd] BuildBulk (Morton/LBVH)")]
         public bool CmdBuildBulk
         {
             get => false;
@@ -389,8 +389,8 @@ namespace EngineNS.Bricks.Collision.BVH
             }
         }
 
-        [Category("BVH/Commands")]
-        [DisplayName("[Cmd] OptimizeNow")]
+        [System.ComponentModel.Category("BVH/Commands")]
+        [System.ComponentModel.DisplayName("[Cmd] OptimizeNow")]
         public bool CmdOptimizeNow
         {
             get => false;
@@ -409,8 +409,8 @@ namespace EngineNS.Bricks.Collision.BVH
             }
         }
 
-        [Category("BVH/Commands")]
-        [DisplayName("[Cmd] RunQueryDemo")]
+        [System.ComponentModel.Category("BVH/Commands")]
+        [System.ComponentModel.DisplayName("[Cmd] RunQueryDemo")]
         public bool CmdRunQueryDemo
         {
             get => false;
@@ -421,8 +421,8 @@ namespace EngineNS.Bricks.Collision.BVH
             }
         }
 
-        [Category("BVH/Commands")]
-        [DisplayName("[Cmd] ClearTree")]
+        [System.ComponentModel.Category("BVH/Commands")]
+        [System.ComponentModel.DisplayName("[Cmd] ClearTree")]
         public bool CmdClearTree
         {
             get => false;
@@ -433,8 +433,8 @@ namespace EngineNS.Bricks.Collision.BVH
             }
         }
 
-        [Category("BVH/Commands")]
-        [DisplayName("[Cmd] DumpHierarchyToLog")]
+        [System.ComponentModel.Category("BVH/Commands")]
+        [System.ComponentModel.DisplayName("[Cmd] DumpHierarchyToLog")]
         public bool CmdDumpHierarchyToLog
         {
             get => false;
@@ -461,8 +461,8 @@ namespace EngineNS.Bricks.Collision.BVH
         //                   to the log.
         //   3) ClearGpu  — drop GPU buffers without touching the CPU tree.
         // ------------------------------------------------------------------
-        [Category("BVH/GPU")]
-        [DisplayName("[Cmd] UploadToGpu")]
+        [System.ComponentModel.Category("BVH/GPU")]
+        [System.ComponentModel.DisplayName("[Cmd] UploadToGpu")]
         public bool CmdUploadToGpu
         {
             get => false;
@@ -473,8 +473,8 @@ namespace EngineNS.Bricks.Collision.BVH
             }
         }
 
-        [Category("BVH/GPU")]
-        [DisplayName("[Cmd] FGpuRayCast")]
+        [System.ComponentModel.Category("BVH/GPU")]
+        [System.ComponentModel.DisplayName("[Cmd] FGpuRayCast")]
         public bool CmdFGpuRayCast
         {
             get => false;
@@ -485,8 +485,8 @@ namespace EngineNS.Bricks.Collision.BVH
             }
         }
 
-        [Category("BVH/GPU")]
-        [DisplayName("[Cmd] ClearGpu")]
+        [System.ComponentModel.Category("BVH/GPU")]
+        [System.ComponentModel.DisplayName("[Cmd] ClearGpu")]
         public bool CmdClearGpu
         {
             get => false;
@@ -500,14 +500,14 @@ namespace EngineNS.Bricks.Collision.BVH
         }
 
         // Toggles for what to draw in OnGatherVisibleMeshes.
-        [Category("BVH/Display")]
+        [System.ComponentModel.Category("BVH/Display")]
         public bool DrawInternalNodes
         {
             get => mDrawInternalNodes;
             set => mDrawInternalNodes = value;
         }
 
-        [Category("BVH/Display")]
+        [System.ComponentModel.Category("BVH/Display")]
         public bool DrawLeafNodes
         {
             get => mDrawLeafNodes;

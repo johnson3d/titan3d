@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_9742957833721272774 Type="EngineNS.GamePlay.Scene.TtHeightFogNode.TtHeightFogNodeData@EngineCore">
+  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <FogColor Type="EngineNS.Color3f@EngineCore" Order="0" />
+  <FogDensity Type="System.Single@Unknown" Order="0" />
+  <FogEnd Type="System.Single@Unknown" Order="0" />
+  <FogHeightFalloff Type="System.Single@Unknown" Order="0" />
+  <InscatterColor Type="EngineNS.Color3f@EngineCore" Order="0" />
+  <InscatteringExponent Type="System.Single@Unknown" Order="0" />
+  <InscatterStartDistance Type="System.Single@Unknown" Order="0" />
+  <MinFogOpacity Type="System.Single@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.TtNode.ENodeStyles@EngineCore" Order="0" />
+  <StartDistance Type="System.Single@Unknown" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.TtBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.TtPlacementBase@EngineCore" Order="2" />
+</Hash_9742957833721272774>

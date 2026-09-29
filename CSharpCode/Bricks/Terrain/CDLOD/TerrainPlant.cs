@@ -134,7 +134,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         public Dictionary<UTerrainPlant, UPlantType> PlantTypes = new Dictionary<UTerrainPlant, UPlantType>();
         public uint CameralOffsetSerialId = 0;
-        public async System.Threading.Tasks.Task Initialize(Procedure.Node.UMaterialIdMapNode matIdMap)
+        public async System.Threading.Tasks.Task Initialize(Procedure.Node.TtMaterialIdMapNode matIdMap)
         {
             //await matIdMap.SureMaterialResources();
             //foreach (var i in matIdMap.MaterialIdManager.MaterialIdArray)

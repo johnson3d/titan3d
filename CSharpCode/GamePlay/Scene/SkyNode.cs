@@ -1,4 +1,4 @@
-﻿using EngineNS.Graphics.Pipeline;
+using EngineNS.Graphics.Pipeline;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -26,7 +26,7 @@ namespace EngineNS.GamePlay.Scene
             [Rtti.Meta("")]
             public Vector3 SunDirection { get; set; }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public Vector3 SunDirection
         {
@@ -34,7 +34,7 @@ namespace EngineNS.GamePlay.Scene
             set => GetNodeData<TtSkyNodeData>().SunDirection = value;
         }
         Graphics.Pipeline.Shader.TtMaterialInstance SunMaterial;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt)]
         public RName SunMaterialName

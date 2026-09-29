@@ -1,4 +1,4 @@
-﻿using EngineNS.DesignMacross.Base.Description;
+using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Editor;
 using EngineNS.DesignMacross.Base.Outline;
 using EngineNS.DesignMacross.Base.Render;
@@ -51,7 +51,7 @@ namespace EngineNS.DesignMacross.Design
             Vector2 buttonSize = new Vector2(16, 16);
 
             ImGuiAPI.SetNextItemAllowOverlap();
-            var treeNodeResult = ImGuiAPI.TreeNodeEx("DesignableVariables", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen);
+            var treeNodeResult = ImGuiAPI.TreeNodeEx(TtLocalization.Tr("DesignableVariables"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen);
             var regionSize = ImGuiAPI.GetContentRegionAvail();
             ImGuiAPI.SameLine(regionSize.X, -1.0f);
             if (EGui.UIProxy.CustomButton.ToolButton("+", in buttonSize, 0xFF00FF00))
@@ -68,7 +68,7 @@ namespace EngineNS.DesignMacross.Design
                     EGui.UIProxy.MenuItemProxy.MenuState newMethodMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
                     newMethodMenuState.Reset();
                     //newMethodMenuState.Opened =true;
-                    if (EGui.UIProxy.MenuItemProxy.MenuItem("New" + typeShowName, null, false, null, in drawList, in menuData, ref newMethodMenuState))
+                    if (EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("New") + typeShowName, null, false, null, in drawList, in menuData, ref newMethodMenuState))
                     {
                         var num = 0;
                         while (true)

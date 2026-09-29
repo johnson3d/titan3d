@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -54,7 +54,7 @@ namespace EngineNS.UI.Controls.Containers
         ELayout_Orientation mOrientation = ELayout_Orientation.Horizontal;
         [Bind.BindProperty]
         [Meta]
-        [Category("Layout")]
+        [System.ComponentModel.Category("Layout")]
         public ELayout_Orientation Orientation
         {
             get => mOrientation;

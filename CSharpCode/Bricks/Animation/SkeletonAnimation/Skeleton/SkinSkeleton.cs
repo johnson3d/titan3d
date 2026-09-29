@@ -109,7 +109,10 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
             {
                 Limbs[i].Index = new IndexInSkeleton(i);
                 Limbs[i].Children.Clear();
-                HashDic.Add(Limbs[i].Desc.NameHash, Limbs[i]);
+                if (HashDic.ContainsKey(Limbs[i].Desc.NameHash) == false)
+                {
+                    HashDic.Add(Limbs[i].Desc.NameHash, Limbs[i]);
+                }
             }
             for (int i = 0; i < Limbs.Count; ++i)
             {
@@ -130,6 +133,8 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
             }
             foreach (var limb in Children)
             {
+                if (limb.Desc.Name == null)
+                    continue;
                 if (limb.Desc.Name.ToLower() == "root" || string.IsNullOrEmpty(limb.Desc.ParentName))
                 {
                     Root = limb;

@@ -50,7 +50,7 @@ namespace EngineNS.Graphics.Pipeline.Utility
             mBasePassShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtMaterialToTextureShading>();
         }
         [RName.PGRName(FilterExts = TtMaterial.AssetExt + "," + TtMaterialInstance.AssetExt)]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName MaterialName
         {
             get

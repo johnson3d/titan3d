@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Bricks.Procedure.UPgcAssetAMeta@EngineCore">
+<Root Type="EngineNS.Bricks.Procedure.TtPgcAssetAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
   <AssetId Type="System.Guid@Unknown" Value="d2a5fe45-8b63-4ce7-bf0e-59bacfa9efe3" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/terrain/terrain_gen01.pgc,d2a5fe45-8b63-4ce7-bf0e-59bacfa9efe3" />
@@ -19,5 +19,5 @@
     <e_3 Value="Game,tutorials/common/texture/ground6_nmp.srv,3db4d650-7358-4e19-aa8a-be32d2fdfb14" />
   </RefAssetRNames>
   <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.UPgcAsset@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.TtPgcAsset@EngineCore" />
 </Root>

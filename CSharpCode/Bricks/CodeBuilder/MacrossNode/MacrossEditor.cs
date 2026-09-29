@@ -1,4 +1,4 @@
-﻿using EngineNS.Editor;
+using EngineNS.Editor;
 using EngineNS.Macross;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
@@ -738,13 +738,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 new EGui.UIProxy.MenuItemProxy()
                 {
-                    MenuName = "File",
+                    MenuName = TtLocalization.Tr("File"),
                     IsTopMenuItem = true,
                     SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
                     {
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Reload",
+                            MenuName = TtLocalization.Tr("Reload"),
                             Action = (item, data)=>
                             {
                                 //LoadClassGraph(RName.GetRName("UTest/class_graph.xml"));
@@ -753,7 +753,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Save",
+                            MenuName = TtLocalization.Tr("Save"),
                             Action = (item, data)=>
                             {
                                 Save();
@@ -1111,7 +1111,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (method.MethodHasError())
             {
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.ErrorStringColor);
-                methodTreeNodeResult = ImGuiAPI.TreeNodeEx("(E) " + displayName + "##" + keyName, treeNodeFlags);
+                methodTreeNodeResult = ImGuiAPI.TreeNodeEx(TtLocalization.Tr("(E) ") + displayName + "##" + keyName, treeNodeFlags);
                 if(ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
                 {
                     if(ImGuiAPI.BeginTooltip())
@@ -1221,7 +1221,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var regionSize = ImGuiAPI.GetContentRegionAvail();
 
                 ImGuiAPI.SetNextItemAllowOverlap();
-                var membersTreeNodeResult = ImGuiAPI.TreeNodeEx("Members", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None);
+                var membersTreeNodeResult = ImGuiAPI.TreeNodeEx(TtLocalization.Tr("Members"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None);
                 ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
                 if (EGui.UIProxy.CustomButton.ToolButton("+", in buttonSize, 0xFF00FF00))
                 {
@@ -1323,7 +1323,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     ImGuiAPI.TreePop();
                 }
                 ImGuiAPI.SetNextItemAllowOverlap();
-                var methodsTreeNodeResult = ImGuiAPI.TreeNodeEx("Methods", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None);
+                var methodsTreeNodeResult = ImGuiAPI.TreeNodeEx(TtLocalization.Tr("Methods"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None);
                 ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
                 if(EGui.UIProxy.CustomButton.ToolButton("+", in buttonSize, 0xFF00FF00))
                 {
@@ -1334,7 +1334,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     var drawList = ImGuiAPI.GetWindowDrawList();
                     var menuData = new Support.TtAnyPointer();
-                    if(EGui.UIProxy.MenuItemProxy.MenuItem("New Method", null, false, null, in drawList, in menuData, ref mNewMethodMenuState))
+                    if(EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("New Method"), null, false, null, in drawList, in menuData, ref mNewMethodMenuState))
                     {
                         var num = 0;
                         while(true)
@@ -1391,7 +1391,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextDisableColor);
                 ImGuiAPI.SetNextItemAllowOverlap();
-                var deletedMethodsTreeNodeResult = ImGuiAPI.TreeNodeEx("Deleted Methods", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None);
+                var deletedMethodsTreeNodeResult = ImGuiAPI.TreeNodeEx(TtLocalization.Tr("Deleted Methods"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None);
                 if(deletedMethodsTreeNodeResult)
                 {
                     for(int i=MethodDeletedList.Count - 1; i >= 0; i--)
@@ -1416,7 +1416,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         private unsafe void DrawMethodLocalVars(in Vector2 regionSize, in Vector2 buttonSize, float buttonOffset, ImGuiTreeNodeFlags_ flags)
         {
             ImGuiAPI.SetNextItemAllowOverlap();
-            var localVarsTreeNodeResult = ImGuiAPI.TreeNodeEx("LocalVars", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None);
+            var localVarsTreeNodeResult = ImGuiAPI.TreeNodeEx(TtLocalization.Tr("LocalVars"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None);
             ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
             if (EGui.UIProxy.CustomButton.ToolButton("+", in buttonSize, 0xFF00FF00))
             {
@@ -1608,19 +1608,19 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
 
             ImGuiAPI.SameLine(0, 8);
-            if (ImGuiAPI.SmallButton("Undo"))
+            if (ImGuiAPI.SmallButton(TtLocalization.Tr("Undo")))
                 mCodeEditor.Undo();
             ImGuiAPI.SameLine(0, 4);
-            if (ImGuiAPI.SmallButton("Redo"))
+            if (ImGuiAPI.SmallButton(TtLocalization.Tr("Redo")))
                 mCodeEditor.Redo();
             ImGuiAPI.SameLine(0, 4);
-            if (ImGuiAPI.SmallButton("Copy"))
+            if (ImGuiAPI.SmallButton(TtLocalization.Tr("Copy")))
                 mCodeEditor.Copy();
             ImGuiAPI.SameLine(0, 4);
-            if (ImGuiAPI.SmallButton("Paste"))
+            if (ImGuiAPI.SmallButton(TtLocalization.Tr("Paste")))
                 mCodeEditor.Paste();
             ImGuiAPI.SameLine(0, 4);
-            if (ImGuiAPI.SmallButton("Select All"))
+            if (ImGuiAPI.SmallButton(TtLocalization.Tr("Select All")))
                 mCodeEditor.SelectAll();
 
             ImGuiAPI.SameLine(0, 10);
@@ -1737,9 +1737,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     ImGuiAPI.TableSetColumnIndex(0);
                                     ImGuiAPI.Text(diagnostic.Severity.ToString());
                                     ImGuiAPI.TableSetColumnIndex(1);
-                                    ImGuiAPI.Text(diagnostic.Line >= 0 ? (diagnostic.Line + 1).ToString() : "-");
+                                    ImGuiAPI.Text(diagnostic.Line >= 0 ? (diagnostic.Line + 1).ToString() : TtLocalization.Tr("-"));
                                     ImGuiAPI.TableSetColumnIndex(2);
-                                    ImGuiAPI.Text(string.IsNullOrEmpty(diagnostic.FilePath) ? "-" : IO.TtFileManager.GetPureName(diagnostic.FilePath));
+                                    ImGuiAPI.Text(string.IsNullOrEmpty(diagnostic.FilePath) ? TtLocalization.Tr("-") : IO.TtFileManager.GetPureName(diagnostic.FilePath));
                                     ImGuiAPI.TableSetColumnIndex(3);
                                     ImGuiAPI.Text(diagnostic.Message);
                                     ImGuiAPI.PopStyleColor(1);
@@ -1751,9 +1751,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
                                     if (ImGuiAPI.BeginPopupContextItem($"DiagContext_{i}", ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
                                     {
-                                        if (ImGuiAPI.MenuItem("Copy Message", null, false, true))
+                                        if (ImGuiAPI.MenuItem(TtLocalization.Tr("Copy Message"), null, false, true))
                                             ImGuiAPI.SetClipboardText(diagnostic.Message);
-                                        if (!string.IsNullOrEmpty(diagnostic.FilePath) && ImGuiAPI.MenuItem("Copy File Path", null, false, true))
+                                        if (!string.IsNullOrEmpty(diagnostic.FilePath) && ImGuiAPI.MenuItem(TtLocalization.Tr("Copy File Path"), null, false, true))
                                             ImGuiAPI.SetClipboardText(diagnostic.FilePath);
                                         ImGuiAPI.EndPopup();
                                     }
@@ -1763,12 +1763,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             }
                             else if (mLastCompileResult.Diagnostics.Count == 0)
                             {
-                                ImGuiAPI.TextDisabled(mLastCompileResult.Success ? "No diagnostics." : "No compiler diagnostics captured.");
+                                ImGuiAPI.TextDisabled(mLastCompileResult.Success ? TtLocalization.Tr("No diagnostics.") : TtLocalization.Tr("No compiler diagnostics captured."));
                             }
                         }
                         else
                         {
-                            ImGuiAPI.TextDisabled("Compile the asset to show diagnostics.");
+                            ImGuiAPI.TextDisabled(TtLocalization.Tr("Compile the asset to show diagnostics."));
                         }
                     }
                     ImGuiAPI.EndChild();
@@ -1864,14 +1864,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             // Mode switch toolbar
             var modeLabel = func.MethodEditMode == TtMacrossMethodGraph.EMethodEditMode.Graph ? "Graph" : "CSharp";
-            ImGuiAPI.Text("Mode:");
+            ImGuiAPI.Text(TtLocalization.Tr("Mode:"));
             ImGuiAPI.SameLine(0, 4);
             ImGuiAPI.SetNextItemWidth(80);
             if (ImGuiAPI.BeginCombo("##EditMode" + func.KeyName, modeLabel, ImGuiComboFlags_.ImGuiComboFlags_None))
             {
-                if (ImGuiAPI.Selectable("Graph", func.MethodEditMode == TtMacrossMethodGraph.EMethodEditMode.Graph, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                if (ImGuiAPI.Selectable(TtLocalization.Tr("Graph"), func.MethodEditMode == TtMacrossMethodGraph.EMethodEditMode.Graph, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                     func.MethodEditMode = TtMacrossMethodGraph.EMethodEditMode.Graph;
-                if (ImGuiAPI.Selectable("CSharp", func.MethodEditMode == TtMacrossMethodGraph.EMethodEditMode.CSharp, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                if (ImGuiAPI.Selectable(TtLocalization.Tr("CSharp"), func.MethodEditMode == TtMacrossMethodGraph.EMethodEditMode.CSharp, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
                     func.MethodEditMode = TtMacrossMethodGraph.EMethodEditMode.CSharp;
                 ImGuiAPI.EndCombo();
             }

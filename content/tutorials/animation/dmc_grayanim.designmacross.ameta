@@ -2,7 +2,7 @@
 <Root Type="EngineNS.DesignMacross.TtDesignMacrossAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="3">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="c44d2d80bff3c1460dcece5cf10ebd91ee4f06fafae1b0ae6d3cf4255ad43073" />
+      <Hash Type="System.String@Unknown" Value="7f1ff11ab325e557238a974038b436499a8acf9fbe6384753fba1dc1cbd77772" />
       <Path Type="System.String@Unknown" Value="dmc_grayanim.designmacross/designmacrossdescription.dat" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
@@ -10,7 +10,7 @@
       <Path Type="System.String@Unknown" Value="dmc_grayanim.designmacross/graphelementstyles.dat" />
     </e_1>
     <e_2 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="1b8833e207e0b75ab734c42ab5323cee5bf7d45f6a88d11786eb91fabee2e715" />
+      <Hash Type="System.String@Unknown" Value="19d5b0a7a3f983c87a26bda4e5c9f94bae1affd88a58030def42ce6b2dc550fe" />
       <Path Type="System.String@Unknown" Value="dmc_grayanim.designmacross/dmc_grayanim.cs" />
     </e_2>
   </AssetFiles>

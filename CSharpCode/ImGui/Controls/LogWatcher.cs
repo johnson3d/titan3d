@@ -1,4 +1,4 @@
-﻿using EngineNS.DesignMacross;
+using EngineNS.DesignMacross;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -37,7 +37,7 @@ namespace EngineNS.EGui.Controls
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             var size = new Vector2(800, 600);
             ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_FirstUseEver);
-            var result = EGui.UIProxy.DockProxy.BeginMainForm("LogWatcher", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(TtLocalization.Label("LogWatcher", "###LogWatcher"), this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (result)
             {
                 DockId = ImGuiAPI.GetWindowDockID();
@@ -70,7 +70,7 @@ namespace EngineNS.EGui.Controls
         {
             EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox("Log", ref mIsReportLog);
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Clear"))
+            if (ImGuiAPI.Button(TtLocalization.Tr("Clear")))
             {
                 lock (mNewLogs)
                 {
@@ -85,7 +85,7 @@ namespace EngineNS.EGui.Controls
             DrawTagFilter("Fatal", Profiler.ELogTag.Fatal);
 
             ImGuiAPI.SameLine(0, 25);
-            ImGuiAPI.Text("Category:");
+            ImGuiAPI.Text(TtLocalization.Tr("Category:"));
             ImGuiAPI.SameLine(0, -1);
             ImGuiAPI.SetNextItemWidth(220);
             if (ImGuiAPI.InputText("##CategoryFilter", ref CategoryFilterText))
@@ -93,7 +93,7 @@ namespace EngineNS.EGui.Controls
                 UpdateCategoryFilters();
             }
             ImGuiAPI.SameLine(0, 12);
-            ImGuiAPI.TextDisabled($"{mLogInfos.Count}/{MaxLogs}");
+            ImGuiAPI.TextDisabled(TtLocalization.Format("{0}/{1}", mLogInfos.Count, MaxLogs));
         }
 
         private void DrawTagFilter(string label, Profiler.ELogTag tag)
@@ -111,7 +111,7 @@ namespace EngineNS.EGui.Controls
 
         private void DrawCommandLine()
         {
-            ImGuiAPI.Text("Cmd:");
+            ImGuiAPI.Text(TtLocalization.Tr("Cmd:"));
             ImGuiAPI.SameLine(0, -1);
             ImGuiAPI.SetNextItemWidth(-64);
             ImGuiAPI.InputText("##Command", ref CommandText);
@@ -123,7 +123,7 @@ namespace EngineNS.EGui.Controls
                     SelectCommandHistory(-1);
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("OK"))
+            if (ImGuiAPI.Button(TtLocalization.Tr("OK")))
                 ExecuteCommand();
         }
 
@@ -216,11 +216,11 @@ namespace EngineNS.EGui.Controls
             UIProxy.StyleConfig.Instance.PushPopupStyle();
             if (ImGuiAPI.BeginPopupContextItem($"LogRowContext_{rowIndex}", ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
             {
-                if (ImGuiAPI.MenuItem("Copy Message", null, false, true))
+                if (ImGuiAPI.MenuItem(TtLocalization.Tr("Copy Message"), null, false, true))
                     ImGuiAPI.SetClipboardText(info.LogText ?? "");
-                if (ImGuiAPI.MenuItem("Copy Source", null, false, true))
+                if (ImGuiAPI.MenuItem(TtLocalization.Tr("Copy Source"), null, false, true))
                     ImGuiAPI.SetClipboardText($"{info.SourceFile}:{info.SourceLine}");
-                if (!string.IsNullOrEmpty(info.SourceFile) && ImGuiAPI.MenuItem("Goto Source", null, false, true))
+                if (!string.IsNullOrEmpty(info.SourceFile) && ImGuiAPI.MenuItem(TtLocalization.Tr("Goto Source"), null, false, true))
                 {
                     var plugin = EngineNS.Bricks.DevIDE.TtDevIDEPlugin.FindDevIDEPlugin();
                     plugin?.OpenFileAtLine(info.SourceFile, info.SourceLine);
@@ -235,7 +235,7 @@ namespace EngineNS.EGui.Controls
             var sampleCount = BuildTrendData();
             if (sampleCount == 0)
             {
-                ImGuiAPI.TextDisabled("No logs match the current filters.");
+                ImGuiAPI.TextDisabled(TtLocalization.Tr("No logs match the current filters."));
                 return;
             }
 

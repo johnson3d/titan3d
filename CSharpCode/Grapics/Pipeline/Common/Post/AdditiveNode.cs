@@ -1,4 +1,4 @@
-﻿using EngineNS.GamePlay;
+using EngineNS.GamePlay;
 using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
@@ -72,6 +72,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Additive", "Post\\Additive", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.Post.UAdditiveNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.Post.UAdditiveNode" })]
     public class TtAdditiveNode : TAuxSceenSpaceNode<TtAdditiveNode>
     {
         public TtRenderGraphPin Color1PinIn = TtRenderGraphPin.CreateInput("Color1", NxRHI.EBufferType.BFT_SRV);
@@ -111,14 +112,14 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             public float Factor2;
         }
         internal FAdditiveStruct mAdditiveStruct = new FAdditiveStruct();
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public float Factor1
         {
             get => mAdditiveStruct.Factor1;
             set => mAdditiveStruct.Factor1 = value;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public float Factor2
         {
@@ -160,6 +161,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
     }
     [Bricks.CodeBuilder.ContextMenu("AdditiveLum", "Post\\AdditiveLum", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.Post.UAdditiveLumNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.Post.UAdditiveLumNode" })]
     public class TtAdditiveLumNode : TtAdditiveNode
     {
         public TtAdditiveLumNode()

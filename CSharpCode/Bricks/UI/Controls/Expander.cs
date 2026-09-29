@@ -1,4 +1,4 @@
-﻿using EngineNS.Rtti;
+using EngineNS.Rtti;
 using EngineNS.UI.Bind;
 using EngineNS.UI.Controls.Containers;
 using EngineNS.UI.Event;
@@ -91,7 +91,7 @@ namespace EngineNS.UI.Controls
         /// ExpandDirection specifies to which direction the content will expand
         /// </summary>
         [Rtti.Meta, BindProperty]
-        [Category("Behavior")]
+        [System.ComponentModel.Category("Behavior")]
         public EExpandDirection ExpandDirection
         {
             get => mExpandDirection;
@@ -106,7 +106,7 @@ namespace EngineNS.UI.Controls
         /// IsExpanded indicates whether the expander is currently expanded.
         /// </summary>
         [Rtti.Meta, BindProperty]
-        [Category("Behavior")]
+        [System.ComponentModel.Category("Behavior")]
         public bool IsExpanded
         {
             get => mIsExpanded;

@@ -6,7 +6,7 @@
       <Path Type="System.String@Unknown" Value="cbuffer_node.scene/cbuffer_node.scene" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="6cdf0d400f3b0a74ac692996837745f39b7486581304d37a6c8ebdf2fbc49bc6" />
+      <Hash Type="System.String@Unknown" Value="eb2f40e82c6cb2252a5c4706019947a29933c0e259f94ac351c4b47d61f74d7d" />
       <Path Type="System.String@Unknown" Value="cbuffer_node.scene/class_graph.dat" />
     </e_1>
   </AssetFiles>

@@ -6,7 +6,7 @@
       <Path Type="System.String@Unknown" Value="scene_gray.scene/scene_gray.scene" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="96013b2fb5e55488b83fda01289bd501399e7562cd0863d7d5725ca729d92bbd" />
+      <Hash Type="System.String@Unknown" Value="2e6b7af6b4ab11552a958421ce75c9e6f6cfb0f0de874e193a726e2012978770" />
       <Path Type="System.String@Unknown" Value="scene_gray.scene/class_graph.dat" />
     </e_1>
   </AssetFiles>
@@ -21,9 +21,8 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Value="Game,tutorials/animation/graychan_lod0.ums,7c682a4f-438f-40e9-8f02-f7545e7fd2f6" />
-    <e_1 Value="Engine,material/gridline.material,fe431749-ed31-45b1-93d8-34462bd00922" />
   </RefAssetRNames>
   <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="Default" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />

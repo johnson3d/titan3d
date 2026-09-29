@@ -145,10 +145,13 @@ namespace NxRHI
 	{
 		
 	}
-	AutoRef<FGpuMemory> DX12DefaultGpuMemAllocator::Alloc(IGpuDevice* device, const D3D12_RESOURCE_DESC* resDesc, const D3D12_HEAP_PROPERTIES* heapDesc, D3D12_RESOURCE_STATES resState, const char* name)
+	AutoRef<FGpuMemory> DX12DefaultGpuMemAllocator::Alloc(const char* file, int line, IGpuDevice* device, const D3D12_RESOURCE_DESC* resDesc, const D3D12_HEAP_PROPERTIES* heapDesc, D3D12_RESOURCE_STATES resState, const char* name)
 	{
-		auto result = MakeWeakRef(new FDX12DefaultGpuMemory());
-		result->GpuHeap = new DX12GpuHeap();
+#pragma push_macro("new")
+#undef new
+		auto result = MakeWeakRef(new(file, line) FDX12DefaultGpuMemory());
+		result->GpuHeap = new(file, line) DX12GpuHeap();
+#pragma pop_macro("new")
 		result->Size = (resDesc->Width * resDesc->Height) * GetPixelByteWidth(DXFormatToFormat(resDesc->Format));
 		result->Offset = 0;
 

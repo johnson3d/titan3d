@@ -6,11 +6,11 @@ cbuffer cbGridUVMesh DX_AUTOBIND//
 
 void DoGridUVModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 {
-	float4 lightmapUV = vert.vLightMap;
+	float4 extraUV = vert.vExtraUV;
 	float2 uv = vert.vUV;
 	
-	float2 u = float2(lightmapUV.x, lightmapUV.y);
-	float2 v = float2(lightmapUV.z, lightmapUV.w);
+	float2 u = float2(extraUV.x, extraUV.y);
+	float2 v = float2(extraUV.z, extraUV.w);
 	float2 min_v = float2(UVMin.y, UVMin.y);
 	float2 max_v = float2(UVMax.y, UVMax.y);
 	float2 min_u = float2(UVMin.x, UVMin.x);

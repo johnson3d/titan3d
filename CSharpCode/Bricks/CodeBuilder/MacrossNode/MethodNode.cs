@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
@@ -1081,7 +1081,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                 if(pinData.PinIn == pin)
                 {
-                    if (EGui.UIProxy.MenuItemProxy.MenuItem("AddPin", null, false, null, in drawList, in menuData, ref pinData.AddPinMenuState))
+                    if (EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("AddPin"), null, false, null, in drawList, in menuData, ref pinData.AddPinMenuState))
                         addPinAction();
                     processed = true;
                 }
@@ -1090,11 +1090,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     var subPin = pinData.SubPins[subIdx];
                     if(subPin.PinIn == pin)
                     {
-                        if (EGui.UIProxy.MenuItemProxy.MenuItem("AddPin", null, false, null, in drawList, in menuData, ref subPin.AddPinMenuState))
+                        if (EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("AddPin"), null, false, null, in drawList, in menuData, ref subPin.AddPinMenuState))
                             addPinAction();
                         if (subPin.IsCustomPin)
                         {
-                            if (EGui.UIProxy.MenuItemProxy.MenuItem("DeletePin", null, false, null, in drawList, in menuData, ref subPin.DeletePinMenuState))
+                            if (EGui.UIProxy.MenuItemProxy.MenuItem(TtLocalization.Tr("DeletePin"), null, false, null, in drawList, in menuData, ref subPin.DeletePinMenuState))
                             {
                                 RemovePinIn(subPin.PinIn);
                                 pinData.SubPins.RemoveAt(subIdx);
@@ -1920,7 +1920,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var Styles = MethodSelector.MethodSelectorStyle.Instance;
             ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet;
             //列出DownCast List
-            if (ImGuiAPI.TreeNode("Cast"))
+            if (ImGuiAPI.TreeNode(TtLocalization.Tr("Cast")))
             {
                 if (KlsMeta != null)
                 {
@@ -1942,7 +1942,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
 
             //列出所有属性
-            if (ImGuiAPI.TreeNode("Properties"))
+            if (ImGuiAPI.TreeNode(TtLocalization.Tr("Properties")))
             {
                 if (KlsMeta != null)
                 {
@@ -1963,7 +1963,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
 
             //所有field
-            if (ImGuiAPI.TreeNode("Fields"))
+            if (ImGuiAPI.TreeNode(TtLocalization.Tr("Fields")))
             {
                 if (KlsMeta != null)
                 {
@@ -1984,7 +1984,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }            
 
             //method
-            if (ImGuiAPI.TreeNode("Methods"))
+            if (ImGuiAPI.TreeNode(TtLocalization.Tr("Methods")))
             {
                 if (KlsMeta != null)
                 {

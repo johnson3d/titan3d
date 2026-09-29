@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.Rtti;
@@ -13,7 +13,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         [Rtti.Meta("")]
         public Guid Id { get; set; } = Guid.NewGuid();
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public virtual string Name { get; set; } = "ExpressionDescription";
         public virtual IDescription Parent { get; set; }
 

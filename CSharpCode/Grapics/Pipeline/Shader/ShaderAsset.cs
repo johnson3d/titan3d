@@ -90,13 +90,13 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
                 return true;
             }
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             public string ShaderType
             {
                 get;
                 set;
             }
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [RName.PGRName(FilterExts = AssetExt)]
             public RName TemplateName
             {

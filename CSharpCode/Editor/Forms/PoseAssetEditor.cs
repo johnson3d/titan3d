@@ -178,7 +178,7 @@ namespace EngineNS.Editor.Forms
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Poses", ref mPosesShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                ImGuiAPI.Text($"Poses ({PoseAsset.PoseCount})   Bones: {PoseAsset.BoneCount}");
+                ImGuiAPI.Text(TtLocalization.Format("Poses ({0})   Bones: {1}", PoseAsset.PoseCount, PoseAsset.BoneCount));
                 ImGuiAPI.Separator();
 
                 // 列表占上半部分, 下半给选中 pose 的逐骨骼属性
@@ -300,7 +300,7 @@ namespace EngineNS.Editor.Forms
                 mRenameTargetName = mSelectedPoseName;
             }
 
-            ImGuiAPI.Text("Name");
+            ImGuiAPI.Text(TtLocalization.Tr("Name"));
             ImGuiAPI.SameLine(0, 6);
             ImGuiAPI.SetNextItemWidth(180);
             ImGuiAPI.InputText("##PoseRename", ref mRenameBuffer);
@@ -343,11 +343,11 @@ namespace EngineNS.Editor.Forms
             {
                 // 在视口上方提示当前预览的是哪个 pose(多 pose 资产里很容易搞混)
                 if (mSelectedPoseName != null)
-                    ImGuiAPI.Text($"Previewing Pose: {mSelectedPoseName}");
+                    ImGuiAPI.Text(TtLocalization.Format("Previewing Pose: {0}", mSelectedPoseName));
                 else if (PoseAsset.PoseCount == 0)
-                    ImGuiAPI.Text("No pose yet - import one from a clip");
+                    ImGuiAPI.Text(TtLocalization.Tr("No pose yet - import one from a clip"));
                 else
-                    ImGuiAPI.Text("No pose selected (bind pose)");
+                    ImGuiAPI.Text(TtLocalization.Tr("No pose selected (bind pose)"));
 
                 PreviewViewport.ViewportType = Graphics.Pipeline.TtViewportSlate.EViewportType.ChildWindow;
                 PreviewViewport.OnDraw();

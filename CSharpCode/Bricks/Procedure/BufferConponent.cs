@@ -15,34 +15,35 @@ namespace EngineNS.Bricks.Procedure
         }
     }
 
-    public class UBufferCreator : IO.BaseSerializer
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.UBufferCreator@EngineCore", "EngineNS.Bricks.Procedure.UBufferCreator" })]
+    public class TtBufferCreator : IO.BaseSerializer
     {
-        public static UBufferCreator CreateInstance<TBuffer>(int x = -1, int y = -1, int z = -1)
+        public static TtBufferCreator CreateInstance<TBuffer>(int x = -1, int y = -1, int z = -1)
             where TBuffer : TtBufferComponent
         {
-            var result = new UBufferCreator();
+            var result = new TtBufferCreator();
             result.BufferType = Rtti.TtTypeDesc.TypeOf<TBuffer>();
             result.XSize = x;
             result.YSize = y;
             result.ZSize = z;
             return result;
         }
-        public static UBufferCreator CreateInstance(Rtti.TtTypeDesc bufferType, int x = -1, int y = -1, int z = -1)
+        public static TtBufferCreator CreateInstance(Rtti.TtTypeDesc bufferType, int x = -1, int y = -1, int z = -1)
         {
-            var result = new UBufferCreator();
+            var result = new TtBufferCreator();
             result.BufferType = bufferType;
             result.XSize = x;
             result.YSize = y;
             result.ZSize = z;
             return result;
         }
-        public UBufferCreator Clone()
+        public TtBufferCreator Clone()
         {
-            var result = new UBufferCreator();
+            var result = new TtBufferCreator();
             CopyTo(this, result);
             return result;
         }
-        public static void CopyTo(UBufferCreator src, UBufferCreator tag)
+        public static void CopyTo(TtBufferCreator src, TtBufferCreator tag)
         {
             if (src == null || tag == null)
                 return;
@@ -51,7 +52,7 @@ namespace EngineNS.Bricks.Procedure
             tag.YSize = src.YSize;
             tag.ZSize = src.ZSize;
         }
-        public void SetSize(UBufferCreator creator)
+        public void SetSize(TtBufferCreator creator)
         {
             XSize = creator.XSize;
             YSize = creator.YSize;
@@ -154,7 +155,7 @@ namespace EngineNS.Bricks.Procedure
             CoreSDK.DisposeObject(ref GpuBuffer);
             CoreSDK.DisposeObject(ref SuperPixels);
         }
-        public UBufferCreator BufferCreator { get; private set; }
+        public TtBufferCreator BufferCreator { get; private set; }
         public virtual ISuperPixelOperatorBase PixelOperator { get => null; }
         public int LifeCount { get; set; } = 0;
         public int Width 
@@ -301,7 +302,7 @@ namespace EngineNS.Bricks.Procedure
                 if (dataHash != testHash)
                     return false;
 
-                var bfCreator = creator as UBufferCreator;
+                var bfCreator = creator as TtBufferCreator;
                 if (bfCreator == null && BufferCreator.BufferType != bfCreator.BufferType)
                     return false;
                 
@@ -595,7 +596,7 @@ namespace EngineNS.Bricks.Procedure
         }
         
         #region CppMemBuffer
-        public unsafe static TtBufferComponent CreateInstance(in UBufferCreator creator)
+        public unsafe static TtBufferComponent CreateInstance(in TtBufferCreator creator)
         {
             var result = Rtti.TtTypeDescManager.CreateInstance(creator.BufferType) as TtBufferComponent;
             result.BufferCreator = creator.Clone();
@@ -607,7 +608,7 @@ namespace EngineNS.Bricks.Procedure
             int elementSize = System.Runtime.InteropServices.Marshal.SizeOf(type.SystemType);
             if (BufferCreator == null)
             {   
-                BufferCreator = UBufferCreator.CreateInstance(type, xSize, ySize, zSize);
+                BufferCreator = TtBufferCreator.CreateInstance(type, xSize, ySize, zSize);
             }
             BufferCreator.XSize = xSize;
             BufferCreator.YSize = ySize;
@@ -1359,14 +1360,14 @@ namespace EngineNS.Bricks.Procedure
         }
         public TtBufferComponent FindBuffer(NodePin pin)
         {
-            var node = pin.HostNode as UPgcNodeBase;
+            var node = pin.HostNode as TtPgcNodeBase;
             TtBufferComponent buffer;
             if (CachedBuffers.TryGetValue(pin, out buffer))
                 return buffer;
             var oPin = pin as PinOut;
             if (oPin != null)
             {
-                UPgcGraph graph = oPin.HostNode.ParentGraph as UPgcGraph;
+                TtPgcGraph graph = oPin.HostNode.ParentGraph as TtPgcGraph;
                 var src = node.GetOutBufferCreator(oPin);
                 if (src == null)
                 {

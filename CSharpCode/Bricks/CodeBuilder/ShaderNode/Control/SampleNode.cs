@@ -20,23 +20,23 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             CoreSDK.DisposeObject(ref CmdParameters);
         }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string TextureVarName { get; set; }
         /// <summary>
         /// 是否使用动态 SRV（运行时由 TtDynamicSrvRegistry 提供，而非静态纹理资产）
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsDynamic { get; set; } = false;
         /// <summary>
         /// 动态 SRV 在 TtDynamicSrvRegistry 中的注册名（仅 IsDynamic=true 时有效）
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string DynamicSrvName { get; set; }
         RName mAssetName;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName AssetName
         {
@@ -67,7 +67,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public NxRHI.FSamplerDesc Sampler
         {
             get => mSampler;
@@ -158,24 +158,24 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             CoreSDK.DisposeObject(ref CmdParameters);
         }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string TextureVarName { get; set; }
         /// <summary>
         /// 是否使用动态 SRV（运行时由 TtDynamicSrvRegistry 提供）
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsDynamic { get; set; } = false;
         /// <summary>
         /// 动态 SRV 在 TtDynamicSrvRegistry 中的注册名
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string DynamicSrvName { get; set; }
 
         RName mAssetName;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName AssetName
         {
@@ -207,7 +207,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
         private NxRHI.TtSrView TextureSRV;
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
@@ -309,23 +309,23 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             CoreSDK.DisposeObject(ref CmdParameters);
         }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string TextureVarName { get; set; }
         /// <summary>
         /// 是否使用动态 SRV（运行时由 TtDynamicSrvRegistry 提供）
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsDynamic { get; set; } = false;
         /// <summary>
         /// 动态 SRV 在 TtDynamicSrvRegistry 中的注册名
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string DynamicSrvName { get; set; }
         RName mAssetName;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName AssetName
         {
@@ -357,7 +357,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
         private NxRHI.TtSrView TextureSRV;
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
@@ -450,17 +450,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         {
         }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string TextureVarName { get; set; }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsDynamic { get; set; } = false;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string DynamicSrvName { get; set; }
         RName mAssetName;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName AssetName
         {
@@ -491,7 +491,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public NxRHI.FSamplerDesc Sampler
         {
             get => mSampler;
@@ -580,17 +580,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         {
         }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string TextureVarName { get; set; }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsDynamic { get; set; } = false;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string DynamicSrvName { get; set; }
         RName mAssetName;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName AssetName
         {
@@ -620,7 +620,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public NxRHI.FSamplerDesc Sampler
         {
             get => mSampler;

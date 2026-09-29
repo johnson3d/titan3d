@@ -6,7 +6,7 @@
       <Path Type="System.String@Unknown" Value="terrain_scene.scene/terrain_scene.scene" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="bc3a5368885e754b56f37f1fe4ce6124ec90a4c153148adb1d4bc93b19926dec" />
+      <Hash Type="System.String@Unknown" Value="dbad93e4990934d753945da2cb204d76bca9c1d1f2320bac87426d8ceb1ea575" />
       <Path Type="System.String@Unknown" Value="terrain_scene.scene/class_graph.dat" />
     </e_1>
   </AssetFiles>
@@ -21,7 +21,10 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Game,tutorials/terrain/terrain_gen01.pgc,d2a5fe45-8b63-4ce7-bf0e-59bacfa9efe3" />
+    <e_1 Value="Engine,material/terrainidmap.material,3a5bde1e-39df-4c8a-a2cc-6eadaeabcefe" />
+  </RefAssetRNames>
   <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
 </Root>

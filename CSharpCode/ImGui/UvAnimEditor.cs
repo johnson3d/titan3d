@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -120,7 +120,7 @@ namespace EngineNS.EGui
 
             }
             ImGuiAPI.SameLine(0, 100);
-            ImGuiAPI.Text("Index");
+            ImGuiAPI.Text(TtLocalization.Tr("Index"));
             ImGuiAPI.SameLine(0, 0);
             ImGuiAPI.SetNextItemWidth(100);
             if (ImGuiAPI.InputInt("##FrameIndex", ref CurFrameIndex, 1, 0, ImGuiInputTextFlags_.ImGuiInputTextFlags_None))
@@ -128,12 +128,12 @@ namespace EngineNS.EGui
                 CurFrameIndex = CurFrameIndex % UvAnim.FrameUVs.Count;
             }
             ImGuiAPI.SameLine(0, 0);
-            if (ImGuiAPI.Button("AddFrame"))
+            if (ImGuiAPI.Button(TtLocalization.Tr("AddFrame")))
             {
                 UvAnim.FrameUVs.Insert(CurFrameIndex, new Vector4());
             }
             ImGuiAPI.SameLine(0, 0);
-            if (ImGuiAPI.Button("RemoveFrame"))
+            if (ImGuiAPI.Button(TtLocalization.Tr("RemoveFrame")))
             {
                 UvAnim.FrameUVs.RemoveAt(CurFrameIndex);
             }

@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.IO;
 using EngineNS.Macross;
@@ -17,9 +17,10 @@ namespace EngineNS.GamePlay.Scene
         {
             get => TtScene.AssetExt;
         }
+        public const string AssetTypeName = "Scene";
         public override string GetAssetTypeName()
         {
-            return "Scene";
+            return AssetTypeName;
         }
         public override Color4b GetBorderColor()
         {
@@ -83,7 +84,21 @@ namespace EngineNS.GamePlay.Scene
                 mAsset = Rtti.TtTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IO.IAsset;
                 var world = new TtWorld(null);
                 await world.InitWorld();
-                var task = (mAsset as TtScene).InitializeNode(world, new TtSceneData(), EBoundVolumeType.Box, typeof(TtPlacement));
+                var scene = mAsset as TtScene;
+                if (await scene.InitializeNode(world, new TtSceneData(), EBoundVolumeType.Box, typeof(TtPlacement)) == false)
+                    return;
+
+                // 仅为新建 Scene 提供基础环境节点；加载已有 Scene 不经过此创建器，因而不会重复插入。
+                var cloud = await TtNode.SpawnNode<Bricks.FX.Weather.TtVolumetricCloudSceneNode>(scene,
+                    null, null, EBoundVolumeType.None, typeof(TtPlacement));
+                if (cloud != null)
+                    cloud.NodeData.Name = "VolumetricCloud";
+
+                var fog = await TtNode.SpawnNode<TtHeightFogNode>(scene,
+                    null, null, EBoundVolumeType.None, typeof(TtPlacement));
+                if (fog != null)
+                    fog.NodeData.Name = "HeightFog";
+
                 PGAsset.Target = mAsset;
             }
         }
@@ -123,7 +138,7 @@ namespace EngineNS.GamePlay.Scene
                 return NodeData as TtSceneData;
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("",Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]
         public RName RPolicyName

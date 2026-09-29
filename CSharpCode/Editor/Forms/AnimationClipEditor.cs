@@ -1,4 +1,4 @@
-﻿using Assimp;
+using Assimp;
 using EngineNS.Animation.Asset;
 using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline;
@@ -191,14 +191,14 @@ namespace EngineNS.Editor.Forms
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Left", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                if (ImGuiAPI.CollapsingHeader("Property", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("Property"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     AnimationClipPropGrid.OnDraw(true, false, false);
                 }
-                if (ImGuiAPI.CollapsingHeader("Notify", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
+                if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("Notify"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     if (mSelectedNotify == null)
-                        ImGuiAPI.Text("Select a notify in timeline");
+                        ImGuiAPI.Text(TtLocalization.Tr("Select a notify in timeline"));
                     else
                         NotifyPropGrid.OnDraw(true, false, false);
                 }
@@ -322,7 +322,7 @@ namespace EngineNS.Editor.Forms
 
             if (mPopupForNotify)
             {
-                if (ImGuiAPI.MenuItem("Remove Notify", null, false, true) && mSelectedNotify != null)
+                if (ImGuiAPI.MenuItem(TtLocalization.Tr("Remove Notify"), null, false, true) && mSelectedNotify != null)
                 {
                     var notify = mSelectedNotify;
                     int index = AnimationClip.Notifies.IndexOf(notify);
@@ -335,9 +335,9 @@ namespace EngineNS.Editor.Forms
             }
             else
             {
-                if (ImGuiAPI.MenuItem("Add Transient Notify", null, false, true))
+                if (ImGuiAPI.MenuItem(TtLocalization.Tr("Add Transient Notify"), null, false, true))
                     AddNotify(mPopupTime, false);
-                if (ImGuiAPI.MenuItem("Add Durative Notify", null, false, true))
+                if (ImGuiAPI.MenuItem(TtLocalization.Tr("Add Durative Notify"), null, false, true))
                     AddNotify(mPopupTime, true);
             }
             ImGuiAPI.EndPopup();

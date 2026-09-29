@@ -1,5 +1,15 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.CodeBuilder.TtMacrossAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="60a389c18ed0385df93d9f99457e4835f8dd5dd585e2bb7e59b0292207ce2301" />
+      <Path Type="System.String@Unknown" Value="test01_move.macross/class_graph.dat" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="a7922fbdb36de76dc77db9f971a364e6d2ff6b010617f2895b0237bc1bc507fe" />
+      <Path Type="System.String@Unknown" Value="test01_move.macross/[o]onupdateemitter_b1_c9_0f_a9_9a_71_1f_ba_59_24_31_8b_8e_69_20_ff_ee_19_79_b7.fn" />
+    </e_1>
+  </AssetFiles>
   <AssetId Type="System.Guid@Unknown" Value="fea33170-dbce-4809-94ce-fd890ebf6fde" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/particles/test01_move.macross,fea33170-dbce-4809-94ce-fd890ebf6fde" />
   <BaseTypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Particle.TtNebulaMacross@EngineCore" />
@@ -12,7 +22,8 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
+  <IsDisable Type="System.Boolean@Unknown" Value="False" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.CodeBuilder.UMacross@EngineCore" />
   <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.CodeBuilder.UMacross@EngineCore" />
 </Root>

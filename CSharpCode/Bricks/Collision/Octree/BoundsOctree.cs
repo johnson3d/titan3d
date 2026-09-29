@@ -323,7 +323,7 @@ namespace EngineNS.Bricks.Collision.Octree
         public Bricks.Collision.Octree.TtBoundsOctree<TtOctreeEntry> mOctree = null;
         public NxRHI.TtTransientBuffer TransientVB = new();
         public NxRHI.TtTransientBuffer TransientIB = new();
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsDrawBounds { get; set; } = false;
         public async Thread.Async.TtTask<bool> Initialize(DVector3 position)
         {
@@ -380,18 +380,22 @@ namespace EngineNS.Bricks.Collision.Octree
             }
             mOctree.Add(entry, in bounds);
         }
-        public void Remove(GamePlay.Scene.TtNode node)
+        public void Remove(GamePlay.Scene.TtNode node, bool removeChildren = true)
         {
             var entry = node.OctreeEntry;
-            if (entry == null)
-                return;
-            mOctree.Remove(in entry);
-            entry.OctreeOwner = null;
-            node.OctreeEntry = null;
-
-            foreach (var c in node.Children)
+            if (entry != null)
             {
-                this.Remove(c);
+                mOctree.Remove(in entry);
+                entry.OctreeOwner = null;
+                node.OctreeEntry = null;
+            }
+
+            if (removeChildren)
+            {
+                foreach (var c in node.Children)
+                {
+                    this.Remove(c);
+                }
             }
         }
         public void Move(GamePlay.Scene.TtNode node, in Aabb newBounds)
@@ -439,6 +443,8 @@ namespace EngineNS.Bricks.Collision.Octree
 
             if (candidates == null)
                 candidates = new List<GamePlay.Scene.TtNode>();
+            else
+                candidates.Clear();
 
             mEntryBuffer.Clear();
             mOctree.GetColliding(mEntryBuffer, in ray, maxDistance);
@@ -452,11 +458,11 @@ namespace EngineNS.Bricks.Collision.Octree
 
             bool hasHit = false;
             double closestDistSq = double.MaxValue;
-            ref VHitResult tempResult = ref *hitResult;
 
             for (int i = 0; i < candidates.Count; i++)
             {
                 var node = candidates[i];
+                var tempResult = new VHitResult();
                 if (node.LineCheck(in start, in end, ref tempResult))
                 {
                     var hitDist = (tempResult.Position - start).LengthSquared();

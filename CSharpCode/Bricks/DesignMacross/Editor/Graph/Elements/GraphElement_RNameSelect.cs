@@ -1,4 +1,4 @@
-﻿using EngineNS.DesignMacross.Base.Graph;
+using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
 
 namespace EngineNS.DesignMacross.Editor
@@ -194,7 +194,7 @@ namespace EngineNS.DesignMacross.Editor
             }
             else
             {
-                ImGuiAPI.Text("null");
+                ImGuiAPI.Text(TtLocalization.Tr("null"));
                 ImGuiAPI.SameLine(0, -1);
             }
             //ImGuiAPI.SameLine(0, -1);
@@ -202,7 +202,7 @@ namespace EngineNS.DesignMacross.Editor
             element.GetContentBrowser().ExtNames = element.GetBrowserFilterExtsFunc();
             element.GetContentBrowser().MacrossBase = element.GetBrowserShowTypeFunc();
             element.GetContentBrowser().SelectedAssets.Clear();
-            if (ImGuiAPI.Button("+"))
+            if (ImGuiAPI.Button(TtLocalization.Tr("+")))
             {
                 element.GetContentBrowser().Visible = true;
                 ImGuiAPI.OpenPopup($"RName: {element.Description.Id} {element.Name}", ImGuiPopupFlags_.ImGuiPopupFlags_None);

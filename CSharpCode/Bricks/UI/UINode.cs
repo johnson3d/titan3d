@@ -1,4 +1,4 @@
-﻿using EngineNS.GamePlay;
+using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.IO;
@@ -87,7 +87,7 @@ namespace EngineNS.UI
             return true;
         }
         [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName UIName
         {
             get

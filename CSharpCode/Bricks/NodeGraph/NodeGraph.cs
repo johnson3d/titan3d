@@ -1078,6 +1078,21 @@ namespace EngineNS.Bricks.NodeGraph
                 }
             }
         }
+        // 把视口平移到让目标节点居中(可选同时选中), 供"按名字查找定位节点"UI使用。
+        // 居中方程: 视口显示画布区间 [PositionVP, PositionVP + SizeVP], 令节点中心落在视口中心
+        // => PositionVP = nodeCenter - SizeVP * 0.5
+        public void FocusToNode(TtNodeBase node, bool select = true)
+        {
+            if (node == null)
+                return;
+            if (select)
+            {
+                ClearSelected();
+                AddSelected(node);
+            }
+            var nodeCenter = node.Position + node.Size * 0.5f;
+            PositionVP = nodeCenter - SizeVP * 0.5f;
+        }
 
         public void ResetButtonPress()
         {
@@ -1643,6 +1658,390 @@ namespace EngineNS.Bricks.NodeGraph
             history.PushCommand(new EngineNS.Editor.Infrastructure.TtDelegateCommand(moved.Count == 1 ? $"Move Node {moved[0].Node.Name}" : $"Move {moved.Count} Nodes",
                 () => { foreach (var m in moved) m.Node.Position = m.NewPos; },
                 () => { foreach (var m in moved) m.Node.Position = m.OldPos; }));
+        }
+        // 依据 DAG 结构对整图节点做分层(Sugiyama 风格)自动排布:
+        // 边方向为 OutNode(输出/上游) -> InNode(输入/下游), 故上游在左、下游在右, 与自左向右的数据流一致。
+        // 步骤: 1)最长路径求最早层级, 再按连通分量反向压缩为尽量晚的层级(ALAP)
+        // 2)列内用重心法(barycenter)多轮排序减少连线交叉 3)按列宽累加计算X、列内堆叠计算Y并竖直居中
+        // 4)孤立节点排到主图下方 5)整体重排封为一条可撤销命令。
+        public void AutoLayout()
+        {
+            AutoLayoutNodes(Nodes, null, "Auto Layout");
+        }
+        // 仅整理当前选中节点。以整图拓扑中最接近下游根节点的选中节点为锚点,
+        // 锚点位置保持不变, 其他选中节点按其内部连接关系重新排布。
+        public void AutoLayoutSelected()
+        {
+            if (SelectedNodes.Count < 2)
+                return;
+
+            var layoutNodes = new List<TtNodeBase>(SelectedNodes.Count);
+            foreach (var selected in SelectedNodes)
+            {
+                if (selected.Node != null && Nodes.Contains(selected.Node) && !layoutNodes.Contains(selected.Node))
+                    layoutNodes.Add(selected.Node);
+            }
+            if (layoutNodes.Count < 2)
+                return;
+
+            var fixedAnchor = FindLayoutRootAnchor(layoutNodes);
+            AutoLayoutNodes(layoutNodes, fixedAnchor, "Auto Layout Selected");
+        }
+        // NodeGraph 的数据流为上游输出 -> 下游输入; RenderPolicy 等图中的语义根节点位于下游终点。
+        // 从所有下游终点反向广度遍历, 距离最短的选中节点即“最接近根”的节点。
+        TtNodeBase FindLayoutRootAnchor(IList<TtNodeBase> candidates)
+        {
+            var predecessors = new Dictionary<TtNodeBase, List<TtNodeBase>>(Nodes.Count);
+            var outDegree = new Dictionary<TtNodeBase, int>(Nodes.Count);
+            foreach (var node in Nodes)
+            {
+                predecessors[node] = new List<TtNodeBase>();
+                outDegree[node] = 0;
+            }
+            foreach (var linker in Linkers)
+            {
+                var upstream = linker?.OutNode;
+                var downstream = linker?.InNode;
+                if (upstream == null || downstream == null || upstream == downstream ||
+                    !predecessors.ContainsKey(upstream) || !predecessors.ContainsKey(downstream))
+                    continue;
+                if (!predecessors[downstream].Contains(upstream))
+                {
+                    predecessors[downstream].Add(upstream);
+                    outDegree[upstream]++;
+                }
+            }
+
+            var distanceToRoot = new Dictionary<TtNodeBase, int>(Nodes.Count);
+            var pending = new Queue<TtNodeBase>();
+            foreach (var node in Nodes)
+            {
+                distanceToRoot[node] = int.MaxValue;
+                if (outDegree[node] == 0)
+                {
+                    distanceToRoot[node] = 0;
+                    pending.Enqueue(node);
+                }
+            }
+            while (pending.Count > 0)
+            {
+                var node = pending.Dequeue();
+                int predecessorDistance = distanceToRoot[node] + 1;
+                foreach (var predecessor in predecessors[node])
+                {
+                    if (predecessorDistance >= distanceToRoot[predecessor])
+                        continue;
+                    distanceToRoot[predecessor] = predecessorDistance;
+                    pending.Enqueue(predecessor);
+                }
+            }
+
+            TtNodeBase result = null;
+            int bestDistance = int.MaxValue;
+            foreach (var node in candidates)
+            {
+                int distance = distanceToRoot.TryGetValue(node, out var value) ? value : int.MaxValue;
+                if (result == null || distance < bestDistance ||
+                    (distance == bestDistance && node.Position.X > result.Position.X))
+                {
+                    result = node;
+                    bestDistance = distance;
+                }
+            }
+            return result;
+        }
+        void AutoLayoutNodes(IList<TtNodeBase> layoutNodes, TtNodeBase fixedAnchor, string commandName)
+        {
+            if (layoutNodes.Count == 0)
+                return;
+
+            const float hSpacing = 60.0f;   // 列间距
+            const float vSpacing = 30.0f;   // 列内节点间距
+
+            // 确保每个节点尺寸有效(从未绘制过的节点 Size 可能为 0)
+            foreach (var n in layoutNodes)
+            {
+                if (n.LayoutDirty || n.Size.X <= 0 || n.Size.Y <= 0)
+                {
+                    n.UpdateLayout();
+                    n.LayoutDirty = false;
+                }
+            }
+
+            int count = layoutNodes.Count;
+            var indexOf = new Dictionary<TtNodeBase, int>(count);
+            for (int i = 0; i < count; i++)
+                indexOf[layoutNodes[i]] = i;
+
+            // 邻接表: preds[v]=上游集合, succs[u]=下游集合
+            var preds = new List<int>[count];
+            var succs = new List<int>[count];
+            for (int i = 0; i < count; i++)
+            {
+                preds[i] = new List<int>();
+                succs[i] = new List<int>();
+            }
+            foreach (var lk in Linkers)
+            {
+                if (lk == null)
+                    continue;
+                var up = lk.OutNode;   // 输出端 = 上游
+                var dn = lk.InNode;    // 输入端 = 下游
+                if (up == null || dn == null || up == dn)
+                    continue;
+                if (!indexOf.TryGetValue(up, out var ui) || !indexOf.TryGetValue(dn, out var di))
+                    continue;
+                if (!succs[ui].Contains(di)) succs[ui].Add(di);
+                if (!preds[di].Contains(ui)) preds[di].Add(ui);
+            }
+
+            // 最长路径先求“尽早”层级, 保证每条边至少向右跨一列。
+            var layer = new int[count];
+            for (int iter = 0; iter < count; iter++)
+            {
+                bool changed = false;
+                for (int i = 0; i < count; i++)
+                {
+                    foreach (var di in succs[i])
+                    {
+                        if (layer[di] < layer[i] + 1)
+                        {
+                            layer[di] = layer[i] + 1;
+                            changed = true;
+                        }
+                    }
+                }
+                if (!changed) break;
+            }
+
+            // 孤立节点(无上下游)单独处理, 不进入分层列。
+            var isolated = new List<int>();
+            for (int i = 0; i < count; i++)
+            {
+                if (preds[i].Count == 0 && succs[i].Count == 0)
+                    isolated.Add(i);
+            }
+
+            // 每个弱连通分量独立确定最右层, 避免短小的独立子图被整图最长链强行推到右侧。
+            var component = new int[count];
+            for (int i = 0; i < count; i++) component[i] = -1;
+            var componentMaxLayer = new List<int>();
+            var pending = new Queue<int>();
+            for (int start = 0; start < count; start++)
+            {
+                if (component[start] >= 0 || (preds[start].Count == 0 && succs[start].Count == 0))
+                    continue;
+                int componentId = componentMaxLayer.Count;
+                int componentMax = 0;
+                component[start] = componentId;
+                pending.Enqueue(start);
+                while (pending.Count > 0)
+                {
+                    int node = pending.Dequeue();
+                    if (layer[node] > componentMax) componentMax = layer[node];
+                    foreach (var neighbor in preds[node])
+                    {
+                        if (component[neighbor] >= 0) continue;
+                        component[neighbor] = componentId;
+                        pending.Enqueue(neighbor);
+                    }
+                    foreach (var neighbor in succs[node])
+                    {
+                        if (component[neighbor] >= 0) continue;
+                        component[neighbor] = componentId;
+                        pending.Enqueue(neighbor);
+                    }
+                }
+                componentMaxLayer.Add(componentMax);
+            }
+
+            // 将节点反向压缩为“尽量晚”(As Late As Possible)层级:
+            // 末端节点对齐到本连通分量最右层; 其余节点紧贴最早的下游节点左侧一列。
+            // 例如仅向 AntiAliasing 提供 Prev 的 GetPrevColor, 会被放到 AntiAliasing 的前一列,
+            // 而不会因为自身没有输入就落到整张图的最左侧。
+            var reverseTopo = new List<int>();
+            for (int i = 0; i < count; i++)
+            {
+                if (component[i] >= 0)
+                    reverseTopo.Add(i);
+            }
+            reverseTopo.Sort((a, b) => layer[b].CompareTo(layer[a]));
+            foreach (var i in reverseTopo)
+            {
+                if (succs[i].Count == 0)
+                {
+                    layer[i] = componentMaxLayer[component[i]];
+                    continue;
+                }
+                int latestLayer = int.MaxValue;
+                foreach (var downstream in succs[i])
+                {
+                    int candidate = layer[downstream] - 1;
+                    if (candidate < latestLayer) latestLayer = candidate;
+                }
+                layer[i] = latestLayer;
+            }
+
+            int maxLayer = 0;
+            for (int i = 0; i < count; i++)
+            {
+                if (component[i] >= 0 && layer[i] > maxLayer)
+                    maxLayer = layer[i];
+            }
+
+            var columns = new List<int>[maxLayer + 1];
+            for (int c = 0; c <= maxLayer; c++)
+                columns[c] = new List<int>();
+            for (int i = 0; i < count; i++)
+            {
+                if (preds[i].Count == 0 && succs[i].Count == 0)
+                    continue;
+                columns[layer[i]].Add(i);
+            }
+
+            // 列内初始顺序按原始 Y 排列, 贴近用户直觉
+            foreach (var col in columns)
+                col.Sort((a, b) => layoutNodes[a].Position.Y.CompareTo(layoutNodes[b].Position.Y));
+
+            // order[i] = 节点 i 在其所在列中的序号
+            var order = new int[count];
+            System.Action refreshOrder = () =>
+            {
+                for (int c = 0; c <= maxLayer; c++)
+                    for (int k = 0; k < columns[c].Count; k++)
+                        order[columns[c][k]] = k;
+            };
+            refreshOrder();
+
+            // 重心法多轮排序减少交叉: 下行按上游序号、上行按下游序号
+            const int sweeps = 4;
+            for (int s = 0; s < sweeps; s++)
+            {
+                for (int c = 1; c <= maxLayer; c++)
+                {
+                    SortColumnByBarycenter(columns[c], preds, order);
+                    refreshOrder();
+                }
+                for (int c = maxLayer - 1; c >= 0; c--)
+                {
+                    SortColumnByBarycenter(columns[c], succs, order);
+                    refreshOrder();
+                }
+            }
+
+            // 计算每列 X(列宽累加)与每列总高
+            var columnX = new float[maxLayer + 1];
+            var colHeights = new float[maxLayer + 1];
+            float curX = 0;
+            float maxColHeight = 0;
+            for (int c = 0; c <= maxLayer; c++)
+            {
+                columnX[c] = curX;
+                float maxW = 0;
+                float h = 0;
+                foreach (var i in columns[c])
+                {
+                    if (layoutNodes[i].Size.X > maxW) maxW = layoutNodes[i].Size.X;
+                    h += layoutNodes[i].Size.Y + vSpacing;
+                }
+                if (h > 0) h -= vSpacing;
+                colHeights[c] = h;
+                if (h > maxColHeight) maxColHeight = h;
+                curX += maxW + hSpacing;
+            }
+
+            // 生成相对位置: 列内堆叠, 各列竖直居中
+            var newPos = new Vector2[count];
+            float mainBottom = 0;
+            for (int c = 0; c <= maxLayer; c++)
+            {
+                float y = (maxColHeight - colHeights[c]) * 0.5f;
+                foreach (var i in columns[c])
+                {
+                    newPos[i] = new Vector2(columnX[c], y);
+                    y += layoutNodes[i].Size.Y + vSpacing;
+                    if (newPos[i].Y + layoutNodes[i].Size.Y > mainBottom)
+                        mainBottom = newPos[i].Y + layoutNodes[i].Size.Y;
+                }
+            }
+
+            // 孤立节点排到主图下方一行
+            float isoX = 0;
+            float isoY = mainBottom + vSpacing * 2;
+            foreach (var i in isolated)
+            {
+                newPos[i] = new Vector2(isoX, isoY);
+                isoX += layoutNodes[i].Size.X + hSpacing;
+            }
+
+            // 全图整理以原左上角为锚; 局部整理则平移整个结果, 让指定锚点严格保持原位。
+            var layoutOffset = new Vector2(float.MaxValue, float.MaxValue);
+            if (fixedAnchor != null && indexOf.TryGetValue(fixedAnchor, out var fixedIndex))
+            {
+                layoutOffset = fixedAnchor.Position - newPos[fixedIndex];
+            }
+            else
+            {
+                foreach (var n in layoutNodes)
+                {
+                    if (n.Position.X < layoutOffset.X) layoutOffset.X = n.Position.X;
+                    if (n.Position.Y < layoutOffset.Y) layoutOffset.Y = n.Position.Y;
+                }
+            }
+
+            var moved = new List<(TtNodeBase Node, Vector2 OldPos, Vector2 NewPos)>(count);
+            for (int i = 0; i < count; i++)
+            {
+                var node = layoutNodes[i];
+                var np = node == fixedAnchor ? node.Position : newPos[i] + layoutOffset;
+                if (node.Position != np)
+                    moved.Add((node, node.Position, np));
+            }
+            if (moved.Count == 0)
+                return;
+
+            foreach (var m in moved)
+                m.Node.Position = m.NewPos;
+
+            var history = HistoryHost;
+            if (history != null && history.IsApplying == false)
+            {
+                history.PushCommand(new EngineNS.Editor.Infrastructure.TtDelegateCommand($"{commandName} {moved.Count} Nodes",
+                    () => { foreach (var m in moved) m.Node.Position = m.NewPos; },
+                    () => { foreach (var m in moved) m.Node.Position = m.OldPos; }));
+            }
+        }
+        // 按重心(相邻列已排定序号的平均值)对列内节点稳定排序; 无邻居的节点保持原序号不动。
+        static void SortColumnByBarycenter(List<int> column, List<int>[] neighbors, int[] order)
+        {
+            if (column.Count <= 1)
+                return;
+            var bary = new float[column.Count];
+            for (int k = 0; k < column.Count; k++)
+            {
+                var nb = neighbors[column[k]];
+                if (nb.Count == 0)
+                {
+                    bary[k] = order[column[k]];
+                }
+                else
+                {
+                    float sum = 0;
+                    foreach (var m in nb) sum += order[m];
+                    bary[k] = sum / nb.Count;
+                }
+            }
+            var idx = new int[column.Count];
+            for (int k = 0; k < column.Count; k++) idx[k] = k;
+            Array.Sort(idx, (a, b) =>
+            {
+                int cmp = bary[a].CompareTo(bary[b]);
+                return cmp != 0 ? cmp : a.CompareTo(b);
+            });
+            var sorted = new List<int>(column.Count);
+            foreach (var k in idx) sorted.Add(column[k]);
+            column.Clear();
+            column.AddRange(sorted);
         }
         void CheckNodeIntersectLink(in Vector2 dragPosition)
         {

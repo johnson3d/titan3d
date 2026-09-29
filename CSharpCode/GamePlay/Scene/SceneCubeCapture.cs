@@ -130,7 +130,7 @@ namespace EngineNS.GamePlay.Scene
 
         // 立即在下一次 TickLogic 触发一次 cube 拍摄 (忽略 interval).
         // 暴露给 Macross / 编辑器 / 任意 C# 调用方手动触发.
-        [Category("Capture")]
+        [System.ComponentModel.Category("Capture")]
         public bool CaptureNow
         {
             get
@@ -147,7 +147,7 @@ namespace EngineNS.GamePlay.Scene
         // 抓帧 (一次性, 抓完自动关). 用于 detail 面板里"我现在要 debug 这次
         // cube 拍摄的 GPU 行为" 场景 — 点一下按钮就在 RenderDoc UI 拿到
         // 包含 6 面渲染 + 6 次 face copy 的完整 capture.
-        [Category("Capture")]
+        [System.ComponentModel.Category("Capture")]
         public bool CaptureWithRenderDoc
         {
             get
@@ -163,7 +163,7 @@ namespace EngineNS.GamePlay.Scene
         }
 
         Editor.Forms.TtTextureViewer mTextureViewer = null;
-        [Category("Capture")]
+        [System.ComponentModel.Category("Capture")]
         public bool OpenInTextureViewer
         {
             get
@@ -528,14 +528,14 @@ namespace EngineNS.GamePlay.Scene
         }
 
         // ---------- 编辑器属性 ----------
-        [Category("Capture")]
+        [System.ComponentModel.Category("Capture")]
         public ECaptureMode CaptureMode
         {
             get => GetNodeData<TtSceneCubeCaptureData>().CaptureMode;
             set => GetNodeData<TtSceneCubeCaptureData>().CaptureMode = value;
         }
 
-        [Category("Capture")]
+        [System.ComponentModel.Category("Capture")]
         public uint CubeFaceSize
         {
             get => GetNodeData<TtSceneCubeCaptureData>().CubeFaceSize;
@@ -550,21 +550,21 @@ namespace EngineNS.GamePlay.Scene
             }
         }
 
-        [Category("Capture")]
+        [System.ComponentModel.Category("Capture")]
         public float CaptureInterval
         {
             get => GetNodeData<TtSceneCubeCaptureData>().CaptureInterval;
             set => GetNodeData<TtSceneCubeCaptureData>().CaptureInterval = value;
         }
 
-        [Category("Capture")]
+        [System.ComponentModel.Category("Capture")]
         public Vector3 VolumeExtent
         {
             get => GetNodeData<TtSceneCubeCaptureData>().VolumeExtent;
             set => GetNodeData<TtSceneCubeCaptureData>().VolumeExtent = value;
         }
 
-        [Category("Capture")]
+        [System.ComponentModel.Category("Capture")]
         public bool CaptureOnlyVisualsInVolume
         {
             get => GetNodeData<TtSceneCubeCaptureData>().CaptureOnlyVisualsInVolume;

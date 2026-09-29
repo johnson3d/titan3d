@@ -16,7 +16,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         // Permutation: ENABLE_COLOR_GRADING_LUT (0 = legacy tonemap, 1 = LUT path)
         public TtPermutationItem EnableColorGradingLUT { get; set; }
 
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsEnableColorGradingLUT
         {
             get { return EnableColorGradingLUT.GetValue() == (int)EPermutation_Bool.TrueValue; }

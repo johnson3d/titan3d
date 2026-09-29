@@ -1,4 +1,4 @@
-﻿using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Mesh;
 using EngineNS.IO;
 using EngineNS.Thread.Async;
 using System;
@@ -18,7 +18,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
     {
         public event AxisNameChange OnAxisNameChange;
         string mAxisName = "None";
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public string AxisName
         {
             get => mAxisName;
@@ -28,11 +28,11 @@ namespace EngineNS.Animation.Asset.BlendSpace
                 OnAxisNameChange?.Invoke(value);
             }
         }
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public float Min { get; set; }
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public float Max { get; set; }
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public int GridNum { get; set; }
         public TtBlendSpace_Axis()
         {
@@ -72,9 +72,9 @@ namespace EngineNS.Animation.Asset.BlendSpace
     public class TtBlendSpace_Point : IO.BaseSerializer
     {
         public event EventHandler OnAnimationChanged;
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public Vector3 Value { get; set; } = Vector3.Zero;
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         [RName.PGRName(FilterExts = TtAnimationClip.AssetExt)]
         public RName AnimationName { get; set; }
         public IAnimationAsset Animation { get; set; } = null;
@@ -132,12 +132,12 @@ namespace EngineNS.Animation.Asset.BlendSpace
         {
             get { return null; }
         }
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public List<TtBlendSpace_Axis> BlendAxises { get; set; } = new List<TtBlendSpace_Axis>() { null, null, null };
         [Rtti.Meta("")]
         public List<TtBlentSpace_Triangle> GridTriangles { get; protected set; } = new List<TtBlentSpace_Triangle>();
  
-        [Rtti.Meta, Category("Option")]    
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public List<TtBlendSpace_Point> AnimPoints { get; set; } = new List<TtBlendSpace_Point>();
 
         public TtBlendSpace_Point GetAnimPoint(RName name)

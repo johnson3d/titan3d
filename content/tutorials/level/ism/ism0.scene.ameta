@@ -2,11 +2,11 @@
 <Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="79ec7d0485c0eb5a97621046cf37ac3d5ef7d200ba196ae5969a1cd85ccb543b" />
+      <Hash Type="System.String@Unknown" Value="dd8729b3fa95e4bd052c7b3e461257bd138badd9d9fb9a505354a3cb6fe193de" />
       <Path Type="System.String@Unknown" Value="ism0.scene/ism0.scene" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="ff911c6c77cfd4764c0879e834a3db326474ea47aa06583d09684d2d09b3ac14" />
+      <Hash Type="System.String@Unknown" Value="e5e8d9e1a520ad4f36730c02afed51d1c805c8682b4cbff6ae7af2913a7752c7" />
       <Path Type="System.String@Unknown" Value="ism0.scene/class_graph.dat" />
     </e_1>
   </AssetFiles>
@@ -21,9 +21,8 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Value="Game,tutorials/common/oldwood0.ums,dc6ec359-fb69-4d56-a6e0-c4551078cf05" />
-    <e_1 Value="Engine,material/gridline.material,fe431749-ed31-45b1-93d8-34462bd00922" />
   </RefAssetRNames>
   <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="Default" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />

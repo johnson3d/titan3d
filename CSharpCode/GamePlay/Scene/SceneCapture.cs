@@ -1,4 +1,4 @@
-﻿using EngineNS.Graphics.Pipeline;
+using EngineNS.Graphics.Pipeline;
 using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
@@ -226,7 +226,7 @@ namespace EngineNS.GamePlay.Scene
             
             return true;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public ECaptureMode CaptureMode
         {
@@ -236,7 +236,7 @@ namespace EngineNS.GamePlay.Scene
                 GetNodeData<TtSceneCaptureData>().CaptureMode = value;
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector2 TargetSize
         {
             get => GetNodeData<TtSceneCaptureData>().TargetSize;
@@ -274,14 +274,14 @@ namespace EngineNS.GamePlay.Scene
         float mAccumulatedTime = 0;
         bool mManualTriggerPending = false;
 
-        [Category("Capture")]
+        [System.ComponentModel.Category("Capture")]
         public bool CaptureNow
         {
             get => false;
             set => mManualTriggerPending = true;
         }
 
-        [Category("Capture")]
+        [System.ComponentModel.Category("Capture")]
         public bool CaptureWithRenderDoc
         {
             get => false;
@@ -296,7 +296,7 @@ namespace EngineNS.GamePlay.Scene
         }
 
         Editor.Forms.TtTextureViewer mTextureViewer = null;
-        [Category("Capture")]
+        [System.ComponentModel.Category("Capture")]
         public bool OpenInTextureViewer
         {
             get
@@ -319,7 +319,7 @@ namespace EngineNS.GamePlay.Scene
             }
         }
 
-        [Category("Capture")]
+        [System.ComponentModel.Category("Capture")]
         public float CaptureInterval
         {
             get => GetNodeData<TtSceneCaptureData>().CaptureInterval;

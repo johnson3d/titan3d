@@ -50,11 +50,22 @@ namespace EngineNS.Sequencer.Asset
         /// <summary>多个 Section 写同一属性时谁赢, 大的赢</summary>
         [Rtti.Meta, System.ComponentModel.Category("Blend")]
         public int OverlapPriority { get; set; } = 0;
+        /// <summary>
+        /// 播放头离开本 Section 之后, 它写过的属性怎么办。求值路径在
+        /// TtSequenceEvalTable.Flush 里消费这个值。
+        ///
+        /// 默认给 KeepState 而不是跟 UE 的关卡序列一样默认 RestoreState: UE 那个默认
+        /// 面向的是过场 (播完了场景该复原), 而这套目前主要用在编辑器预览上, 拖到哪
+        /// 就看到哪更符合直觉。想换默认值改这一行就行, 已存盘的 Section 存的是显式值,
+        /// 不会跟着变。
+        /// </summary>
         [Rtti.Meta, System.ComponentModel.Category("Blend")]
         public ESectionCompletionMode CompletionMode { get; set; } = ESectionCompletionMode.KeepState;
 
         [System.ComponentModel.Browsable(false)]
         public long Duration { get => EndTick - StartTick; }
+        [System.ComponentModel.Browsable(false)]
+        public bool WantsRestoreState { get => CompletionMode == ESectionCompletionMode.RestoreState; }
 
         /// <summary>
         /// 时间区间取闭区间 [StartTick, EndTick], 两端都算命中。

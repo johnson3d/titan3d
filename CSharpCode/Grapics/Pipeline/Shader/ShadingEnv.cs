@@ -677,7 +677,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             base.EnvShadingDefines(in id, defines);
 
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtShaderAsset.AssetExt, ShaderType = "ComputeShadingMacross")]
         public override RName CodeName
@@ -689,14 +689,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 ShaderAsset = value.GetAsset<TtShaderAsset>().GetResultUntilCompleted();
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public override string MainName
         {
             get => base.MainName;
             set => base.MainName = value;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Bricks.CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtShadingMacross))]
         public RName McName
@@ -951,7 +951,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         #endregion
 
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtShaderAsset.AssetExt, ShaderType = "ComputeShadingMacross")]
         public RName CodeName
@@ -967,7 +967,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 }
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public string MainName
         {
@@ -977,7 +977,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 ShaderAsset.MainName = value;
             }
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Bricks.CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtShadingMacross))]
         public RName McName

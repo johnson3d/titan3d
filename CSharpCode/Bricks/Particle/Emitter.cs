@@ -564,14 +564,14 @@ namespace EngineNS.Bricks.Particle
         #endregion
 
         #region Macross API
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("",ShaderName = "Location")]
         public Vector3 Location
         {
             get => EmitterData.Location;
             set => EmitterData.Location = value;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("",ShaderName = "Velocity")]
         public Vector3 Velocity
         {
@@ -692,7 +692,7 @@ namespace EngineNS.Bricks.Particle
         {
 
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         [RName.PGRName(FilterExts = CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtEmitterMacross))]
         public RName McName
@@ -722,7 +722,7 @@ namespace EngineNS.Bricks.Particle
         {
             get => mMcObject;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtShaderAsset.AssetExt, ShaderType = "NebulaEmitter")]
         public RName ShaderName

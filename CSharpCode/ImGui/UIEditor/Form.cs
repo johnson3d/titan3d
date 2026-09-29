@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using EngineNS;
@@ -115,7 +115,7 @@ namespace EngineNS.EGui.UIEditor
                     if (structureEditor.DragingItem.IsDragging)
                     {
                         ImGuiAPI.SameLine(0, -1);
-                        ImGuiAPI.Text("PushTo");
+                        ImGuiAPI.Text(TtLocalization.Tr("PushTo"));
                     }
                     var hover2 = ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
 
@@ -163,12 +163,12 @@ namespace EngineNS.EGui.UIEditor
                     }
                     if (drawDragging)
                     {
-                        ImGuiAPI.TreeNodeEx(DragingItem.DraggingElement.Name, flags, $"<-{DragingItem.DraggingElement.Name}");
+                        ImGuiAPI.TreeNodeEx(DragingItem.DraggingElement.Name, flags, TtLocalization.Format("<-{0}", DragingItem.DraggingElement.Name));
                     }
                     if (drawDraggingInContainer)
                     {
                         ImGuiAPI.TreePush("##Dragging2Container");
-                        ImGuiAPI.TreeNodeEx(DragingItem.DraggingElement.Name, flags, $"{DragingItem.DraggingElement.Name}");
+                        ImGuiAPI.TreeNodeEx(DragingItem.DraggingElement.Name, flags, TtLocalization.Format("{0}", DragingItem.DraggingElement.Name));
                         ImGuiAPI.TreePop();
                     }
                 }
@@ -195,7 +195,7 @@ namespace EngineNS.EGui.UIEditor
                             }
                             else if (DragingItem.IsDragging)
                             {
-                                ImGuiAPI.TreeNodeEx(DragingItem.DraggingElement.Name, flags, $"<-{DragingItem.DraggingElement.Name}");
+                                ImGuiAPI.TreeNodeEx(DragingItem.DraggingElement.Name, flags, TtLocalization.Format("<-{0}", DragingItem.DraggingElement.Name));
                             }
                         }
                         else

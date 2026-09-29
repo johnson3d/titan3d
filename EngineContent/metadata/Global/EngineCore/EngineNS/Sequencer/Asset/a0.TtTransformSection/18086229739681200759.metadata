@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_18086229739681200759 Type="EngineNS.Sequencer.Asset.TtTransformSection@EngineCore">
+  <CompletionMode Type="EngineNS.Sequencer.Asset.ESectionCompletionMode@EngineCore" Order="0" />
+  <EaseInDuration Type="System.Int64@Unknown" Order="0" />
+  <EaseOutDuration Type="System.Int64@Unknown" Order="0" />
+  <EndTick Type="System.Int64@Unknown" Order="0" />
+  <OverlapPriority Type="System.Int32@Unknown" Order="0" />
+  <PositionX Type="EngineNS.Sequencer.TtScalarChannel@EngineCore" Order="0" />
+  <PositionY Type="EngineNS.Sequencer.TtScalarChannel@EngineCore" Order="0" />
+  <PositionZ Type="EngineNS.Sequencer.TtScalarChannel@EngineCore" Order="0" />
+  <Rotation Type="EngineNS.Sequencer.TtQuatChannel@EngineCore" Order="0" />
+  <RowIndex Type="System.Int32@Unknown" Order="0" />
+  <ScaleX Type="EngineNS.Sequencer.TtScalarChannel@EngineCore" Order="0" />
+  <ScaleY Type="EngineNS.Sequencer.TtScalarChannel@EngineCore" Order="0" />
+  <ScaleZ Type="EngineNS.Sequencer.TtScalarChannel@EngineCore" Order="0" />
+  <StartTick Type="System.Int64@Unknown" Order="0" />
+</Hash_18086229739681200759>

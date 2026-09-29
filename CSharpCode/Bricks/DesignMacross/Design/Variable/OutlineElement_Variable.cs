@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Outline;
@@ -84,7 +84,7 @@ public class TtOutlineElementsListRender_Variables : IOutlineElementsListRender
         Vector2 buttonSize = new Vector2(16, 16);
 
         ImGuiAPI.SetNextItemAllowOverlap();
-        var treeNodeResult = ImGuiAPI.TreeNodeEx("Variables",
+        var treeNodeResult = ImGuiAPI.TreeNodeEx(TtLocalization.Tr("Variables"),
             ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnDoubleClick |
             ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen);
         var regionSize = ImGuiAPI.GetContentRegionAvail();

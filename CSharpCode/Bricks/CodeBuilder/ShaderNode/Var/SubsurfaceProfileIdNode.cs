@@ -26,7 +26,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         /// to the profile's integer index in TtSubsurfaceProfileManager.
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [RName.PGRName(FilterExts = Graphics.Pipeline.Deferred.TtSubsurfaceProfileData.AssetExt)]
         public RName ProfileAsset
         {
@@ -41,7 +41,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         /// <summary>
         /// Preview-only: shows the resolved index in the editor. Not serialized.
         /// </summary>
-        [Category("Info")]
+        [System.ComponentModel.Category("Info")]
         [ReadOnly(true)]
         public int PreviewIndex { get; private set; } = 0;
 

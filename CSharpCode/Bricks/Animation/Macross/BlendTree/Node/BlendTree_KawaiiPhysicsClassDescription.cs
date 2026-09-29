@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation.Macross;
+using EngineNS.Animation.Macross;
 using EngineNS.Animation.Macross.BlendTree.Node;
 using EngineNS.Animation.StateMachine;
 using EngineNS.Bricks.Animation.KawaiiPhysics;
@@ -32,13 +32,13 @@ namespace EngineNS.Animation.Macross.BlendTree
     {
         public override string Name { get => "KawaiiPhysics"; }
         [Rtti.Meta("")]
-        [Category("Kawaii")]
+        [System.ComponentModel.Category("Kawaii")]
         public List<TtKawaiiChainSetup> ChainSetups { get; set; } = new();
         [Rtti.Meta("")]
-        [Category("Kawaii")]
+        [System.ComponentModel.Category("Kawaii")]
         public List<TtKawaiiClothSetup> ClothSetups { get; set; } = new();
         [Rtti.Meta("")]
-        [Category("Kawaii")]
+        [System.ComponentModel.Category("Kawaii")]
         public List<TtKawaiiRodSetup> RodSetups { get; set; } = new();
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace EngineNS.Animation.Macross.BlendTree
         /// the simulation.
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Kawaii")]
+        [System.ComponentModel.Category("Kawaii")]
         public bool ApplyComponentPhysicsSettings { get; set; } = true;
 
         /// <summary>
@@ -57,21 +57,21 @@ namespace EngineNS.Animation.Macross.BlendTree
         /// producing flow/swing effects. When false, particles are unaffected by actor movement.
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Kawaii")]
+        [System.ComponentModel.Category("Kawaii")]
         public bool EnableComponentMovementPhysics { get; set; } = true;
 
         /// <summary>
         /// Uniform physics settings applied to all chains/rods when ApplyComponentPhysicsSettings is true.
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Kawaii")]
+        [System.ComponentModel.Category("Kawaii")]
         public TtKawaiiPhySettings ComponentPhysicsSettings { get; set; } = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettings();
 
         /// <summary>
         /// Randomization range for the component-level physics settings.
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Kawaii")]
+        [System.ComponentModel.Category("Kawaii")]
         public TtKawaiiPhySettings ComponentPhysicsSettingsRandom { get; set; } = TtKawaiiPhysicsSetupDefaults.CreatePhysicsSettingsRandom();
 
         /// <summary>
@@ -79,14 +79,14 @@ namespace EngineNS.Animation.Macross.BlendTree
         /// 所以默认是 (0,-9.8,0)，而不是上游 KawaiiPhysics 的厘米值 -980。
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Kawaii")]
+        [System.ComponentModel.Category("Kawaii")]
         public Vector3 Gravity { get; set; } = new Vector3(0, -9.8f, 0);
 
         /// <summary>
         /// 乘在 <see cref="Gravity"/> 上的系数: 1 = 引擎重力, 0 = 失重头发, &gt;1 = 更重。
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Kawaii")]
+        [System.ComponentModel.Category("Kawaii")]
         public float GravityScale { get; set; } = 1.0f;
 
         public TtPoseInPinDescription InPin
@@ -97,7 +97,7 @@ namespace EngineNS.Animation.Macross.BlendTree
             }
         }
 
-        [Category("Pins"), DisplayName("Alpha")]
+        [System.ComponentModel.Category("Pins"), System.ComponentModel.DisplayName("Alpha")]
         public TtDataInPinDescription AlphaPin { get => DataInPins[0]; }
 
         //[Category("Pins"), DisplayName("PhysicsSettings")]

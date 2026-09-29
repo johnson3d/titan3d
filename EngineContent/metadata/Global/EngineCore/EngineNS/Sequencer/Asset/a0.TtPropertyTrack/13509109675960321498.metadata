@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_13509109675960321498 Type="EngineNS.Sequencer.Asset.TtPropertyTrack@EngineCore">
+  <AdapterId Type="System.String@Unknown" Order="0" />
+  <DisplayName Type="System.String@Unknown" Order="0" />
+  <Muted Type="System.Boolean@Unknown" Order="0" />
+  <PropertyId Type="System.String@Unknown" Order="0" />
+  <Sections Type="System.Collections.Generic.List&lt;EngineNS.Sequencer.Asset.TtSequenceSection@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_13509109675960321498>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
 using System.ComponentModel;
@@ -133,7 +133,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
         protected Vector3 mValue = Vector3.Zero;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector3 Value { get => mValue; set => mValue = value; }
         [Browsable(false)]
         public PinIn InXYZ { get; set; } = new PinIn();
@@ -198,7 +198,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         [Browsable(false)]
         public new Vector3 Value { get => mValue; set => mValue = value; }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [EGui.Controls.PropertyGrid.TtColor3PickerEditor()]
         public Vector3 Color { get => mValue; set => mValue = value; }
     }
@@ -331,7 +331,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
         protected Vector3i mValue = Vector3i.Zero;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector3i Value { get => mValue; set => mValue = value; }
         [Browsable(false)]
         public PinIn InXYZ { get; set; } = new PinIn();

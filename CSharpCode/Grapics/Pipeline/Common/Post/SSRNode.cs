@@ -170,6 +170,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     /// </summary>
     [Bricks.CodeBuilder.ContextMenu("SSR", "Post\\SSR",
         Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.Post.USSRNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.Post.USSRNode" })]
     public class TtSSRNode : TAuxRenderGraphNode<TtSSRNode>
     {
         // ---- Pins ----
@@ -205,48 +206,48 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
         // ---- Parameters ----
         [Rtti.Meta("")]
-        [Category("SSR")]
+        [System.ComponentModel.Category("SSR")]
         public float Intensity { get; set; } = 1.0f;
 
         /// <summary>超过该粗糙度的像素不做 SSR (粗糙反射靠 IBL / GI, SSR 在那儿噪声收益都很差)。</summary>
         [Rtti.Meta("")]
-        [Category("SSR")]
+        [System.ComponentModel.Category("SSR")]
         public float MaxRoughness { get; set; } = 0.6f;
 
         /// <summary>反射线最长世界距离 (米)。</summary>
         [Rtti.Meta("")]
-        [Category("SSR")]
+        [System.ComponentModel.Category("SSR")]
         public float MaxDistance { get; set; } = 30.0f;
 
         [Rtti.Meta("")]
-        [Category("SSR")]
+        [System.ComponentModel.Category("SSR")]
         public int NumSteps { get; set; } = 24;
 
         /// <summary>线性 fallback 的相交厚度容差 (米)。HZB 路径不用这个值。</summary>
         [Rtti.Meta("")]
-        [Category("SSR")]
+        [System.ComponentModel.Category("SSR")]
         public float Thickness { get; set; } = 0.5f;
 
         [Rtti.Meta("")]
-        [Category("SSR")]
+        [System.ComponentModel.Category("SSR")]
         public float EdgeFadePower { get; set; } = 1.0f;
 
         /// <summary>按粗糙度扰动反射方向的强度。0 = 纯镜面 (最锐但粗糙面会失真)。</summary>
         [Rtti.Meta("")]
-        [Category("SSR")]
+        [System.ComponentModel.Category("SSR")]
         public float RayJitter { get; set; } = 1.0f;
 
         /// <summary>半分辨率 trace + resolve。合成时由 Additive 的 LinearClamp 采样自动升采样。</summary>
         [Rtti.Meta("")]
-        [Category("SSR")]
+        [System.ComponentModel.Category("SSR")]
         public bool HalfResolution { get; set; } = true;
 
         [Rtti.Meta("")]
-        [Category("SSR Resolve")]
+        [System.ComponentModel.Category("SSR Resolve")]
         public int ResolveRadius { get; set; } = 2;
 
         [Rtti.Meta("")]
-        [Category("SSR Resolve")]
+        [System.ComponentModel.Category("SSR Resolve")]
         public float ResolveDepthSigma { get; set; } = 8.0f;
 
         /// <summary>
@@ -348,7 +349,10 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             cb.SetValue("SSRNumSteps", NumSteps);
             cb.SetValue("SSRThickness", Thickness);
             cb.SetValue("SSREdgeFadePower", EdgeFadePower);
-            cb.SetValue("SSRFrameIndex", (uint)TtEngine.Instance.FrameCount);
+            // Resolve is spatial only: changing the ray pattern every frame produces
+            // hit/miss flicker that the scene TAA cannot reliably reject. Keep the
+            // cbuffer field for layout compatibility until SSR has its own history.
+            cb.SetValue("SSRFrameIndex", 0u);
 
             cb.SetValue("SSRRayJitter", RayJitter);
             float pad = 0.0f;

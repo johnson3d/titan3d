@@ -161,13 +161,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             //    return false;
             var patchSide = Level.PatchSide;
             var terrainGen = Level.Node.TerrainGen;
-            var IdMapNode = terrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.UMaterialIdMapNode;
+            var IdMapNode = terrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.TtMaterialIdMapNode;
             if (IdMapNode!=null)
                 IdMapNode.InitProcedure(terrainGen.AssetGraph);
 
-            var hMap = Procedure.TtBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
-            var norMap = Procedure.TtBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<Vector3, Procedure.FFloat3Operator>>(1, 1, 1));
-            var idMap = Procedure.TtBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
+            var hMap = Procedure.TtBufferComponent.CreateInstance(Procedure.TtBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
+            var norMap = Procedure.TtBufferComponent.CreateInstance(Procedure.TtBufferCreator.CreateInstance<Procedure.TtSuperBuffer<Vector3, Procedure.FFloat3Operator>>(1, 1, 1));
+            var idMap = Procedure.TtBufferComponent.CreateInstance(Procedure.TtBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
             Procedure.TtBufferComponent waterMap = null;
             Procedure.TtBufferComponent transform = null;
             Procedure.TtBufferComponent plants = null;
@@ -207,21 +207,21 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 node = xnd.RootNode.TryGetChildNode("WaterMap");
                 if (node.IsValidPointer)
                 {
-                    waterMap = Procedure.TtBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
+                    waterMap = Procedure.TtBufferComponent.CreateInstance(Procedure.TtBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
                     waterMap.LoadXnd(node, Hash160.Emtpy);
                 }
 
                 node = xnd.RootNode.TryGetChildNode("PlantTransform");
                 if (node.IsValidPointer)
                 {
-                    transform = Procedure.TtBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<FTransform, Procedure.FTransformOperator>>(1, 1, 1));
+                    transform = Procedure.TtBufferComponent.CreateInstance(Procedure.TtBufferCreator.CreateInstance<Procedure.TtSuperBuffer<FTransform, Procedure.FTransformOperator>>(1, 1, 1));
                     transform.LoadXnd(node, Hash160.Emtpy);
                 }
 
                 node = xnd.RootNode.TryGetChildNode("PlantInfo");
                 if (node.IsValidPointer)
                 {
-                    plants = Procedure.TtBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<Vector2i, Procedure.FInt2Operator>>(1, 1, 1));
+                    plants = Procedure.TtBufferComponent.CreateInstance(Procedure.TtBufferCreator.CreateInstance<Procedure.TtSuperBuffer<Vector2i, Procedure.FInt2Operator>>(1, 1, 1));
                     plants.LoadXnd(node, Hash160.Emtpy);
                 }
                 
@@ -249,7 +249,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                             grassData = (UTerrainGrass)serializer;
                         }
 
-                        var gBuffer = Procedure.TtBufferComponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
+                        var gBuffer = Procedure.TtBufferComponent.CreateInstance(Procedure.TtBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
                         gBuffer.LoadXnd(subNode, Hash160.Emtpy);
 
                         UpdateGrass(grassData, gBuffer);
@@ -394,7 +394,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         
         public void UpdateNormalMap(Procedure.TtBufferComponent norMap)
         {
-            var norImage = new Bricks.Procedure.UImage2D();
+            var norImage = new Bricks.Procedure.TtImage2D();
             norImage.Initialize(norMap.Width, norMap.Height,
                 norMap as Procedure.TtSuperBuffer<Vector3, Procedure.FFloat3Operator>,
                 null, 0);
@@ -413,7 +413,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             if (idMap == null)
                 return;
 
-            var idMapImage = new Bricks.Procedure.UImage2D();
+            var idMapImage = new Bricks.Procedure.TtImage2D();
             idMapImage.Initialize(idMap.Width, idMap.Height,
                 idMap as Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>,
                 null,
@@ -439,7 +439,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public void UpdatePlants(Procedure.TtBufferComponent transform, Procedure.TtBufferComponent plants)
         {
             var terrainGen = Level.Node.TerrainGen;
-            var IdMapNode = terrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.UMaterialIdMapNode;
+            var IdMapNode = terrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.TtMaterialIdMapNode;
             if (transform != null && plants != null)
             {
                 for (int i = 0; i < plants.Width; i++)
@@ -456,7 +456,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         //////////////////////////////////////////////////
         //static bool GAdded = false;
         //////////////////////////////////////////////////
-        public void UpdateGrass(Procedure.Node.UGrassNode node)
+        public void UpdateGrass(Procedure.Node.TtGrassNode node)
         {
             for(int i=0; i<node.Inputs.Count; i++)
             {
@@ -492,7 +492,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         //        return;
 
         //    var terrainGen = Level.Node.TerrainGen;
-        //    var idMapNode = terrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.UMaterialIdMapNode;
+        //    var idMapNode = terrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.TtMaterialIdMapNode;
         //    var grassAdr = grass.GetSuperPixelAddress(0, 0, 0);
         //    float minScale = float.MaxValue;
         //    float maxScale = float.MinValue;
@@ -583,10 +583,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var plants = terrainGen.AssetGraph.Root.GetResultBuffer("Plants");
 
             var grassPin = terrainGen.AssetGraph.Root.FindPinIn("Grass");
-            Procedure.Node.UGrassNode linkedGrassNode = null;
+            Procedure.Node.TtGrassNode linkedGrassNode = null;
             if (grassPin != null)
             {
-                linkedGrassNode = terrainGen.AssetGraph.Root.GetInputNode(terrainGen.AssetGraph.Root.ParentGraph as Procedure.UPgcGraph, grassPin) as Procedure.Node.UGrassNode;
+                linkedGrassNode = terrainGen.AssetGraph.Root.GetInputNode(terrainGen.AssetGraph.Root.ParentGraph as Procedure.TtPgcGraph, grassPin) as Procedure.Node.TtGrassNode;
             }
 
             using (var xnd = new IO.TtXndHolder("TrLevel", 0, 0))
@@ -685,6 +685,60 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 xnd.SaveXnd(file);
             }   
         }
+        static Hash160 BuildPgcRuntimeHash(Hash160 baseHash, Procedure.TtPgcGraph graph,
+            Procedure.TtPgcExecutionContext context)
+        {
+            var signature = new StringBuilder(baseHash.ToString());
+            signature.Append('|').Append(BitConverter.DoubleToInt64Bits(context.WorldOrigin.X));
+            signature.Append('|').Append(BitConverter.DoubleToInt64Bits(context.WorldOrigin.Z));
+            signature.Append('|').Append(BitConverter.SingleToInt32Bits(context.GridCellSize.X));
+            signature.Append('|').Append(BitConverter.SingleToInt32Bits(context.GridCellSize.Y));
+
+            for (int i = 0; i < graph.Nodes.Count; i++)
+            {
+                if (!(graph.Nodes[i] is Procedure.Node.TtSplineRegionSamplerNode sampler))
+                    continue;
+                signature.Append('|').Append((int)sampler.QueryScope);
+                signature.Append('|').Append(sampler.SplineName);
+                signature.Append('|').Append(BitConverter.SingleToInt32Bits(sampler.InteriorSampleSpacing));
+                signature.Append('|').Append(BitConverter.SingleToInt32Bits(sampler.BorderSampleSpacing));
+                signature.Append('|').Append(sampler.Seed);
+                signature.Append('|').Append(BitConverter.SingleToInt32Bits(sampler.Jitter));
+                signature.Append('|').Append(sampler.ProjectOntoSplineSurface ? 1 : 0);
+                signature.Append('|').Append(BitConverter.SingleToInt32Bits(sampler.BoundaryEpsilon));
+                if (sampler.DensityFalloff != null)
+                {
+                    for (int pointIndex = 0; pointIndex < sampler.DensityFalloff.Count; pointIndex++)
+                    {
+                        var point = sampler.DensityFalloff[pointIndex];
+                        signature.Append('|').Append(BitConverter.SingleToInt32Bits(point.Position.X));
+                        signature.Append('|').Append(BitConverter.SingleToInt32Bits(point.Position.Y));
+                        signature.Append('|').Append(BitConverter.SingleToInt32Bits(point.ControlPoint.X));
+                        signature.Append('|').Append(BitConverter.SingleToInt32Bits(point.ControlPoint.Y));
+                    }
+                }
+
+                var splineQuery = new Procedure.FSplineQuery(sampler.QueryScope, sampler.SplineName);
+                if (context.TryGetSplineRegion(in splineQuery, sampler.BorderSampleSpacing,
+                    out var region, out var error))
+                {
+                    signature.Append('|').Append(region.SourceRevision);
+                    for (int pointIndex = 0; pointIndex < region.BoundaryPoints.Count; pointIndex++)
+                    {
+                        var point = region.BoundaryPoints[pointIndex];
+                        signature.Append('|').Append(BitConverter.SingleToInt32Bits(point.X));
+                        signature.Append('|').Append(BitConverter.SingleToInt32Bits(point.Y));
+                        signature.Append('|').Append(BitConverter.SingleToInt32Bits(point.Z));
+                    }
+                }
+                else
+                {
+                    signature.Append('|').Append(error);
+                }
+            }
+            return Hash160.CreateHash160(signature.ToString());
+        }
+
         protected void BuildLevelDataFromPGC(TtTerrainNode.TtTerrainData nodeData)
         {
             RName terrainName = nodeData.PgcName;
@@ -695,6 +749,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
             var patchSide = Level.PatchSide;
             var terrainGen = Level.Node.TerrainGen;
+            var worldOrigin = Level.StartPosition;
+            var pgcContext = new Procedure.TtPgcExecutionContext(Level.Node.GetWorld(),
+                in worldOrigin, Level.Node.GridSize);
+            var runtimeHash = BuildPgcRuntimeHash(Level.Node.TerrainGenHash,
+                terrainGen.AssetGraph, pgcContext);
 
             var dir = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "terrain/";
             dir = IO.TtFileManager.CombinePath(dir, terrainName.Name);
@@ -702,24 +761,24 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var lvlFile = $"{dir}/X{Level.LevelX}_Y{Level.LevelZ}.trlvl";
             if (terrainName != null)
             {
-                if (LoadLevelFromCache(lvlFile, Level.Node.TerrainGenHash) == true)
+                if (LoadLevelFromCache(lvlFile, runtimeHash) == true)
                 {
                     return;
                 }
             }
             
-            var IdMapNode = terrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.UMaterialIdMapNode;
+            var IdMapNode = terrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.TtMaterialIdMapNode;
             //if (IdMapNode != null)
             //    await IdMapNode.SureMaterialResources();
 
-            var noise1 = terrainGen.AssetGraph.FindFirstNode("NoisePerlin1") as Procedure.Node.UNoisePerlin;
+            var noise1 = terrainGen.AssetGraph.FindFirstNode("NoisePerlin1") as Procedure.Node.TtNoisePerlin;
             if(noise1!=null)
             {
                 noise1.StartPosition = Level.StartPosition;
                 noise1.StartPosition.X -= noise1.Border;
                 noise1.StartPosition.Z -= noise1.Border;
             }
-            //var noise2 = terrainGen.AssetGraph.FindFirstNode("NoisePerlin2") as Procedure.Node.UNoisePerlin;
+            //var noise2 = terrainGen.AssetGraph.FindFirstNode("NoisePerlin2") as Procedure.Node.TtNoisePerlin;
             //if (noise2 != null)
             //{
             //    noise2.StartPosition = Level.StartPosition;
@@ -727,7 +786,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             //    noise2.StartPosition.Z -= noise1.Border;
             //}
 
-            var trans = terrainGen.AssetGraph.FindFirstNode("Plants") as Procedure.Node.UTransformBuilder;
+            var trans = terrainGen.AssetGraph.FindFirstNode("Plants") as Procedure.Node.TtTransformBuilder;
             if (trans != null)
             {
                 trans.FinalRandomSeed = trans.RandomSeed + Level.LevelZ * Level.Node.NumOfLevelX + Level.LevelX;
@@ -736,18 +795,18 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
 
             var root = terrainGen.AssetGraph.Root;
-            terrainGen.Compile(root);
+            terrainGen.Compile(root, pgcContext);
             var hMap = root.GetResultBuffer("Height");
             var norMap = root.GetResultBuffer("Normal") as Procedure.TtSuperBuffer<Vector3, Procedure.FFloat3Operator>;
             if (norMap == null)
             {
-                var creator = Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<Vector3, Procedure.FFloat3Operator>>(nodeData.LevelSideX, nodeData.LevelSideZ, 1);
+                var creator = Procedure.TtBufferCreator.CreateInstance<Procedure.TtSuperBuffer<Vector3, Procedure.FFloat3Operator>>(nodeData.LevelSideX, nodeData.LevelSideZ, 1);
                 norMap = Procedure.TtBufferComponent.CreateInstance(creator) as Procedure.TtSuperBuffer<Vector3, Procedure.FFloat3Operator>;
             }
             var idMap = root.GetResultBuffer("MatId") as Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>;
             if (idMap==null)
             {
-                var creator = Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(nodeData.LevelSideX, nodeData.LevelSideZ, 1);
+                var creator = Procedure.TtBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(nodeData.LevelSideX, nodeData.LevelSideZ, 1);
                 idMap = Procedure.TtBufferComponent.CreateInstance(creator) as Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>;
             }
             var waterMap = root.GetResultBuffer("Water") as Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>;
@@ -757,22 +816,22 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var grassPin = root.FindPinIn("Grass");
             if (grassPin != null)
             {
-                var tagNode = root.GetInputNode(root.ParentGraph as Procedure.UPgcGraph, grassPin) as Procedure.Node.UGrassNode;
+                var tagNode = root.GetInputNode(root.ParentGraph as Procedure.TtPgcGraph, grassPin) as Procedure.Node.TtGrassNode;
                 if(tagNode != null)
                     UpdateGrass(tagNode);
             }
             
-            SaveLevelToCache(lvlFile, Level.Node.TerrainGenHash);
+            SaveLevelToCache(lvlFile, runtimeHash);
             terrainGen.AssetGraph.BufferCache.ResetCache();
         }
         protected void BuildEmptyLevelData(int xSize, int ySize)
         {
-            var creator = Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(xSize, ySize, 1);
+            var creator = Procedure.TtBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(xSize, ySize, 1);
             var hMap = Procedure.TtBufferComponent.CreateInstance(creator);
             var waterMap = Procedure.TtBufferComponent.CreateInstance(creator);
-            creator = Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<Vector3, Procedure.FFloat3Operator>>(xSize, ySize, 1);
+            creator = Procedure.TtBufferCreator.CreateInstance<Procedure.TtSuperBuffer<Vector3, Procedure.FFloat3Operator>>(xSize, ySize, 1);
             var norMap = Procedure.TtBufferComponent.CreateInstance(creator);
-            creator = Procedure.UBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(xSize, ySize, 1);
+            creator = Procedure.TtBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(xSize, ySize, 1);
             var idMap = Procedure.TtBufferComponent.CreateInstance(creator);
 
             CreateFromBuffer(hMap, norMap, waterMap, idMap, null, null);

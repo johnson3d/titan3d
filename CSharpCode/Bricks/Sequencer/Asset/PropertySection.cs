@@ -102,7 +102,7 @@ namespace EngineNS.Sequencer.Asset
             var value = adapter.Evaluate(this, current, in ctx);
             if (value == null)
                 return;
-            ctx.Table.Write(target, accessor, value, OverlapPriority);
+            ctx.Table.Write(target, accessor, value, OverlapPriority, WantsRestoreState);
         }
         public override long GetMaxKeyTime()
         {

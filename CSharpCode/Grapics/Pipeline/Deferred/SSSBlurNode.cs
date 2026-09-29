@@ -1,4 +1,4 @@
-﻿using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline.Common;
 using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
@@ -55,7 +55,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public NxRHI.TtCbView CBSSSBlurH;
         public NxRHI.TtCbView CBSSSBlurV;
 
-        [Category("SSS")]
+        [System.ComponentModel.Category("SSS")]
         [Rtti.Meta("")]
         public float SSSWidth { get; set; } = 1.0f;
 

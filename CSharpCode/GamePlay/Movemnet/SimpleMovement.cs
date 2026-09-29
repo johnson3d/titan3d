@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.PhysicsCore.SceneNode;
+using EngineNS.Bricks.PhysicsCore.SceneNode;
 using EngineNS.GamePlay.Camera;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
@@ -25,16 +25,16 @@ namespace EngineNS.GamePlay.Movemnet
         public TtSimpleMovementData MovementData { get=> NodeData as TtSimpleMovementData; }
         public float Speed { get; set; } = 3;
         public Vector3 LinearVelocity { get; private set; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector3 DesiredPosition { get; set; } = Vector3.Zero;
         public void SetDesiredPosition(Vector3 position)
         {
             DesiredPosition = position;
         }
         
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool EnableGravity { get=>MovementData.EnableGravity; set=> MovementData.EnableGravity = value; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector3 GravityAcceleration { get => MovementData.GravityAcceleration; set => MovementData.GravityAcceleration = value; }
         protected Vector3 GravityVelocity = Vector3.Zero;
         public float MaxGravitySpeed = 10;
@@ -45,6 +45,8 @@ namespace EngineNS.GamePlay.Movemnet
         }
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
+            if (Parent == null)
+                return false;
             DVector3 posBeforeMove = Parent.Placement.AbsTransform.Position;
             UpdatePlacement(args.World, args.Policy);
             DVector3 posAfterMove = Parent.Placement.AbsTransform.Position;

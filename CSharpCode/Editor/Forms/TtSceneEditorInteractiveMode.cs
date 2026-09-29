@@ -24,9 +24,24 @@ namespace EngineNS.Editor.Forms
 
         // 标记本次按下 -> 抬起 期间是否已经触发过克隆, 避免在拖动过程中反复克隆。
         bool mCloneTriggeredInThisDrag = false;
+        bool mOpenSplineContextMenu = false;
+        TtBezierSplineNode mSplineContextNode;
+        int mSplineContextPointIndex = -1;
+        TtBezierSplineNode.ESplineElementKind mSplineContextElementKind;
+        bool mSplineContextIsLeftTangent;
+        bool mConsumeSplineDoubleClickButtonUp = false;
+        TtBezierSplineNode.TtSplinePoint mSplineDoubleClickCandidate;
+        Vector2 mSplineDoubleClickStart;
+        const float SplineDoubleClickMaxDistance = 12.0f;
 
         public override bool OnEvent(in Bricks.Input.Event e)
         {
+            // 第一次单击控制点后 Gizmo 会出现在控制球上，第二击重新读 HitProxy 时可能
+            // 命中 Gizmo 而不是控制点。这里使用第一击已经激活的控制点完成双击，并在
+            // Axis 收到第二次 MOUSEBUTTONDOWN 前截断事件，避免误启动 Gizmo 拖动。
+            if (TryHandleSplineElementDoubleClick(in e))
+                return true;
+
             // Ctrl + 左键按下 + 当前 hover 在 Move 轴上 + 有选中节点 -> 触发"复制并拖动"。
             // 必须在 base.OnEvent 之前执行: base.OnEvent 会把按下事件转给 TtAxis 启动拖动,
             // 我们要在那之前把选择列表替换成克隆出的新节点, 这样 Axis 拖的就是复制品。
@@ -38,19 +53,186 @@ namespace EngineNS.Editor.Forms
             {
                 mCloneTriggeredInThisDrag = false;
             }
+            else if (e.Type == Bricks.Input.EventType.MOUSEBUTTONUP &&
+                e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_RIGHT)
+            {
+                var viewport = SceneEditorViewport;
+                var host = viewport?.HostEditor;
+                var active = host?.ActiveSplineElement;
+                var node = active?.OwnerNode ?? host?.GetSelectedSplineNode();
+                if (viewport != null && viewport.IsMouseIn && node?.Spline != null)
+                {
+                    // Popup 打开后，菜单点击仍会经过视口输入链，当前选择可能先发生变化。
+                    // 在右键抬起时固定操作目标，菜单回调不再依赖易变的 ActiveSplineElement。
+                    mSplineContextNode = node;
+                    mSplineContextPointIndex = active?.OwnerNode == node ? active.PointIndex :
+                        Math.Max(0, node.Spline.PointCount - 1);
+                    mSplineContextElementKind = active?.OwnerNode == node ? active.ElementKind :
+                        TtBezierSplineNode.ESplineElementKind.Anchor;
+                    mSplineContextIsLeftTangent = active?.OwnerNode == node && active.IsLeftTangent;
+                    mOpenSplineContextMenu = true;
+                }
+            }
 
             return base.OnEvent(in e);
+        }
+
+        bool TryHandleSplineElementDoubleClick(in Bricks.Input.Event e)
+        {
+            if (e.Type == Bricks.Input.EventType.MOUSEBUTTONUP &&
+                e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT &&
+                mConsumeSplineDoubleClickButtonUp)
+            {
+                mConsumeSplineDoubleClickButtonUp = false;
+                return true;
+            }
+
+            if (e.Type != Bricks.Input.EventType.MOUSEBUTTONDOWN)
+                return false;
+
+            if (e.MouseButton.Button != (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
+            {
+                // 右键打开菜单或其它鼠标操作会中断当前左键双击序列。否则菜单项的左键
+                // 点击可能继承 SDL 的 Clicks 计数，被误当成控制点第二击而提前吞掉。
+                mSplineDoubleClickCandidate = null;
+                return false;
+            }
+
+            var viewport = SceneEditorViewport;
+            if (viewport == null)
+            {
+                mSplineDoubleClickCandidate = null;
+                return false;
+            }
+            var mousePoint = new Vector2(e.MouseButton.X, e.MouseButton.Y);
+            var viewportPoint = mousePoint + viewport.ViewportPos;
+            if (viewport.Axis?.IsTransforming == true ||
+                viewport.UIOperated || !viewport.IsMouseIn ||
+                viewport.PointInOverlappedArea(in viewportPoint))
+            {
+                mSplineDoubleClickCandidate = null;
+                return false;
+            }
+
+            if (e.MouseButton.Clicks < 2)
+            {
+                // 只把 HitProxy 确实命中控制球的首次按下记为候选。第一次抬起后 Gizmo
+                // 可能覆盖控制球，所以第二击不能再依赖 HitProxy，但必须匹配该候选。
+                mSplineDoubleClickCandidate = GetSplineElementAtMouse(viewport, in mousePoint);
+                mSplineDoubleClickStart = mousePoint;
+                return false;
+            }
+
+            var candidate = mSplineDoubleClickCandidate;
+            mSplineDoubleClickCandidate = null;
+            var active = viewport.HostEditor?.ActiveSplineElement;
+            var delta = mousePoint - mSplineDoubleClickStart;
+            if (candidate?.OwnerNode == null || !object.ReferenceEquals(candidate, active) ||
+                delta.LengthSquared() > SplineDoubleClickMaxDistance * SplineDoubleClickMaxDistance)
+            {
+                return false;
+            }
+
+            mConsumeSplineDoubleClickButtonUp = true;
+            viewport.OnHitproxyDoubleClick(candidate);
+            return true;
+        }
+
+        static TtBezierSplineNode.TtSplinePoint GetSplineElementAtMouse(
+            TtSceneEditor.TtSceneEditorViewport viewport, in Vector2 mousePoint)
+        {
+            var policy = viewport.RenderPolicy as Graphics.Pipeline.TtRenderPolicy;
+            if (policy == null)
+                return null;
+            var position = viewport.Window2Viewport(mousePoint);
+            if (position.X < 0 || position.Y < 0)
+                return null;
+            return policy.GetHitproxy((uint)position.X, (uint)position.Y) as
+                TtBezierSplineNode.TtSplinePoint;
         }
 
         public override void TickOnFocus()
         {
             base.TickOnFocus();
 
+            var host = SceneEditorViewport?.HostEditor;
+            host?.SyncSplineControlFromAxis();
+
             var keyboards = TtEngine.Instance.InputSystem;
             if (keyboards.IsKeyPressed(Bricks.Input.Keycode.KEY_DELETE))
             {
-                DeleteSelectedNodes();
+                // 有样条子元素处于活动状态时，Delete 只处理锚点，绝不向下删除所属节点。
+                if (host?.ActiveSplineElement != null)
+                    host.DeleteSelectedSplinePoint();
+                else
+                    DeleteSelectedNodes();
             }
+        }
+
+        public override Vector2 OnDrawViewportUI(in Vector2 startDrawPos)
+        {
+            var host = SceneEditorViewport?.HostEditor;
+            if (mOpenSplineContextMenu)
+            {
+                ImGuiAPI.OpenPopup("##SplineControlContext", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                mOpenSplineContextMenu = false;
+            }
+
+            EGui.UIProxy.StyleConfig.Instance.PushPopupStyle();
+            if (ImGuiAPI.BeginPopup("##SplineControlContext", ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            {
+                var splineNode = mSplineContextNode;
+                var spline = splineNode?.Spline;
+                var pointIndex = mSplineContextPointIndex;
+                var validPoint = spline != null && pointIndex >= 0 && pointIndex < spline.PointCount;
+                bool actionExecuted = false;
+                if (ImGuiAPI.MenuItem(TtLocalization.Tr("Insert Point After"), null, false, validPoint))
+                {
+                    host?.InsertSplinePointAfter(splineNode, pointIndex,
+                        mSplineContextElementKind, mSplineContextIsLeftTangent);
+                    actionExecuted = true;
+                }
+                if (!actionExecuted && ImGuiAPI.MenuItem(TtLocalization.Tr("Append Point"), null, false,
+                    spline != null && !spline.IsClosed))
+                {
+                    host?.AppendSplinePoint(splineNode, pointIndex,
+                        mSplineContextElementKind, mSplineContextIsLeftTangent);
+                    actionExecuted = true;
+                }
+                var canDelete = validPoint &&
+                    mSplineContextElementKind == TtBezierSplineNode.ESplineElementKind.Anchor &&
+                    spline.PointCount > (spline.IsClosed ? 3 : 2);
+                if (!actionExecuted && ImGuiAPI.MenuItem(TtLocalization.Tr("Delete Point"), null, false, canDelete))
+                {
+                    host?.DeleteSplinePoint(splineNode, pointIndex);
+                    actionExecuted = true;
+                }
+                var canToggleClosed = spline != null && (spline.IsClosed || spline.PointCount >= 3);
+                var toggleLabel = spline?.IsClosed == true ? "Open Spline" : "Close Spline";
+                if (!actionExecuted && ImGuiAPI.MenuItem(TtLocalization.Tr(toggleLabel), null, false, canToggleClosed))
+                {
+                    host?.ToggleSplineClosed(splineNode, pointIndex);
+                    actionExecuted = true;
+                }
+                if (actionExecuted)
+                {
+                    mSplineContextNode = null;
+                    mSplineContextPointIndex = -1;
+                }
+                ImGuiAPI.EndPopup();
+            }
+            EGui.UIProxy.StyleConfig.Instance.PopPopupStyle();
+            return base.OnDrawViewportUI(in startDrawPos);
+        }
+
+        public override void OnLeaveMode()
+        {
+            mSplineContextNode = null;
+            mSplineContextPointIndex = -1;
+            mConsumeSplineDoubleClickButtonUp = false;
+            mSplineDoubleClickCandidate = null;
+            SceneEditorViewport?.HostEditor?.ClearSplineElementSelection(true);
+            base.OnLeaveMode();
         }
 
         void DeleteSelectedNodes()
@@ -110,7 +292,7 @@ namespace EngineNS.Editor.Forms
                 return;
 
             var host = viewport.HostEditor;
-            if (host == null || host.mWorldOutliner == null)
+            if (host == null || host.mWorldOutliner == null || host.ActiveSplineElement != null)
                 return;
             var selected = host.mWorldOutliner.SelectedNodes;
             if (selected == null || selected.Count == 0)

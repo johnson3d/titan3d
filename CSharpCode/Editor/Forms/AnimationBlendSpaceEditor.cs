@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation.Asset;
+using EngineNS.Animation.Asset;
 using EngineNS.Animation.Asset.BlendSpace;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Mesh;
@@ -154,7 +154,7 @@ namespace EngineNS.Editor.Forms
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Left", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                if (ImGuiAPI.CollapsingHeader("Property", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("Property"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     AnimationPropGrid.OnDraw(true, false, false);
                 }
@@ -265,7 +265,7 @@ namespace EngineNS.Editor.Forms
             public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
             [Browsable(false)]
             private RName mPreivewMeshName;
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [RName.PGRName(FilterExts = TtMaterialMesh.AssetExt)]
             public RName PreivewMesh
             {
@@ -293,9 +293,9 @@ namespace EngineNS.Editor.Forms
                     exec();
                 }
             }
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             public TtBlendSpace2D Animation { get; set; } = new();
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             public Vector2 PreviewInput { get; set; } = Vector2.Zero;
         }
 

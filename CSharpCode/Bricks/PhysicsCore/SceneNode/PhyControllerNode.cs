@@ -1,4 +1,4 @@
-﻿using EngineNS.GamePlay;
+using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using System.ComponentModel;
 using EngineNS.Bricks.PhysicsCore.SceneNode;
@@ -61,9 +61,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         }
         TtPhyCapsuleControllerDesc PhyControllerDesc = null;
 
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float Radius { get=> CapsulePhyControllerNodeData.Radius; set=> CapsulePhyControllerNodeData.Radius = value; } 
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float Height { get=> CapsulePhyControllerNodeData.Height; set=> CapsulePhyControllerNodeData.Height = value; }
 
         protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
@@ -143,7 +143,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
         public class TtBoxPhyControllerNodeData : TtPhyControllerNodeDataBase
         {
-            [Rtti.Meta, Category("Option")]
+            [Rtti.Meta, System.ComponentModel.Category("Option")]
             public Vector3 Extent { get; set; } = Vector3.One;
         }
         public TtBoxPhyControllerNodeData BoxPhyControllerNodeData
@@ -151,7 +151,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             get => NodeData as TtBoxPhyControllerNodeData;
         }
         TtPhyBoxControllerDesc PhyControllerDesc = null;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector3 Extent { get => BoxPhyControllerNodeData.Extent; set => BoxPhyControllerNodeData.Extent = value; }
 
         protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)

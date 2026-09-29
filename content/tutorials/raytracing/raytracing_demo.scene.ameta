@@ -6,7 +6,7 @@
       <Path Type="System.String@Unknown" Value="raytracing_demo.scene/raytracing_demo.scene" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="61d0ede8c0aa14d12b1c9eb079aff33753ba4ccbf0e0570afeeed8005f9d3912" />
+      <Hash Type="System.String@Unknown" Value="625fccd585f6edc01a0dbb9605dee36815988eeba938e36c9e944b1bdb8bb02f" />
       <Path Type="System.String@Unknown" Value="raytracing_demo.scene/class_graph.dat" />
     </e_1>
   </AssetFiles>

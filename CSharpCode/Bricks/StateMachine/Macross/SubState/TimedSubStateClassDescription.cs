@@ -1,4 +1,4 @@
-﻿using EngineNS.Animation.Macross;
+using EngineNS.Animation.Macross;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.StateMachine.Macross.StateAttachment;
 using EngineNS.Bricks.StateMachine.Macross.StateTransition;
@@ -17,13 +17,13 @@ namespace EngineNS.Bricks.StateMachine.Macross.SubState
     public class TtTimedSubStateClassDescription : TtDesignableVariableDescription
     {
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public override string Name { get; set; } = "TimedSubState";
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool bInitialActive { get; set; } = false;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float Duration { get; set; } = 1;
         [DrawInGraph]
         [Rtti.Meta("")]

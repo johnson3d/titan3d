@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1804507769656516236 Type="EngineNS.Sequencer.Asset.TtSequenceBinding@EngineCore">
+  <BindingId Type="System.Guid@Unknown" Order="0" />
+  <DisplayName Type="System.String@Unknown" Order="0" />
+  <ParentNodeId Type="System.Guid@Unknown" Order="0" />
+  <RelativePath Type="System.String@Unknown" Order="0" />
+  <TargetNodeId Type="System.Guid@Unknown" Order="0" />
+  <Tracks Type="System.Collections.Generic.List&lt;EngineNS.Sequencer.Asset.TtSequenceTrack@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_1804507769656516236>

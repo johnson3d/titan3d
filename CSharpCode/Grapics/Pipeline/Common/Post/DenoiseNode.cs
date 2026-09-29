@@ -113,6 +113,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     //   history ping-pong: mHistoryTextures[2], 每帧 swap, 写 slot = frame % 2.
     // =========================================================================
     [Bricks.CodeBuilder.ContextMenu("Denoise", "Post\\Denoise", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.Post.UDenoiseNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.Post.UDenoiseNode" })]
     public class TtDenoiseNode : TAuxRenderGraphNode<TtDenoiseNode>
     {
         // ---------- Pins ----------
@@ -128,43 +129,43 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             EBufferType.BFT_SRV | EBufferType.BFT_UAV);
 
         // ---------- Tunable ----------
-        [Category("Denoise")]
+        [System.ComponentModel.Category("Denoise")]
         [Rtti.Meta("")]
         public int IterationCount { get; set; } = 4;
-        [Category("Denoise")]
+        [System.ComponentModel.Category("Denoise")]
         [Rtti.Meta("")]
         public float PhiColor { get; set; } = 1.0f;
         // PhiNormal 默认 32: cos15°^32 ≈ 0.33, 保留 ±15° 内邻域有显著权重.
         // 之前 128 太严苛 (cos10°^128 ≈ 0.14, cos15°^128 ≈ 0.012), 曲面上几乎所有
         // 邻域采样都被剔除, 等于完全不滤波 -> 萤火虫无法被平均掉.
-        [Category("Denoise")]
+        [System.ComponentModel.Category("Denoise")]
         [Rtti.Meta("")]
         public float PhiNormal { get; set; } = 32.0f;
-        [Category("Denoise")]
+        [System.ComponentModel.Category("Denoise")]
         [Rtti.Meta("")]
         public float PhiDepth { get; set; } = 1.0f;
         // Firefly clamp: ReSTIR resolve 偶发 outlier 可达几百~几千, à-trous 只会把它
         // 摊薄成"喷溅"而不是消除. shader 端在 center/sample 取色后做 luminance clamp,
         // 把超过 MaxLuminance 的像素亮度按比例压回. 默认 5.0 (经验值).
-        [Category("Denoise")]
+        [System.ComponentModel.Category("Denoise")]
         [Rtti.Meta("")]
         public float MaxLuminance { get; set; } = 5.0f;
 
         // ---------- Temporal ----------
         // EnableTemporal: 总开关. 即使打开, 若 MotionVector pin 未连入也会自动 fallback 到纯 spatial.
-        [Category("Temporal")]
+        [System.ComponentModel.Category("Temporal")]
         [Rtti.Meta("")]
         public bool EnableTemporal { get; set; } = true;
         // TemporalAlpha: 当前帧权重 (历史权重 = 1 - alpha).
         // 越小越稳但 ghosting 越强. 0.1 = 10% 当前帧 + 90% 历史, 是 SSR ReSTIR 推荐值.
-        [Category("Temporal")]
+        [System.ComponentModel.Category("Temporal")]
         [Rtti.Meta("")]
         public float TemporalAlpha { get; set; } = 0.1f;
         // 历史一致性阈值, 与 ReSTIR 同名字段语义一致.
-        [Category("Temporal")]
+        [System.ComponentModel.Category("Temporal")]
         [Rtti.Meta("")]
         public float TemporalNormalThreshold { get; set; } = 0.9f;
-        [Category("Temporal")]
+        [System.ComponentModel.Category("Temporal")]
         [Rtti.Meta("")]
         public float TemporalDepthThreshold { get; set; } = 0.05f;
 

@@ -1,4 +1,4 @@
-﻿using EngineNS.EGui.Controls;
+using EngineNS.EGui.Controls;
 using EngineNS.GamePlay.Scene;
 using EngineNS.IO;
 using NPOI.POIFS.Properties;
@@ -172,6 +172,9 @@ namespace EngineNS.Editor.Forms
         protected override bool OnDrawNode(INodeUIProvider parent, INodeUIProvider provider, int index, int NumOfChild)
         {
             var node = provider as GamePlay.Scene.TtNode;
+            if (node?.IsShowInOutliner == false)
+                return false;
+
             if (ShouldDrawEditorVisibilityToggle(node))
             {
                 DrawEditorVisibilityToggle(node);
@@ -208,9 +211,8 @@ namespace EngineNS.Editor.Forms
             // 节点是 GridLine, “把网格关掉”是常见需求。IsEditorVisible 存在 runtime style
             // 里, 不写进场景资产, 重开场景即恢复。
             //
-            // 但自己不画树行的节点 (IsShowInOutliner == false, 如 gizmo 的 AxisRootNode)
-            // 必须跳过: 眼睛是个真实 item, 画了眼睛却没有后续树行时, SameLine 会把它
-            // 推到下一个节点的行首 —— 就是 GridLine 行里出现两个眼睛的成因。
+            // 不显示在 Outliner 的节点会在 OnDrawNode 入口整体跳过。这里仍保留判断，
+            // 保证不会为这类内部辅助节点先画出眼睛，再把眼睛挤到下一节点的行首。
             return node != null && node.IsShowInOutliner;
         }
         protected virtual void DrawEditorVisibilityToggle(GamePlay.Scene.TtNode node)
@@ -234,7 +236,7 @@ namespace EngineNS.Editor.Forms
 
             if (hovered)
             {
-                ImGuiAPI.SetTooltip(visible ? "Hide in editor" : "Show in editor");
+                ImGuiAPI.SetTooltip(visible ? TtLocalization.Tr("Hide in editor") : TtLocalization.Tr("Show in editor"));
             }
         }
         static void DrawEditorVisibilityEyeIcon(in Vector2 itemMin, in Vector2 itemMax, bool visible, bool hovered)
@@ -463,15 +465,15 @@ namespace EngineNS.Editor.Forms
 
         protected virtual void DrawBaseMenu(GamePlay.Scene.TtNode node)
         {
-            if (ImGuiAPI.MenuItem($"Goto", null, false, true))
+            if (ImGuiAPI.MenuItem(TtLocalization.Tr("Goto"), null, false, true))
             {
                 FocusNodeInViewport(node);
             }
-            if (ImGuiAPI.MenuItem($"DoCommand", null, false, true))
+            if (ImGuiAPI.MenuItem(TtLocalization.Tr("DoCommand"), null, false, true))
             {
                 node.OnCommand("WorldOutliner");
             }
-            if (ImGuiAPI.BeginMenu("AddChild", true))
+            if (ImGuiAPI.BeginMenu(TtLocalization.Tr("AddChild"), true))
             {
                 var drawList = ImGuiAPI.GetWindowDrawList();
                 EGui.UIProxy.SearchBarProxy.OnDraw(ref mAddNodeMenuFilterFocused, in drawList, "search item", ref mAddNodeMenuFilterStr, -1);
@@ -480,7 +482,7 @@ namespace EngineNS.Editor.Forms
 
                 ImGuiAPI.EndMenu();
             }
-            if (ImGuiAPI.MenuItem($"Delete", null, false, true))
+            if (ImGuiAPI.MenuItem(TtLocalization.Tr("Delete"), null, false, true))
             {
                 if (World.Root != node)
                 {

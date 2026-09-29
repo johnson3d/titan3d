@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Algorithm\Voronoi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bezier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bezier\BezierCalculate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SplineRegion.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BoundingBox.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BoundingBox2D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BoundingCapsule.cs" />

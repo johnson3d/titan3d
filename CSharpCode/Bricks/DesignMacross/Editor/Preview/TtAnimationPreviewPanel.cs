@@ -148,11 +148,11 @@ namespace EngineNS.DesignMacross.Editor.Preview
         /// </summary>
         public void LoadModel(RName modelRName)
         {
-            if (mAssetState == EAssetState.Loading)
+            if (modelRName == null || mAssetState == EAssetState.Loading)
+                return;
+            if (modelRName == mPreivewMeshName && mCurrentMeshNode != null)
                 return;
             mPreivewMeshName = modelRName;
-            if (modelRName == null)
-                return;
             mAssetState = EAssetState.Loading;
             System.Action exec = async () =>
             {
@@ -162,8 +162,8 @@ namespace EngineNS.DesignMacross.Editor.Preview
                     mAssetState = EAssetState.LoadFailed;
                     return;
                 }
-                mAssetState = EAssetState.LoadFinished;
                 await OnPreviewModelChange(mesh);
+                mAssetState = EAssetState.LoadFinished;
                 // 参考TtAnimationClipEditor: 预览模型保存到TtDesignMacrossAMeta
                 if (mDesignMacross != null)
                 {
@@ -223,7 +223,7 @@ namespace EngineNS.DesignMacross.Editor.Preview
                 if (dmNode != null)
                 {
                     dmNode.NodeData.Name = "PreviewDMNode";
-                    dmNode.DesignMacross = mDesignMacross;
+                    // SpawnNode的OnPostInitNode已按NodeData初始化DesignMacross，避免再次赋值触发并发初始化。
                     mDesignMacrossNode = dmNode;
                 }
             }

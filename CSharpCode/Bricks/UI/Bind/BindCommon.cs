@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.WorldSimulator;
 using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.Rtti;
@@ -425,7 +425,7 @@ namespace EngineNS.UI.Bind
                         // has binded item
                         mCurrentBindBackgroundStart = ImGuiAPI.GetCursorScreenPos();
                         cmdList.AddRectFilled(in mCurrentBindBackgroundStart, in mCurrentBindBackgroundEnd, EGui.UIProxy.StyleConfig.Instance.PanelBackground, 0.0f, ImDrawFlags_.ImDrawFlags_None);
-                        ImGuiAPI.Text("Current Binds:");
+                        ImGuiAPI.Text(TtLocalization.Tr("Current Binds:"));
                         if(mBindingDatasIsSameOne)
                         {
                             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xff00ff00);
@@ -435,7 +435,7 @@ namespace EngineNS.UI.Bind
                         else
                         {
                             ImGuiAPI.SameLine(0, -1);
-                            ImGuiAPI.Text(" multi bindings!");
+                            ImGuiAPI.Text(TtLocalization.Tr(" multi bindings!"));
                         }
 
                         ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xff0000ff);
@@ -467,7 +467,7 @@ namespace EngineNS.UI.Bind
 
                         EGui.UIProxy.ComboBox.EndCombo();
                     }
-                    if (ImGuiAPI.TreeNodeEx("Create bind method", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf))
+                    if (ImGuiAPI.TreeNodeEx(TtLocalization.Tr("Create bind method"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf))
                     {
                         ImGuiAPI.TreePop();
                     }
@@ -589,7 +589,7 @@ namespace EngineNS.UI.Bind
                         }
                         ImGuiAPI.CloseCurrentPopup();
                     }
-                    if (ImGuiAPI.TreeNodeEx("Self", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
+                    if (ImGuiAPI.TreeNodeEx(TtLocalization.Tr("Self"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
                     {
                         int idx = 0;
                         foreach(var pro in host.HostEditor.UIAsset.MacrossEditor.DefClass.Properties)
@@ -640,7 +640,7 @@ namespace EngineNS.UI.Bind
 
                         ImGuiAPI.TreePop();
                     }
-                    if (ImGuiAPI.TreeNodeEx("UIControls", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
+                    if (ImGuiAPI.TreeNodeEx(TtLocalization.Tr("UIControls"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
                     {
                         int idx = 0;
                         DrawUIElementBindableProperty(firstElement, in cmdList, host, ref idx, mBindPopFilterString, info);
@@ -766,14 +766,14 @@ namespace EngineNS.UI.Bind
                 return;
             if(ImGuiAPI.TreeNodeEx(Editor.TtUIEditor.GetElementShowName(element) + "##" + idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
             {
-                if (ImGuiAPI.TreeNodeEx("Properties##" + idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
+                if (ImGuiAPI.TreeNodeEx(TtLocalization.Label("Properties", "##") + idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
                 {
                     element.TourBindProperties(ref data, BindPropertyTourAction);
                     ImGuiAPI.TreePop();
                 }
                 if(container != null && container.Children.Count > 0)
                 {
-                    if(ImGuiAPI.TreeNodeEx("Children##" + idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
+                    if(ImGuiAPI.TreeNodeEx(TtLocalization.Label("Children", "##") + idx, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth))
                     {
                         for(int i=0; i<container.Children.Count; i++)
                         {

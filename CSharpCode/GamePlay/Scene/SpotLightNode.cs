@@ -23,7 +23,7 @@ namespace EngineNS.GamePlay.Scene
 
             Vector3 mColor;
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [EGui.Controls.PropertyGrid.TtColor3PickerEditor()]
             public Vector3 Color
             {
@@ -36,17 +36,17 @@ namespace EngineNS.GamePlay.Scene
             }
 
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             public float Intensity { get; set; } = 1.0f;
 
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             public float Radius { get; set; } = 10.0f;
 
             float mInnerConeAngle = 25.0f;
             [Rtti.Meta("")]
-            [Category("Option")]
-            [Description("Inner cone half-angle in degrees (full intensity region)")]
+            [System.ComponentModel.Category("Option")]
+            [System.ComponentModel.Description("Inner cone half-angle in degrees (full intensity region)")]
             public float InnerConeAngle
             {
                 get => mInnerConeAngle;
@@ -55,8 +55,8 @@ namespace EngineNS.GamePlay.Scene
 
             float mOuterConeAngle = 45.0f;
             [Rtti.Meta("")]
-            [Category("Option")]
-            [Description("Outer cone half-angle in degrees (falloff boundary)")]
+            [System.ComponentModel.Category("Option")]
+            [System.ComponentModel.Description("Outer cone half-angle in degrees (falloff boundary)")]
             public float OuterConeAngle
             {
                 get => mOuterConeAngle;
@@ -78,7 +78,7 @@ namespace EngineNS.GamePlay.Scene
             return ret;
         }
 
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public TtSpotLightNodeData LightData
         {
             get => GetNodeData<TtSpotLightNodeData>();

@@ -109,7 +109,7 @@ namespace EngineNS.GamePlay.Scene
             /// 对应 UE 的 MaterialDomain=Deferred Decal。为空时贴花不渲染。
             /// </summary>
             [Rtti.Meta("")]
-            [Category("Material")]
+            [System.ComponentModel.Category("Material")]
             [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtMaterial.AssetExt)]
             public RName DecalMaterial
             {
@@ -128,7 +128,7 @@ namespace EngineNS.GamePlay.Scene
             #region Blend
             /// <summary>base color 通道的混合权重 (0 = 不改颜色)。</summary>
             [Rtti.Meta("")]
-            [Category("Blend")]
+            [System.ComponentModel.Category("Blend")]
             public float ColorWeight { get; set; } = 1.0f;
 
             /// <summary>
@@ -136,19 +136,19 @@ namespace EngineNS.GamePlay.Scene
             /// 仅在材质 <c>DecalMode == WithNormal</c> 时生效。
             /// </summary>
             [Rtti.Meta("")]
-            [Category("Blend")]
+            [System.ComponentModel.Category("Blend")]
             public float NormalWeight { get; set; } = 1.0f;
 
             /// <summary>Roughness / Metallic / Specular 通道的混合权重 (0 = 不改)。</summary>
             [Rtti.Meta("")]
-            [Category("Blend")]
+            [System.ComponentModel.Category("Blend")]
             public float MaterialWeight { get; set; } = 0.0f;
 
             /// <summary>
             /// 排序序号。同一像素上数值小的先投影、数值大的后投影 (后者盖在前者上面)。
             /// </summary>
             [Rtti.Meta("")]
-            [Category("Blend")]
+            [System.ComponentModel.Category("Blend")]
             public int SortOrder { get; set; } = 0;
             #endregion
 
@@ -158,22 +158,22 @@ namespace EngineNS.GamePlay.Scene
             /// 避免贴花在侧壁上被拉伸。
             /// </summary>
             [Rtti.Meta("")]
-            [Category("Fade")]
+            [System.ComponentModel.Category("Fade")]
             public float AngleFadeDegree { get; set; } = 80.0f;
 
             /// <summary>盒体边缘淡出比例 (0~0.5, 局域单位)。0 = 硬边。</summary>
             [Rtti.Meta("")]
-            [Category("Fade")]
+            [System.ComponentModel.Category("Fade")]
             public float EdgeFade { get; set; } = 0.1f;
 
             /// <summary>开始按距离淡出的距离 (米)。</summary>
             [Rtti.Meta("")]
-            [Category("Fade")]
+            [System.ComponentModel.Category("Fade")]
             public float FadeStartDistance { get; set; } = 60.0f;
 
             /// <summary>完全淡出的距离 (米)。</summary>
             [Rtti.Meta("")]
-            [Category("Fade")]
+            [System.ComponentModel.Category("Fade")]
             public float FadeEndDistance { get; set; } = 80.0f;
             #endregion
 
@@ -251,7 +251,7 @@ namespace EngineNS.GamePlay.Scene
         // 不需要额外的状态刷新。
 
         /// <summary>见 <see cref="TtDecalNodeData.DecalMaterial"/>。</summary>
-        [Category("Material")]
+        [System.ComponentModel.Category("Material")]
         [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtMaterial.AssetExt)]
         public RName DecalMaterial
         {
@@ -266,7 +266,7 @@ namespace EngineNS.GamePlay.Scene
         }
 
         /// <summary>见 <see cref="TtDecalNodeData.ColorWeight"/>。</summary>
-        [Category("Blend")]
+        [System.ComponentModel.Category("Blend")]
         public float ColorWeight
         {
             get => DecalData.ColorWeight;
@@ -274,7 +274,7 @@ namespace EngineNS.GamePlay.Scene
         }
 
         /// <summary>见 <see cref="TtDecalNodeData.NormalWeight"/>。</summary>
-        [Category("Blend")]
+        [System.ComponentModel.Category("Blend")]
         public float NormalWeight
         {
             get => DecalData.NormalWeight;
@@ -282,7 +282,7 @@ namespace EngineNS.GamePlay.Scene
         }
 
         /// <summary>见 <see cref="TtDecalNodeData.MaterialWeight"/>。</summary>
-        [Category("Blend")]
+        [System.ComponentModel.Category("Blend")]
         public float MaterialWeight
         {
             get => DecalData.MaterialWeight;
@@ -290,7 +290,7 @@ namespace EngineNS.GamePlay.Scene
         }
 
         /// <summary>见 <see cref="TtDecalNodeData.SortOrder"/>。</summary>
-        [Category("Blend")]
+        [System.ComponentModel.Category("Blend")]
         public int SortOrder
         {
             get => DecalData.SortOrder;
@@ -298,7 +298,7 @@ namespace EngineNS.GamePlay.Scene
         }
 
         /// <summary>见 <see cref="TtDecalNodeData.AngleFadeDegree"/>。</summary>
-        [Category("Fade")]
+        [System.ComponentModel.Category("Fade")]
         public float AngleFadeDegree
         {
             get => DecalData.AngleFadeDegree;
@@ -306,7 +306,7 @@ namespace EngineNS.GamePlay.Scene
         }
 
         /// <summary>见 <see cref="TtDecalNodeData.EdgeFade"/>。</summary>
-        [Category("Fade")]
+        [System.ComponentModel.Category("Fade")]
         public float EdgeFade
         {
             get => DecalData.EdgeFade;
@@ -314,7 +314,7 @@ namespace EngineNS.GamePlay.Scene
         }
 
         /// <summary>见 <see cref="TtDecalNodeData.FadeStartDistance"/>。</summary>
-        [Category("Fade")]
+        [System.ComponentModel.Category("Fade")]
         public float FadeStartDistance
         {
             get => DecalData.FadeStartDistance;
@@ -322,7 +322,7 @@ namespace EngineNS.GamePlay.Scene
         }
 
         /// <summary>见 <see cref="TtDecalNodeData.FadeEndDistance"/>。</summary>
-        [Category("Fade")]
+        [System.ComponentModel.Category("Fade")]
         public float FadeEndDistance
         {
             get => DecalData.FadeEndDistance;

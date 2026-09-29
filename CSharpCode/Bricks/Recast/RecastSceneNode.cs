@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.NodeGraph;
+using EngineNS.Bricks.NodeGraph;
 using EngineNS.Bricks.PhysicsCore;
 using EngineNS.GamePlay;
 using System;
@@ -38,7 +38,7 @@ namespace EngineNS.Bricks.Recast
             public override bool OnDraw(in EditorInfo info, out object newValue)
             {
                 newValue = info.Value;
-                if (ImGuiAPI.Button("BuildNavMesh", in Vector2.Zero))
+                if (ImGuiAPI.Button(TtLocalization.Tr("BuildNavMesh"), in Vector2.Zero))
                 {
                     //var lst = info.ObjectInstance as List<TtRecastSceneNode>;
                     //if (lst != null)
@@ -65,7 +65,7 @@ namespace EngineNS.Bricks.Recast
             }
         }
         [NavMeshAttribute]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool NavMeshBuilder
         {
             get => true;
@@ -74,7 +74,7 @@ namespace EngineNS.Bricks.Recast
         {
             get => mNavMesh;
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public override Guid NodeId
         {
             get

@@ -1,4 +1,4 @@
-﻿namespace NS_tutorials.material
+namespace NS_tutorials.material
 {
     [EngineNS.Macross.TtMacross]
     [EngineNS.Macross.TtMacrossSign(RName_Name = "tutorials/material/test_material.macross", RName_Type = EngineNS.RName.ERNameType.Game)]

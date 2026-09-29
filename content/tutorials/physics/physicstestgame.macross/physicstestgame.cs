@@ -1,4 +1,4 @@
-﻿namespace NS_tutorials.physics
+namespace NS_tutorials.physics
 {
     [EngineNS.Macross.TtMacross]
     [EngineNS.Macross.TtMacrossSign(RName_Name = "tutorials/physics/physicstestgame.macross", RName_Type = EngineNS.RName.ERNameType.Game)]

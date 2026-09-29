@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -85,7 +85,7 @@ namespace EngineNS.GamePlay
                     sz.X++;
                     sz.Y++;
                 }
-                ImGuiAPI.InvisibleButton("ViewportClient", &sz, ImGuiButtonFlags_.ImGuiButtonFlags_None);
+                ImGuiAPI.InvisibleButton(TtLocalization.Tr("ViewportClient"), &sz, ImGuiButtonFlags_.ImGuiButtonFlags_None);
                 if (min != ClientMin || max != ClientMax)
                 {
                     mClientChanged = true;

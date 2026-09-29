@@ -18,14 +18,14 @@ namespace EngineNS.GamePlay.Scene
             /// <summary>
             /// Higher priority volumes override lower ones when multiple overlap.
             /// </summary>
-            [Category("Volume")]
+            [System.ComponentModel.Category("Volume")]
             [Rtti.Meta("")]
             public int Priority { get; set; } = 0;
 
             /// <summary>
             /// Blend weight (0 = no effect, 1 = full effect).
             /// </summary>
-            [Category("Volume")]
+            [System.ComponentModel.Category("Volume")]
             [Rtti.Meta("")]
             [EGui.Controls.PropertyGrid.TtValueChangeStep(0.05f)]
             public float BlendWeight { get; set; } = 1.0f;
@@ -33,7 +33,7 @@ namespace EngineNS.GamePlay.Scene
             /// <summary>
             /// Blend radius in world units for smooth transitions at volume boundaries. 0 = hard cut.
             /// </summary>
-            [Category("Volume")]
+            [System.ComponentModel.Category("Volume")]
             [Rtti.Meta("")]
             [EGui.Controls.PropertyGrid.TtValueChangeStep(0.5f)]
             public float BlendRadius { get; set; } = 0.0f;
@@ -41,7 +41,7 @@ namespace EngineNS.GamePlay.Scene
             /// <summary>
             /// If true, volume affects the entire world regardless of spatial bounds.
             /// </summary>
-            [Category("Volume")]
+            [System.ComponentModel.Category("Volume")]
             [Rtti.Meta("")]
             public bool IsUnbound { get; set; } = false;
         }

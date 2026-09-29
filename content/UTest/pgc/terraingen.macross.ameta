@@ -1,18 +1,29 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Bricks.CodeBuilder.UMacrossAMeta@EngineCore">
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.CodeBuilder.TtMacrossAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="124b6aedd477e409d6b5fc215be1e684a45de93d2520e60db3ea5a3c2ebeed67" />
+      <Path Type="System.String@Unknown" Value="terraingen.macross/class_graph.dat" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="359e48ccb8832af9572dd3fae3927fa0dbdac6ad6f8a58da3e1f268ddf22edee" />
+      <Path Type="System.String@Unknown" Value="terraingen.macross/[o]onnodeinitialized_76_7a_d0_fb_ef_4d_0c_63_29_4b_3b_d3_24_f2_0a_e1_d8_41_52_71.fn" />
+    </e_1>
+  </AssetFiles>
   <AssetId Type="System.Guid@Unknown" Value="318c3ff6-c3c8-4e00-bb54-c3c2abaa73a2" />
-  <BaseTypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.UPgcGraphProgram@EngineCore" />
-  <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.CodeBuilder.UMacross&#xA;Hahah" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/pgc/terraingen.macross,318c3ff6-c3c8-4e00-bb54-c3c2abaa73a2" />
+  <BaseTypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.TtPgcGraphProgram@EngineCore" />
+  <Description Type="System.String@Unknown" Value="MacrossType:EngineNS.Bricks.Procedure.TtPgcGraphProgram@EngineCore&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
       <e_0 Value="0,0,1,1" />
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
-    <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
-    <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   </Icon>
+  <IsDisable Type="System.Boolean@Unknown" Value="False" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.CodeBuilder.UMacross@EngineCore" />
   <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.CodeBuilder.UMacross@EngineCore" />
 </Root>

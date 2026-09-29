@@ -1,4 +1,4 @@
-﻿using EngineNS.GamePlay.Character;
+using EngineNS.GamePlay.Character;
 using EngineNS.IO;
 using EngineNS.Rtti;
 using NPOI.SS.UserModel;
@@ -78,7 +78,7 @@ namespace EngineNS.Editor
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm("MetaViewer", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(TtLocalization.Label("MetaViewer", "###MetaViewer"), this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (IsDrawing)
             {
                 WindowPos = ImGuiAPI.GetWindowPos();
@@ -217,8 +217,8 @@ namespace EngineNS.Editor
                 DrawTree(null,RootNode, 0);
 
                 ImGuiAPI.Separator();
-                ImGuiAPI.Text($"Total Version Count: {TotalVersionCount}");
-                ImGuiAPI.Text($"Used Version Count: {UsedVersionCount}");
+                ImGuiAPI.Text(TtLocalization.Format("Total Version Count: {0}", TotalVersionCount));
+                ImGuiAPI.Text(TtLocalization.Format("Used Version Count: {0}", UsedVersionCount));
             }
             public override void OnNodeUI_LClick(INodeUIProvider provider)
             {

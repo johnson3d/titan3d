@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -12,7 +12,7 @@ namespace EngineNS.GamePlay
     {
         public Graphics.Pipeline.Shader.FDirLight mDirLight;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector3 Direction
         {
             get => mDirLight.Direction;
@@ -21,7 +21,7 @@ namespace EngineNS.GamePlay
 
         [EGui.Controls.PropertyGrid.TtColor3PickerEditor]
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector3 SunLightColor
         {
             get => mDirLight.SunLightColor;
@@ -32,7 +32,7 @@ namespace EngineNS.GamePlay
         }
         [EGui.Controls.PropertyGrid.TtColor3PickerEditor]
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector3 SkyLightColor
         {
             get => mDirLight.SkyLightColor;
@@ -43,7 +43,7 @@ namespace EngineNS.GamePlay
         }
         [EGui.Controls.PropertyGrid.TtColor3PickerEditor]
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector3 GroundLightColor
         {
             get => mDirLight.GroundLightColor;
@@ -53,7 +53,7 @@ namespace EngineNS.GamePlay
             }
         }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public float SunLightIntensity
         {
             get => mDirLight.SunLightIntensity;

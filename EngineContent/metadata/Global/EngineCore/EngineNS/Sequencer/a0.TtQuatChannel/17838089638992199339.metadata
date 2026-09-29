@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_17838089638992199339 Type="EngineNS.Sequencer.TtQuatChannel@EngineCore">
+  <DefaultValue Type="EngineNS.Quaternion@EngineCore" Order="0" />
+  <IsStepped Type="System.Boolean@Unknown" Order="0" />
+  <Times Type="System.Collections.Generic.List&lt;System.Int64@Unknown,&gt;@Unknown" Order="0" />
+  <Values Type="System.Collections.Generic.List&lt;EngineNS.Quaternion@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_17838089638992199339>

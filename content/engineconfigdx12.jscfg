@@ -62,6 +62,7 @@
   "EditorFont": "fonts/NotoSansSC-Regular.otf:Engine",
   "EditorSmallFont": "fonts/NotoSansSC-Regular.otf:Engine",
   "EditorEffectFont": "fonts/fa-solid-900.ttf:Engine",
+  "EditorLanguage": "zh-CN",
   "UIDefaultTexture": "texture/white.srv:Engine",
   "IsWriteShaderDebugFile": false,
   "SaveSnapshotInAssetDir": false,

@@ -133,6 +133,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
     [Bricks.CodeBuilder.ContextMenu("AntiAliasing", "Post\\AntiAliasing", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UAntiAliasingNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UAntiAliasingNode" })]
     public class TtAntiAliasingNode : TAuxSceenSpaceNode<TtAntiAliasingNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);

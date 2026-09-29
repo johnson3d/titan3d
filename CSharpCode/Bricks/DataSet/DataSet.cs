@@ -88,7 +88,7 @@ namespace EngineNS.Bricks.DataSet
                         dataset.DataType = TypeSlt.SelectedType;
                     }
                     var sz = new Vector2(-1, 0);
-                    if (ImGuiAPI.Button("Select XLS", in sz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Select XLS"), in sz))
                     {
                         mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".xlsx", ".");
                     }
@@ -107,12 +107,12 @@ namespace EngineNS.Bricks.DataSet
                     if (bFileExisting)
                     {
                         var clr = new Vector4(1, 0, 0, 1);
-                        ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
+                        ImGuiAPI.TextColored(in clr, TtLocalization.Format("Source:{0}", mSourceFile));
                     }
                     else
                     {
                         var clr = new Vector4(1, 1, 1, 1);
-                        ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
+                        ImGuiAPI.TextColored(in clr, TtLocalization.Format("Source:{0}", mSourceFile));
                     }
                     ImGuiAPI.Separator();
                     using (var buffer = BigStackBuffer.CreateInstance(128))
@@ -130,7 +130,7 @@ namespace EngineNS.Bricks.DataSet
                     var btSz = Vector2.Zero;
                     if (bFileExisting == false)
                     {
-                        if (ImGuiAPI.Button("Create Asset", in btSz))
+                        if (ImGuiAPI.Button(TtLocalization.Tr("Create Asset"), in btSz))
                         {
                             if (ImportDataSet())
                             {
@@ -140,7 +140,7 @@ namespace EngineNS.Bricks.DataSet
                         }
                         ImGuiAPI.SameLine(0, 20);
                     }
-                    if (ImGuiAPI.Button("Cancel", in btSz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Cancel"), in btSz))
                     {
                         ImGuiAPI.CloseCurrentPopup();
                         retValue = true;
@@ -502,6 +502,8 @@ namespace EngineNS.Bricks.DataSet
             var ameta = name.AMeta as TtDataSetAMeta;
             if (ameta == null)
                 return false;
+            if (ameta.DataType == null)
+                return false;
             DataSet = new TtDataSet();
             DataSet.DataType = ameta.DataType;
             DataSet.LoadDataSet(name, ameta.DataType.SystemType);
@@ -611,9 +613,9 @@ namespace EngineNS.Bricks.DataSet
                     if (i==null)
                         continue;
                     if (prop != null)
-                        ImGuiAPI.Text($"{prop.GetValue(i)}");
+                        ImGuiAPI.Text(TtLocalization.Format("{0}", prop.GetValue(i)));
                     else
-                        ImGuiAPI.Text($"{n}");
+                        ImGuiAPI.Text(TtLocalization.Format("{0}", n));
                     if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                     {
                         DataPropGrid.Target = i;

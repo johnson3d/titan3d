@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
@@ -55,6 +55,22 @@ namespace EngineNS.Editor.Forms
                 ShowInteractiveModeCombo = false;
             }
 
+            public override void OnHitproxyDoubleClick(Graphics.Pipeline.IProxiable proxy)
+            {
+                if (proxy is TtBezierSplineNode.TtSplinePoint splineElement)
+                {
+                    var owner = splineElement.OwnerNode;
+                    if (owner == null)
+                        return;
+                    // 单击控制点进入子元素编辑；双击则退出该编辑状态并恢复所属节点的
+                    // Outliner、Inspector、描边与 Gizmo 选择。
+                    OnHitproxySelectedMulti(true, owner);
+                    owner.OnDoubleClick();
+                    return;
+                }
+                base.OnHitproxyDoubleClick(proxy);
+            }
+
             public override void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
             {
                 // 点击视口空白处 (proxy == null) 时, 拾取没命中任何对象。
@@ -73,6 +89,11 @@ namespace EngineNS.Editor.Forms
                 // 的语义, 应另走显式路径 (Esc / 右键菜单), 不要再绑回易误触的左键空白点。
                 if (proxy == null)
                     return;
+                if (proxy is TtBezierSplineNode.TtSplinePoint)
+                {
+                    OnHitproxySelectedMulti(true, proxy);
+                    return;
+                }
 
                 if(TtEngine.Instance.InputSystem.IsCtrlKeyDown())
                 {
@@ -120,6 +141,17 @@ namespace EngineNS.Editor.Forms
             }
             public override void OnHitproxyUnSelectedMulti(params IProxiable[] proxies)
             {
+                if (proxies != null)
+                {
+                    for (int i = 0; i < proxies.Length; i++)
+                    {
+                        if (proxies[i] is TtBezierSplineNode.TtSplinePoint)
+                        {
+                            HostEditor?.ClearSplineElementSelection(true);
+                            return;
+                        }
+                    }
+                }
                 base.OnHitproxyUnSelectedMulti(proxies);
 
                 foreach(var prox in proxies)
@@ -134,6 +166,18 @@ namespace EngineNS.Editor.Forms
             }
             public override void OnHitproxySelectedMulti(bool clearPre, params IProxiable[] proxies)
             {
+                if (proxies != null)
+                {
+                    for (int i = 0; i < proxies.Length; i++)
+                    {
+                        if (proxies[i] is TtBezierSplineNode.TtSplinePoint splineElement)
+                        {
+                            HostEditor?.SelectSplineElement(splineElement);
+                            return;
+                        }
+                    }
+                }
+                HostEditor?.ClearSplineElementSelection(false);
                 base.OnHitproxySelectedMulti(clearPre, proxies);
 
                 if (proxies == null || proxies.Length == 0)
@@ -275,6 +319,7 @@ namespace EngineNS.Editor.Forms
         // (TtWorldOutliner.DrawAsChildWindow / OnDraw)。
         public void DeselectAll()
         {
+            ClearSplineElementSelection(false);
             if (mWorldOutliner != null)
             {
                 var selected = mWorldOutliner.SelectedNodes;
@@ -304,7 +349,7 @@ namespace EngineNS.Editor.Forms
 
             PreviewViewport?.Axis?.SetSelectedNodes(mWorldOutliner?.SelectedNodes);
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [ReadOnly(true)]
         public RName AssetName { get; set; }
         protected bool mVisible = true;
@@ -381,10 +426,322 @@ namespace EngineNS.Editor.Forms
         }
         #endregion
 
-        [Category("Option")]
+        #region 贝塞尔样条控制点编辑
+        TtNode mSplineAxisProxyNode;
+        TtBezierSplineNode.TtSplinePoint mActiveSplineElement;
+        TtBezier3DSplineSnapshot mSplineDragBefore;
+        TtAxis.enAxisOperationType mSplinePreviousAxisOperation;
+        bool mEditingSplineElement;
+
+        internal TtBezierSplineNode.TtSplinePoint ActiveSplineElement => mActiveSplineElement;
+
+        async Thread.Async.TtTask InitializeSplineEditing()
+        {
+            if (mSplineAxisProxyNode != null || Scene == null)
+                return;
+            var nodeData = new TtNodeData
+            {
+                Name = "SplineAxisProxy",
+                HitproxyType = TtHitProxy.EHitproxyType.None,
+            };
+            mSplineAxisProxyNode = await TtNode.SpawnNode<TtNode>(
+                PreviewViewport.World.Root, null, nodeData, EBoundVolumeType.None, typeof(TtPlacement), PreviewViewport.World);
+            mSplineAxisProxyNode.SetStyle(TtNode.ENodeStyles.SelfInvisible |
+                TtNode.ENodeStyles.NoPickedDraw | TtNode.ENodeStyles.Transient);
+            mSplineAxisProxyNode.SetRuntimeStyle(TtNode.ENodeRuntimeStyles.HideInOutliner);
+
+            var axis = PreviewViewport?.Axis;
+            if (axis != null)
+            {
+                axis.TransformStarted += OnSplineTransformStarted;
+                axis.TransformEnded += OnSplineTransformEnded;
+            }
+        }
+
+        void DisposeSplineEditing()
+        {
+            var axis = PreviewViewport?.Axis;
+            if (axis != null)
+            {
+                axis.TransformStarted -= OnSplineTransformStarted;
+                axis.TransformEnded -= OnSplineTransformEnded;
+                axis.EnableTransformHistory = true;
+            }
+            mActiveSplineElement = null;
+            mSplineDragBefore = null;
+            if (mSplineAxisProxyNode != null)
+            {
+                mSplineAxisProxyNode.Parent = null;
+                mSplineAxisProxyNode.Dispose();
+                mSplineAxisProxyNode = null;
+            }
+        }
+
+        internal void SelectSplineElement(TtBezierSplineNode.TtSplinePoint element)
+        {
+            var owner = element?.OwnerNode;
+            if (owner == null || element.PointIndex < 0 || element.PointIndex >= owner.Spline.PointCount)
+                return;
+
+            if (mActiveSplineElement != null && mActiveSplineElement != element)
+                mActiveSplineElement.Selected = false;
+            mActiveSplineElement = element;
+
+            var selected = mWorldOutliner.SelectedNodes;
+            for (int i = 0; i < selected.Count; i++)
+            {
+                if (selected[i] != owner)
+                    selected[i].Selected = false;
+            }
+            selected.Clear();
+            owner.Selected = true;
+            selected.Add(owner);
+            NodeInspector.Target = selected;
+
+            var pickedManager = (RenderPolicy as TtRenderPolicy)?.PickedProxiableManager;
+            pickedManager?.ClearSelected();
+            pickedManager?.Selected(element);
+            owner.UpdateSplineMesh();
+
+            if (mSplineAxisProxyNode == null)
+                return;
+            if (!mEditingSplineElement)
+            {
+                mSplinePreviousAxisOperation = PreviewViewport.Axis.AxisOperationType;
+                mEditingSplineElement = true;
+            }
+            mSplineAxisProxyNode.Parent = PreviewViewport.World.Root;
+            var localPosition = element.Position.AsDVector();
+            mSplineAxisProxyNode.Placement.Position = owner.Placement.AbsTransform.TransformPosition(in localPosition);
+            mSplineAxisProxyNode.Placement.Quat = Quaternion.Identity;
+            mSplineAxisProxyNode.Placement.Scale = Vector3.One;
+            PreviewViewport.Axis.EnableTransformHistory = false;
+            PreviewViewport.Axis.SetAxisOperationType(TtAxis.enAxisOperationType.Move);
+            PreviewViewport.Axis.SetSelectedNodes(new List<TtNode> { mSplineAxisProxyNode });
+        }
+
+        internal void ClearSplineElementSelection(bool restoreNodeAxis)
+        {
+            var oldOwner = mActiveSplineElement?.OwnerNode;
+            if (mActiveSplineElement != null)
+                mActiveSplineElement.Selected = false;
+            mActiveSplineElement = null;
+            mSplineDragBefore = null;
+
+            if (mSplineAxisProxyNode != null && PreviewViewport?.World?.Root != null)
+                mSplineAxisProxyNode.Parent = PreviewViewport.World.Root;
+            var axis = PreviewViewport?.Axis;
+            if (axis != null)
+            {
+                axis.EnableTransformHistory = true;
+                if (mEditingSplineElement)
+                    axis.SetAxisOperationType(mSplinePreviousAxisOperation);
+                if (restoreNodeAxis)
+                    axis.SetSelectedNodes(mWorldOutliner?.SelectedNodes);
+            }
+            mEditingSplineElement = false;
+            oldOwner?.RequestVisualRefresh();
+        }
+
+        void OnSplineTransformStarted()
+        {
+            var owner = mActiveSplineElement?.OwnerNode;
+            if (owner != null)
+                mSplineDragBefore = owner.Spline.CreateSnapshot();
+        }
+
+        void OnSplineTransformEnded()
+        {
+            SyncSplineControlFromAxis();
+            var owner = mActiveSplineElement?.OwnerNode;
+            if (owner == null || mSplineDragBefore == null)
+                return;
+            var after = owner.Spline.CreateSnapshot();
+            if (!SplineSnapshotsEqual(mSplineDragBefore, after))
+            {
+                RecordSplineSnapshotCommand(TtLocalization.Tr("Move Spline Control"), owner,
+                    mSplineDragBefore, after,
+                    mActiveSplineElement.PointIndex, mActiveSplineElement.ElementKind,
+                    mActiveSplineElement.IsLeftTangent,
+                    mActiveSplineElement.PointIndex, mActiveSplineElement.ElementKind,
+                    mActiveSplineElement.IsLeftTangent);
+            }
+            mSplineDragBefore = null;
+        }
+
+        internal void SyncSplineControlFromAxis()
+        {
+            var element = mActiveSplineElement;
+            var owner = element?.OwnerNode;
+            if (owner == null || mSplineAxisProxyNode == null || !mEditingSplineElement)
+                return;
+            var worldPosition = mSplineAxisProxyNode.Placement.AbsTransform.mPosition;
+            var localPosition = owner.Placement.AbsTransform.InverseTransformPosition(in worldPosition).ToSingleVector3();
+            if ((localPosition - element.Position).LengthSquared() < 1e-12f)
+                return;
+            owner.SetControlPosition(element.PointIndex, element.ElementKind, element.IsLeftTangent, in localPosition);
+        }
+
+        internal TtBezierSplineNode GetSelectedSplineNode()
+        {
+            if (mActiveSplineElement?.OwnerNode != null)
+                return mActiveSplineElement.OwnerNode;
+            var selected = mWorldOutliner?.SelectedNodes;
+            if (selected != null && selected.Count == 1)
+                return selected[0] as TtBezierSplineNode;
+            return null;
+        }
+
+        internal bool InsertSplinePointAfterSelection()
+        {
+            var element = mActiveSplineElement;
+            return InsertSplinePointAfter(element?.OwnerNode, element?.PointIndex ?? -1,
+                element?.ElementKind ?? TtBezierSplineNode.ESplineElementKind.Anchor,
+                element?.IsLeftTangent ?? false);
+        }
+
+        internal bool InsertSplinePointAfter(TtBezierSplineNode owner, int pointIndex,
+            TtBezierSplineNode.ESplineElementKind oldKind, bool oldIsLeftTangent)
+        {
+            if (owner?.Spline == null || pointIndex < 0 || pointIndex >= owner.Spline.PointCount)
+                return false;
+            var before = owner.Spline.CreateSnapshot();
+            var newIndex = owner.InsertPointAfter(pointIndex);
+            if (newIndex < 0)
+                return false;
+            var after = owner.Spline.CreateSnapshot();
+            RecordSplineSnapshotCommand(TtLocalization.Tr("Insert Spline Point"), owner, before, after,
+                pointIndex, oldKind, oldIsLeftTangent,
+                newIndex, TtBezierSplineNode.ESplineElementKind.Anchor, false);
+            SelectSplineElement(owner.FindControlProxy(newIndex, TtBezierSplineNode.ESplineElementKind.Anchor));
+            return true;
+        }
+
+        internal bool AppendSplinePoint()
+        {
+            var owner = GetSelectedSplineNode();
+            var element = mActiveSplineElement;
+            if (element?.OwnerNode != owner)
+                element = null;
+            return AppendSplinePoint(owner,
+                element?.PointIndex ?? Math.Max(0, (owner?.Spline?.PointCount ?? 1) - 1),
+                element?.ElementKind ?? TtBezierSplineNode.ESplineElementKind.Anchor,
+                element?.IsLeftTangent ?? false);
+        }
+
+        internal bool AppendSplinePoint(TtBezierSplineNode owner, int oldIndex,
+            TtBezierSplineNode.ESplineElementKind oldKind, bool oldIsLeftTangent)
+        {
+            if (owner?.Spline == null)
+                return false;
+            oldIndex = Math.Max(0, Math.Min(oldIndex, owner.Spline.PointCount - 1));
+            var before = owner.Spline.CreateSnapshot();
+            var newIndex = owner.AppendLinearPoint();
+            if (newIndex < 0)
+                return false;
+            var after = owner.Spline.CreateSnapshot();
+            RecordSplineSnapshotCommand(TtLocalization.Tr("Append Spline Point"), owner, before, after,
+                oldIndex, oldKind, oldIsLeftTangent,
+                newIndex, TtBezierSplineNode.ESplineElementKind.Anchor, false);
+            SelectSplineElement(owner.FindControlProxy(newIndex, TtBezierSplineNode.ESplineElementKind.Anchor));
+            return true;
+        }
+
+        internal bool DeleteSelectedSplinePoint()
+        {
+            var element = mActiveSplineElement;
+            if (element?.ElementKind != TtBezierSplineNode.ESplineElementKind.Anchor)
+                return false;
+            return DeleteSplinePoint(element.OwnerNode, element.PointIndex);
+        }
+
+        internal bool DeleteSplinePoint(TtBezierSplineNode owner, int pointIndex)
+        {
+            var minimumCount = owner?.Spline?.IsClosed == true ? 3 : 2;
+            if (owner?.Spline == null || pointIndex < 0 || pointIndex >= owner.Spline.PointCount ||
+                owner.Spline.PointCount <= minimumCount)
+                return false;
+            var before = owner.Spline.CreateSnapshot();
+            if (!owner.RemovePoint(pointIndex))
+                return false;
+            var newIndex = Math.Min(pointIndex, owner.Spline.PointCount - 1);
+            var after = owner.Spline.CreateSnapshot();
+            RecordSplineSnapshotCommand(TtLocalization.Tr("Delete Spline Point"), owner, before, after,
+                pointIndex, TtBezierSplineNode.ESplineElementKind.Anchor, false,
+                newIndex, TtBezierSplineNode.ESplineElementKind.Anchor, false);
+            SelectSplineElement(owner.FindControlProxy(newIndex, TtBezierSplineNode.ESplineElementKind.Anchor));
+            return true;
+        }
+
+        internal bool ToggleSelectedSplineClosed()
+        {
+            var owner = GetSelectedSplineNode();
+            return ToggleSplineClosed(owner, mActiveSplineElement?.PointIndex ?? 0);
+        }
+
+        internal bool ToggleSplineClosed(TtBezierSplineNode owner, int pointIndex)
+        {
+            if (owner?.Spline == null || (!owner.Spline.IsClosed && owner.Spline.PointCount < 3))
+                return false;
+            var before = owner.Spline.CreateSnapshot();
+            owner.IsClosed = !owner.IsClosed;
+            var after = owner.Spline.CreateSnapshot();
+            pointIndex = Math.Max(0, Math.Min(pointIndex, owner.Spline.PointCount - 1));
+            RecordSplineSnapshotCommand(owner.IsClosed ? TtLocalization.Tr("Close Spline") :
+                TtLocalization.Tr("Open Spline"), owner, before, after,
+                pointIndex, TtBezierSplineNode.ESplineElementKind.Anchor, false,
+                pointIndex, TtBezierSplineNode.ESplineElementKind.Anchor, false);
+            SelectSplineElement(owner.FindControlProxy(pointIndex, TtBezierSplineNode.ESplineElementKind.Anchor));
+            return true;
+        }
+
+        void RecordSplineSnapshotCommand(string name, TtBezierSplineNode owner,
+            TtBezier3DSplineSnapshot before, TtBezier3DSplineSnapshot after,
+            int undoIndex, TtBezierSplineNode.ESplineElementKind undoKind, bool undoIsLeftTangent,
+            int redoIndex, TtBezierSplineNode.ESplineElementKind redoKind, bool redoIsLeftTangent)
+        {
+            var history = EditorHistory;
+            if (history == null || history.IsApplying || SplineSnapshotsEqual(before, after))
+                return;
+            history.PushCommand(new Infrastructure.TtDelegateCommand(name,
+                () => ApplySplineSnapshot(owner, after, redoIndex, redoKind, redoIsLeftTangent),
+                () => ApplySplineSnapshot(owner, before, undoIndex, undoKind, undoIsLeftTangent)));
+        }
+
+        void ApplySplineSnapshot(TtBezierSplineNode owner, TtBezier3DSplineSnapshot snapshot,
+            int pointIndex, TtBezierSplineNode.ESplineElementKind kind, bool isLeftTangent)
+        {
+            if (owner == null)
+                return;
+            owner.RestoreSpline(snapshot);
+            pointIndex = Math.Max(0, Math.Min(pointIndex, owner.Spline.PointCount - 1));
+            var proxy = owner.FindControlProxy(pointIndex, kind, isLeftTangent) ??
+                owner.FindControlProxy(pointIndex, TtBezierSplineNode.ESplineElementKind.Anchor);
+            SelectSplineElement(proxy);
+        }
+
+        static bool SplineSnapshotsEqual(TtBezier3DSplineSnapshot left, TtBezier3DSplineSnapshot right)
+        {
+            if (ReferenceEquals(left, right))
+                return true;
+            if (left == null || right == null || left.IsClosed != right.IsClosed ||
+                left.Segments != right.Segments || left.Points.Count != right.Points.Count)
+                return false;
+            for (int i = 0; i < left.Points.Count; i++)
+            {
+                if (left.Points[i].Position != right.Points[i].Position ||
+                    left.Points[i].LeftControl != right.Points[i].LeftControl ||
+                    left.Points[i].RightControl != right.Points[i].RightControl)
+                    return false;
+            }
+            return true;
+        }
+        #endregion
+
+        [System.ComponentModel.Category("Option")]
         public Graphics.Pipeline.TtRenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
-        [Category("Option")]
-        [DisplayName("Editor UI Font Size")]
+        [System.ComponentModel.Category("Option")]
+        [System.ComponentModel.DisplayName("Editor UI Font Size")]
         [EGui.Controls.PropertyGrid.TtValueRange(TtEngineConfig.MinEditorUIFontSize, TtEngineConfig.MaxEditorUIFontSize)]
         [EGui.Controls.PropertyGrid.TtValueChangeStep(0.5f)]
         [EGui.Controls.PropertyGrid.TtValueFormat("%.1f")]
@@ -420,13 +777,13 @@ namespace EngineNS.Editor.Forms
             mMenuItems.Clear();
             mMenuItems.Add(new EGui.UIProxy.MenuItemProxy()
             {
-                MenuName = "View",
+                MenuName = TtLocalization.Tr("View"),
                 IsTopMenuItem = true,
                 SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
                     {
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "EnableAO",
+                            MenuName = TtLocalization.Tr("EnableAO"),
                             Selected = false,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
@@ -436,7 +793,7 @@ namespace EngineNS.Editor.Forms
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "EnableLocalLights",
+                            MenuName = TtLocalization.Tr("EnableLocalLights"),
                             Selected = false,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
@@ -448,13 +805,13 @@ namespace EngineNS.Editor.Forms
             });
             mMenuItems.Add(new EGui.UIProxy.MenuItemProxy()
             {
-                MenuName = "Illumination",
+                MenuName = TtLocalization.Tr("Illumination"),
                 IsTopMenuItem = true,
                 SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
                     {
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "VoxelDebugger",
+                            MenuName = TtLocalization.Tr("VoxelDebugger"),
                             Selected = true,
                             //Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
                             //{
@@ -468,7 +825,7 @@ namespace EngineNS.Editor.Forms
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "ResetVoxels",
+                            MenuName = TtLocalization.Tr("ResetVoxels"),
 
                             //Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
                             //{
@@ -483,7 +840,7 @@ namespace EngineNS.Editor.Forms
             });
             mMenuItems.Add(new EGui.UIProxy.MenuItemProxy()
             {
-                MenuName = "Windows",
+                MenuName = TtLocalization.Tr("Windows"),
                 IsTopMenuItem = true,
                 SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
                 {
@@ -598,6 +955,7 @@ namespace EngineNS.Editor.Forms
         }
         public void Dispose()
         {
+            DisposeSplineEditing();
             Scene = null;
             CoreSDK.DisposeObject(ref PreviewViewport);
             ScenePropGrid.Target = null;
@@ -694,6 +1052,7 @@ namespace EngineNS.Editor.Forms
             ScenePropGrid.HistoryHost = mEditorHistory;
             if (PreviewViewport.Axis != null)
                 PreviewViewport.Axis.HistoryHost = mEditorHistory;
+            await InitializeSplineEditing();
             if (mWorldOutliner != null)
                 mWorldOutliner.HistoryHost = mEditorHistory;
             // 地形笔刷的 undo 也进同一个历史栈, 这样 History 面板和 Ctrl+Z 不需要任何改动。
@@ -932,7 +1291,7 @@ namespace EngineNS.Editor.Forms
             }
             else
             {
-                ImGuiAPI.Text("No CpuCullingNode!");
+                ImGuiAPI.Text(TtLocalization.Tr("No CpuCullingNode!"));
             }
             //ImGuiAPI.EndGroup();
             EGui.UIProxy.Toolbar.EndToolbar();
@@ -947,12 +1306,12 @@ namespace EngineNS.Editor.Forms
             if (modes == null || modes.Count == 0)
             {
                 ImGuiAPI.SameLine(0, -1);
-                ImGuiAPI.Text("Mode: -");
+                ImGuiAPI.Text(TtLocalization.Tr("Mode: -"));
                 return;
             }
 
             ImGuiAPI.SameLine(0, -1);
-            ImGuiAPI.Text("Mode:");
+            ImGuiAPI.Text(TtLocalization.Tr("Mode:"));
             ImGuiAPI.SameLine(0, -1);
 
             var current = PreviewViewport.CurrentIntercativeMode;
@@ -976,7 +1335,7 @@ namespace EngineNS.Editor.Forms
         }
         EGui.UIProxy.MenuItemProxy mDrawSceneDetailsShow = new EGui.UIProxy.MenuItemProxy()
         {
-            MenuName = "SceneDetails",
+            MenuName = TtLocalization.Tr("SceneDetails"),
             Selected = true,
             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
             {
@@ -985,7 +1344,7 @@ namespace EngineNS.Editor.Forms
         };
         EGui.UIProxy.MenuItemProxy mDrawNodeDetailsShow = new EGui.UIProxy.MenuItemProxy()
         {
-            MenuName = "NodeDetails",
+            MenuName = TtLocalization.Tr("NodeDetails"),
             Selected = true,
             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
             {
@@ -994,7 +1353,7 @@ namespace EngineNS.Editor.Forms
         };
         EGui.UIProxy.MenuItemProxy mEditorSettingsShow = new EGui.UIProxy.MenuItemProxy()
         {
-            MenuName = "Editor Settings",
+            MenuName = TtLocalization.Tr("Editor Settings"),
             Selected = true,
             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
             {
@@ -1003,7 +1362,7 @@ namespace EngineNS.Editor.Forms
         };
         EGui.UIProxy.MenuItemProxy mCameraSettingsShow = new EGui.UIProxy.MenuItemProxy()
         {
-            MenuName = "Camera Settings",
+            MenuName = TtLocalization.Tr("Camera Settings"),
             Selected = false,
             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
             {
@@ -1012,7 +1371,7 @@ namespace EngineNS.Editor.Forms
         };
         EGui.UIProxy.MenuItemProxy mOutlinerShow = new EGui.UIProxy.MenuItemProxy()
         {
-            MenuName = "Outliner",
+            MenuName = TtLocalization.Tr("Outliner"),
             Selected = true,
             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
             {
@@ -1021,7 +1380,7 @@ namespace EngineNS.Editor.Forms
         };
         EGui.UIProxy.MenuItemProxy mTerrainBrushShow = new EGui.UIProxy.MenuItemProxy()
         {
-            MenuName = "Terrain Brush",
+            MenuName = TtLocalization.Tr("Terrain Brush"),
             Selected = true,
             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
             {
@@ -1030,7 +1389,7 @@ namespace EngineNS.Editor.Forms
         };
         EGui.UIProxy.MenuItemProxy mPreviewShow = new EGui.UIProxy.MenuItemProxy()
         {
-            MenuName = "Preview",
+            MenuName = TtLocalization.Tr("Preview"),
             Selected = true,
             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
             {
@@ -1048,7 +1407,7 @@ namespace EngineNS.Editor.Forms
         //};
         EGui.UIProxy.MenuItemProxy mContentBrowserShow = new EGui.UIProxy.MenuItemProxy()
         {
-            MenuName = "Content Browser",
+            MenuName = TtLocalization.Tr("Content Browser"),
             Selected = true,
             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
             {
@@ -1057,7 +1416,7 @@ namespace EngineNS.Editor.Forms
         };
         EGui.UIProxy.MenuItemProxy mPlaceItemPanelShow = new EGui.UIProxy.MenuItemProxy()
         {
-            MenuName = "Place Items",
+            MenuName = TtLocalization.Tr("Place Items"),
             Selected = false,
             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
             {
@@ -1169,10 +1528,10 @@ namespace EngineNS.Editor.Forms
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Terrain Brush", ref mTerrainBrushShow.Selected, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                if (ImGuiAPI.Button("Stop Sculpting", in Vector2.Zero))
+                if (ImGuiAPI.Button(TtLocalization.Tr("Stop Sculpting"), in Vector2.Zero))
                     PreviewViewport.SetDefaultInteractiveMode<TtSceneEditorInteractiveMode>();
                 ImGuiAPI.SameLine(0, -1);
-                ImGuiAPI.Text("左键雕刻 / Shift+左键反向 / Alt+左键转视角");
+                ImGuiAPI.Text(TtLocalization.Tr("左键雕刻 / Shift+左键反向 / Alt+左键转视角"));
                 ImGuiAPI.Separator();
 
                 mTerrainBrushMode.DrawBrushParams();

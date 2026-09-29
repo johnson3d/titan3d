@@ -6,7 +6,7 @@
       <Path Type="System.String@Unknown" Value="advshadow.scene/advshadow.scene" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="bb77ca777bd97ccb1b129b068daccc4f56e8b83d84c50f18e81843e404c36dc3" />
+      <Hash Type="System.String@Unknown" Value="dc29635b5d5f355c7195925045e5ad6d942d84a1d915c5a9c42c6fa9b94dbce5" />
       <Path Type="System.String@Unknown" Value="advshadow.scene/class_graph.dat" />
     </e_1>
   </AssetFiles>

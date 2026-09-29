@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3459642329122589952 Type="EngineNS.Sequencer.TtNameChannel@EngineCore">
+  <Times Type="System.Collections.Generic.List&lt;System.Int64@Unknown,&gt;@Unknown" Order="0" />
+  <Values Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_3459642329122589952>

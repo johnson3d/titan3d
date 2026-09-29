@@ -6,7 +6,7 @@
       <Path Type="System.String@Unknown" Value="cornell.scene/cornell.scene" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="2b4ae3b200233349bbc58b5d5f27773bcb42864c8ad455ee875e63ad994be443" />
+      <Hash Type="System.String@Unknown" Value="8446a90c1c86c0b7f303714132d0b45767ca8447271b8cd63b593b97ba96b3cd" />
       <Path Type="System.String@Unknown" Value="cornell.scene/class_graph.dat" />
     </e_1>
   </AssetFiles>
@@ -23,7 +23,7 @@
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="5">
     <e_0 Value="Engine,mesh/base/box.vms,5355ee7f-de0b-4e29-bb7d-ed4ca9d6b0cf" />
-    <e_1 Value="Game,tutorials/gi/cornell/whitecolor.uminst,e26b345b-bd3f-464f-9bca-f8c05155fd02" />
+    <e_1 Value="Game,tutorials/gi/cornell/whitecolor.uminst,2477cd49-ad07-418b-b1df-fc992e68f7c6" />
     <e_2 Value="Game,tutorials/gi/cornell/redcolor.uminst,3fd4ce0d-d39c-41b3-82dd-56e68c09af8a" />
     <e_3 Value="Game,tutorials/gi/cornell/greencolor.uminst,db1806dc-3b07-4451-8871-33ab8d9040b7" />
     <e_4 Value="Engine,mesh/base/sphere.vms,7a5a0469-7899-40d9-aa67-7be6e33824d1" />

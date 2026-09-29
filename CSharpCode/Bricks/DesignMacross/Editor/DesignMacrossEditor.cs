@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Description;
 using System.Text;
@@ -398,13 +398,13 @@ namespace EngineNS.DesignMacross.Editor
             {
                 new EGui.UIProxy.MenuItemProxy()
                 {
-                    MenuName = "File",
+                    MenuName = TtLocalization.Tr("File"),
                     IsTopMenuItem = true,
                     SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
                     {
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Reload",
+                            MenuName = TtLocalization.Tr("Reload"),
                             Action = (item, data)=>
                             {
                                 //LoadClassGraph(AssetName);
@@ -412,7 +412,7 @@ namespace EngineNS.DesignMacross.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "Save",
+                            MenuName = TtLocalization.Tr("Save"),
                             Action = (item, data)=>
                             {
                                 mDesignMacross.Save(AssetName);

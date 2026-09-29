@@ -63,21 +63,37 @@ namespace EngineNS.Thread
         private static int WaitingCount = 0;
         private static void EnterWaitingThread(TtContextThread thread)
         {
-            System.Threading.Monitor.Enter(WaitingThreadMonitor);
-            if (WaitingThread!=null)
-            {
-                System.Diagnostics.Debug.Assert(WaitingThread.ThreadId == thread.ThreadId);
-            }
+            //if (WaitingThread != null)
+            //{
+            //    System.Diagnostics.Debug.Assert(WaitingThread.ThreadId == thread.ThreadId);
+            //}
             WaitingThread = thread;
-            WaitingCount++;
+            System.Threading.Interlocked.Increment(ref WaitingCount);
+            return;
+            //bool isRun = false;
+            //System.Threading.Monitor.TryEnter(WaitingThreadMonitor, ref isRun);
+            //if (isRun)
+            //{
+            //    System.Diagnostics.Debug.Assert(false);
+            //}
+            //if (WaitingThread!=null)
+            //{
+            //    System.Diagnostics.Debug.Assert(WaitingThread.ThreadId == thread.ThreadId);
+            //}
+            //WaitingThread = thread;
+            //WaitingCount++;
         }
         private static void LeaveWaitingThread(TtContextThread thread)
         {
-            System.Diagnostics.Debug.Assert(WaitingThread.ThreadId == thread.ThreadId);
-            WaitingCount--;
+            //System.Diagnostics.Debug.Assert(WaitingThread.ThreadId == thread.ThreadId);
+            System.Threading.Interlocked.Decrement(ref WaitingCount);
             if (WaitingCount == 0)
                 WaitingThread = null;
-            System.Threading.Monitor.Exit(WaitingThreadMonitor);
+            return;
+            //WaitingCount--;
+            //if (WaitingCount == 0)
+            //    WaitingThread = null;
+            //System.Threading.Monitor.Exit(WaitingThreadMonitor);
         }
         protected bool mIsRun = false;
         private bool mIsFinished = false;

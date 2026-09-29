@@ -54,7 +54,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     mCodeEditor.Render("##code_viewer", in editorSize, true);
 
                     var closeSize = new Vector2(120, 0);
-                    if (ImGuiAPI.Button("Close", in closeSize))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Close"), in closeSize))
                     {
                         mPopupOpen = false;
                         ImGuiAPI.CloseCurrentPopup();
@@ -73,9 +73,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             get => TtMaterial.AssetExt;
         }
+        public const string AssetTypeName = "Material";
         public override string GetAssetTypeName()
         {
-            return "Material";
+            return AssetTypeName;
         }
         public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
@@ -237,7 +238,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 MaterialGraph.AddNode(MaterialOutput);
             }
             string code = "";
-            GenMateralGraphCode(ref code, this, new UHLSLCodeGenerator(), MaterialGraph, MaterialOutput);
+            try
+            {
+                GenMateralGraphCode(ref code, this, new UHLSLCodeGenerator(), MaterialGraph, MaterialOutput);
+            }
+            catch(Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+            }
 
             var ameta = this.GetAMeta();
             if (ameta != null)
@@ -287,7 +295,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         [Rtti.Meta("")]
         [RName.PGRName(ReadOnly = true)]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName AssetName
         {
             get;
@@ -473,7 +481,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         ENormalMode mNormalMode = ENormalMode.NormalMap;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual ENormalMode NormalMode
         {
             get => mNormalMode;
@@ -501,7 +509,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         EDecalMode mDecalMode = EDecalMode.ColorAndMaterial;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual EDecalMode DecalMode
         {
             get => mDecalMode;
@@ -511,11 +519,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsFlowMapTangent { get; set; } = false;
         protected ERenderLayer mRenderLayer = ERenderLayer.RL_Opaque;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual unsafe ERenderLayer RenderLayer
         {
             get => mRenderLayer;
@@ -536,7 +544,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual bool AlphaTest
         {
             get;
@@ -571,10 +579,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
         private ERenderFlags mRenderFlags = ERenderFlags.None;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual ERenderFlags RenderFlags { get => mRenderFlags; }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public virtual EShadingMode ShadingMode
         {
             get
@@ -729,7 +737,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public NxRHI.TtShaderCode DefineCode { get; } = new NxRHI.TtShaderCode();
         public NxRHI.TtShaderCode SourceCode { get; } = new NxRHI.TtShaderCode();
         [TtShaderCodeViewer]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string DefineCodeText
         {
             get
@@ -738,7 +746,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         [TtShaderCodeViewer]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string SourceCodeText
         {
             get
@@ -867,12 +875,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             TtMaterial HostMaterial;
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [ReadOnly(true)]
             public string Name { get; set; }
             RName mValue;
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
             public RName Value
             {
@@ -890,13 +898,13 @@ namespace EngineNS.Graphics.Pipeline.Shader
             /// 是否为动态 SRV（运行时由 TtDynamicSrvRegistry 提供，而非静态纹理资产）
             /// </summary>
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             public bool IsDynamic { get; set; } = false;
             /// <summary>
             /// 动态 SRV 在 TtDynamicSrvRegistry 中的注册名（仅 IsDynamic=true 时有效）
             /// </summary>
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             public string DynamicSrvName { get; set; }
             public NameRNamePair Clone(TtMaterial mtl)
             {
@@ -912,7 +920,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         protected List<NameRNamePair> mUsedSrView = new List<NameRNamePair>();
         [Rtti.Meta("",NameAlias = new string[] { "UsedRSView" })]
-        [Category("Variable")]
+        [System.ComponentModel.Category("Variable")]
         public List<NameRNamePair> UsedSrView { get => mUsedSrView; }
         public NameRNamePair FindSRV(string name)
         {
@@ -978,12 +986,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             TtMaterial HostMaterial;
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [ReadOnly(true)]
             public string Name { get; set; }
             internal NxRHI.FSamplerDesc mValue;
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             public NxRHI.FSamplerDesc Value
             {
                 get => mValue;
@@ -1005,7 +1013,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         protected List<NameSamplerStateDescPair> mUsedSamplerStates = new List<NameSamplerStateDescPair>();
         [Rtti.Meta("")]
-        [Category("Variable")]
+        [System.ComponentModel.Category("Variable")]
         public List<NameSamplerStateDescPair> UsedSamplerStates { 
             get => mUsedSamplerStates; 
             set => mUsedSamplerStates = value; }
@@ -1059,16 +1067,16 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             TtMaterial HostMaterial;
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [ReadOnly(true)]
             public string VarType { get; set; }
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             [ReadOnly(true)]
             [Rtti.Meta("")]
             public string Name { get; set; }
             string mValue;
             [Rtti.Meta("")]
-            [Category("Option")]
+            [System.ComponentModel.Category("Option")]
             public string Value
             {
                 get => mValue;
@@ -1133,7 +1141,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         protected List<NameValuePair> mUsedUniformVars = new List<NameValuePair>();
         [Rtti.Meta("")]
-        [Category("Variable")]
+        [System.ComponentModel.Category("Variable")]
         public List<NameValuePair> UsedUniformVars { get => mUsedUniformVars; }
 
         /// <summary>
@@ -1362,7 +1370,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return true;
         }
         [Rtti.Meta("")]
-        [Category("State")]
+        [System.ComponentModel.Category("State")]
         public NxRHI.FRasterizerDesc Rasterizer
         {
             get => mPipelineDesc.m_Rasterizer;
@@ -1376,8 +1384,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public const uint StencilWriteDisabled = 0xFFFFFFFF;
         protected uint mStencilWriteValue = StencilWriteDisabled;
         [Rtti.Meta("", Order = 1)]
-        [Category("State")]
-        [Description("Stencil tag written during BasePass (0~254). 0xFFFFFFFF = disabled")]
+        [System.ComponentModel.Category("State")]
+        [System.ComponentModel.Description("Stencil tag written during BasePass (0~254). 0xFFFFFFFF = disabled")]
         public uint StencilWriteValue
         {
             get => mStencilWriteValue;
@@ -1415,7 +1423,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         [Rtti.Meta("")]
-        [Category("State")]
+        [System.ComponentModel.Category("State")]
         public NxRHI.FDepthStencilDesc DepthStencil
         {
             get => mPipelineDesc.m_DepthStencil;
@@ -1445,7 +1453,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         [Rtti.Meta("")]
-        [Category("State")]
+        [System.ComponentModel.Category("State")]
         public NxRHI.FBlendDesc Blend
         {
             get => mPipelineDesc.m_Blend;

@@ -1,4 +1,4 @@
-﻿using EngineNS.EGui.Controls.PropertyGrid;
+using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.EGui.UIProxy;
 using EngineNS.Rtti;
 using EngineNS.Thread.Async;
@@ -76,7 +76,7 @@ namespace EngineNS.UI.Event
 
             if(count > 1)
             {
-                ImGuiAPI.Text("Invalid");
+                ImGuiAPI.Text(TtLocalization.Tr("Invalid"));
             }
             else
             {

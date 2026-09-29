@@ -1,4 +1,4 @@
-﻿using EngineNS.EGui.Controls.PropertyGrid;
+using EngineNS.EGui.Controls.PropertyGrid;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -564,7 +564,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
             else
             {
-                ImGuiAPI.Text("null");
+                ImGuiAPI.Text(TtLocalization.Tr("null"));
                 ImGuiAPI.SameLine(0, -1);
             }
             //ImGuiAPI.SameLine(0, -1);
@@ -572,7 +572,7 @@ namespace EngineNS.Bricks.NodeGraph
             ContentBrowser.ExtNames = FilterExts;
             ContentBrowser.MacrossBase = MacrossType;
             ContentBrowser.SelectedAssets.Clear();
-            if (ImGuiAPI.Button("+"))
+            if (ImGuiAPI.Button(TtLocalization.Tr("+")))
             {
                 ContentBrowser.Visible = true;
                 ImGuiAPI.OpenPopup($"RName: {node.NodeId} {pin.Name}", ImGuiPopupFlags_.ImGuiPopupFlags_None);

@@ -189,7 +189,7 @@ namespace EngineNS.Graphics.Mesh.PhysicsAsset
     public class TtBoneBody : IO.BaseSerializer
     {
         [Rtti.Meta("")]
-        [Category("Bone")]
+        [System.ComponentModel.Category("Bone")]
         [ReadOnly(true)]
         public string BoneName { get; set; }
 
@@ -197,26 +197,26 @@ namespace EngineNS.Graphics.Mesh.PhysicsAsset
         public uint BoneNameHash { get; set; }
 
         [Rtti.Meta("")]
-        [Category("Bone")]
+        [System.ComponentModel.Category("Bone")]
         [ReadOnly(true)]
         public List<TtCollisionShape> Shapes { get; set; } = new List<TtCollisionShape>();
 
         [Rtti.Meta("")]
-        [Category("Bone")]
+        [System.ComponentModel.Category("Bone")]
         public float Mass { get; set; } = 1.0f;
 
         [Rtti.Meta("")]
-        [Category("Bone")]
+        [System.ComponentModel.Category("Bone")]
         public float LinearDamping { get; set; } = 0.01f;
 
         [Rtti.Meta("")]
-        [Category("Bone")]
+        [System.ComponentModel.Category("Bone")]
         public float AngularDamping { get; set; } = 0.05f;
 
         /// <summary>
         /// 该 Body 到最近祖先 Body 的关节约束（由 RebuildConstraints 自动关联，不序列化）
         /// </summary>
-        [Category("Constraint")]
+        [System.ComponentModel.Category("Constraint")]
         [ReadOnly(true)]
         public TtBoneConstraint Constraint { get; set; }
     }
@@ -240,12 +240,12 @@ namespace EngineNS.Graphics.Mesh.PhysicsAsset
     public class TtBoneConstraint : IO.BaseSerializer
     {
         [Rtti.Meta("")]
-        [Category("Constraint")]
+        [System.ComponentModel.Category("Constraint")]
         [ReadOnly(true)]
         public string BoneNameA { get; set; }
 
         [Rtti.Meta("")]
-        [Category("Constraint")]
+        [System.ComponentModel.Category("Constraint")]
         [ReadOnly(true)]
         public string BoneNameB { get; set; }
 
@@ -255,7 +255,7 @@ namespace EngineNS.Graphics.Mesh.PhysicsAsset
         float mTwistLimitDeg = 30.0f;
 
         [Rtti.Meta("")]
-        [Category("Constraint")]
+        [System.ComponentModel.Category("Constraint")]
         public EConstraintType ConstraintType
         {
             get => mConstraintType;
@@ -266,7 +266,7 @@ namespace EngineNS.Graphics.Mesh.PhysicsAsset
         /// Swing1 锥角限制（度），对应骨骼的一个横向摆动轴
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Constraint")]
+        [System.ComponentModel.Category("Constraint")]
         public float Swing1LimitDeg
         {
             get => mSwing1LimitDeg;
@@ -278,7 +278,7 @@ namespace EngineNS.Graphics.Mesh.PhysicsAsset
         /// 与 Swing1 不同时形成椭圆锥约束。
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Constraint")]
+        [System.ComponentModel.Category("Constraint")]
         public float Swing2LimitDeg
         {
             get => mSwing2LimitDeg;
@@ -289,7 +289,7 @@ namespace EngineNS.Graphics.Mesh.PhysicsAsset
         /// Twist 扭转限制（度）
         /// </summary>
         [Rtti.Meta("")]
-        [Category("Constraint")]
+        [System.ComponentModel.Category("Constraint")]
         public float TwistLimitDeg
         {
             get => mTwistLimitDeg;

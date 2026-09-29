@@ -6,7 +6,8 @@ using EngineNS.Graphics.Pipeline;
 namespace EngineNS.Bricks.Procedure.Node.GpuNode
 {
     //https://file.notion.so/f/f/9ea74915-0ba8-4149-8301-d1ee5ae8e483/ab83df73-97af-4a74-90d0-c0f7a55bafaf/2009_HowtoextractrivernetworksandcatchmentboundariesfromDEM.pdf?id=5e7d8919-1654-44d9-af39-f96b77b63f75&table=block&spaceId=9ea74915-0ba8-4149-8301-d1ee5ae8e483&expirationTimestamp=1711713600000&signature=jggggsGBzKBLhmMB_s5yf8jt-hjsyx5BrGX20Jn86BA&downloadName=2009_HowtoextractrivernetworksandcatchmentboundariesfromDEM.pdf
-    [Bricks.CodeBuilder.ContextMenu("WaterBasin", "Float1\\WaterBasin", UPgcGraph.PgcEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("WaterBasin", "Float1\\WaterBasin", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.GpuNode.UWaterBasinNode@EngineCore", "EngineNS.Bricks.Procedure.Node.GpuNode.UWaterBasinNode" })]
     public class TtWaterBasinNode : TtGpuNodeBase
     {
         [Rtti.Meta("")]
@@ -22,7 +23,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
         public float RainScalar { get; set; } = 20.0f;
         TtAttachBuffer HeightAttachement = new TtAttachBuffer();
         TtAttachBuffer IncWaterAttachement = new TtAttachBuffer();
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             if (Policy == null)
                 return false;

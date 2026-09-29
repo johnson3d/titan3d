@@ -45,7 +45,8 @@ $analyzerProjects = @(
 $additionalToolProjects = @(
     'Module\CSharpCompiler\CSharpCompiler.csproj',
     'Module\GameBuilder\GameBuilder.csproj',
-    'Module\TitanCMD\TitanCMD.csproj'
+    'Module\TitanCMD\TitanCMD.csproj',
+    'Module\SlateApp\LocalizationTool\LocalizationTool.csproj'
 )
 
 $managedProjects = @(

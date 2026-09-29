@@ -60,42 +60,42 @@ namespace EngineNS
             }
         }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool EnableSourceControl { get; set; } = true;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string NativeDll { get; set; } = "auto";
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string ImGuiIniPath { get; set; } = "imgui.ini";
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string CookAssetType { get; set; } = "Texture+Scene+Mesh+Material+MaterialInst+AnimClip+MeshPrimitive+UI+Prefab+Macross+UVAnim+RPolicy+AnimationClip+BlendSpace+MaterialFunction";
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public EMultiRenderMode MultiRenderMode { get; set; } = EMultiRenderMode.Queue;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool UseRenderThread { get; set; } = true;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool UsePhysxMT { get; set; } = true;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool UseRenderDoc { get; set; } = false;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool Feature_UseRVT { get; set; } = false;
         public string ConfigName;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public int NumOfThreadPool { get; set; } = -1;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsParrallelWorldGather { get; set; } = true;
         int mInterval = 15;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public int Interval {
             get => mInterval;
             set
@@ -105,10 +105,10 @@ namespace EngineNS
             }
         }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool ReduceWorkWhenWindowInvisible { get; set; } = true;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public int InvisibleWindowInterval { get; set; } = 200;
         private int mTargetFps;
         public int TargetFps
@@ -116,109 +116,109 @@ namespace EngineNS
             get => mTargetFps;
         }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName DefaultTexture { get; set; }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public int AdaperId { get; set; }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Vector4 MainWindow { get; set; } = new Vector4(100, 100, 1280, 720);
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool SupportMultWindows { get; set; } = true;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool DoUnitTest { get; set; } = true;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool CheckMetaHash { get; set; } = false;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool AutoSyncPropertyData { get; set; } = true;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public NxRHI.ERhiType RHIType { get; set; } = NxRHI.ERhiType.RHI_D3D11;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool HasDebugLayer { get; set; } = false;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsGpuBaseValidation { get; set; } = false;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsDebugShader { get; set; } = false;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsGpuDred { get; set; } = false;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsAftermath { get; set; } = false;//if true, engine will disable debuglayer&renderdoc
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsScopeWithSource { get; set; } = false;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string MainWindowType { get; set; } = "EngineNS.Editor.TtMainEditorApplication@EngineCore";
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName MainRPolicyName { get ; set; }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName DefaultGame { get; set; }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string RpcRootType { get; set; }// = Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.UnitTest.UTest_Rpc));
         [Rtti.Meta("")]
-        [Category("Shader")]
+        [System.ComponentModel.Category("Shader")]
         public NxRHI.EShaderLanguage ShaderLanguage { get; set; } = NxRHI.EShaderLanguage.SL_DXIL;
         [Rtti.Meta("")]
-        [Category("Shader")]
+        [System.ComponentModel.Category("Shader")]
         public int ShaderModelMajor { get; set; } = 6;
         [Rtti.Meta("")]
-        [Category("Shader")]
+        [System.ComponentModel.Category("Shader")]
         public int ShaderModelMinor { get; set; } = 6;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool CompressDxt { get; set; } = true;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool CompressEtc { get; set; } = false;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool CompressAstc { get; set; } = false;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName DefaultVMS { get; set; } //= RName.GetRName("mesh/base/box.vms", RName.ERNameType.Engine);
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName DefaultMaterial { get; set; }// = RName.GetRName("UTest/ttt.material");
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName DefaultMaterialInstance { get; set; }// = RName.GetRName("UTest/box_wite.uminst");
         [RName.PGRName(FilterExts = Bricks.CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(GamePlay.TtMacrossGame))]
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName PlayGameName { get; set; }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public string RootServerURL { get; set; } = "127.0.0.1:2333";
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public Bricks.Network.RPC.EAuthority DefaultAuthority { get; set; } = Bricks.Network.RPC.EAuthority.Server;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName EditorFont { get; set; }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName EditorSmallFont { get; set; }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName EditorEffectFont { get; set; }
         private float mEditorUIFontSize = DefaultEditorUIFontSize;
         [Rtti.Meta("")]
-        [Category("Option")]
-        [DisplayName("Editor UI Font Size")]
+        [System.ComponentModel.Category("Option")]
+        [System.ComponentModel.DisplayName("Editor UI Font Size")]
         [EGui.Controls.PropertyGrid.TtValueRange(MinEditorUIFontSize, MaxEditorUIFontSize)]
         [EGui.Controls.PropertyGrid.TtValueChangeStep(0.5f)]
         [EGui.Controls.PropertyGrid.TtValueFormat("%.1f")]
@@ -235,25 +235,28 @@ namespace EngineNS
                 TtEngine.Instance?.GfxDevice?.SlateRenderer?.ApplyEditorUIFontSize(fontSize);
             }
         }
+        [Rtti.Meta("")]
+        [System.ComponentModel.Category("Option")]
+        [System.ComponentModel.DisplayName("Editor Language")]
         public string EditorLanguage { get; set; } = "English";
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName UIDefaultTexture { get; set; }
         [Rtti.Meta("")]
-        [Category("Option")]
-        [DisplayName("Save Snapshot In Asset Dir")]
+        [System.ComponentModel.Category("Option")]
+        [System.ComponentModel.DisplayName("Save Snapshot In Asset Dir")]
         public bool SaveSnapshotInAssetDir { get; set; } = false;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsWriteShaderDebugFile { get; set; } = false;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsTryUnloadMacrossAssembly { get; set; } = true;
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public List<string> Plugins { get; set; } = new List<string>() { "SourceGit", "BlenderImporter", "Survivor" };
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public List<string> TypeAssemblies { get; set; } = new List<string>();
         public TtEngineConfig()
         {

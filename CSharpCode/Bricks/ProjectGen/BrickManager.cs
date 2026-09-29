@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 //using Microsoft.CodeAnalysis.MSBuild;
@@ -98,7 +98,7 @@ namespace EngineNS.Bricks.ProjectGen
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
 
             Vector2 size = new Vector2(0, 0);
-            var result = EGui.UIProxy.DockProxy.BeginMainForm("BrickManager", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(TtLocalization.Label("BrickManager", "###BrickManager"), this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (result)
             {
                 for (int i = 0; i < AllBricks.Count; i++)
@@ -111,7 +111,7 @@ namespace EngineNS.Bricks.ProjectGen
                     }
                 }
                 var sz = new Vector2(0);
-                if (ImGuiAPI.Button("Save Project", in sz))
+                if (ImGuiAPI.Button(TtLocalization.Tr("Save Project"), in sz))
                 {
                     SaveProject("CustomEngine");
                 }

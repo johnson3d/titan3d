@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -8,6 +8,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 {
     //Bloom: https://zhuanlan.zhihu.com/p/525500877
     [Bricks.CodeBuilder.ContextMenu("Bloom", "Post\\Bloom", Bricks.RenderPolicyEditor.TtPolicyGraph.RGDEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.Post.UBloomNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.Post.UBloomNode" })]
     public class TtBloomNode : TAuxRenderGraphNode<TtBloomNode>
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_SRV);
@@ -23,13 +24,13 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
             base.InitNodePins();
         }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public float DownSampleSigma { get; set; } = 1.0f;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public int BlurSize { get; set; } = 5;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public int NumDownSample { get; set; } = 5;
         public TtGaussNode[] DownSampleNodes = null;

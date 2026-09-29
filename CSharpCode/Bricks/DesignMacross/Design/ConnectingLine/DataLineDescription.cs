@@ -1,4 +1,4 @@
-﻿using EngineNS.DesignMacross.Base.Graph;
+using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Editor;
 using EngineNS.Rtti;
 using System.ComponentModel;
@@ -28,7 +28,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
     {
         [Rtti.Meta("")]
         public string TypeVaule { get; set; } = null;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public object Vaule 
         {
             get

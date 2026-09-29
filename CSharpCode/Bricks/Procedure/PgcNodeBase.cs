@@ -5,7 +5,8 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Procedure
 {
-    public abstract partial class UPgcNodeBase : TtNodeBase, EGui.Controls.PropertyGrid.IPropertyCustomization
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.UPgcNodeBase@EngineCore", "EngineNS.Bricks.Procedure.UPgcNodeBase" })]
+    public abstract partial class TtPgcNodeBase : TtNodeBase, EGui.Controls.PropertyGrid.IPropertyCustomization
     {
         public int RootDistance;
         protected int mPreviewResultIndex = -1;
@@ -14,7 +15,7 @@ namespace EngineNS.Bricks.Procedure
         protected NxRHI.TtSrView PreviewSRV;
         public class UCompileButton
         {
-            internal UPgcNodeBase HostNode;
+            internal TtPgcNodeBase HostNode;
             public class UValueEditorAttribute : EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute
             {
                 public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
@@ -22,13 +23,13 @@ namespace EngineNS.Bricks.Procedure
                     newValue = info.Value;
                     var nodeDef = newValue as UCompileButton;
                     
-                    if (ImGuiAPI.Button("Compile"))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Compile")))
                     {
-                        var graph = nodeDef.HostNode.ParentGraph as UPgcGraph;
+                        var graph = nodeDef.HostNode.ParentGraph as TtPgcGraph;
 
                         graph.Compile(nodeDef.HostNode);
                     }
-                    if (ImGuiAPI.Button("PreviewMesh"))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("PreviewMesh")))
                     {
                         var task = nodeDef.HostNode.DoPreviewMesh();
                     }
@@ -41,7 +42,7 @@ namespace EngineNS.Bricks.Procedure
             if (this.PreviewResultIndex < 0)
                 return;
 
-            var graph = this.ParentGraph as UPgcGraph;
+            var graph = this.ParentGraph as TtPgcGraph;
             graph.GraphEditor.PreviewRoot.ClearChildren();
 
             var vms = Graphics.Mesh.TtMeshDataProvider.MakeRect2D(0, 0, 100, 100, 0).ToMesh();
@@ -81,12 +82,12 @@ namespace EngineNS.Bricks.Procedure
         {
             get;
         } = new UCompileButton();
-        public UPgcNodeBase()
+        public TtPgcNodeBase()
         {
             CompileButton.HostNode = this;
             this.TitleColor = Color4b.FromRgb(255, 0, 255).ToB8G8R8A8();
         }
-        ~UPgcNodeBase()
+        ~TtPgcNodeBase()
         {
             if (PreviewSRV != null)
             {
@@ -94,18 +95,18 @@ namespace EngineNS.Bricks.Procedure
                 PreviewSRV = null;
             }
         }
-        public void AddInput(PinIn pin, string name, UBufferCreator desc, string linkType = "Value")
+        public void AddInput(PinIn pin, string name, TtBufferCreator desc, string linkType = "Value")
         {
             pin.Name = name;
-            pin.LinkDesc = UPgcEditorStyles.Instance.NewInOutPinDesc(linkType);
+            pin.LinkDesc = TtPgcEditorStyles.Instance.NewInOutPinDesc(linkType);
 
             pin.Tag = desc;
             AddPinIn(pin);
         }
-        public void AddOutput(PinOut pin, string name, UBufferCreator desc, string linkType = "Value")
+        public void AddOutput(PinOut pin, string name, TtBufferCreator desc, string linkType = "Value")
         {
             pin.Name = name;
-            pin.LinkDesc = UPgcEditorStyles.Instance.NewInOutPinDesc(linkType);
+            pin.LinkDesc = TtPgcEditorStyles.Instance.NewInOutPinDesc(linkType);
 
             pin.Tag = desc;
             AddPinOut(pin);
@@ -117,7 +118,7 @@ namespace EngineNS.Bricks.Procedure
         #region GUI
         public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
-            var creator = stayPin.Tag as UBufferCreator;
+            var creator = stayPin.Tag as TtBufferCreator;
             if (creator != null)
             {
                 EGui.Controls.CtrlUtility.DrawHelper($"{creator.ElementType.Name}");
@@ -181,8 +182,8 @@ namespace EngineNS.Bricks.Procedure
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
-            var input = iPin.Tag as UBufferCreator;
-            var output = oPin.Tag as UBufferCreator;
+            var input = iPin.Tag as TtBufferCreator;
+            var output = oPin.Tag as TtBufferCreator;
 
             if (IsMatchLinkedPin(input, output) == false)
             {
@@ -190,7 +191,7 @@ namespace EngineNS.Bricks.Procedure
             }
             return true;
         }
-        public virtual bool IsMatchLinkedPin(UBufferCreator input, UBufferCreator output)
+        public virtual bool IsMatchLinkedPin(TtBufferCreator input, TtBufferCreator output)
         {
             if (input == output)
                 return true;
@@ -221,7 +222,7 @@ namespace EngineNS.Bricks.Procedure
         {
             return Hash160.Emtpy;
         }
-        public void SaveOutBufferToCache(UPgcGraph graph, PinOut pin)
+        public void SaveOutBufferToCache(TtPgcGraph graph, PinOut pin)
         {
             if (graph.IsTryCacheBuffer == false)
                 return;
@@ -236,7 +237,7 @@ namespace EngineNS.Bricks.Procedure
             IO.TtFileManager.SureDirectory(dir);
             buffer.SaveToCache($"{dir}/{this.Name}_{NodeId}_{pin.Name}.bfpgc", in hash);
         }
-        public void SaveOutBufferToCache(UPgcGraph graph, PinOut pin, in Hash160 hash)
+        public void SaveOutBufferToCache(TtPgcGraph graph, PinOut pin, in Hash160 hash)
         {
             if (graph.IsTryCacheBuffer == false)
                 return;
@@ -248,7 +249,7 @@ namespace EngineNS.Bricks.Procedure
             IO.TtFileManager.SureDirectory(dir);
             buffer.SaveToCache($"{dir}/{this.Name}_{NodeId}_{pin.Name}.bfpgc", in hash);
         }
-        public bool TryLoadOutBufferFromCache(UPgcGraph graph, PinOut pin)
+        public bool TryLoadOutBufferFromCache(TtPgcGraph graph, PinOut pin)
         {
             if (graph.IsTryCacheBuffer == false)
                 return false;
@@ -261,7 +262,7 @@ namespace EngineNS.Bricks.Procedure
 
             return buffer.LoadFromCache($"{dir}/{this.Name}_{NodeId}_{pin.Name}.bfpgc", in hash);
         }
-        public bool TryLoadOutBufferFromCache(UPgcGraph graph, PinOut pin, in Hash160 hash)
+        public bool TryLoadOutBufferFromCache(TtPgcGraph graph, PinOut pin, in Hash160 hash)
         {
             if (graph.IsTryCacheBuffer == false)
                 return false;
@@ -275,32 +276,32 @@ namespace EngineNS.Bricks.Procedure
         }
         #endregion
 
-        public UBufferCreator GetInputBufferCreator(PinIn pin)
+        public TtBufferCreator GetInputBufferCreator(PinIn pin)
         {
-            return pin.Tag as UBufferCreator;
+            return pin.Tag as TtBufferCreator;
         }
-        public abstract UBufferCreator GetOutBufferCreator(PinOut pin);
+        public abstract TtBufferCreator GetOutBufferCreator(PinOut pin);
 
         #region procedure
         public virtual TtBufferComponent GetResultBuffer(int index)
         {
             if (index < 0 || index >= Outputs.Count)
                 return null;
-            var graph = ParentGraph as UPgcGraph;
+            var graph = ParentGraph as TtPgcGraph;
             return graph.BufferCache.FindBuffer(Outputs[index]);
         }
-        public virtual bool InitProcedure(UPgcGraph graph)
+        public virtual bool InitProcedure(TtPgcGraph graph)
         {
             return true;
         }
-        public bool DoProcedure(UPgcGraph graph)
+        public bool DoProcedure(TtPgcGraph graph)
         {
             var ret = OnProcedure(graph);
             PreviewSRVProcedure(graph);
             OnAfterProcedure(graph);
             return ret;
         }
-        protected virtual void PreviewSRVProcedure(UPgcGraph graph)
+        protected virtual void PreviewSRVProcedure(TtPgcGraph graph)
         {
             if (graph.GraphEditor != null)
             {
@@ -349,16 +350,16 @@ namespace EngineNS.Bricks.Procedure
                 }
             }
         }
-        public virtual bool OnProcedure(UPgcGraph graph)
+        public virtual bool OnProcedure(TtPgcGraph graph)
         {
             return true;
         }
-        public virtual void OnAfterProcedure(UPgcGraph graph)
+        public virtual void OnAfterProcedure(TtPgcGraph graph)
         {
 
         }
         [Rtti.Meta("")]
-        public void DispatchBuffer(UPgcGraph graph, TtBufferComponent result, object tag, bool bMultThread = false)
+        public void DispatchBuffer(TtPgcGraph graph, TtBufferComponent result, object tag, bool bMultThread = false)
         {
             if (result == null)
                 return;
@@ -447,7 +448,7 @@ namespace EngineNS.Bricks.Procedure
                 smp.FreeSemaphore();
             }
         }
-        public virtual void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, TtBufferComponent resuilt, int x, int y, int z, object tag)
+        public virtual void OnPerPixel(TtPgcGraph graph, TtPgcNodeBase node, TtBufferComponent resuilt, int x, int y, int z, object tag)
         {
 
         }
@@ -457,7 +458,7 @@ namespace EngineNS.Bricks.Procedure
         [Rtti.Meta("")]
         public TtBufferComponent FindBuffer(string name)
         {
-            var graph = this.ParentGraph as UPgcGraph;
+            var graph = this.ParentGraph as TtPgcGraph;
             var pin = this.FindPinIn(name) as NodePin;
             if (pin == null)
             {
@@ -469,16 +470,16 @@ namespace EngineNS.Bricks.Procedure
             }
             return graph.BufferCache.FindBuffer(pin);
         }
-        public UPgcNodeBase GetInputNode(UPgcGraph graph, int index, System.Type retType = null)
+        public TtPgcNodeBase GetInputNode(TtPgcGraph graph, int index, System.Type retType = null)
         {
             var linker = graph.FindInLinkerSingle(Inputs[index]);
             if (linker == null)
                 return null;
-            return linker.OutNode as UPgcNodeBase;
+            return linker.OutNode as TtPgcNodeBase;
         }
         [Rtti.Meta("")]
-        public UPgcNodeBase GetInputNodeByName(UPgcGraph graph, string pinName,
-            [Rtti.MetaParameter(FilterType = typeof(UPgcNodeBase),
+        public TtPgcNodeBase GetInputNodeByName(TtPgcGraph graph, string pinName,
+            [Rtti.MetaParameter(FilterType = typeof(TtPgcNodeBase),
             ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type retType = null)
         {
@@ -488,15 +489,15 @@ namespace EngineNS.Bricks.Procedure
             var linker = graph.FindInLinkerSingle(pin);
             if (linker == null)
                 return null;
-            return linker.OutNode as UPgcNodeBase;
+            return linker.OutNode as TtPgcNodeBase;
         }
         [Rtti.Meta("")]
-        public UPgcNodeBase GetInputNode(UPgcGraph graph, PinIn pin)
+        public TtPgcNodeBase GetInputNode(TtPgcGraph graph, PinIn pin)
         {
             var linker = graph.FindInLinkerSingle(pin);
             if (linker == null)
                 return null;
-            return linker.OutNode as UPgcNodeBase;
+            return linker.OutNode as TtPgcNodeBase;
         }
         #endregion
 
@@ -515,7 +516,7 @@ namespace EngineNS.Bricks.Procedure
                 //if (p == null)
                 //    continue;
                 if (prop.Name != "Name" && prop.Name != "NodeType" &&
-                    prop.ComponentType != typeof(UPgcNodeBase) && !prop.ComponentType.IsSubclassOf(typeof(UPgcNodeBase)))
+                    prop.ComponentType != typeof(TtPgcNodeBase) && !prop.ComponentType.IsSubclassOf(typeof(TtPgcNodeBase)))
                 {
                     continue;
                 }
@@ -561,9 +562,9 @@ namespace EngineNS.Bricks.Procedure
 
 namespace EngineNS.Bricks.Procedure
 {
-	partial class UPgcNodeBase
+	partial class TtPgcNodeBase
 	{
-		public unsafe void macross_DispatchBuffer (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, TtBufferComponent result, object tag, bool bMultThread) 
+		public unsafe void macross_DispatchBuffer (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtPgcGraph graph, TtBufferComponent result, object tag, bool bMultThread) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
@@ -584,7 +585,7 @@ namespace EngineNS.Bricks.Procedure
 			var _return_value = FindBuffer(name);
 			return _return_value;
 		}
-		public unsafe UPgcNodeBase macross_GetInputNodeByName (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, string pinName, System.Type retType) 
+		public unsafe TtPgcNodeBase macross_GetInputNodeByName (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtPgcGraph graph, string pinName, System.Type retType) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
@@ -595,7 +596,7 @@ namespace EngineNS.Bricks.Procedure
 			var _return_value = GetInputNodeByName(graph, pinName, retType);
 			return _return_value;
 		}
-		public unsafe UPgcNodeBase macross_GetInputNode (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, PinIn pin) 
+		public unsafe TtPgcNodeBase macross_GetInputNode (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtPgcGraph graph, PinIn pin) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{

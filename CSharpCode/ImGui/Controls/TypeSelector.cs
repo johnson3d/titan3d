@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -37,7 +37,7 @@ namespace EngineNS.EGui.Controls
                 {
                     foreach (var j in i.Value.Types)
                     {
-                        //if ("UImageLoader" == j.Value.SystemType.Name)
+                        //if ("TtImageLoader" == j.Value.SystemType.Name)
                         //{
                         //    int xxx = 0;
                         //}
@@ -174,7 +174,7 @@ namespace EngineNS.EGui.Controls
             }
             var sizeDelta = ImGuiAPI.GetFontSize() * 0.4f;
             ImGuiAPI.Arrow(drawList, pos + new Vector2(UIProxy.StyleConfig.Instance.ItemSpacing.X + textSize.X, (frameHeight - sizeDelta) * 0.5f - 2.0f), UIProxy.StyleConfig.Instance.TextColor, ImGuiDir.ImGuiDir_Down, 1.0f);
-            if(ImGuiAPI.InvisibleButton(CtrlId + "InvBtn",
+            if(ImGuiAPI.InvisibleButton(CtrlId + TtLocalization.Tr("InvBtn"),
                 new Vector2(Math.Max(itemWidth, UIProxy.StyleConfig.Instance.ItemSpacing.X + textSize.X + sizeDelta), frameHeight),
                 ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft))
             {

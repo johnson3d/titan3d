@@ -221,15 +221,15 @@ namespace EngineNS.UnitTest
             var table = new TtSequenceEvalTable();
             var store = new TtPreAnimatedStore();
 
-            table.Write(target, accessor, 1.0, 0);
-            table.Write(target, accessor, 2.0, 0);
+            table.Write(target, accessor, 1.0, 0, false);
+            table.Write(target, accessor, 2.0, 0, false);
             TtUnitTestManager.TAssert(table.Count == 1, "同一属性只占一条");
             table.Flush(store);
             TtUnitTestManager.TAssert(Math.Abs(target.Value - 1.0) < 1e-9, "相同优先级保留先写入的");
             TtUnitTestManager.TAssert(store.Count == 1, "Flush 时记下原值");
 
             table.Clear();
-            table.Write(target, accessor, 3.0, 5);
+            table.Write(target, accessor, 3.0, 5, false);
             table.Flush(store);
             TtUnitTestManager.TAssert(Math.Abs(target.Value - 3.0) < 1e-9, "高优先级覆盖");
             TtUnitTestManager.TAssert(store.Count == 1, "第二帧不重复记原值");
@@ -241,12 +241,50 @@ namespace EngineNS.UnitTest
             // 目标已销毁的情形: Forget 之后不该再往它身上写
             var target2 = new FTestTarget() { Value = 1.0 };
             table.Clear();
-            table.Write(target2, accessor, 9.0, 0);
+            table.Write(target2, accessor, 9.0, 0, false);
             table.Flush(store);
             store.Forget(target2);
             TtUnitTestManager.TAssert(store.Count == 0, "Forget 丢掉记录");
             store.RestoreAll();
             TtUnitTestManager.TAssert(Math.Abs(target2.Value - 9.0) < 1e-9, "Forget 后不恢复");
+
+            // RestoreState: 某一帧不再有人写这个属性时, Flush 把原值改回去。这就是
+            // "Section 结束"在求值层的表现 —— 靠的是差集, 不依赖任何跨帧状态
+            var target3 = new FTestTarget() { Value = 100.0 };
+            table.Clear();
+            table.Write(target3, accessor, 42.0, 0, true);
+            table.Flush(store);
+            TtUnitTestManager.TAssert(Math.Abs(target3.Value - 42.0) < 1e-9, "RestoreState 的 Section 在范围内照常写值");
+            TtUnitTestManager.TAssert(store.Count == 1, "还在范围内时原值留着");
+
+            table.Clear();
+            table.Flush(store);
+            TtUnitTestManager.TAssert(Math.Abs(target3.Value - 100.0) < 1e-9, "没人写的那一帧自动恢复原值");
+            TtUnitTestManager.TAssert(store.Count == 0, "恢复之后记录一起丢掉");
+
+            // KeepState 反过来: 没人写就停在末值上, 不许动
+            var target4 = new FTestTarget() { Value = 5.0 };
+            table.Clear();
+            table.Write(target4, accessor, 8.0, 0, false);
+            table.Flush(store);
+            table.Clear();
+            table.Flush(store);
+            TtUnitTestManager.TAssert(Math.Abs(target4.Value - 8.0) < 1e-9, "KeepState 停在末值");
+            TtUnitTestManager.TAssert(store.Count == 1, "KeepState 的原值留到 Stop 时再恢复");
+            store.RestoreAll();
+
+            // 两个 Section 重叠且模式不同时 KeepState 优先, 而且不跟着谁赢 (Priority) 走:
+            // 这里让 RestoreState 那个用更高优先级赢下值, 结束时依然不许恢复
+            var target5 = new FTestTarget() { Value = 1.0 };
+            table.Clear();
+            table.Write(target5, accessor, 2.0, 0, false);
+            table.Write(target5, accessor, 3.0, 9, true);
+            table.Flush(store);
+            TtUnitTestManager.TAssert(Math.Abs(target5.Value - 3.0) < 1e-9, "高优先级仍然赢下值");
+            table.Clear();
+            table.Flush(store);
+            TtUnitTestManager.TAssert(Math.Abs(target5.Value - 3.0) < 1e-9, "混合模式下 KeepState 优先, 不恢复");
+            store.RestoreAll();
         }
 
         enum ETestMode

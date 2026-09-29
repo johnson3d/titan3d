@@ -32,7 +32,7 @@ namespace EngineNS.Animation.Macross.BlendTree
         public override string Name { get => "KawaiiRibbon"; }
 
         [Rtti.Meta("")]
-        [Category("Ribbon")]
+        [System.ComponentModel.Category("Ribbon")]
         public List<TtKawaiiRibbonSetup> RibbonSetups { get; set; } = new();
 
         public TtPoseInPinDescription InPin
@@ -43,7 +43,7 @@ namespace EngineNS.Animation.Macross.BlendTree
             }
         }
 
-        [Category("Pins"), DisplayName("Alpha")]
+        [System.ComponentModel.Category("Pins"), System.ComponentModel.DisplayName("Alpha")]
         public TtDataInPinDescription AlphaPin { get => DataInPins[0]; }
 
         public TtBlendTree_KawaiiRibbonClassDescription()

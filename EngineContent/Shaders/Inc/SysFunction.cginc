@@ -1268,10 +1268,10 @@ void Lut3S(Texture2D lutTexture, float NoL, float Curvature, out float3 OutColor
 }
 
 
-//void GetGridUV(float2 uv, float4 lightmapUV, float2 min, float2 max, out float2 outUV)
+//void GetGridUV(float2 uv, float4 extraUV, float2 min, float2 max, out float2 outUV)
 //{
-//	float2 u = float2(lightmapUV.x, lightmapUV.y);
-//	float2 v = float2(lightmapUV.z, lightmapUV.w);
+//	float2 u = float2(extraUV.x, extraUV.y);
+//	float2 v = float2(extraUV.z, extraUV.w);
 //	float2 min_v = float2(min.y, min.y);
 //	float2 max_v = float2(max.y, max.y);
 //	float2 min_u = float2(min.x, min.x);

@@ -1,11 +1,11 @@
-using NPOI.Util;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
     //https://zhuanlan.zhihu.com/p/434435957
     //https://github.com/bshishov/UnityTerrainErosionGPU?tab=readme-ov-file
-    [Bricks.CodeBuilder.ContextMenu("Erosion", "Float1\\Erosion", UPgcGraph.PgcEditorKeyword)]
-    public class TtErosionNode : Node.UAnyTypeMonocular
+    [Bricks.CodeBuilder.ContextMenu("Erosion", "Float1\\Erosion", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UErosionNode@EngineCore", "EngineNS.Bricks.Procedure.Node.UErosionNode" })]
+    public class TtErosionNode : Node.TtAnyTypeMonocular
     {
         [Rtti.Meta("")]
         public int DropNum { get; set; } = 100;
@@ -39,7 +39,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 mSeed = value;
             }
         }
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var Input = graph.BufferCache.FindBuffer(SrcPin);
             var Output = graph.BufferCache.FindBuffer(ResultPin);

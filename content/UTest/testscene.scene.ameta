@@ -6,7 +6,7 @@
       <Path Type="System.String@Unknown" Value="testscene.scene/testscene.scene" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="362d33c70bacd057526a91843d72d91c7592d4f157a323e4e3e4be9ecfa2269c" />
+      <Hash Type="System.String@Unknown" Value="264e0f4b34f97e709c6b8acbce473d2868621a6c50e6aefe68906aceb793401d" />
       <Path Type="System.String@Unknown" Value="testscene.scene/class_graph.dat" />
     </e_1>
   </AssetFiles>
@@ -21,10 +21,13 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="6">
     <e_0 Value="Game,utest/mesh/skysphere001.ums,099ebd2d-0dda-4ca1-bc23-6b754f41b31d" />
-    <e_1 Value="Game,utest/puppet/mesh/puppet.ums,f96719f6-83b6-4bd6-87f2-547a6cf50c04" />
-    <e_2 Value="Game,utest/brdf_test/chair2.ums,5e719504-b5a0-4b08-bfb1-03c410445a57" />
+    <e_1 Value="Game,utest/puppet/mesh/puppet.ums,00000000-0000-0000-0000-000000000000" />
+    <e_2 Value="Game,utest/puppet/mesh/puppet.vms,00000000-0000-0000-0000-000000000000" />
+    <e_3 Value="Game,utest/brdf_test/chair2.ums,5e719504-b5a0-4b08-bfb1-03c410445a57" />
+    <e_4 Value="Game,utest/terraingen.pgc,39025ad5-415f-4585-9357-fac812394c3f" />
+    <e_5 Value="Engine,material/terrainidmap.material,3a5bde1e-39df-4c8a-a2cc-6eadaeabcefe" />
   </RefAssetRNames>
   <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />

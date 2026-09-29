@@ -1,4 +1,4 @@
-﻿using EngineNS;
+using EngineNS;
 using EngineNS.Animation.SkeletonAnimation.Skeleton;
 using System;
 using System.Collections;
@@ -645,7 +645,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ImGuiAPI.BeginGroup();
                 {
                     ImGuiAPI.SetNextItemWidth(sliderWidth);
-                    ImGuiAPI.Text("R");
+                    ImGuiAPI.Text(TtLocalization.Tr("R"));
                     ImGuiAPI.SameLine(20, 0);
                     ImGuiAPI.SetNextItemWidth(sliderWidth - 20);
                     float r = v.X;
@@ -655,7 +655,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         valueChanged = true;
                     }
 
-                    ImGuiAPI.Text("G");
+                    ImGuiAPI.Text(TtLocalization.Tr("G"));
                     ImGuiAPI.SameLine(20, 0);
                     ImGuiAPI.SetNextItemWidth(sliderWidth - 20);
                     float g = v.Y;
@@ -665,7 +665,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         valueChanged = true;
                     }
 
-                    ImGuiAPI.Text("B");
+                    ImGuiAPI.Text(TtLocalization.Tr("B"));
                     ImGuiAPI.SameLine(20, 0);
                     ImGuiAPI.SetNextItemWidth(sliderWidth - 20);
                     float b = v.Z;
@@ -675,7 +675,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         valueChanged = true;
                     }
 
-                    ImGuiAPI.Text("Y");
+                    ImGuiAPI.Text(TtLocalization.Tr("Y"));
                     ImGuiAPI.SameLine(20, 0);
                     ImGuiAPI.SetNextItemWidth(sliderWidth - 20);
                     float y = v.W;

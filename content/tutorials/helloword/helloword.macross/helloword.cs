@@ -1,4 +1,4 @@
-﻿namespace NS_tutorials.helloword
+namespace NS_tutorials.helloword
 {
     [EngineNS.Macross.TtMacross]
     [EngineNS.Macross.TtMacrossSign(RName_Name = "tutorials/helloword/helloword.macross", RName_Type = EngineNS.RName.ERNameType.Game)]

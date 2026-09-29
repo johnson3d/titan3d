@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Outline;
@@ -18,11 +18,11 @@ namespace EngineNS.DesignMacross.Design
     [EGui.Controls.PropertyGrid.TtCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtMethodArgumentDescription : IDescription
     {
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public string Name { get; set; }
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public TtTypeDesc VariableType { get; set; } = Rtti.TtTypeDesc.TypeOf<int>();
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public EMethodArgumentAttribute OperationType { get; set; } = EMethodArgumentAttribute.Default;
         public Guid Id { get; set; } = Guid.NewGuid();
         public IDescription Parent { get; set; } = null;
@@ -122,17 +122,17 @@ namespace EngineNS.DesignMacross.Design
         public virtual string MethodName { get => TtASTBuildUtil.GenerateMethodName(this); }
         [Rtti.Meta("")]
         public Guid Id { get; set; } = Guid.NewGuid();
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public string Name { get; set; } = "Method";
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public TtCommentStatement Comment { get; set; }
         [Rtti.Meta("")]
         public bool IsOverride { get; set; } = false;
         [Rtti.Meta("")]
         public TtMethodDeclaration.EAsyncType AsyncType { get; set; } = TtMethodDeclaration.EAsyncType.None;
-        [Rtti.Meta, Category("Option")]
+        [Rtti.Meta, System.ComponentModel.Category("Option")]
         public List<TtMethodArgumentDescription> Arguments { get; set; } = new List<TtMethodArgumentDescription>();
         [Rtti.Meta("")]
         public List<TtVariableDescription> LocalVariables { get; set; } = new List<TtVariableDescription>();

@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.Input.Control;
+using EngineNS.Bricks.Input.Control;
 using EngineNS.Bricks.Input.Device.Keyboard;
 using EngineNS.Bricks.Network;
 using System;
@@ -353,7 +353,10 @@ namespace EngineNS.Editor
         bool mStartDS = false;
         public void OnDraw()
         {
-            var result = EGui.UIProxy.DockProxy.BeginMainForm("PIEController", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(
+                TtLocalization.Label("PIE Controller", "###PIEController"),
+                this,
+                ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (result)
             {
                 var drawList = ImGuiAPI.GetWindowDrawList();
@@ -373,13 +376,13 @@ namespace EngineNS.Editor
                     mCurrentName = (RName)newValue;
                     TtEngine.Instance.DynConfigData.SetConfig("LastPIEName", mCurrentName);
                 }
-                ImGuiAPI.Checkbox("StartDS", ref mStartDS);
+                ImGuiAPI.Checkbox(TtLocalization.Tr("StartDS"), ref mStartDS);
                 Vector2 sz = new Vector2(-1, 40);
-                if (ImGuiAPI.Button("Play", sz))
+                if (ImGuiAPI.Button(TtLocalization.Tr("Play"), sz))
                 {
                     OnPlayGame(mCurrentName);
                 }
-                if (ImGuiAPI.Button("Stop", sz))
+                if (ImGuiAPI.Button(TtLocalization.Tr("Stop"), sz))
                 {
 
                 }
@@ -389,7 +392,7 @@ namespace EngineNS.Editor
                     {
                         if (TtEngine.Instance.PIEModule.MultiGameInstances[i]==null)
                         {
-                            if (ImGuiAPI.Button("Run Multi Game", sz))
+                            if (ImGuiAPI.Button(TtLocalization.Tr("Run Multi Game"), sz))
                             {
                                 TtEngine.Instance.EventPoster.RunOn(async (state) =>
                                 {

@@ -22,7 +22,11 @@ namespace EngineNS.Animation.BlendTree.Node
         {
             if (FromCommand == null)
                 return;
-
+            if (Desc?.KawaiiComponent == null)
+            {
+                TtRuntimePoseUtility.CopyPose(ref mOutPose, FromCommand.OutPose);
+                return;
+            }
             TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(ref FromMeshSpaceRuntimePose, FromCommand.OutPose);
             Desc.KawaiiComponent.UpdateFromMeshPose(FromMeshSpaceRuntimePose, Desc.ElapseSecond);
             TtRuntimePoseUtility.ConvetToLocalSpaceRuntimePose(ref KawaiiLocalPose, FromMeshSpaceRuntimePose);
@@ -48,9 +52,12 @@ namespace EngineNS.Animation.BlendTree.Node
         {
             mAnimationCommand = new();
             mAnimationCommand.Desc = CommandDesc;
-            mAnimationCommand.OutPose = TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(context.AnimatableSkeletonPose);
-
             var animatablePose = context.AnimatableSkeletonPose;
+            mAnimationCommand.OutPose = TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animatablePose);
+            // 预览模型切换时，已淘汰节点的异步初始化可能在脱离父Mesh后恢复。
+            // 此时没有骨架可供物理解算，直接禁用该节点，不能把空Pose送入空间转换。
+            if (animatablePose == null || animatablePose.LimbPoses.Count == 0)
+                return base.Initialize(context);
             var localPose = TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animatablePose);
             var meshSpacePose = TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(localPose);
             List<Vector3> bonePositions = new();

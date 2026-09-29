@@ -20,7 +20,7 @@ namespace EngineNS.Animation.Asset
                 if (ImGuiAPI.BeginPopupModal($"Import Animation", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     var sz = new Vector2(-1, 0);
-                    if (ImGuiAPI.Button("Select FBX", in sz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Select FBX"), in sz))
                     {
                         mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".fbx", ".");
                     }
@@ -46,12 +46,12 @@ namespace EngineNS.Animation.Asset
                     if (eErrorType != enErrorType.None)
                     {
                         var clr = new Vector4(1, 0, 0, 1);
-                        ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
+                        ImGuiAPI.TextColored(in clr, TtLocalization.Format("Source:{0}", mSourceFile));
                     }
                     else
                     {
                         var clr = new Vector4(1, 1, 1, 1);
-                        ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
+                        ImGuiAPI.TextColored(in clr, TtLocalization.Format("Source:{0}", mSourceFile));
                     }
                     ImGuiAPI.Separator();
 
@@ -72,7 +72,7 @@ namespace EngineNS.Animation.Asset
                     sz = new Vector2(0, 0);
                     if (eErrorType == enErrorType.None)
                     {
-                        if (ImGuiAPI.Button("Create Asset", in sz))
+                        if (ImGuiAPI.Button(TtLocalization.Tr("Create Asset"), in sz))
                         {
                             if (FBXImport())
                             {
@@ -82,7 +82,7 @@ namespace EngineNS.Animation.Asset
                         }
                         ImGuiAPI.SameLine(0, 20);
                     }
-                    if (ImGuiAPI.Button("Cancel", in sz))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Cancel"), in sz))
                     {
                         ImGuiAPI.CloseCurrentPopup();
                         retValue = true;

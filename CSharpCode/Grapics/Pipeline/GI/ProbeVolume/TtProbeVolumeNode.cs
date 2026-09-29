@@ -19,7 +19,7 @@ namespace EngineNS.Graphics.Pipeline.GI.ProbeVolume
         // ENV_USE_SKY_CUBE: 0 -> miss 时用 cbProbeUpdate.SkyColor 常量天光
         //                   1 -> miss 时采 EnvMap (TextureCube), 需要 EnvMap pin 接入
         public TtPermutationItem EnableSkyCube { get; set; }
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool IsEnableSkyCube
         {
             get { return EnableSkyCube.GetValue() == (int)EPermutation_Bool.TrueValue; }
@@ -123,38 +123,38 @@ namespace EngineNS.Graphics.Pipeline.GI.ProbeVolume
         public TtRenderGraphPin EnvMapPinIn = TtRenderGraphPin.CreateInput("EnvMap", EBufferType.BFT_SRV);
 
         // ---------- Tunable ----------
-        [Category("ProbeVolume")]
+        [System.ComponentModel.Category("ProbeVolume")]
         [Rtti.Meta("")]
         public float ProbeSpacing { get; set; } = 4.0f;
 
-        [Category("ProbeVolume")]
+        [System.ComponentModel.Category("ProbeVolume")]
         [Rtti.Meta("")]
         public uint RaysPerProbe { get; set; } = 64u;
 
-        [Category("ProbeVolume")]
+        [System.ComponentModel.Category("ProbeVolume")]
         [Rtti.Meta("")]
         public uint ProbesPerFrame { get; set; } = 32u;
 
-        [Category("ProbeVolume")]
+        [System.ComponentModel.Category("ProbeVolume")]
         [Rtti.Meta("")]
         public float HistoryBlendAlpha { get; set; } = 0.05f;
 
-        [Category("ProbeVolume")]
+        [System.ComponentModel.Category("ProbeVolume")]
         [Rtti.Meta("")]
         public Vector3 SkyColor { get; set; } = new Vector3(0.5f, 0.7f, 1.0f);
 
-        [Category("ProbeVolume")]
+        [System.ComponentModel.Category("ProbeVolume")]
         [Rtti.Meta("")]
         public float SkyIntensity { get; set; } = 1.0f;
 
-        [Category("ProbeVolume")]
+        [System.ComponentModel.Category("ProbeVolume")]
         [Rtti.Meta("")]
         public float MaxRayDistance { get; set; } = 50.0f;
 
         // ENV_USE_SKY_CUBE permutation 开关: 配置型切换, 同 ReSTIRGINode.EnableEnvMap.
         // EnvMapPinIn 悬空时, Initialize 会把这个值刷成 false.
         bool mEnableEnvMap = false;
-        [Category("ProbeVolume")]
+        [System.ComponentModel.Category("ProbeVolume")]
         [Rtti.Meta("")]
         public bool EnableEnvMap
         {

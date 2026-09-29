@@ -1,4 +1,4 @@
-﻿using EngineNS.GamePlay;
+using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.Thread.Async;
@@ -76,7 +76,7 @@ namespace EngineNS.DesignMacross
         }
         //[RName.PGRName(FilterExts = UDesignMacross.AssetExt)]
         [RName.PGMacrossRName<TtDesignMacrossBase>(FilterExts = UDesignMacross.AssetExt)]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public RName DesignMacross
         {
             get

@@ -357,14 +357,14 @@ namespace EngineNS.Editor.Forms
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Left", ref mLeftShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                if (ImGuiAPI.CollapsingHeader("Sequence", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
+                if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("Sequence"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     SequencePropGrid.OnDraw(true, false, false);
                 }
-                if (ImGuiAPI.CollapsingHeader("Selected", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
+                if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("Selected"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     if (mSelectedObject == null)
-                        ImGuiAPI.Text("Select a binding / section in timeline");
+                        ImGuiAPI.Text(TtLocalization.Tr("Select a binding / section in timeline"));
                     else
                         DetailPropGrid.OnDraw(true, false, false);
                 }
@@ -378,8 +378,8 @@ namespace EngineNS.Editor.Forms
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Bindings", ref mBindingsShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                ImGuiAPI.Text("Drag assets into the preview to add nodes");
-                if (ImGuiAPI.CollapsingHeader("Scene Nodes", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
+                ImGuiAPI.Text(TtLocalization.Tr("Drag assets into the preview to add nodes"));
+                if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("Scene Nodes"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     var root = PreviewViewport.World?.Root;
                     if (root != null)
@@ -404,14 +404,14 @@ namespace EngineNS.Editor.Forms
                                 SelectSceneNode(node);
                             }
                             ImGuiAPI.SameLine(0, -1);
-                            if (ImGuiAPI.SmallButton($"+##addbinding{i}"))
+                            if (ImGuiAPI.SmallButton(TtLocalization.Label("+", $"##addbinding{i}")))
                             {
                                 AddBindingForNode(node);
                             }
                         }
                     }
                 }
-                if (ImGuiAPI.CollapsingHeader("Bindings", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
+                if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("Bindings"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     for (int i = 0; i < Sequence.Bindings.Count; ++i)
                     {
@@ -428,15 +428,15 @@ namespace EngineNS.Editor.Forms
                             SelectObject(binding);
                         }
                         ImGuiAPI.SameLine(0, -1);
-                        if (ImGuiAPI.SmallButton($"+##addtrack{i}"))
+                        if (ImGuiAPI.SmallButton(TtLocalization.Label("+", $"##addtrack{i}")))
                         {
                             RefreshPropertyCandidates(binding);
                             ImGuiAPI.OpenPopup($"AddPropertyTrack{i}", ImGuiPopupFlags_.ImGuiPopupFlags_None);
                         }
                         if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
-                            ImGuiAPI.SetTooltip("Add property track");
+                            ImGuiAPI.SetTooltip(TtLocalization.Tr("Add property track"));
                         ImGuiAPI.SameLine(0, -1);
-                        if (ImGuiAPI.SmallButton($"x##delbinding{i}"))
+                        if (ImGuiAPI.SmallButton(TtLocalization.Label("x", $"##delbinding{i}")))
                         {
                             RemoveBinding(binding);
                             break;
@@ -462,7 +462,7 @@ namespace EngineNS.Editor.Forms
                                 SelectObject(track);
                             }
                             ImGuiAPI.SameLine(0, -1);
-                            if (ImGuiAPI.SmallButton($"x##deltrack{i}_{ti}"))
+                            if (ImGuiAPI.SmallButton(TtLocalization.Label("x", $"##deltrack{i}_{ti}")))
                             {
                                 RemoveTrack(binding, track);
                                 trackRemoved = true;
@@ -515,7 +515,7 @@ namespace EngineNS.Editor.Forms
             {
                 var frameTicks = Sequence.TickResolution.TicksPerFrame(Sequence.DisplayRate);
                 var frameIndex = frameTicks > 0 ? mCurrentTick / frameTicks : 0;
-                ImGuiAPI.Text($"Tick: {mCurrentTick}   Frame: {frameIndex} @ {Sequence.DisplayRate}   Range: [{Sequence.PlaybackStartTick}, {Sequence.PlaybackEndTick}]");
+                ImGuiAPI.Text(TtLocalization.Format("Tick: {0}   Frame: {1} @ {2}   Range: [{3}, {4}]", mCurrentTick, frameIndex, Sequence.DisplayRate, Sequence.PlaybackStartTick, Sequence.PlaybackEndTick));
                 BuildTimelineData();
                 var size = new Vector2(-1, 0);
                 mTimeline.OnDraw(in size);
@@ -724,43 +724,60 @@ namespace EngineNS.Editor.Forms
                     // 用 handle.Tick 而不是右键位置换算出来的时刻: 后者吸附到整帧之后未必
                     // 正好落在关键帧那一 tick 上, 差一个 tick 就变成在旁边新插一个点了。
                     if (track is Sequencer.Asset.TtPropertyTrack keyDlgTrack &&
-                        ImGuiAPI.MenuItem($"Set Key Value ({TickToSeconds(keyHandle.Tick):0.00}s)...", null, false, true))
+                        ImGuiAPI.MenuItem(TtLocalization.Format("Set Key Value ({0:0.00}s)...", TickToSeconds(keyHandle.Tick)), null, false, true))
                     {
                         OpenSetValueAndKeyDialog(binding, keyDlgTrack, keyHandle.Tick, true);
                     }
-                    if (ImGuiAPI.MenuItem("Remove Key", null, false, true))
+                    if (ImGuiAPI.MenuItem(TtLocalization.Tr("Remove Key"), null, false, true))
                         RemoveKeyAt(keyHandle);
                 }
                 else if (mSelectedObject is Sequencer.Asset.TtSequenceSection section)
                 {
-                    if (ImGuiAPI.MenuItem("Remove Section", null, false, true))
+                    // 对标 UE 的 Section 属性 "When Finished": 播放头离开这个 Section 之后,
+                    // 它写过的属性是停在末值还是回到进序列之前的值。
+                    if (ImGuiAPI.BeginMenu(TtLocalization.Tr("When Finished"), true))
+                    {
+                        var mode = section.CompletionMode;
+                        if (ImGuiAPI.MenuItem(TtLocalization.Tr("Keep State"), null,
+                            mode == Sequencer.Asset.ESectionCompletionMode.KeepState, true))
+                        {
+                            SetSectionCompletionMode(section, Sequencer.Asset.ESectionCompletionMode.KeepState);
+                        }
+                        if (ImGuiAPI.MenuItem(TtLocalization.Tr("Restore State"), null,
+                            mode == Sequencer.Asset.ESectionCompletionMode.RestoreState, true))
+                        {
+                            SetSectionCompletionMode(section, Sequencer.Asset.ESectionCompletionMode.RestoreState);
+                        }
+                        ImGuiAPI.EndMenu();
+                    }
+                    if (ImGuiAPI.MenuItem(TtLocalization.Tr("Remove Section"), null, false, true))
                         RemoveSection(binding, section);
                 }
             }
             else if (binding == null)
             {
-                ImGuiAPI.Text("Add a binding from the Bindings panel");
+                ImGuiAPI.Text(TtLocalization.Tr("Add a binding from the Bindings panel"));
             }
             else
             {
                 // 菜单项按右键那一行所属的轨道给: 一个绑定现在可能挂着 Transform 轨和好几条
                 // 属性轨, 一律给 "Key Transform" 会打到用户没在看的那条轨上。
                 var label = track != null ? track.DisplayName : "Transform";
-                if (ImGuiAPI.MenuItem($"Key {label} At PlayHead", null, false, true))
+                if (ImGuiAPI.MenuItem(TtLocalization.Format("Key {0} At PlayHead", label), null, false, true))
                     KeyRow(binding, track);
-                if (ImGuiAPI.MenuItem($"Key {label} Here", null, false, true))
+                if (ImGuiAPI.MenuItem(TtLocalization.Format("Key {0} Here", label), null, false, true))
                 {
                     SetPlayHead(SnapTick(SecondsToTick(mPopupTime)));
                     KeyRow(binding, track);
                 }
-                if (track != null && ImGuiAPI.MenuItem($"Remove Track {track.DisplayName}", null, false, true))
+                if (track != null && ImGuiAPI.MenuItem(TtLocalization.Format("Remove Track {0}", track.DisplayName), null, false, true))
                     RemoveTrack(binding, track);
                 // 只对属性轨给: Transform 轨是一次写七条通道的复合轨, 没有“那一条属性”可设。
                 // 弹窗而不是常驻面板: 打点读的是节点当前值, 而引用类型属性 (RName 之类)
                 // 没设过就是 null、一个关键帧都打不出。在打点的上下文里只摆这一条属性,
                 // 比让人去一个几十条属性的面板里翻找直接得多。
                 if (track is Sequencer.Asset.TtPropertyTrack dlgTrack &&
-                    ImGuiAPI.MenuItem($"Set Value & Key {dlgTrack.DisplayName}...", null, false, true))
+                    ImGuiAPI.MenuItem(TtLocalization.Format("Set Value & Key {0}...", dlgTrack.DisplayName), null, false, true))
                 {
                     OpenSetValueAndKeyDialog(binding, dlgTrack, SnapTick(SecondsToTick(mPopupTime)));
                 }
@@ -768,11 +785,11 @@ namespace EngineNS.Editor.Forms
                 // 和正常的多关键帧长得一模一样, 只有拖播放头时才发现值是阶梯的。菜单项只在真的
                 // 有多个 Section 时出现, 不给一个永远点不动的灰项。
                 if (track != null && track.Sections.Count > 1 &&
-                    ImGuiAPI.MenuItem($"Merge {track.Sections.Count} Sections", null, false, true))
+                    ImGuiAPI.MenuItem(TtLocalization.Format("Merge {0} Sections", track.Sections.Count), null, false, true))
                 {
                     MergeSections(track);
                 }
-                if (ImGuiAPI.MenuItem("Remove Binding", null, false, true))
+                if (ImGuiAPI.MenuItem(TtLocalization.Tr("Remove Binding"), null, false, true))
                     RemoveBinding(binding);
             }
             ImGuiAPI.EndPopup();
@@ -856,14 +873,14 @@ namespace EngineNS.Editor.Forms
                 if (node == null || mKeyDlgTrack == null)
                 {
                     // 绑定在预览世界里解析不到节点, 就没有值可读也没有值可设
-                    ImGuiAPI.TextDisabled("This binding does not resolve to a node in the preview world");
+                    ImGuiAPI.TextDisabled(TtLocalization.Tr("This binding does not resolve to a node in the preview world"));
                 }
                 else
                 {
                     if (mKeyDlgEditExisting)
-                        ImGuiAPI.Text($"{node.NodeName}  .  {mKeyDlgTrack.DisplayName}   -  existing key at {TickToSeconds(mKeyDlgTick):0.00}s");
+                        ImGuiAPI.Text(TtLocalization.Format("{0}  .  {1}   -  existing key at {2:0.00}s", node.NodeName, mKeyDlgTrack.DisplayName, TickToSeconds(mKeyDlgTick)));
                     else
-                        ImGuiAPI.Text($"{node.NodeName}  .  {mKeyDlgTrack.DisplayName}");
+                        ImGuiAPI.Text(TtLocalization.Format("{0}  .  {1}", node.NodeName, mKeyDlgTrack.DisplayName));
                     ImGuiAPI.Separator();
                     // 底部给按钮行留出一行高
                     var pgSize = new Vector2(0, -ImGuiAPI.GetFrameHeightWithSpacing() - 4);
@@ -879,7 +896,7 @@ namespace EngineNS.Editor.Forms
                     {
                         // 改已有关键帧时只给一个按钮: 开窗时已经把播放头挪到这个关键帧上了,
                         // “Here” 和 “At PlayHead” 是同一个 tick, 摆两个一模一样的按钮只会让人犯疑。
-                        if (ImGuiAPI.Button($"Apply To Key ({TickToSeconds(mKeyDlgTick):0.00}s)", in btnSize))
+                        if (ImGuiAPI.Button(TtLocalization.Format("Apply To Key ({0:0.00}s)", TickToSeconds(mKeyDlgTick)), in btnSize))
                         {
                             ApplyValueToExistingKey();
                             CloseSetValueAndKeyDialog();
@@ -888,7 +905,7 @@ namespace EngineNS.Editor.Forms
                     }
                     else
                     {
-                        if (ImGuiAPI.Button($"Key Here ({TickToSeconds(mKeyDlgTick):0.00}s)", in btnSize))
+                        if (ImGuiAPI.Button(TtLocalization.Format("Key Here ({0:0.00}s)", TickToSeconds(mKeyDlgTick)), in btnSize))
                         {
                             // 跟菜单里的 "Key XXX Here" 一个语义: 先把播放头移到右键位置再打
                             SetPlayHead(mKeyDlgTick);
@@ -896,7 +913,7 @@ namespace EngineNS.Editor.Forms
                             CloseSetValueAndKeyDialog();
                         }
                         ImGuiAPI.SameLine(0, -1);
-                        if (ImGuiAPI.Button("Key At PlayHead", in btnSize))
+                        if (ImGuiAPI.Button(TtLocalization.Tr("Key At PlayHead"), in btnSize))
                         {
                             KeyProperty(mKeyDlgBinding, mKeyDlgTrack);
                             CloseSetValueAndKeyDialog();
@@ -904,7 +921,7 @@ namespace EngineNS.Editor.Forms
                         ImGuiAPI.SameLine(0, -1);
                     }
                     // 不叫 Cancel: 属性值是当场写进节点的, 关窗收不回来
-                    if (ImGuiAPI.Button("Close", in btnSize))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("Close"), in btnSize))
                         CloseSetValueAndKeyDialog();
                 }
                 ImGuiAPI.EndPopup();
@@ -1206,14 +1223,14 @@ namespace EngineNS.Editor.Forms
             // 以前它只能靠按 Key 时 GetOrCreateTransformTrack 隐式建出来 —— 删了之后想重建,
             // 在这个菜单里找不到任何入口。它是最常用的轨道, 不能只有隐式入口。
             bool transformExist = binding.FindTrack("Transform") != null;
-            if (ImGuiAPI.MenuItem("Transform  :  Position / Scale / Rotation", null, transformExist, transformExist == false))
+            if (ImGuiAPI.MenuItem(TtLocalization.Tr("Transform  :  Position / Scale / Rotation"), null, transformExist, transformExist == false))
                 AddTransformTrack(binding);
             ImGuiAPI.Separator();
 
             if (mPropertyCandidates.Count == 0)
             {
                 // 绑定解析不到节点时也走这里 —— 不知道目标类型就列不出属性
-                ImGuiAPI.Text("No animatable property (needs [Rtti.Meta] + public get/set + a value adapter)");
+                ImGuiAPI.Text(TtLocalization.Tr("No animatable property (needs [Rtti.Meta] + public get/set + a value adapter)"));
                 return;
             }
             for (int i = 0; i < mPropertyCandidates.Count; ++i)
@@ -1223,7 +1240,7 @@ namespace EngineNS.Editor.Forms
                 // 已经有轨道的属性画成打勾 + 禁用: 一条属性只允许一条轨 (理由见
                 // TtSequenceBinding.GetOrCreatePropertyTrack), 但仍然要让用户看得见它已经在了
                 bool exist = binding.FindPropertyTrack(propertyId) != null;
-                if (ImGuiAPI.MenuItem($"{prop.Name}  :  {prop.PropertyType.Name}", null, exist, exist == false))
+                if (ImGuiAPI.MenuItem(TtLocalization.Format("{0}  :  {1}", prop.Name, prop.PropertyType.Name), null, exist, exist == false))
                     AddPropertyTrack(binding, prop);
             }
         }
@@ -1685,6 +1702,27 @@ namespace EngineNS.Editor.Forms
                 () => { before.ApplyTo(section); OnSequenceDataChanged(); });
             cmd.Seal();
             mEditorHistory.PushCommand(cmd);
+        }
+        /// <summary>
+        /// 改 Section 的 CompletionMode。没走 ExecuteStructureCommand 是因为这不是结构性改动,
+        /// 绑定列表没变, 不必让解析缓存失效。
+        ///
+        /// OnSequenceDataChanged 里会重新 SetPosition, 所以改成 Restore State 后如果播放头
+        /// 当前就在 Section 外面, 当帧就能看到属性弹回原值。
+        /// </summary>
+        void SetSectionCompletionMode(Sequencer.Asset.TtSequenceSection section, Sequencer.Asset.ESectionCompletionMode mode)
+        {
+            if (section == null || section.CompletionMode == mode)
+                return;
+            var old = section.CompletionMode;
+            var cmd = new Infrastructure.TtDelegateCommand("Set When Finished",
+                () => { section.CompletionMode = mode; OnSequenceDataChanged(); },
+                () => { section.CompletionMode = old; OnSequenceDataChanged(); });
+            cmd.Seal();
+            if (mEditorHistory != null)
+                mEditorHistory.ExecuteCommand(cmd);
+            else
+                cmd.Do();
         }
         /// <summary>结构性增删统一走历史, 并让解析缓存失效 (绑定列表变了)</summary>
         void ExecuteStructureCommand(string name, Action doAction, Action undoAction)

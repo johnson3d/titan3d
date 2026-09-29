@@ -4,6 +4,7 @@
   <AssetId Type="System.Guid@Unknown" Value="acdb2bfd-54ca-43a0-b205-9f589148578d" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/plant/tree/sm_pine01_lod0.vms,acdb2bfd-54ca-43a0-b205-9f589148578d" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMeshPrimitives&#xA;" />
+  <HasBLAS Type="System.Boolean@Unknown" Value="False" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />

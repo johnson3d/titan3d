@@ -1,4 +1,4 @@
-﻿using Assimp;
+using Assimp;
 using EngineNS.Animation.BlendTree;
 using EngineNS.Animation.Macross.BlendTree.Node;
 using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
@@ -37,7 +37,7 @@ namespace EngineNS.Animation.Macross.BlendTree
     public class TtBlendTreeClassDescription : TtDesignableVariableDescription, IDataLineOperator, IPoseLineOperator, IExpressionOperator, IStatementOperator, IAnimMacrossClassDescription
     {
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public override string Name { get; set; } = "BlendTree";
         [Rtti.Meta("")]
         [DrawInGraph]

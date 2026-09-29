@@ -4,6 +4,7 @@
   <AssetId Type="System.Guid@Unknown" Value="5b7c009d-439c-4593-81e2-cd28e6bbedcf" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/animation/graychan_lod0.vms,5b7c009d-439c-4593-81e2-cd28e6bbedcf" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.TtMeshPrimitives&#xA;" />
+  <HasBLAS Type="System.Boolean@Unknown" Value="False" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />

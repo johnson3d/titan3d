@@ -27,9 +27,10 @@ namespace EngineNS.Animation.Asset
             //必须是TextureAsset
             return true;
         }
+        public const string AssetTypeName = "AnimationClip";
         public override string GetAssetTypeName()
         {
-            return "AnimationClip";
+            return AssetTypeName;
         }
         public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {

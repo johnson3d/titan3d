@@ -2516,3 +2516,155 @@ public RName DecalMaterial
 - [ ] 节点需要引用资产时, 补了 `AddAssetReferences` (cook / 打包依赖收集)?
 
 ---
+
+## 10. 多国化 (i18n) 编写约束
+
+所有**用户可见**的字符串都必须能被本地化系统翻译。运行时入口是 `EngineNS.TtLocalization`
+(定义见 `CSharpCode/Bricks/Localization/Localization.cs:204`), 翻译目录与源码改写由
+`Module/SlateApp/LocalizationTool` (Roslyn 扫描器) 维护。可直接照抄的骨架见
+`CodeLib.md` §14; 本节只列硬性约束和背后原因。
+
+### 10.1 键策略: 原文即键, 绝不手编翻译 ID
+
+- `Tr("Close")` 里的 **英文原文本身就是翻译键**, 同时是运行时查表键、也是工具扫描
+  出来写进 `zh-CN.json` 的 key。**不要**发明 `"IDS_CLOSE"` 这类符号键。
+- 因此**源文本必须是稳定的、有意义的英文常量**。不要把动态拼出来的字符串塞给 `Tr`
+  (键会爆炸且无法被扫描), 动态部分一律走 §10.3 的 `Format`。
+- 键区分大小写、区分空格 (`StringComparer.Ordinal`)。`"OK"` 与 `"Ok"` 是两个键。
+- **不要拼接可翻译片段** (`Tr("Found ") + count + Tr(" items")`)。把完整句子写成
+  `Format("Found {0} items", count)`, 让译者能按目标语言调整语序。
+- 原文即键意味着同一个英文 key 只能有一份译文。若同词在不同上下文需要不同译法,
+  应改用语义明确的完整原文 (例如 `"Close Window"` / `"Close Project"`), 不要依赖调用位置猜语境。
+
+### 10.2 三个 API 的选择
+
+| 场景 | 用 | 反例 |
+|---|---|---|
+| 纯静态可见文本 | `TtLocalization.Tr("Save")` | 硬编码 `"Save"` |
+| 带运行时参数的文本 | `TtLocalization.Format("Page {0}/{1}", a, b)` | `$"Page {a}/{b}"` |
+| 含 ImGui `##`/`###` ID 的可见文本 | `TtLocalization.Label("Visible", "###StableId")` | `Tr("Visible###StableId")` |
+
+- `Tr` / `Format` / `Label` 在 `TtEngine` 未就绪时**安全回退原文**, 可在任意早期代码调用。
+- 只有 `Format` 会做 `string.Format`; 占位符异常时逐级回退, 永不抛出。
+
+### 10.3 插值串必须改写成 Format
+
+ImGui / 日志 / 提示里的 `$"Hello {name}"` **不能**直接翻译 —— 插值后已经是拼好的成品串,
+键随参数变化无法命中。正确形式是把它变成 composite format:
+
+```csharp
+// ❌ 不可翻译
+ImGuiAPI.Text($"Page {mIndex + 1}/{mCount}");
+// ✓ 键为 "Page {0}/{1}", 参数单独传
+ImGuiAPI.Text(TtLocalization.Format("Page {0}/{1}", mIndex + 1, mCount));
+```
+
+译文里的 `{0}` `{1}` 占位符必须与原文**完全一致** (LocalizationTool 保存时会做
+`ValidatePlaceholders` 校验, 数量/编号不匹配的译文会被拒绝写入)。
+
+### 10.4 ImGui `##` / `###` ID 绝不能进翻译键
+
+ImGui 用字符串同时表达 "可见文字" 和 "控件身份":
+- `"Visible##hidden"`: `##` 之后是**不显示但参与 ID 计算**的部分。
+- `"Visible###stable"`: `###` 之后是**唯一决定控件/窗口身份**的稳定 ID, 换了可见文字
+  也不换身份 (Dock 布局、窗口状态靠它维持)。
+
+翻译可见部分、原样保留 ID 后缀, 用 `Label`:
+
+```csharp
+// "Prev##ContentBrowserAssetPage" ->
+ImGuiAPI.Button(TtLocalization.Label("Prev", "##ContentBrowserAssetPage"));
+```
+
+**纯 ID 字符串** (如 `"##foo"`, 无可见文字) 不翻译, 工具会归类为 `ImGuiId` 且不勾选。
+
+### 10.5 Dock 窗口标题: 必须补 `###原文` 稳定 ID
+
+`DockProxy.BeginMainForm` / `BeginPanel` 的标题**既显示又是窗口身份**。直接翻译标题会
+让 ImGui 认为是不同窗口, 破坏 Dock 布局与 imgui.ini 记忆。规则: 翻译可见标题, 并把
+**英文原文**作为 `###` 稳定 ID 附加:
+
+```csharp
+// ❌ DockProxy.BeginMainForm("CpuProfiler", this, flags);
+// ✓ 可见文字被翻译, 窗口身份恒为 ###CpuProfiler
+DockProxy.BeginMainForm(TtLocalization.Label("CpuProfiler", "###CpuProfiler"), this, flags);
+```
+
+实证参考: `CSharpCode/Editor/Forms/CpuProfiler.cs:183`、`GpuProfiler.cs`、
+`ImGui/Controls/LogWatcher.cs:40`、`Editor/PlayInEditor.cs` 中的
+`TtLocalization.Label("PIE Controller", "###PIEController")`。多实例窗口 (如
+`ContentBrowser` 的非空 `Name`) 只对**默认实例**套 `Label`, 保留实例名区分。
+
+### 10.6 菜单项 `MenuItemProxy.MenuName`
+
+菜单文本通过 `MenuName = TtLocalization.Tr("File")` 赋值即可。扫描器专门识别
+`MenuItemProxy.MenuName` 的字符串赋值 (`SourceScanner.cs:415`), 会把它当 UI 文本收录。
+注意: 菜单在 `InitMainMenu` 里**构建时缓存文本**, 改完 `zh-CN.json` 后需**重启编辑器**
+或重建菜单才生效。
+
+### 10.7 PropertyGrid 元数据 Attribute 不要自己翻译
+
+`[DisplayName("...")]` / `[Description("...")]` / `[Category("...")]` 的文本**保持英文原文**,
+**不要**在 Attribute 里写 `Tr(...)`。PG 是这些文本的唯一消费方, 在渲染时统一调用
+`TtLocalization.Tr` (见 `ImGui/Controls/PropertyGrid/PropertyCollection.cs:172-193`)。
+工具会把这些 Attribute 文本采集为翻译键, 但**不改写**源码。
+
+### 10.8 双层翻译目录合并规则
+
+运行时按固定顺序合并 (`Localization.cs:107-108`):
+1. `enginecontent/localization/<culture>.json` (引擎默认层)
+2. `content/localization/<culture>.json` (游戏覆盖层, 后加载)
+
+- 游戏层**非空**译文覆盖引擎层同键译文; 游戏层**空**译文**不覆盖**引擎层已有译文。
+- 配置 `localization.config.json` (SourceCulture / Cultures) 同样引擎层先、游戏层覆盖。
+- `EditorLanguage` (`"Chinese"`/`"zh-CN"` 等) 经 `MapEditorLanguageToCulture` 映射到 culture。
+
+### 10.9 不需要翻译 (工具默认不勾选) 的字符串
+
+纯符号 (`"+"` `"/"`)、格式占位串本身、技术缩写 (`"BVH"` `"SSR"` `"DX12"`)、类型名/序列化
+键、路径、GUID、URL、Shader 片段 —— 这些**保持原文**, 不要强行翻译。LocalizationTool 会
+把它们归类到 `Other`/`TypeName`/`Path` 等类别并**默认不勾选**, `zh-CN.json` 里对应条目
+`Translation` 留空即可 (留空表示 "沿用原文", 不是遗漏)。
+
+### 10.10 LocalizationTool 工作流 (改键 vs 改源码)
+
+工具是独立 SlateApp, 配置 `content/applocalization.jscfg`
+(`MainWindowType = LocalizationTool.TtLocalizationApplication`), 四个动作**语义不同**:
+
+| 动作 | 作用 | 是否动源码 |
+|---|---|---|
+| **Scan** | Roslyn 扫描 `ScanRoots` 下 `.cs`, 归类候选字符串 | 否 |
+| **Save Catalog** | 把勾选键写入 `content/localization/<culture>.json` (缺译文写空占位) | 否, 只写目录 |
+| **Preview Rewrite** | 预览把硬编码字符串替换成 `Tr/Format/Label` 的 diff | 否 |
+| **Apply Rewrite** | 校验文件哈希 + 改写后重解析无 error 才落盘 | **是** |
+
+- 只想补译文: 改 `zh-CN.json` 即可, **不需要**改源码。
+- 想把新硬编码文本纳入体系: Scan → (勾选) → Preview Rewrite → Apply Rewrite, 再填译文。
+- 勾选/忽略状态持久化在 `cache/localization/scan-state.json` (以稳定指纹为键)。改动
+  扫描规则若不影响指纹, 旧的 `Selected:false` 会**压制**新规则的默认勾选 —— 这时给
+  occurrence 的 Fingerprint 追加区分后缀 (参考 `SourceScanner.cs` 里
+  `"|MenuItemProxy.MenuName"` 的做法) 让它变成新指纹。
+- 扫描器**幂等**: 已包裹 `Tr/Format/Label` 的调用会被识别 (`IsLocalizationInvocation`),
+  只补录键不重复改写。
+- catalog 中的 `Sources` 是工具生成数据, 开发者/译者只编辑 `Translation`; 下次
+  Save Catalog 会根据当前扫描刷新源码位置。
+- 修改过 LocalizationTool 自身后, 必须重新构建并重启该 SlateApp 再 Scan; 已运行进程
+  不会热替换扫描器程序集。若一个 `Tr/Format/Label` key 仍没出现, 先确认第一个参数是
+  编译期字符串字面量, 再检查 scan-state 是否把 occurrence 设为未选中。
+
+### 10.11 校验与自检
+
+译文文件是大 JSON, 用脚本校验而非肉眼:
+
+```powershell
+python -c "import json,re; d=json.load(open('content/localization/zh-CN.json',encoding='utf-8')); bad=[k for k,v in d.items() if v.get('Translation') and set(re.findall(r'{\d+}',k))!=set(re.findall(r'{\d+}',v['Translation']))]; print('total',len(d),'empty',sum(1 for v in d.values() if not v.get('Translation')),'placeholder-bad',len(bad))"
+```
+
+- [ ] 新增可见文本用了 `Tr` / `Format` / `Label`, 没有裸字符串或 `$"..."`?
+- [ ] 含 `##`/`###` 的走了 `Label`, ID 后缀原样保留?
+- [ ] Dock 标题补了 `###原文` 稳定 ID?
+- [ ] `Format` 译文的 `{0}` 占位符与原文完全一致?
+- [ ] PG 的 `[DisplayName]`/`[Description]`/`[Category]` 保持英文原文 (没写 `Tr`)?
+- [ ] 只改了 `zh-CN.json` 时, 已知菜单/Dock 标题需**重启编辑器**才刷新?
+
+---

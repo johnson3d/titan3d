@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.Procedure.TtPgcGraph@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/pgc/spline_sample.pgc,4f9a2296-8a3e-483f-aab3-9202cdf286ba" />
+  <DefaultCreator Type="EngineNS.Bricks.Procedure.TtBufferCreator@EngineCore">
+    <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;System.Single@Unknown,EngineNS.Bricks.Procedure.FFloatOperator@EngineCore,&gt;@EngineCore" />
+    <XSize Type="System.Int32@Unknown" Value="1" />
+    <YSize Type="System.Int32@Unknown" Value="1" />
+    <ZSize Type="System.Int32@Unknown" Value="1" />
+  </DefaultCreator>
+  <GraphName Type="System.String@Unknown" Value="NodeGraph" />
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="4">
+    <e_0 Type="EngineNS.Bricks.Procedure.Node.TtEndingNode@EngineCore">
+      <Label Type="System.String@Unknown" Value="RootNode" />
+      <Name Type="System.String@Unknown" Value="RootNode" />
+      <NodeId Type="System.Guid@Unknown" Value="49c5a2ef-e21e-4be2-9bac-1c16948c234f" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="1661.2725,309.72247" />
+      <PreviewResultIndex Type="System.Int32@Unknown" Value="-1" />
+      <UserInputs Type="System.Collections.Generic.List&lt;EngineNS.Bricks.Procedure.Node.UNodePinDefine@EngineCore,&gt;@Unknown" Count="1">
+        <e_0 Type="EngineNS.Bricks.Procedure.Node.UNodePinDefine@EngineCore">
+          <BufferCreator Type="EngineNS.Bricks.Procedure.TtBufferCreator@EngineCore">
+            <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.TtSuperBuffer&lt;EngineNS.Vector3@EngineCore,EngineNS.Bricks.Procedure.FFloat3Operator@EngineCore,&gt;@EngineCore" />
+            <XSize Type="System.Int32@Unknown" Value="-1" />
+            <YSize Type="System.Int32@Unknown" Value="-1" />
+            <ZSize Type="System.Int32@Unknown" Value="-1" />
+          </BufferCreator>
+          <Name Type="System.String@Unknown" Value="Height" />
+          <TypeValue Type="System.String@Unknown" Value="Value" />
+        </e_0>
+      </UserInputs>
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_0>
+    <e_1 Type="EngineNS.Bricks.Procedure.Node.TtSplineRegionSamplerNode@EngineCore">
+      <BorderSampleSpacing Type="System.Single@Unknown" Value="0.25" />
+      <BoundaryEpsilon Type="System.Single@Unknown" Value="0.0001" />
+      <DensityFalloff Type="System.Collections.Generic.List&lt;EngineNS.BezierPointBase@EngineCore,&gt;@Unknown" Count="0" />
+      <InteriorSampleSpacing Type="System.Single@Unknown" Value="1" />
+      <Jitter Type="System.Single@Unknown" Value="0" />
+      <Label Type="System.String@Unknown" Value="Spline Region" />
+      <Name Type="System.String@Unknown" Value="Spline Region" />
+      <NodeId Type="System.Guid@Unknown" Value="d3fbe66b-10eb-4376-a4cb-2c5e5443d8f0" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="687,80.00001" />
+      <PreviewResultIndex Type="System.Int32@Unknown" Value="-1" />
+      <ProjectOntoSplineSurface Type="System.Boolean@Unknown" Value="False" />
+      <QueryScope Type="EngineNS.Bricks.Procedure.ESplineQueryScope@EngineCore" Value="VolumeOverlapping" />
+      <Seed Type="System.Int32@Unknown" Value="12345" />
+      <SplineName Type="System.String@Unknown" Value="BzSpline_0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_1>
+    <e_2 Type="EngineNS.Bricks.Procedure.Node.TtSpawnNode@EngineCore">
+      <DefaultScale Type="EngineNS.Vector3@EngineCore" Value="1,1,1" />
+      <Label Type="System.String@Unknown" Value="Spawn Node" />
+      <MeshName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/mesh01.ums,15ec2216-bf13-481e-a2ef-d3a8a9b739a8" />
+      <Name Type="System.String@Unknown" Value="Spawn Node" />
+      <NamePrefix Type="System.String@Unknown" Value="PgcNode" />
+      <NodeId Type="System.Guid@Unknown" Value="40ffc875-4d87-40c5-bf45-f87235645545" />
+      <NodeTypeName Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtMeshNode@EngineCore" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="1333,118" />
+      <PreviewResultIndex Type="System.Int32@Unknown" Value="-1" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_2>
+    <e_3 Type="EngineNS.Bricks.Procedure.Node.TtSurfaceProjectionNode@EngineCore">
+      <Direction Type="EngineNS.Vector3@EngineCore" Value="0,-1,0" />
+      <IgnoreGeneratedNodes Type="System.Boolean@Unknown" Value="True" />
+      <Label Type="System.String@Unknown" Value="Surface Projection" />
+      <MaxDistance Type="System.Single@Unknown" Value="1000" />
+      <MissPolicy Type="EngineNS.Bricks.Procedure.Node.ESurfaceProjectionMissPolicy@EngineCore" Value="KeepOriginal" />
+      <Name Type="System.String@Unknown" Value="Surface Projection" />
+      <NodeId Type="System.Guid@Unknown" Value="2a9e1480-5330-495a-ac0f-785d42276776" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="979,78.99999" />
+      <PreviewResultIndex Type="System.Int32@Unknown" Value="-1" />
+      <StartOffset Type="System.Single@Unknown" Value="0.1" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_3>
+  </Nodes>
+  <Version Type="System.UInt32@Unknown" Value="10" />
+  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore,&gt;@Unknown" Count="4">
+    <e_0 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="49c5a2ef-e21e-4be2-9bac-1c16948c234f" />
+        <InPinName Type="System.String@Unknown" Value="Height" />
+        <OutNodeId Type="System.Guid@Unknown" Value="40ffc875-4d87-40c5-bf45-f87235645545" />
+        <OutPinName Type="System.String@Unknown" Value="Points" />
+      </SaveData>
+      <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
+    </e_0>
+    <e_1 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="2a9e1480-5330-495a-ac0f-785d42276776" />
+        <InPinName Type="System.String@Unknown" Value="Points" />
+        <OutNodeId Type="System.Guid@Unknown" Value="d3fbe66b-10eb-4376-a4cb-2c5e5443d8f0" />
+        <OutPinName Type="System.String@Unknown" Value="Points" />
+      </SaveData>
+      <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
+    </e_1>
+    <e_2 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="40ffc875-4d87-40c5-bf45-f87235645545" />
+        <InPinName Type="System.String@Unknown" Value="Points" />
+        <OutNodeId Type="System.Guid@Unknown" Value="2a9e1480-5330-495a-ac0f-785d42276776" />
+        <OutPinName Type="System.String@Unknown" Value="Projected Points" />
+      </SaveData>
+      <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
+    </e_2>
+    <e_3 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="40ffc875-4d87-40c5-bf45-f87235645545" />
+        <InPinName Type="System.String@Unknown" Value="Normals" />
+        <OutNodeId Type="System.Guid@Unknown" Value="2a9e1480-5330-495a-ac0f-785d42276776" />
+        <OutPinName Type="System.String@Unknown" Value="Normals" />
+      </SaveData>
+      <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
+    </e_3>
+  </Linkers>
+</Root>

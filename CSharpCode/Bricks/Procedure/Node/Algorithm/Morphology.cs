@@ -3,14 +3,15 @@ using System.Collections.Generic;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
-    [Bricks.CodeBuilder.ContextMenu("Morphology", "Float1\\Morphology", UPgcGraph.PgcEditorKeyword)]
-    public class TtMorphology : Node.UAnyTypeMonocular
+    [Bricks.CodeBuilder.ContextMenu("Morphology", "Float1\\Morphology", TtPgcGraph.PgcEditorKeyword)]
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.Node.UMorphology@EngineCore", "EngineNS.Bricks.Procedure.Node.UMorphology" })]
+    public class TtMorphology : Node.TtAnyTypeMonocular
     {
         [Rtti.Meta("")]
         public int Step { get; set; } = 1;
         [Rtti.Meta("")]
         public float LerpValue { get; set; } = 1.0f;
-        public unsafe override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(TtPgcGraph graph)
         {
             var Input = graph.BufferCache.FindBuffer(SrcPin);
             var Output = graph.BufferCache.FindBuffer(ResultPin);

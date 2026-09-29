@@ -291,14 +291,21 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     var linker = graph.FindInLinkerSingle(i);
                     var opPin = graph.GetOppositePin(i);
                     var pinNode = graph.GetOppositePinNode(i);
-                    pinNode.BuildStatements(opPin, ref data);
-                    var exp = graph.GetOppositePinExpression(i, ref data);
-                    var assign = new TtAssignOperatorStatement()
+                    if (pinNode != null)
                     {
-                        From = exp,
-                        To = new TtVariableReferenceExpression("m" + i.Name, new TtVariableReferenceExpression("mtl")),
-                    };
-                    PSFunction.MethodBody.Sequence.Add(assign);
+                        pinNode.BuildStatements(opPin, ref data);
+                        var exp = graph.GetOppositePinExpression(i, ref data);
+                        var assign = new TtAssignOperatorStatement()
+                        {
+                            From = exp,
+                            To = new TtVariableReferenceExpression("m" + i.Name, new TtVariableReferenceExpression("mtl")),
+                        };
+                        PSFunction.MethodBody.Sequence.Add(assign);
+                    }
+                    else
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtMacrossCategory>(Profiler.ELogTag.Warning, $"{graph.AssetName} graph.GetOppositePinNode(i) == null");
+                    }
                 }
             }
             

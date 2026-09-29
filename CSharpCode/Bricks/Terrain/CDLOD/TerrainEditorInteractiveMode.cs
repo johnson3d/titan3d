@@ -614,13 +614,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 ImGuiAPI.SliderFloat("Strength", ref mStrengthBlend, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
                 if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
-                    ImGuiAPI.SetTooltip($"{mBrush.Tool} 的 Strength 是 0~1 的混合权重");
+                    ImGuiAPI.SetTooltip(TtLocalization.Format("{0} 的 Strength 是 0~1 的混合权重", mBrush.Tool));
             }
             else
             {
                 ImGuiAPI.SliderFloat("Strength", ref mStrengthWorld, 0.0f, 10.0f, "%.3f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
                 if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
-                    ImGuiAPI.SetTooltip($"{mBrush.Tool} 的 Strength 是每次落笔的高度增量(米)");
+                    ImGuiAPI.SetTooltip(TtLocalization.Format("{0} 的 Strength 是每次落笔的高度增量(米)", mBrush.Tool));
             }
 
             ImGuiAPI.SetNextItemWidth(LabelWidth);
@@ -631,27 +631,27 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 ImGuiAPI.SetNextItemWidth(-130.0f);
                 ImGuiAPI.SliderFloat("Target", ref mBrush.TargetHeight, -500.0f, 500.0f, "%.2f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
                 ImGuiAPI.SameLine(0, -1);
-                if (ImGuiAPI.Button("Pick", in Vector2.Zero))
+                if (ImGuiAPI.Button(TtLocalization.Tr("Pick"), in Vector2.Zero))
                 {
                     PickTargetHeightFromHover();
                 }
                 if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
-                    ImGuiAPI.SetTooltip("取鼠标当前所指位置的高度填进 Target");
+                    ImGuiAPI.SetTooltip(TtLocalization.Tr("取鼠标当前所指位置的高度填进 Target"));
             }
 
             if (mBrush.Tool == ETerrainBrushTool.Raise || mBrush.Tool == ETerrainBrushTool.Lower)
             {
                 var effective = GetEffectiveTool();
                 if (effective != mBrush.Tool)
-                    ImGuiAPI.Text($"Shift 反向中 -> {effective}");
+                    ImGuiAPI.Text(TtLocalization.Format("Shift 反向中 -> {0}", effective));
                 else
-                    ImGuiAPI.Text("按住 Shift 反向落笔");
+                    ImGuiAPI.Text(TtLocalization.Tr("按住 Shift 反向落笔"));
             }
 
             if (mHasHover)
-                ImGuiAPI.Text($"Cursor: ({mHoverPos.X:F1}, {mHoverPos.Y:F1}, {mHoverPos.Z:F1})");
+                ImGuiAPI.Text(TtLocalization.Format("Cursor: ({0:F1}, {1:F1}, {2:F1})", mHoverPos.X, mHoverPos.Y, mHoverPos.Z));
             else
-                ImGuiAPI.Text("Cursor: --");
+                ImGuiAPI.Text(TtLocalization.Tr("Cursor: --"));
         }
         /// <summary>
         /// 材质通道的参数 UI。没有 Tool 下拉 (只有“刷”一个动作, 擦除走 Shift), 也没有
@@ -662,11 +662,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var list = FindTerrain()?.TerrainMaterialIdManager?.MaterialIdArray;
             if (list == null || list.Count == 0)
             {
-                ImGuiAPI.Text("地形没有 MatIdMapping 节点或材质列表为空");
+                ImGuiAPI.Text(TtLocalization.Tr("地形没有 MatIdMapping 节点或材质列表为空"));
             }
             else
             {
-                ImGuiAPI.Text("Material");
+                ImGuiAPI.Text(TtLocalization.Tr("Material"));
                 for (int i = 0; i < list.Count; i++)
                 {
                     var tex = list[i].TexDiffuse;
@@ -685,17 +685,17 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             ImGuiAPI.SetNextItemWidth(LabelWidth);
             ImGuiAPI.SliderFloat("Falloff", ref mBrush.Falloff, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
             if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
-                ImGuiAPI.SetTooltip("材质是整数 ID, 无法插值; Falloff 越大, 边缘的散点抖动带越宽");
+                ImGuiAPI.SetTooltip(TtLocalization.Tr("材质是整数 ID, 无法插值; Falloff 越大, 边缘的散点抖动带越宽"));
 
             if (IsInvertStroke())
-                ImGuiAPI.Text("Shift 擦除中 -> 回基底材质");
+                ImGuiAPI.Text(TtLocalization.Tr("Shift 擦除中 -> 回基底材质"));
             else
-                ImGuiAPI.Text("按住 Shift 擦除回基底");
+                ImGuiAPI.Text(TtLocalization.Tr("按住 Shift 擦除回基底"));
 
             if (mHasHover)
-                ImGuiAPI.Text($"Cursor: ({mHoverPos.X:F1}, {mHoverPos.Y:F1}, {mHoverPos.Z:F1})");
+                ImGuiAPI.Text(TtLocalization.Format("Cursor: ({0:F1}, {1:F1}, {2:F1})", mHoverPos.X, mHoverPos.Y, mHoverPos.Z));
             else
-                ImGuiAPI.Text("Cursor: --");
+                ImGuiAPI.Text(TtLocalization.Tr("Cursor: --"));
         }
         /// <summary>
         /// TargetHeight 是 level 内相对高度 (与 SourceHeightMap 同基准), 手填很难对上,

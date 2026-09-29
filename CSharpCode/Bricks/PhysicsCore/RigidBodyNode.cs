@@ -1,4 +1,4 @@
-﻿using EngineNS.IO;
+using EngineNS.IO;
 using EngineNS.Rtti;
 using Org.BouncyCastle.Asn1.X509.Qualified;
 using System;
@@ -171,7 +171,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 {
                     ImGuiAPI.InputFloat3("HalfExtent", (float*)p, "%.3f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
                 }                
-                if (ImGuiAPI.Button("AddBoxShape", in sz))
+                if (ImGuiAPI.Button(TtLocalization.Tr("AddBoxShape"), in sz))
                 {
                     var node = info.ObjectInstance as TtRigidBodyNode;
                     if (node != null)
@@ -186,7 +186,7 @@ namespace EngineNS.Bricks.PhysicsCore
             }
         }
         [PGAddBoxShape()]
-        [Category("Editor")]
+        [System.ComponentModel.Category("Editor")]
         public bool AddBoxShape
         {
             get
@@ -231,7 +231,7 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 var tmInfo = new EditorInfo();
                 tmInfo.Value = mTriMeshName;
-                ImGuiAPI.Text("TriMesh");
+                ImGuiAPI.Text(TtLocalization.Tr("TriMesh"));
                 mMeshRNameEditor.FilterExts = TtPhyTriMesh.AssetExt;
                 object newMesh;
                 ImGuiAPI.PushID("TriMesh");
@@ -243,7 +243,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 }
                 var tmInfo1 = new EditorInfo();
                 tmInfo1.Value = mTriMaterialName;
-                ImGuiAPI.Text("TriMaterial");
+                ImGuiAPI.Text(TtLocalization.Tr("TriMaterial"));
                 mMtlRNameEditor.FilterExts = TtPhyMaterial.AssetExt;
                 object newMtl;
                 ImGuiAPI.PushID("TriMaterial");
@@ -256,7 +256,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 ImGuiAPI.Separator();
                 if (mTriMeshName != null && mTriMaterialName != null)
                 {
-                    if (ImGuiAPI.Button("AddTriMeshShape"))
+                    if (ImGuiAPI.Button(TtLocalization.Tr("AddTriMeshShape")))
                     {
                         var pc = TtEngine.Instance.PhyModule.PhyContext;
                         var mesh = pc.PhyMeshManager.GetMeshSync(mTriMeshName);
@@ -275,7 +275,7 @@ namespace EngineNS.Bricks.PhysicsCore
             }
         }
         [PGAddTriMeshShape()]
-        [Category("Editor")]
+        [System.ComponentModel.Category("Editor")]
         public bool AddTriMeshShape
         {
             get

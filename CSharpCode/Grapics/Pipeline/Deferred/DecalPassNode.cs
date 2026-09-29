@@ -158,7 +158,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         // ---- Parameters ----
         /// <summary>贴花强度的全局缩放, 便于整体压掉而不用改每个贴花。</summary>
         [Rtti.Meta("")]
-        [Category("Decal")]
+        [System.ComponentModel.Category("Decal")]
         public float GlobalIntensity { get; set; } = 1.0f;
 
         // ---- Internal ----

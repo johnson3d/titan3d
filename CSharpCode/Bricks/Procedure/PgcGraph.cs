@@ -6,32 +6,38 @@ using EngineNS.EGui.Controls;
 namespace EngineNS.Bricks.Procedure
 {
     [Macross.TtMacross]
-    public partial class UPgcGraphProgram : Macross.AuxMacrossObject
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.UPgcGraphProgram@EngineCore", "EngineNS.Bricks.Procedure.UPgcGraphProgram" })]
+    public partial class TtPgcGraphProgram : Macross.AuxMacrossObject
     {
         [Rtti.Meta("")]
-        public virtual bool OnNodeInitialized(UPgcGraph graph, UPgcNodeBase node)
+        public virtual bool OnNodeInitialized(TtPgcGraph graph, TtPgcNodeBase node)
         {
             return true;
         }
         [Rtti.Meta("")]
-        public virtual bool OnNodeProcedureFinished(UPgcGraph graph, UPgcNodeBase node)
+        public virtual bool OnNodeProcedureFinished(TtPgcGraph graph, TtPgcNodeBase node)
         {
             return true;
         }
     }
-    public partial class UPgcGraph : TtNodeGraph
+    [Rtti.Meta("", NameAlias = new string[] { "EngineNS.Bricks.Procedure.UPgcGraph@EngineCore", "EngineNS.Bricks.Procedure.UPgcGraph" })]
+    public partial class TtPgcGraph : TtNodeGraph
     {
         public const string PgcEditorKeyword = "PGC";
         public bool IsTryCacheBuffer { get; set; } = false;
         [Rtti.Meta("")]
         public uint Version { get; set; } = 0;
         [Rtti.Meta("")]
-        public UBufferCreator DefaultCreator { get; set; } = UBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(1, 1, 1);
+        public TtBufferCreator DefaultCreator { get; set; } = TtBufferCreator.CreateInstance<TtSuperBuffer<float, FFloatOperator>>(1, 1, 1);
 
-        public UPgcEditor GraphEditor;
+        public TtPgcEditor GraphEditor;
+        [System.ComponentModel.Browsable(false)]
+        public GamePlay.TtWorld HostWorld { get; set; }
+        [System.ComponentModel.Browsable(false)]
+        public GamePlay.Scene.TtPgcVolumeNode HostVolume { get; set; }
         public TtPgcBufferCache BufferCache { get; set; } = new TtPgcBufferCache();
-        public Node.UEndingNode Root { get; set; }
-        public UPgcGraph()
+        public Node.TtEndingNode Root { get; set; }
+        public TtPgcGraph()
         {
             //UpdateCanvasMenus();
             //UpdateNodeMenus();
@@ -94,7 +100,7 @@ namespace EngineNS.Bricks.Procedure
                         parentMenu.AddMenuItem("Pack " + typeDesc.Name, typeDesc.Name, null,
                             (TtMenuItem item, object sender) =>
                             {
-                                var node = new Node.UPackNode();
+                                var node = new Node.TtPackNode();
                                 node.Name = "Pack " + typeDesc.Name;
                                 node.Type = typeDesc;
                                 node.UserData = this;
@@ -105,7 +111,7 @@ namespace EngineNS.Bricks.Procedure
                         parentMenu.AddMenuItem("Unpack " + typeDesc.Name, typeDesc.Name, null,
                             (TtMenuItem item, object sender) =>
                             {
-                                var node = new Node.UUnpackNode();
+                                var node = new Node.TtUnpackNode();
                                 node.Name = "Unpack " + typeDesc.Name;
                                 node.Type = typeDesc;
                                 node.UserData = this;
@@ -117,7 +123,7 @@ namespace EngineNS.Bricks.Procedure
                 }
             }
         }
-        static void GetNodeNameAndMenuStr(in string menuString, UPgcGraph graph, ref string nodeName, ref string menuName)
+        static void GetNodeNameAndMenuStr(in string menuString, TtPgcGraph graph, ref string nodeName, ref string menuName)
         {
             menuName = menuString;
             nodeName = menuName;
@@ -131,52 +137,92 @@ namespace EngineNS.Bricks.Procedure
             //    nodeName = menuName.Insert(idx, subStr);
             //}
         }
-        public void Compile(UPgcNodeBase root, bool resetCache = true)
+        public TtPgcExecutionContext ExecutionContext { get; private set; }
+
+        public TtBufferComponent ResolveInput(PinIn pin)
         {
-            if (resetCache)
-                this.BufferCache.ResetCache();
-            var nodes = this.CompileGraph(root);
-            int NumOfLayer = 0;
-            foreach (var i in nodes)
-            {
-                if (i.RootDistance >= NumOfLayer)
-                    NumOfLayer = i.RootDistance;
-            }
-            NumOfLayer += 1;
-            List<UPgcNodeBase>[] Layers = new List<UPgcNodeBase>[NumOfLayer];
-            for (int i = 0; i < NumOfLayer; i++)
-            {
-                Layers[i] = new List<UPgcNodeBase>();
-            }
+            return ResolveInput(pin, out _);
+        }
 
-            foreach (var i in nodes)
+        public TtBufferComponent ResolveInput(PinIn pin, out bool isExternal)
+        {
+            isExternal = false;
+            if (pin == null)
+                return null;
+            if (FindInLinkerSingle(pin) != null)
+                return BufferCache.FindBuffer(pin);
+            if (ExecutionContext != null &&
+                ExecutionContext.TryGetExternalInput(pin.NodeId, pin.Name, out var externalBuffer))
             {
-                i.InitProcedure(this);
-
-                Layers[i.RootDistance].Add(i);
+                isExternal = true;
+                return externalBuffer;
             }
-            foreach (var i in nodes)
-            {
-                this.McProgram?.Get()?.OnNodeInitialized(this, i);
-            }
+            return null;
+        }
 
-            for (int i = Layers.Length - 1; i >= 0; i--)
+        public void ReleaseInput(PinIn pin)
+        {
+            var buffer = ResolveInput(pin, out var isExternal);
+            if (!isExternal && buffer != null)
+                buffer.LifeCount--;
+        }
+
+        public void Compile(TtPgcNodeBase root, bool resetCache = true)
+        {
+            Compile(root, null, resetCache);
+        }
+
+        public void Compile(TtPgcNodeBase root, TtPgcExecutionContext context, bool resetCache = true)
+        {
+            ExecutionContext = context;
+            try
             {
-                foreach (var j in Layers[i])
+                if (resetCache)
+                    this.BufferCache.ResetCache();
+                var nodes = this.CompileGraph(root);
+                int NumOfLayer = 0;
+                foreach (var i in nodes)
                 {
-                    //AssetGraph.BufferCache .... clear
-                    //AssetGraph.BufferCache .... SaveBuffferToTempFile
-                    var t1 = Support.TtTime.HighPrecision_GetTickCount();
-                    j.DoProcedure(this);
-                    this.McProgram?.Get().OnNodeProcedureFinished(this, j);
-                    var t2 = Support.TtTime.HighPrecision_GetTickCount();
-                    Profiler.Log.WriteLine<Profiler.TtPgcGategory>(Profiler.ELogTag.Info, $"Node:{j.Name} = {(t2 - t1) / 1000000.0f}");
+                    if (i.RootDistance >= NumOfLayer)
+                        NumOfLayer = i.RootDistance;
+                }
+                NumOfLayer += 1;
+                List<TtPgcNodeBase>[] Layers = new List<TtPgcNodeBase>[NumOfLayer];
+                for (int i = 0; i < NumOfLayer; i++)
+                {
+                    Layers[i] = new List<TtPgcNodeBase>();
+                }
+
+                foreach (var i in nodes)
+                {
+                    i.InitProcedure(this);
+                    Layers[i.RootDistance].Add(i);
+                }
+                foreach (var i in nodes)
+                {
+                    this.McProgram?.Get()?.OnNodeInitialized(this, i);
+                }
+
+                for (int i = Layers.Length - 1; i >= 0; i--)
+                {
+                    foreach (var j in Layers[i])
+                    {
+                        var t1 = Support.TtTime.HighPrecision_GetTickCount();
+                        j.DoProcedure(this);
+                        this.McProgram?.Get().OnNodeProcedureFinished(this, j);
+                        var t2 = Support.TtTime.HighPrecision_GetTickCount();
+                        Profiler.Log.WriteLine<Profiler.TtPgcGategory>(Profiler.ELogTag.Info, $"Node:{j.Name} = {(t2 - t1) / 1000000.0f}");
+                    }
                 }
             }
+            finally
+            {
+                ExecutionContext = null;
+            }
         }
-        public List<UPgcNodeBase> CompileGraph(UPgcNodeBase root)
+        public List<TtPgcNodeBase> CompileGraph(TtPgcNodeBase root)
         {
-            List<UPgcNodeBase> allNodes = new List<UPgcNodeBase>();
+            List<TtPgcNodeBase> allNodes = new List<TtPgcNodeBase>();
             allNodes.Add(root);
             //foreach (UPgcNodeBase i in Nodes)
             //{
@@ -187,8 +233,8 @@ namespace EngineNS.Bricks.Procedure
             {
                 if (linker == null)
                     return true;
-                var inNode = linker.InNode as UPgcNodeBase;
-                var outNode = linker.OutNode as UPgcNodeBase;
+                var inNode = linker.InNode as TtPgcNodeBase;
+                var outNode = linker.OutNode as TtPgcNodeBase;
 
                 inNode.RootDistance = -1;
                 if (!allNodes.Contains(inNode))
@@ -208,8 +254,8 @@ namespace EngineNS.Bricks.Procedure
             {
                 if (linker == null)
                     return true;
-                var inNode = linker.InNode as UPgcNodeBase;
-                var outNode = linker.OutNode as UPgcNodeBase;
+                var inNode = linker.InNode as TtPgcNodeBase;
+                var outNode = linker.OutNode as TtPgcNodeBase;
                 if (inNode.RootDistance + 1 > outNode.RootDistance)
                 {
                     outNode.RootDistance = inNode.RootDistance + 1;
@@ -225,7 +271,7 @@ namespace EngineNS.Bricks.Procedure
         }
         #region Macross
         [Rtti.Meta("")]
-        [RName.PGRName(FilterExts = CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(UPgcGraphProgram))]
+        [RName.PGRName(FilterExts = CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtPgcGraphProgram))]
         public RName ProgramName
         {
             get
@@ -238,13 +284,13 @@ namespace EngineNS.Bricks.Procedure
             {
                 if (mMcProgram == null)
                 {
-                    mMcProgram = Macross.TtMacrossGetter<UPgcGraphProgram>.NewInstance();
+                    mMcProgram = Macross.TtMacrossGetter<TtPgcGraphProgram>.NewInstance();
                 }
                 mMcProgram.Name = value;
             }
         }
-        Macross.TtMacrossGetter<UPgcGraphProgram> mMcProgram;
-        public Macross.TtMacrossGetter<UPgcGraphProgram> McProgram
+        Macross.TtMacrossGetter<TtPgcGraphProgram> mMcProgram;
+        public Macross.TtMacrossGetter<TtPgcGraphProgram> McProgram
         {
             get
             {
@@ -257,18 +303,18 @@ namespace EngineNS.Bricks.Procedure
             return this.BufferCache.RegBuffer(pin, buffer);
         }
         [Rtti.Meta("")]
-        public UPgcNodeBase FindPgcNodeByName(string name,
-            [Rtti.MetaParameter(FilterType = typeof(UPgcNodeBase),
+        public TtPgcNodeBase FindPgcNodeByName(string name,
+            [Rtti.MetaParameter(FilterType = typeof(TtPgcNodeBase),
             ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type type)
         {
-            return this.FindFirstNode(name) as UPgcNodeBase;
+            return this.FindFirstNode(name) as TtPgcNodeBase;
         }
         #endregion
 
         public override void CollapseNodes(List<TtNodeBase> nodeList)
         {
-            var node = IUnionNode.CreateUnionNode<Node.UUnionNode, Node.UNodePinDefine, Node.UEndPointNode>(this, nodeList);
+            var node = IUnionNode.CreateUnionNode<Node.TtUnionNode, Node.UNodePinDefine, Node.TtEndPointNode>(this, nodeList);
             node.Name = "Collapse Node";
             DeleteSelectedNodes();
         }
@@ -287,9 +333,9 @@ namespace EngineNS.Bricks.Procedure
 
 namespace EngineNS.Bricks.Procedure
 {
-	partial class UPgcGraphProgram
+	partial class TtPgcGraphProgram
 	{
-		public unsafe bool macross_OnNodeInitialized (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, UPgcNodeBase node) 
+		public unsafe bool macross_OnNodeInitialized (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtPgcGraph graph, TtPgcNodeBase node) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
@@ -300,7 +346,7 @@ namespace EngineNS.Bricks.Procedure
 			var _return_value = OnNodeInitialized(graph, node);
 			return _return_value;
 		}
-		public unsafe bool macross_OnNodeProcedureFinished (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, UPgcGraph graph, UPgcNodeBase node) 
+		public unsafe bool macross_OnNodeProcedureFinished (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtPgcGraph graph, TtPgcNodeBase node) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
@@ -317,7 +363,7 @@ namespace EngineNS.Bricks.Procedure
 
 namespace EngineNS.Bricks.Procedure
 {
-	partial class UPgcGraph
+	partial class TtPgcGraph
 	{
 		public unsafe TtBufferComponent macross_RegBuffer (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, PinOut pin, TtBufferComponent buffer) 
 		{
@@ -330,7 +376,7 @@ namespace EngineNS.Bricks.Procedure
 			var _return_value = RegBuffer(pin, buffer);
 			return _return_value;
 		}
-		public unsafe UPgcNodeBase macross_FindPgcNodeByName (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name, System.Type type) 
+		public unsafe TtPgcNodeBase macross_FindPgcNodeByName (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name, System.Type type) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{

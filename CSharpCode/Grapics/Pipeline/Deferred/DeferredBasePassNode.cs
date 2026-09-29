@@ -1,4 +1,4 @@
-﻿using BCnEncoder.Shared;
+using BCnEncoder.Shared;
 using EngineNS.Bricks.VXGI;
 using EngineNS.GamePlay;
 using EngineNS.Graphics.Pipeline.Shader;
@@ -276,14 +276,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
         public TtCpuCullingNode CpuCullNode = null;
         public TtGpuCullingNode GpuCullNode = null;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public bool ClearMRT
         {
             get;
             set;
         } = true;
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]
         public bool EnableMeshlets
         {
@@ -414,7 +414,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
         }
         [Rtti.Meta("")]
-        [Category("Option")]
+        [System.ComponentModel.Category("Option")]
         public bool EnableHDR { get; set; }
         public override void BeforeTick(TtRenderPolicy policy)
         {
