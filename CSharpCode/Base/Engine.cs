@@ -258,6 +258,9 @@ namespace EngineNS
         [Rtti.Meta("")]
         [System.ComponentModel.Category("Option")]
         public List<string> TypeAssemblies { get; set; } = new List<string>();
+        [Rtti.Meta("")]
+        [System.ComponentModel.Category("Option")]
+        public List<RName> LeanClrAssemblies { get; set; } = new List<RName>();
         public TtEngineConfig()
         {
             //EditorFont = RName.GetRName("fonts/Roboto-Regular.ttf", RName.ERNameType.Engine);

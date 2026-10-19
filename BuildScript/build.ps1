@@ -222,6 +222,10 @@ if ($CodeGenOnly) {
 
 if (-not $SkipNative) {
     Write-Host ''
+    Write-Host '== Build LeanCLR Windows x64 static libraries =='
+    & "$PSScriptRoot\build-leanclr.ps1" -Configuration $Configuration
+
+    Write-Host ''
     Write-Host '== Build Core.Window x64 =='
     foreach ($config in $configs) {
         Invoke-External $msbuild @(

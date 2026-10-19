@@ -249,6 +249,21 @@ foreach ($group in (Get-ManifestValues $manifest 'nativeDependencyGroups')) {
     }
     Write-Host "  native:   $($group.id)$version"
 
+    foreach ($tool in (Get-ManifestValues $group 'requiredTools')) {
+        if ($tool -eq 'cmake') {
+            try {
+                $cmake = Find-CMake
+                Write-Host "  CMake:    $cmake"
+            }
+            catch {
+                Add-Missing $_.Exception.Message
+            }
+        }
+        else {
+            Add-Missing "Unsupported required build tool '$tool' for native dependency '$($group.id)'."
+        }
+    }
+
     foreach ($path in (Get-ManifestValues $group 'requiredPaths')) {
         $fullPath = Resolve-RepoDependencyPath $path
         if (-not (Test-Path -LiteralPath $fullPath)) {

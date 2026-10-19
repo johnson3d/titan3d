@@ -49,6 +49,7 @@ namespace EngineNS.Bricks.Procedure
     {
         readonly FTransform[] mWorldTransforms;
         readonly int[] mSeeds;
+        readonly RName[] mMeshNames;
 
         public Guid SourceNodeId { get; }
         public string SourceNodeName { get; }
@@ -60,7 +61,7 @@ namespace EngineNS.Bricks.Procedure
 
         public TtPgcSpawnRequest(Guid sourceNodeId, string sourceNodeName, Type nodeType,
             RName meshName, string namePrefix, IReadOnlyList<FTransform> worldTransforms,
-            IReadOnlyList<int> seeds)
+            IReadOnlyList<int> seeds, IReadOnlyList<RName> meshNames = null)
         {
             SourceNodeId = sourceNodeId;
             SourceNodeName = string.IsNullOrWhiteSpace(sourceNodeName) ? "Spawn Node" : sourceNodeName;
@@ -69,8 +70,21 @@ namespace EngineNS.Bricks.Procedure
             NamePrefix = string.IsNullOrEmpty(namePrefix) ? "PgcNode" : namePrefix;
             mWorldTransforms = Copy(worldTransforms);
             mSeeds = Copy(seeds);
+            mMeshNames = Copy(meshNames);
             if (mSeeds.Length != mWorldTransforms.Length)
                 throw new ArgumentException("Spawn request seeds must match transform count", nameof(seeds));
+            if (mMeshNames.Length != 0 && mMeshNames.Length != mWorldTransforms.Length)
+                throw new ArgumentException("Spawn request mesh names must match transform count", nameof(meshNames));
+        }
+
+        /// <summary>
+        /// 逐点模板 (多模板加权选择的结果)。未指定逐点模板时退回 MeshName。
+        /// </summary>
+        public RName GetMeshName(int index)
+        {
+            if (index >= 0 && index < mMeshNames.Length && mMeshNames[index] != null)
+                return mMeshNames[index];
+            return MeshName;
         }
 
         static T[] Copy<T>(IReadOnlyList<T> source)
@@ -81,6 +95,33 @@ namespace EngineNS.Bricks.Procedure
             for (int i = 0; i < source.Count; i++)
                 result[i] = source[i];
             return result;
+        }
+    }
+
+    /// <summary>
+    /// 程序化网格生成请求 (道路、样条变形网格等)。顶点相对 WorldTransform 的 pivot, 由宿主挂到 MeshNode 上。
+    /// </summary>
+    public sealed class TtPgcMeshRequest
+    {
+        public Guid SourceNodeId { get; }
+        public string SourceNodeName { get; }
+        public string NamePrefix { get; }
+        public Graphics.Mesh.TtMeshDataProvider MeshData { get; }
+        public FTransform WorldTransform { get; }
+        public Graphics.Pipeline.Shader.TtMaterial[] Materials { get; }
+        public bool EnableCollision { get; }
+
+        public TtPgcMeshRequest(Guid sourceNodeId, string sourceNodeName, string namePrefix,
+            Graphics.Mesh.TtMeshDataProvider meshData, in FTransform worldTransform,
+            Graphics.Pipeline.Shader.TtMaterial[] materials, bool enableCollision)
+        {
+            SourceNodeId = sourceNodeId;
+            SourceNodeName = string.IsNullOrWhiteSpace(sourceNodeName) ? "Mesh Node" : sourceNodeName;
+            NamePrefix = string.IsNullOrEmpty(namePrefix) ? "PgcMesh" : namePrefix;
+            MeshData = meshData ?? throw new ArgumentNullException(nameof(meshData));
+            WorldTransform = worldTransform;
+            Materials = materials ?? Array.Empty<Graphics.Pipeline.Shader.TtMaterial>();
+            EnableCollision = enableCollision;
         }
     }
 
@@ -157,6 +198,7 @@ namespace EngineNS.Bricks.Procedure
             new Dictionary<(Guid, string), TtBufferComponent>();
         readonly List<string> mDiagnostics = new List<string>();
         readonly List<TtPgcSpawnRequest> mSpawnRequests = new List<TtPgcSpawnRequest>();
+        readonly List<TtPgcMeshRequest> mMeshRequests = new List<TtPgcMeshRequest>();
         readonly List<TtBezierSplineNode> mSplineDependencies = new List<TtBezierSplineNode>();
         readonly HashSet<Guid> mSplineDependencyIds = new HashSet<Guid>();
         readonly List<FSplineQuery> mSplineQueries = new List<FSplineQuery>();
@@ -174,6 +216,7 @@ namespace EngineNS.Bricks.Procedure
         public ulong ExternalInputVersion { get; private set; }
         public IReadOnlyList<string> Diagnostics => mDiagnostics;
         public IReadOnlyList<TtPgcSpawnRequest> SpawnRequests => mSpawnRequests;
+        public IReadOnlyList<TtPgcMeshRequest> MeshRequests => mMeshRequests;
         public IReadOnlyList<TtBezierSplineNode> SplineDependencies => mSplineDependencies;
         public IReadOnlyList<FSplineQuery> SplineQueries => mSplineQueries;
         public bool CanApplySpawnRequests { get; private set; } = true;
@@ -227,6 +270,12 @@ namespace EngineNS.Bricks.Procedure
         {
             if (request != null)
                 mSpawnRequests.Add(request);
+        }
+
+        public void AddMeshRequest(TtPgcMeshRequest request)
+        {
+            if (request != null)
+                mMeshRequests.Add(request);
         }
 
         public void InvalidateSpawnRequests(string message)

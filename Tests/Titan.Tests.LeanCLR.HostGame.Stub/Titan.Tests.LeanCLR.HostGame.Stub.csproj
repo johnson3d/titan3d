@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- 编译 HostGame 生成的 VM 桩源码，产出 Titan.Tests.LeanCLR.HostGame.LeanClrStub.dll -->
+    <LeanClrHostProject>..\Titan.Tests.LeanCLR.HostGame\Titan.Tests.LeanCLR.HostGame.csproj</LeanClrHostProject>
+    <!-- 探针直接从输出目录注册，不进入引擎扫描的 content\LeanCLR -->
+    <LeanClrDeployToContent>false</LeanClrDeployToContent>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- 共享枚举/结构体定义，桩方法签名需要这些类型 -->
+    <Compile Include="..\Titan.Tests.LeanCLR.HostGame\SharedTypes.cs" Link="SharedTypes.cs" />
+  </ItemGroup>
+  <Import Project="..\..\BuildScript\LeanClrStub.targets" />
+</Project>

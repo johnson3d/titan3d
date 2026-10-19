@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- LeanCLR 执行的热更脚本只绑定 netstandard，运行时由 content\LeanCLR\netstandard.dll 转发到 VM 的 BCL -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- 宿主 [TtLeanClr] 类的 VM 桩；调用在 VM 中被劫持到宿主生成的 intrinsic 代理 -->
+    <ProjectReference Include="..\Titan.Tests.LeanCLR.HostGame.Stub\Titan.Tests.LeanCLR.HostGame.Stub.csproj" />
+  </ItemGroup>
+</Project>

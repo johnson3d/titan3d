@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- 编译 Survivor.All 生成的 VM 桩源码，产出 Survivor.All.LeanClrStub.dll，部署到 content\LeanCLR\Survivor\ 由引擎自动扫描注册 -->
+    <LeanClrHostProject>..\Survivor.All\Survivor.All.csproj</LeanClrHostProject>
+    <!-- Plugins\Directory.Build.targets 的 PreBuild 会清空 TtOutputBasePath；与 Survivor.All 共用目录会删掉插件 dll -->
+    <TtOutputBasePath>$(TtTitanRoot)binaries\LeanClrStub\$(TtPluginName)\</TtOutputBasePath>
+    <OutDir>$(TtOutputBasePath)</OutDir>
+  </PropertyGroup>
+  <Import Project="..\..\..\..\BuildScript\LeanClrStub.targets" />
+</Project>

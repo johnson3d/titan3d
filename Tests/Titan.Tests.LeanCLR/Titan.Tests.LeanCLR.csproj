@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Module\Engine.Window\Engine.Window.csproj" />
+    <ProjectReference Include="..\Titan.Tests.LeanCLR.HostGame\Titan.Tests.LeanCLR.HostGame.csproj" />
+    <ProjectReference Include="..\Titan.Tests.LeanCLR.Script\Titan.Tests.LeanCLR.Script.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\Titan.Tests.LeanCLR.Patch\Titan.Tests.LeanCLR.Patch.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+</Project>

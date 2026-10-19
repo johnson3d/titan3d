@@ -8,13 +8,14 @@ namespace ProjectCooker.Command
 {
     class TtStartDS : TtCookCommand
     {
-        public override async EngineNS.Thread.Async.TtTask ExecuteCommand(string[] args)
+        public override async EngineNS.Thread.Async.TtTask<int> ExecuteCommand(string[] args)
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             var port = FindArgument(args, DS_Port);
             Console.WriteLine($"Starting Dedicated Server on port {port}...");
             EngineNS.TtEngine.Instance.DedicatedServer.StartServer("0.0.0.0", System.Convert.ToUInt16(port));
             Console.WriteLine($"Dedicated Server start success.");
+            return 0;
         }
     }
 }

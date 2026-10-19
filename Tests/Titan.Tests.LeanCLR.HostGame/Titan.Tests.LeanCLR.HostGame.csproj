@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- 端到端探针的宿主"插件"：用 LeanClrPlugin.targets 生成 intrinsic 代理与 VM 桩源码 -->
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Module\Engine.Window\Engine.Window.csproj" />
+  </ItemGroup>
+  <Import Project="..\..\BuildScript\LeanClrPlugin.targets" />
+</Project>

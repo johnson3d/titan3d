@@ -6,6 +6,37 @@ using System.Threading.Tasks;
 
 namespace ProjectCooker
 {
+    public static class TtCommandExecutionPolicy
+    {
+        public static bool IsServiceCommand(string command)
+        {
+            switch (command)
+            {
+                case "StartDS":
+                case "LoadPlugin":
+                case "StartRobot":
+                case "StartRootServer":
+                case "StartLoginServer":
+                case "StartLevelServer":
+                case "StartGateServer":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static string ResolveNativeConfiguration(string requested, string cached)
+        {
+            var value = string.IsNullOrEmpty(requested) ? cached : requested;
+            return string.Equals(value, "debug", StringComparison.OrdinalIgnoreCase) ? "debug" : "release";
+        }
+
+        public static bool IsEngineConfigurationAvailable(string configurationPath)
+        {
+            return string.IsNullOrEmpty(configurationPath) || System.IO.File.Exists(configurationPath);
+        }
+    }
+
     class TtCookCommand
     {
         public const string Param_Types = "AssetType=";
@@ -24,9 +55,10 @@ namespace ProjectCooker
         public const string Param_Blacklist = "Blacklist=";
         public const string DS_Port = "DS_Port=";
 
-        public virtual async EngineNS.Thread.Async.TtTask ExecuteCommand(string[] args)
+        public virtual async EngineNS.Thread.Async.TtTask<int> ExecuteCommand(string[] args)
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
+            return 0;
         }
         public static string FindArgument(string[] args, string startWith)
         {

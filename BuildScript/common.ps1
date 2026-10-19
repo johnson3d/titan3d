@@ -31,6 +31,15 @@ function Find-DotNet {
     return $dotnet.Source
 }
 
+function Find-CMake {
+    $cmake = Get-Command cmake -ErrorAction SilentlyContinue
+    if ($null -eq $cmake) {
+        throw 'CMake was not found on PATH. Install CMake 3.15 or newer to build LeanCLR from source.'
+    }
+
+    return $cmake.Source
+}
+
 function Find-NuGet {
     $nuget = Get-Command nuget -ErrorAction SilentlyContinue
     if ($null -ne $nuget) {

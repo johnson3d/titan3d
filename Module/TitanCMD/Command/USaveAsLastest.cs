@@ -68,7 +68,7 @@ namespace ProjectCooker.Command
             return false;
         }
 
-        public override async EngineNS.Thread.Async.TtTask ExecuteCommand(string[] args)
+        public override async EngineNS.Thread.Async.TtTask<int> ExecuteCommand(string[] args)
         {
             LoadBlacklist(args);
             AssetTypes.Clear();
@@ -182,6 +182,7 @@ namespace ProjectCooker.Command
                     }
                 }
             }
+            return 0;
         }
         async EngineNS.Thread.Async.TtTask ProcAssets(System.Type type, bool bOnlyAMeta = false)
         {

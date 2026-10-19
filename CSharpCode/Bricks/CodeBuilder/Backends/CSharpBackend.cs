@@ -361,6 +361,14 @@ namespace EngineNS.Bricks.CodeBuilder
                     sourceCode = sourceCode.Remove(awaitDummyIdx, awaitDummyPosCode.Length);
                     if (!methodDec.HasAwaitCode && methodDec.AsyncType != TtMethodDeclaration.EAsyncType.None)
                         sourceCode = sourceCode.Insert(awaitDummyIdx, $"await {typeof(EngineNS.Thread.TtAsyncDummyClass).FullName}.DummyFunc();");
+                    else if (TtMacrossPatchStubCodeGen.CanPatch(data.Class, methodDec))
+                    {
+                        // 救命热更入口桩：补丁激活且命中时转发到 LeanCLR 补丁方法
+                        var classFullName = string.IsNullOrEmpty(data.Namespace?.Namespace) ? data.Class.ClassName : data.Namespace.Namespace + "." + data.Class.ClassName;
+                        var signature = TtMacrossPatchStubCodeGen.BuildSignature(classFullName, methodDec, data.CodeGen.GetTypeString);
+                        var stub = TtMacrossPatchStubCodeGen.BuildStub(EngineNS.Macross.TtMacrossPatchId.Compute(signature), methodDec, data.CodeGen.GetTypeString);
+                        sourceCode = sourceCode.Insert(awaitDummyIdx, stub[0] + "\n" + data.CodeGen.CurIndentStr + stub[1]);
+                    }
                     else
                         sourceCode = sourceCode.Remove(awaitDummyIdx, data.CodeGen.CurIndentStr.Length + 1);
 

@@ -2044,7 +2044,7 @@ namespace EngineNS.Macross
             var projectFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.ConfigManager.GetConfig<TtEditorConfig>().GameProject;
             success = CompileGameProject(csFilesPath, projectFile, assemblyFile, platformType);
         }
-        public static bool CompileGameProject(string csFilesPath, string projectFile, string assemblyFile, EPlatformType platformType)
+        public static bool CompileGameProject(string csFilesPath, string projectFile, string assemblyFile, EPlatformType platformType, bool enableMirror = false)
         {
             csFilesPath = EngineNS.IO.TtFileManager.GetValidDirectory(csFilesPath);
             var csFiles = new List<string>(EngineNS.IO.TtFileManager.GetFiles(csFilesPath, "*.cs"));
@@ -2166,7 +2166,27 @@ namespace EngineNS.Rtti
             arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.OptimizationLevel, Microsoft.CodeAnalysis.OptimizationLevel.Debug.ToString()));
             arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.AllowUnsafe, "true"));
 
+            if (enableMirror)
+            {
+                try
+                {
+                    var generatorType = System.Type.GetType(
+                        "EngineNS.LeanCLR.Generator.TtMacrossMirrorGenerator, Titan.LeanClrGenerator",
+                        throwOnError: true);
+                    EngineNS.CodeCompiler.CSharpCompiler.ExtraGenerators = new Microsoft.CodeAnalysis.IIncrementalGenerator[]
+                    {
+                        (Microsoft.CodeAnalysis.IIncrementalGenerator)System.Activator.CreateInstance(generatorType)
+                    };
+                }
+                catch (System.Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"MirrorGenerator setup failed: {ex.Message}");
+                    enableMirror = false;
+                }
+            }
+
             var retVal = EngineNS.CodeCompiler.CSharpCompiler.CompilerCSharpWithArguments(arguments.ToArray());
+            EngineNS.CodeCompiler.CSharpCompiler.ExtraGenerators = null;
             if (EngineNS.CodeCompiler.CSharpCompiler.LastEmitResult != null)
                 LastCompileResult = new CompileResult(EngineNS.CodeCompiler.CSharpCompiler.LastEmitResult);
 
@@ -2175,7 +2195,146 @@ namespace EngineNS.Rtti
 
             IO.TtFileManager.CopyFile(src, tar);
             IO.TtFileManager.DeleteFile(src);
+
+            // 镜像编译与基线落盘
+            if (retVal && enableMirror)
+            {
+                try
+                {
+                    BuildMirrorAndBaseline(assemblyFile, arguments.ToArray());
+                }
+                catch (System.Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Mirror build failed: {ex.Message}");
+                }
+            }
+
             return retVal;
+        }
+
+        /// <summary>
+        /// GameProject 编译成功后：提取镜像桩源码编译为 mirror DLL，提取基线草稿补入 MVID 和哈希后落盘。
+        /// </summary>
+        private static void BuildMirrorAndBaseline(string gameProjectDll, string[] compilationArgs)
+        {
+            var generatedSources = EngineNS.CodeCompiler.CSharpCompiler.LastGeneratedSources;
+            if (generatedSources == null)
+                return;
+
+            var assemblyName = IO.TtFileManager.GetPureName(gameProjectDll);
+            var safeAssemblyName = assemblyName.Replace('.', '_');
+
+            // 查找桩源码和基线清单
+            var stubsHint = $"TtLeanClrStubs_{safeAssemblyName}.g.cs";
+            var baselineHint = $"TtMacrossPatchBaseline_{safeAssemblyName}.g.cs";
+            if (!generatedSources.TryGetValue(stubsHint, out var stubsSource))
+            {
+                System.Diagnostics.Debug.WriteLine("Mirror stubs not found in generated sources.");
+                return;
+            }
+
+            // 编译镜像 DLL
+            var leanClrDir = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + "content/LeanCLR/";
+            IO.TtFileManager.CreateDirectory(leanClrDir);
+            var mirrorAssemblyName = assemblyName + ".LeanClrMirror";
+            var mirrorDllPath = leanClrDir + mirrorAssemblyName + ".dll";
+
+            // 镜像桩只需要 EngineStub 引用
+            var engineStubPath = leanClrDir + "Titan.LeanClr.EngineStub.dll";
+            var baseRefDir = IO.TtFileManager.GetBaseDirectory(typeof(object).Assembly.Location);
+            var stubRefs = new string[]
+            {
+                baseRefDir + "System.Runtime.dll",
+                baseRefDir + "System.Private.CoreLib.dll",
+                baseRefDir + "netstandard.dll",
+            };
+            var refList = new System.Collections.Generic.List<string>(stubRefs);
+            if (IO.TtFileManager.FileExists(engineStubPath))
+                refList.Add(engineStubPath);
+
+            var stubParseOptions = new Microsoft.CodeAnalysis.CSharp.CSharpParseOptions()
+                .WithPreprocessorSymbols("TITAN_LEANCLR_STUB");
+            var stubTree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(
+                stubsSource, stubParseOptions, encoding: System.Text.Encoding.UTF8);
+            var stubMetaRefs = refList.Select(r => (Microsoft.CodeAnalysis.MetadataReference)Microsoft.CodeAnalysis.MetadataReference.CreateFromFile(r)).ToArray();
+            var stubCompilation = Microsoft.CodeAnalysis.CSharp.CSharpCompilation.Create(
+                mirrorAssemblyName,
+                new[] { stubTree },
+                stubMetaRefs,
+                new Microsoft.CodeAnalysis.CSharp.CSharpCompilationOptions(
+                    Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary,
+                    allowUnsafe: true));
+
+            using (var dllStream = new System.IO.MemoryStream())
+            {
+                var emitResult = stubCompilation.Emit(dllStream);
+                if (!emitResult.Success)
+                {
+                    foreach (var diag in emitResult.Diagnostics)
+                        System.Diagnostics.Debug.WriteLine($"Mirror compile: {diag}");
+                    return;
+                }
+                System.IO.File.WriteAllBytes(mirrorDllPath, dllStream.ToArray());
+            }
+
+            // 计算 GameProject MVID
+            System.Guid gameMvid;
+            using (var peStream = System.IO.File.OpenRead(gameProjectDll))
+            using (var peReader = new System.Reflection.PortableExecutable.PEReader(peStream))
+            {
+                var metaReader = System.Reflection.Metadata.PEReaderExtensions.GetMetadataReader(peReader);
+                gameMvid = metaReader.GetGuid(metaReader.GetModuleDefinition().Mvid);
+            }
+
+            // 计算镜像 SHA256
+            var mirrorSha256 = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.IO.File.ReadAllBytes(mirrorDllPath)));
+
+            // 从 baseline const string 提取方法列表
+            var baseline = new TtMacrossPatchBaseline
+            {
+                GameMvid = gameMvid,
+                MirrorAssembly = mirrorAssemblyName,
+                MirrorSha256 = mirrorSha256,
+            };
+
+            if (generatedSources.TryGetValue(baselineHint, out var baselineSrc))
+            {
+                // 解析生成的 C# const 字符串中嵌入的 JSON
+                var marker = "DraftJson = @\"";
+                var start = baselineSrc.IndexOf(marker);
+                if (start >= 0)
+                {
+                    start += marker.Length;
+                    var end = baselineSrc.IndexOf("\";", start);
+                    if (end > start)
+                    {
+                        var json = baselineSrc.Substring(start, end - start).Replace("\"\"", "\"");
+                        try
+                        {
+                            using var doc = System.Text.Json.JsonDocument.Parse(json);
+                            foreach (var elem in doc.RootElement.EnumerateArray())
+                            {
+                                var idStr = elem.GetProperty("MethodId").GetString();
+                                if (idStr.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+                                    idStr = idStr.Substring(2);
+                                baseline.Methods.Add(new TtMacrossPatchBaseline.FMethod
+                                {
+                                    MethodId = ulong.Parse(idStr, System.Globalization.NumberStyles.AllowHexSpecifier, System.Globalization.CultureInfo.InvariantCulture),
+                                    Signature = elem.GetProperty("Signature").GetString(),
+                                });
+                            }
+                        }
+                        catch (System.Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Baseline JSON parse: {ex.Message}");
+                        }
+                    }
+                }
+            }
+
+            var baselinePath = leanClrDir + assemblyName + ".baseline.json";
+            baseline.Save(baselinePath);
+            System.Diagnostics.Debug.WriteLine($"Mirror: {mirrorDllPath}, Baseline: {baselinePath} ({baseline.Methods.Count} methods)");
         }
     }
 }

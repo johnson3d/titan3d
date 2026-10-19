@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- 手写补丁工程：平时为空，需要热更时在此编写补丁类 -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>GameProject.Patch</AssemblyName>
+    <RootNamespace>GameProject.Patch</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <!-- 镜像桩的 #if 编译符号 -->
+    <DefineConstants>$(DefineConstants);TITAN_LEANCLR_STUB</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 镜像程序集：GameBuilder 发版后生成到 content/LeanCLR/ -->
+    <Reference Include="GameProject.LeanClrMirror">
+      <HintPath>..\..\content\LeanCLR\GameProject.LeanClrMirror.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <!-- LeanCLR 引擎桩 -->
+    <Reference Include="Titan.LeanClr.EngineStub">
+      <HintPath>..\..\content\LeanCLR\Titan.LeanClr.EngineStub.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>

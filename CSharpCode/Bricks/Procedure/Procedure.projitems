@@ -44,6 +44,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)Node\SplineRegionNodes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\SpawnNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\SurfaceProjectionNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\SplineRoadUtility.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\SplineDistanceNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\LateralOffsetNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\PointFilterNodes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\RoadMeshNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\SplineHeightNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\SplineMeshDeformNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\SubGraphNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\TerrainBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\TransformNode.cs" />

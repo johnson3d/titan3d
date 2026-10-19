@@ -73,6 +73,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)RayTracing\RayTracing.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RenderGraph.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RenderGraphNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UTest\RenderGraphUTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shader\DynamicSrvRegistry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shader\MaterialFunction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shader\MdfQueue.cs" />

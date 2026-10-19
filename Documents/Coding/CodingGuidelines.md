@@ -2668,3 +2668,133 @@ python -c "import json,re; d=json.load(open('content/localization/zh-CN.json',en
 - [ ] 只改了 `zh-CN.json` 时, 已知菜单/Dock 标题需**重启编辑器**才刷新?
 
 ---
+
+## 11. LeanCLR 热更插件接入规范
+
+游戏插件要把类型开放给 LeanCLR 热更脚本时, 必须走 **宿主插件 + 桩工程** 两段构建。
+可直接照抄的工程与代码骨架见 `CodeLib.md` §15; 本节只列硬性约束和背后原因。
+
+### 11.1 三份产物的分工
+
+| 产物 | 所在程序集 | 内容 |
+|---|---|---|
+| 原始实现 | 宿主插件 (如 `Survivor.All.dll`, net8) | 真实逻辑与状态 |
+| `TtLeanClrRegistry.g.cs` | 同上, 由生成器编进宿主 | intrinsic 代理: 把 VM 调用转发到真实宿主对象 |
+| `TtLeanClrStubs.g.cs` | 桩程序集 `<宿主程序集名>.LeanClrStub.dll` (netstandard2.0) | 同名空壳, 方法体全是 `throw null` |
+
+- 桩类**全名与宿主类型一致**, intrinsic 按签名字符串命中, 改名/改命名空间会让调用失配。
+- VM 侧只能看到桩程序集, 看不到宿主插件 dll; 热更脚本编译时引用桩, 运行时由代理劫持到宿主。
+- 可热更范围限定在游戏插件 (`Plugins/Game/*`), 引擎本体程序集不进 VM。
+
+### 11.2 暴露规则: 类级白名单 + 方法级双门槛
+
+- 类必须标 `[EngineNS.LeanCLR.TtLeanClr]`。该特性**不被子类继承**, 每个要进 VM 的派生类都要单独标。
+- 方法必须标 `[EngineNS.Rtti.Meta]`, 且 **不带** `Rtti.MetaAttribute.EMetaFlags.NoMacrossUseable`。
+  只标类不标方法 → 桩类存在但没有方法, 注册表为空数组 (不是 "没生成")。
+- 只支持: 基础数值类型 / `bool` / `char` / `string` 参数与返回值, 以及其它 `[TtLeanClr]` 宿主类型。
+  枚举、数组 (含 `string[]`)、`TtTask`、委托、泛型、`ref`/`out`/`in`、`params`、嵌套类、泛型类会被生成器跳过,
+  并报 `TTLC001` (方法) / `TTLC002` (类) 警告 —— **看到这两个警告必须处理**, 否则脚本侧找不到该成员。
+- `string` 跨边界按值拷贝 (VM→宿主 `ReadString`, 宿主→VM `NewVmString`), `null` 两向透传。
+  不要在热路径上反复传长串; 宿主侧也不要缓存 VM 字符串指针 (未入根, 下次 GC 后失效)。
+  宿主调 VM 的 `TtLeanClrInvokeHelper` 同样支持 `string` 实参 (含 `null`); `string` 返回值必须用
+  `InvokeString` / `InvokeInstanceString`, 泛型 `Invoke<T>` 只接受非托管返回类型。
+- 静态类的非公开方法不支持 (`UnsafeAccessor` 无法以静态类作参数)。
+- 父类未标 `[TtLeanClr]` 时, 桩会拍平继承链, 改为继承 `TtLeanClrHostObject`; 父类的方法在 VM 侧不可见。
+
+### 11.3 三个 targets 的职责与导入位置
+
+| 文件 | 由谁导入 | 作用 |
+|---|---|---|
+| `BuildScript/LeanClrPlugin.targets` | **宿主插件** csproj | 挂 `LeanClrGenerator` 分析器, 生成代理与桩源码, 桩源码落盘到 `obj\LeanClrGenerated\` |
+| `BuildScript/LeanClrStub.targets` | **桩工程** csproj | 设 netstandard2.0 + `TITAN_LEANCLR_STUB`, 引用 EngineStub, 收集宿主的 `TtLeanClrStubs.g.cs` 编译, 并自动导入部署 |
+| `BuildScript/LeanClrDeploy.targets` | 一般**不直接导入** | 把 VM 程序集拷到 `content\LeanCLR\<LeanClrContentSubDir>\`; 插件桩已经由 `LeanClrStub.targets` 带入 |
+
+强制规则:
+1. 宿主插件必须 `AllowUnsafeBlocks=True` —— 生成的注册表是 `unsafe` 类, 直接读写参数缓冲。
+2. 桩工程必须在 `Import LeanClrStub.targets` **之前**设置 `LeanClrHostProject` (相对桩工程目录)。
+3. 桩工程不写源码、不加 `Compile` 项 (`EnableDefaultCompileItems=false`), 所有源码来自宿主生成。
+4. 桩工程放在 `Plugins/` 下时, 必须把 `TtOutputBasePath`/`OutDir` 改到独立目录
+   (`binaries\LeanClrStub\$(TtPluginName)\`): `Plugins\Directory.Build.targets` 的 PreBuild 会
+   清空 `TtOutputBasePath`, 与宿主共用目录会**删掉宿主插件 dll**。
+5. 只有非插件桩的 VM 程序集 (如 `Module/LeanClrEngineStub`) 才直接导入 `LeanClrDeploy.targets`。
+
+### 11.4 桩工程对宿主的 ProjectReference 只用于构建顺序
+
+`LeanClrStub.targets` 里对宿主工程的引用是:
+
+```xml
+<ProjectReference Include="$(LeanClrHostProject)"
+                  ReferenceOutputAssembly="false"
+                  SkipGetTargetFrameworkProperties="true"
+                  GlobalPropertiesToRemove="TargetFramework" />
+```
+
+- 它**不**把宿主 dll 加进桩的编译引用, 桩 dll 中也没有对宿主程序集的引用; VS 依赖项里显示的宿主工程只是构建依赖。
+- 它的唯一作用是保证先构建宿主、让生成器把 `TtLeanClrStubs.g.cs` 写到磁盘。
+- **不要删除**这条引用: 否则单独构建桩工程时会报
+  `LeanCLR: 未在 ... 找到 TtLeanClrStubs.g.cs`。
+- **不要**改成 `ReferenceOutputAssembly="true"`: 宿主是 net8, 桩是 netstandard2.0, 引入宿主会把
+  宿主实现与引擎依赖带进 VM 侧。
+
+### 11.5 部署目录与自动注册
+
+- 所有 VM 程序集统一放 `content\LeanCLR`:
+  - 根目录: BCL (`mscorlib`/`System`/`System.Core`/`netstandard`, 唯一入库项) 与 `Titan.LeanClr.EngineStub`
+  - `content\LeanCLR\<TtPluginName>\`: 插件桩, 以及后续该插件的热更脚本
+- 部署在 `AfterTargets="CopyFilesToOutputDirectory"` 执行, 早于 Plugins 的 PostBuild
+  (PostBuild 会把 pdb 改名为 tpdb 并删除 obj 下的 pdb)。只拷 `IntermediateAssembly` 与同名 pdb,
+  不拷输出目录里的依赖 dll。
+- 引擎启动时 `TtLeanClrAssemblyScanner.Collect` 递归扫描 `content\LeanCLR`, 按**程序集元数据名**注册:
+  同名不同路径报错且 VM 不启动; 非托管 dll 警告跳过。
+- 只有扫到 `Titan.LeanClr.EngineStub` 或 `TtEngineConfig.LeanClrAssemblies` 非空时才启动 VM;
+  `LeanClrAssemblies` 默认空, 只作补充, **不要**再把 BCL 或插件桩手工写进去。
+- 插件程序集加载成功后, `LoadContext.cs` 会在插件初始化前调用 `RegisterAssembly` 注册代理;
+  热更脚本必须晚于其宿主插件注册被 VM 加载。
+- 测试/探针用桩设 `<LeanClrDeployToContent>false</LeanClrDeployToContent>`, 不进入正式扫描目录。
+- `content\LeanCLR` 的产物由 `.gitignore` 忽略 (只保留 4 个 BCL), **不要**提交部署出的 dll/pdb。
+- 当前 TitanCMD cook 按资产类型筛选, **不会**打包 `content\LeanCLR`; 打包流程尚未处理, 发布时需单独确认。
+
+### 11.6 构建与自检
+
+```powershell
+# 新插件接入: 补宿主 Import、生成桩工程并加入 EngineAll.sln (幂等; -Force 覆盖桩, -Build 顺便构建)
+.\BuildScript\New-LeanClrStub.ps1 -HostProject Plugins\Game\<Game>\<Game>.All\<Game>.All.csproj
+
+# 单独构建桩工程 (会先构建宿主插件), 输出应包含 "LeanCLR: <桩程序集> -> ...\content\LeanCLR\<插件名>\"
+dotnet build Plugins\Game\<Game>\<Game>.LeanClrStub\<Game>.LeanClrStub.csproj -c Debug -p:SolutionDir=e:\GitHub\titanengine\
+
+# 生成器 / 构建契约回归
+dotnet test Tests\Titan.Tests.LeanClrGenerator\Titan.Tests.LeanClrGenerator.csproj -c Debug
+powershell -NoProfile -ExecutionPolicy Bypass -File BuildScript\tests\LeanClrBuild.Tests.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File BuildScript\tests\LeanClrStubScaffold.Tests.ps1
+```
+
+- [ ] 要暴露的类标了 `[TtLeanClr]`, 派生类也单独标了?
+- [ ] 要暴露的方法标了 `[Rtti.Meta]` 且没有 `NoMacrossUseable`?
+- [ ] 构建输出没有未处理的 `TTLC001` / `TTLC002`?
+- [ ] 宿主插件导入了 `LeanClrPlugin.targets` 且 `AllowUnsafeBlocks=True`?
+- [ ] 桩工程先设 `LeanClrHostProject` 再导入 `LeanClrStub.targets`, 位于 `Plugins/` 下时改了独立 `OutDir`?
+- [ ] `content\LeanCLR\<插件名>\` 出现 `<宿主程序集名>.LeanClrStub.dll`, 且 `git status` 中没有部署产物?
+- [ ] 没有把桩 dll 写进 `LeanClrAssemblies`, 也没有删除桩对宿主的构建顺序引用?
+
+已有合规实现: `Plugins/Game/Survivor/Survivor.All/Survivor.All.csproj` (宿主)、
+`Plugins/Game/Survivor/Survivor.LeanClrStub/Survivor.LeanClrStub.csproj` (插件桩)、
+`Tests/Titan.Tests.LeanCLR.HostGame.Stub` (不部署的测试桩)、`Module/LeanClrEngineStub` (直接部署)。
+
+---
+
+## 12. 新建插件工程
+
+- 新插件一律用 `BuildScript/New-TitanPlugin.ps1` (或 BrickManager 工具栏 `Create Plugin...`, 内部调用同一脚本) 生成, 不在 VS 中手工建工程、手改 sln。
+- 目录形态为 `Plugins[/<Category>]/<Folder>/<Name>.plugin`: `-Category` 可多级 (`AIGC/Tools` 或 `AIGC\Tools`), 已有层级复用同名解决方案文件夹, 缺失层级逐级新建; `-Folder` 缺省等于插件名, 需要 `GameServer/Gate/GateServer.plugin` 这类目录名≠插件名的结构时指定。工程名、dll 名、命名空间始终取插件名。
+- 脚本在写盘前完成全部校验 (名字/Folder/Category 各级必须是标识符、插件名不能重复、目标目录和同级同名解决方案文件夹不能已存在、依赖必须存在、`All` 不能与其它平台同选), 任一失败则不产生任何文件和 sln 改动。
+- 平台缺省 `All` (`<Name>.All`); 分平台时生成 `<Name>.Window` / `<Name>.Android`。注意二者共用插件输出目录, PreBuild 会清空该目录, 交替构建会删掉对方的 dll。
+- 脚本**不会**修改 jscfg, 是否启用由使用者自行把插件名加入 Plugins 列表。
+- sln 登记包括: `Plugins[/<Category>...]/<Folder>` 解决方案文件夹、shproj 与 csproj 条目、全部解决方案配置映射、`SharedMSBuildProjectFiles` (按 GUID 有序插入)。
+
+```powershell
+# 回归
+powershell -NoProfile -ExecutionPolicy Bypass -File BuildScript\tests\TitanPluginScaffold.Tests.ps1
+```
+
+---

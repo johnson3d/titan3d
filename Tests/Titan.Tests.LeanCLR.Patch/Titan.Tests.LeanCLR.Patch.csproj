@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- 模拟补丁工具产出的 GameProject.Patch：继承 HostGame 桩（发版镜像）中的类，以 new 覆盖方法体 -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Titan.Tests.LeanCLR.HostGame.Stub\Titan.Tests.LeanCLR.HostGame.Stub.csproj" />
+  </ItemGroup>
+</Project>

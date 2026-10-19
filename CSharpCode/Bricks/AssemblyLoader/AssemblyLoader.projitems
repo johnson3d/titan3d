@@ -10,6 +10,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)LoadContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LeanClrIntrinsicDispatcher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LeanClrAssemblyScanner.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LeanClrHostBinding.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LeanClrInvokeHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MacrossPatchRuntime.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MacrossPatch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MacrossPatchLoader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MacrossPatchMetadata.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MacrossPatchBaseline.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MacrossPatchBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)AssemblyLoader.brick" />

@@ -71,6 +71,8 @@
     <Import Project="..\NativeCode\Bricks\FBX\FBX.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\RenderDoc\RenderDoc.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\PythonRuntime\PythonRuntime.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\LeanCLR\LeanCLR.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\LeanCLR\LeanCLR.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\iconv\iconv.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\TextConverter\TextConverter.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\Animation\Animation.vcxitems" Label="Shared" />
@@ -180,7 +182,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>..\3rd\native\PhysX5\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;..\3rd\native\CGAL\Include;..\3rd\native\CGAL\auxiliary\gmp\include;..\3rd\native\boost-1.89.0;..\3rd\native\embree\embree4\include\embree4;..\3rd\native\pthread\include;..\3rd\native\atlmfc\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../3rd/native/PhysX5/include;../3rd/native/Vulkan/Include;../3rd/native/eigen-3.4.0;../3rd/native/FBXSDK/2019.2/include;../3rd/native/FreeType/include;../3rd/native/Recast/Detour/include;../3rd/native/Recast/DetourCrowd/include;../3rd/native/Recast/DetourTileCache/include;../3rd/native/Recast/DebugUtils/include;../3rd/native/Recast/Recast/include;../3rd/native/CGAL/Include;../3rd/native/CGAL/auxiliary/gmp/include;../3rd/native/boost-1.89.0;../3rd/native/embree/embree4/include/embree4;../3rd/native/pthread/include;../3rd/native/atlmfc/include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <BrowseInformation>false</BrowseInformation>
@@ -242,7 +244,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>..\3rd\native\PhysX5\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;..\3rd\native\CGAL\Include;..\3rd\native\CGAL\auxiliary\gmp\include;..\3rd\native\boost-1.89.0;..\3rd\native\embree\embree4\include\embree4;..\3rd\native\atlmfc\include;..\3rd\native\pthread\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../3rd/native/PhysX5/include;../3rd/native/Vulkan/Include;../3rd/native/eigen-3.4.0;../3rd/native/FBXSDK/2019.2/include;../3rd/native/FreeType/include;../3rd/native/Recast/Detour/include;../3rd/native/Recast/DetourCrowd/include;../3rd/native/Recast/DetourTileCache/include;../3rd/native/Recast/DebugUtils/include;../3rd/native/Recast/Recast/include;../3rd/native/CGAL/Include;../3rd/native/CGAL/auxiliary/gmp/include;../3rd/native/boost-1.89.0;../3rd/native/embree/embree4/include/embree4;../3rd/native/atlmfc/include;../3rd/native/pthread/include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -295,6 +297,14 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(TitanPackagesDir)WinPixEventRuntime.$(WinPixEventRuntimeVersion)\build\WinPixEventRuntime.targets" Condition="Exists('$(TitanPackagesDir)WinPixEventRuntime.$(WinPixEventRuntimeVersion)\build\WinPixEventRuntime.targets')" />
   </ImportGroup>
+  <PropertyGroup>
+    <LeanClrLibraryPath>$(MSBuildProjectDirectory)\..\3rd\native\LeanCLR\lib\windows\$(Platform)\$(Configuration)\leanclr.lib</LeanClrLibraryPath>
+    <LeanClrBuildScript>$(MSBuildProjectDirectory)\..\BuildScript\build-leanclr.ps1</LeanClrBuildScript>
+  </PropertyGroup>
+  <Target Name="EnsureLeanClrStaticLibrary" BeforeTargets="PrepareForBuild" Condition="'$(Platform)' == 'x64' And ('$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Release') And !Exists('$(LeanClrLibraryPath)')">
+    <Message Importance="high" Text="LeanCLR static library is missing; building $(Configuration) x64 from source." />
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(LeanClrBuildScript)&quot; -Configuration $(Configuration)" />
+  </Target>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。使用“NuGet 程序包还原”可下载这些程序包。有关更多信息，请参见 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>

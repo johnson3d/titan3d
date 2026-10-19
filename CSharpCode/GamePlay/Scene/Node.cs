@@ -1508,6 +1508,9 @@ namespace EngineNS.GamePlay.Scene
             {
                 foreach (var i in Children)
                 {
+                    // Transient 节点 (编辑器代理、PGC 程序化网格等) 只存在于运行期, 不进存盘
+                    if (i.HasStyle(ENodeStyles.Transient))
+                        continue;
                     //var typeStr = Rtti.TtTypeDesc.TypeStr(i.GetType());
                     using (var cld = xnd.NewNode("", 1, 0))
                     {

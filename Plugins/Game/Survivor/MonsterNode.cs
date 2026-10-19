@@ -10,6 +10,7 @@ namespace Survivor
 {
     //无论角色的武器还是怪物的近远程攻击都算做武器攻击
     [EngineNS.Rtti.Meta]
+    [EngineNS.LeanCLR.TtLeanClr]
     public class TtMonsterNode : EngineNS.GamePlay.Scene.TtSceneActorNode
     {
         public class TtMonsterNodeData : EngineNS.GamePlay.Scene.TtNodeData

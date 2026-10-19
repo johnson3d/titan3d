@@ -266,7 +266,7 @@ namespace EngineNS.Bricks.Procedure.Node
 {
 	partial class UProgram
 	{
-		public unsafe bool macross_InitProcedure (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtPgcGraph graph, TtProgramNode node)
+		public unsafe bool macross_InitProcedure (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtPgcGraph graph, TtProgramNode node) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
@@ -277,7 +277,7 @@ namespace EngineNS.Bricks.Procedure.Node
 			var _return_value = InitProcedure(graph, node);
 			return _return_value;
 		}
-		public unsafe bool macross_OnProcedure (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtPgcGraph graph, TtProgramNode node)
+		public unsafe bool macross_OnProcedure (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtPgcGraph graph, TtProgramNode node) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{
@@ -288,7 +288,7 @@ namespace EngineNS.Bricks.Procedure.Node
 			var _return_value = OnProcedure(graph, node);
 			return _return_value;
 		}
-		public unsafe void macross_OnPerPixel (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtPgcGraph graph, TtProgramNode node, TtBufferComponent resuilt, int x, int y, int z, object tag)
+		public unsafe void macross_OnPerPixel (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtPgcGraph graph, TtProgramNode node, TtBufferComponent resuilt, int x, int y, int z, object tag) 
 		{
 			var stackframe = mcStack.TopFrame;
 			{

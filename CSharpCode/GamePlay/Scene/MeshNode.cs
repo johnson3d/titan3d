@@ -649,6 +649,23 @@ namespace EngineNS.GamePlay.Scene
 
         Graphics.Mesh.TtMeshDataProvider[] mMeshDataProviders = Array.Empty<Graphics.Mesh.TtMeshDataProvider>();
         int mCollisionLoadVersion;
+        Graphics.Mesh.TtMeshDataProvider mProceduralCollisionData;
+        /// <summary>
+        /// 程序化网格 (没有 MeshName 资产) 的碰撞数据, 由 PGC 等生成方直接提供。
+        /// 只在 MeshName 为空且未使用专用碰撞网格时生效。
+        /// </summary>
+        [Browsable(false)]
+        public Graphics.Mesh.TtMeshDataProvider ProceduralCollisionData
+        {
+            get => mProceduralCollisionData;
+            set
+            {
+                if (ReferenceEquals(mProceduralCollisionData, value))
+                    return;
+                mProceduralCollisionData = value;
+                ReloadCollisionDataProviders().AddWaitTask();
+            }
+        }
         public Graphics.Mesh.TtMeshDataProvider MeshDataProvider
         {
             get => mMeshDataProviders.Length > 0 ? mMeshDataProviders[0] : null;
@@ -685,7 +702,9 @@ namespace EngineNS.GamePlay.Scene
             else if (meshData.CollisionMode != EMeshCollisionMode.CollisionMesh)
             {
                 Graphics.Mesh.TtMaterialMesh materialMesh = null;
-                if (meshData.MeshName != null)
+                if (meshData.MeshName == null && mProceduralCollisionData != null)
+                    providers.Add(mProceduralCollisionData);
+                else if (meshData.MeshName != null)
                 {
                     materialMesh = MaterialMesh;
                     if (materialMesh == null || materialMesh.AssetName != meshData.MeshName)

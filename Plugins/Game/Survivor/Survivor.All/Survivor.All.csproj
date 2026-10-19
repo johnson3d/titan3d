@@ -17,6 +17,7 @@
   </PropertyGroup>
 
   <Import Project="..\Survivor.projitems" Label="Shared" />
+  <Import Project="..\..\..\..\BuildScript\LeanClrPlugin.targets" />
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Module\Engine.Window\Engine.Window.csproj" />

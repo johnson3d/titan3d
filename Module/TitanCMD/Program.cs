@@ -16,9 +16,73 @@ namespace ProjectCooker
 #endif
 
         static bool IsRun = true;
-        static void Main(string[] args)
+
+        static int Main(string[] args)
         {
+            try
+            {
+                return Run(args);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex);
+                return 1;
+            }
+            finally
+            {
+                if (TtEngine.Instance != null)
+                {
+                    TtEngine.Instance.FinalCleanup();
+                }
+            }
+        }
+
+        static async System.Threading.Tasks.Task<int> ExecuteCommandAsync(string cmd, string[] args)
+        {
+            switch (cmd)
+            {
+                case "SaveAsLastest":
+                    return await new Command.TtSaveAsLastest().ExecuteCommand(args);
+                case "RunTests":
+                    return await new Command.TtRunTests().ExecuteCommand(args);
+                case "MakeSln":
+                    return 0;
+                case "StartDS":
+                    return await new Command.TtStartDS().ExecuteCommand(args);
+                case "LoadPlugin":
+                    TtEngine.Instance.PluginModuleManager.GetPluginModule("SourceGit")?.SureLoad();
+                    return 0;
+                case "StartRobot":
+                    TtEngine.Instance.PluginModuleManager.GetPluginModule("ClientRobot")?.SureLoad();
+                    return 0;
+                case "StartRootServer":
+                    TtEngine.Instance.PluginModuleManager.GetPluginModule("RootServer")?.SureLoad();
+                    return 0;
+                case "StartLoginServer":
+                    TtEngine.Instance.PluginModuleManager.GetPluginModule("LoginServer")?.SureLoad();
+                    return 0;
+                case "StartLevelServer":
+                    TtEngine.Instance.PluginModuleManager.GetPluginModule("LevelServer")?.SureLoad();
+                    return 0;
+                case "StartGateServer":
+                    TtEngine.Instance.PluginModuleManager.GetPluginModule("GateServer")?.SureLoad();
+                    return 0;
+                case "macross-patch":
+                    return await new Command.TtMacrossPatch().ExecuteCommand(args);
+                default:
+                    Console.Error.WriteLine($"Unknown ExeCmd: {cmd ?? "<null>"}");
+                    return 2;
+            }
+        }
+
+        static int Run(string[] args)
+        {
+            IsRun = true;
             var mBin = System.IO.Directory.GetCurrentDirectory();
+            var requestedNativeConfig = TtCookCommand.FindArgument(args, "NativeDLL=");
+            var nativeConfig = TtCommandExecutionPolicy.ResolveNativeConfiguration(requestedNativeConfig, null);
+            Console.WriteLine($"NativeDLL={nativeConfig}");
+            EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/{nativeConfig}");
 
             var jsCode = EngineNS.IO.TtFileManager.ReadAllText(mBin + "/../cache/config/engine.jscfg");
             EngineNS.TtEngineConfig Config = null;
@@ -33,8 +97,9 @@ namespace ProjectCooker
 
             if (Config!=null)
             {
-                Console.WriteLine($"NativeDLL={Config.NativeDll}");
-                EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/{Config.NativeDll}");
+                nativeConfig = TtCommandExecutionPolicy.ResolveNativeConfiguration(requestedNativeConfig, Config.NativeDll);
+                Console.WriteLine($"NativeDLL={nativeConfig}");
+                EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/{nativeConfig}");
 
                 for (int i = 0; i < args.Length; i++)
                 {
@@ -43,20 +108,6 @@ namespace ProjectCooker
                         args[i] = "AssetType=" + Config.CookAssetType;
                         break;
                     }
-                }
-            }
-            else
-            {
-                var cfg = TtCookCommand.FindArgument(args, "NativeDLL=");
-                if (cfg != null && cfg == "debug")
-                {
-                    Console.WriteLine($"NativeDLL=debug");
-                    EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/debug");
-                }
-                else
-                {
-                    Console.WriteLine($"NativeDLL=release");
-                    EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/release");
                 }
             }
 
@@ -83,112 +134,51 @@ namespace ProjectCooker
             }
             
             var cfgFile = TtCookCommand.FindArgument(args, "CookCfg=");
+            if (!TtCommandExecutionPolicy.IsEngineConfigurationAvailable(cfgFile))
+            {
+                Console.Error.WriteLine($"Engine configuration does not exist: {cfgFile}");
+                return 1;
+            }
             //var cfgFile = @"F:\titan3d\content\EngineConfigForCook.cfg";
             //EngineNS.UEngine.UGfxDeviceType = typeof(EngineNS.Graphics.Pipeline.UGfxDeviceConsole);
             var task = EngineNS.TtEngine.StartEngine(new EngineNS.TtEngine(args), cfgFile, false);
 
             var cmd = TtCookCommand.FindArgument(args, "ExeCmd=");
-            Action action = async () =>
-            {
-                switch (cmd)
-                {
-                    case "SaveAsLastest":
-                        {
-                            //ExeCmd=SaveAsLastest AssetType=Scene+Mesh CookCfg=$(SolutionDir)content\EngineConfigForCook.cfg 
-                            var exe = new Command.TtSaveAsLastest();
-                            await exe.ExecuteCommand(args);
-                        }
-                        break;
-                    case "MakeSln":
-                        {
-                            //using (var sln = new net.r_eg.MvsSln.Sln("e:/Titan3d/EngineAll.sln", net.r_eg.MvsSln.SlnItems.All & ~net.r_eg.MvsSln.SlnItems.ProjectDependencies))
-                            //{
-                            //    foreach(var i in sln.Result.ProjectItems)
-                            //    {
-                            //        Console.WriteLine(i.fullPath);
-                            //    }
-                            //}
-                        }
-                        break;
-                    case "StartDS":
-                        {
-                            var exe = new Command.TtStartDS();
-                            await exe.ExecuteCommand(args);
-                        }
-                        return;
-                    case "LoadPlugin":
-                        {
-                            var serverPlugin = TtEngine.Instance.PluginModuleManager.GetPluginModule("SourceGit");
-                            if (serverPlugin != null)
-                            {
-                                serverPlugin.SureLoad();
-                            }
-                        }
-                        return;
-                    case "StartRobot":
-                        {
-                            var serverPlugin = TtEngine.Instance.PluginModuleManager.GetPluginModule("ClientRobot");
-                            if (serverPlugin != null)
-                            {
-                                serverPlugin.SureLoad();
-                            }
-                        }
-                        return;
-                    case "StartRootServer":
-                        {
-                            var serverPlugin = TtEngine.Instance.PluginModuleManager.GetPluginModule("RootServer");
-                            if (serverPlugin != null)
-                            {
-                                serverPlugin.SureLoad();
-                            }
-                        }
-                        return;
-                    case "StartLoginServer":
-                        {
-                            var serverPlugin = TtEngine.Instance.PluginModuleManager.GetPluginModule("LoginServer");
-                            if (serverPlugin != null)
-                            {
-                                serverPlugin.SureLoad();
-                            }
-                        }
-                        return;
-                    case "StartLevelServer":
-                        {
-                            var serverPlugin = TtEngine.Instance.PluginModuleManager.GetPluginModule("LevelServer");
-                            if (serverPlugin != null)
-                            {
-                                serverPlugin.SureLoad();
-                            }
-                        }
-                        return;
-                    case "StartGateServer":
-                        {
-                            var serverPlugin = TtEngine.Instance.PluginModuleManager.GetPluginModule("GateServer");
-                            if (serverPlugin != null)
-                            {
-                                serverPlugin.SureLoad();
-                            }
-                        }
-                        return;
-                }
-                EngineNS.TtEngine.Instance.PostQuitMessage();
-                IsRun = false;
-            };
-
-            bool isExcuteAction = false;
+            var isServiceCommand = TtCommandExecutionPolicy.IsServiceCommand(cmd);
+            System.Threading.Tasks.Task<int> commandTask = null;
+            var commandStarted = false;
+            var exitCode = 0;
             while (IsRun)
             {
                 if (EngineNS.TtEngine.Instance.Tick() == false)
-                    break;
-
-                if (isExcuteAction == false && task.IsCompleted)
                 {
-                    isExcuteAction = true;
-                    action();
+                    if (!commandStarted || (!isServiceCommand && commandTask != null))
+                        return 1;
+                    break;
+                }
+
+                if (!commandStarted && task.IsCompleted)
+                {
+                    if (!task.GetAwaiter().GetResult())
+                        return 1;
+
+                    commandStarted = true;
+                    commandTask = ExecuteCommandAsync(cmd, args);
+                }
+
+                if (commandTask != null && commandTask.IsCompleted)
+                {
+                    exitCode = commandTask.GetAwaiter().GetResult();
+                    commandTask = null;
+                    if (!isServiceCommand)
+                    {
+                        EngineNS.TtEngine.Instance.PostQuitMessage();
+                        IsRun = false;
+                    }
                 }
             }
 
-            EngineNS.TtEngine.Instance.FinalCleanup();
+            return exitCode;
         }
     }
 }

@@ -200,6 +200,7 @@
 	
   <ItemGroup>
     <ProjectReference Include="..\CompilingGenerator\CompilingGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\LeanClrGenerator\LeanClrGenerator.csproj" />
     <ProjectReference Include="..\TtEngineLints\TtEngineLints.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   

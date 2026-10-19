@@ -18,6 +18,10 @@ namespace EngineNS.UnitTest
     }
     public class TtUnitTestManager
     {
+        [ThreadStatic]
+        static TtTestAssertionException mLastAssertion;
+        public static TtTestAssertionException LastAssertion => mLastAssertion;
+
         public static void TMessage(string message, [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
             [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
             [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
@@ -30,48 +34,21 @@ namespace EngineNS.UnitTest
         {
             if (condi == false)
             {
-                Profiler.Log.WriteLine<TtTestCategory>(Profiler.ELogTag.Error, $"Assert:{sourceFilePath}:{sourceLineNumber}->{memberName}->{message}");
-                System.Diagnostics.Debug.Assert(false);
+                var detail = $"Assert:{sourceFilePath}:{sourceLineNumber}->{memberName}->{message}";
+                Profiler.Log.WriteLine<TtTestCategory>(Profiler.ELogTag.Error, detail);
+                mLastAssertion = new TtTestAssertionException(detail);
+                throw mLastAssertion;
             }
         }
         public static void DoUnitTests()
         {
-            var ass = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (var i in ass)
+            var summary = new TtTestRunner().RunTests(string.Empty, string.Empty);
+            foreach (var result in summary.Results)
             {
-                try
-                {
-                    var types = i.GetTypes();
-                    foreach (var j in types)
-                    {
-                        var assDesc = Rtti.TtTypeDescManager.Instance.FindAssemblyDesc(j.Assembly);
-                        if (assDesc == null)
-                            continue;
-                        var attrs = j.GetCustomAttributes(typeof(TtTestAttribute), false);
-                        if (attrs.Length == 0)
-                            continue;
-                        var ut = attrs[0] as TtTestAttribute;
-                        if (ut.Enable == false)
-                            continue;
-                        var obj = Rtti.TtTypeDescManager.CreateInstance(j);
-                        var mtd = j.GetMethod("UnitTestEntrance");
-                        if (mtd != null)
-                        {
-                            try
-                            {
-                                mtd.Invoke(obj, null);
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine(ex);
-                            }
-                        }
-                    }
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
+                if (result.Status == ETestStatus.Passed || result.Status == ETestStatus.Skipped)
+                    continue;
+                Profiler.Log.WriteLine<TtTestCategory>(Profiler.ELogTag.Error,
+                    $"{result.ClassName}.{result.MethodName}: {result.Message}");
             }
         }
     }

@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Backends\CSharpBackend.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Backends\MacrossPatchStubCodeGen.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Backends\HLSLBackend.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Expression\CodeGen.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Expression\Expressions.cs" />

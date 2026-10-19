@@ -1,0 +1,169 @@
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+namespace EngineNS.LeanCLR.Generator
+{
+    /// <summary>
+    /// GameProject 编译时扫描 [TtMacross][TtLeanClr] 类，生成：
+    /// 1. TtLeanClrRegistry_{assembly}.g.cs — 宿主 thunk 注册表（编入 GameProject.dll）
+    /// 2. TtLeanClrStubs_{assembly}.g.cs — VM 桩源码（额外产物，供镜像工程编译）
+    /// 3. baseline_draft.json — 基线清单草稿（MethodId + Signature）
+    /// 
+    /// 仅在 GameProject 编译时挂载（与 BindingCodeIncrementalGenerator 并列）。
+    /// 与 TtLeanClrGenerator 的区别：本生成器用 [TtMacross] 而非 [TtLeanClr] 作扫描入口，
+    /// 且额外产出基线清单。类型映射和代码生成完全复用 LeanClrEmitter。
+    /// </summary>
+    [Generator(LanguageNames.CSharp)]
+    public sealed class TtMacrossMirrorGenerator : IIncrementalGenerator
+    {
+        private const string MacrossAttributeName = "EngineNS.Macross.TtMacrossAttribute";
+
+        internal static readonly DiagnosticDescriptor MethodIdCollision = new DiagnosticDescriptor(
+            "TTMC001",
+            "MethodId 冲突",
+            "{0} 与 {1} 的 MethodId 相同 (0x{2:X16})，请重命名方法以消除冲突",
+            "LeanCLR.Mirror",
+            DiagnosticSeverity.Error,
+            isEnabledByDefault: true);
+
+        public void Initialize(IncrementalGeneratorInitializationContext context)
+        {
+            var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
+                    MacrossAttributeName,
+                    static (node, _) => node is ClassDeclarationSyntax,
+                    static (ctx, ct) => Extract((INamedTypeSymbol)ctx.TargetSymbol, ct))
+                .Collect();
+            var assemblyName = context.CompilationProvider.Select(static (c, _) => c.AssemblyName ?? string.Empty);
+
+            context.RegisterSourceOutput(classes.Combine(assemblyName), static (spc, input) => Emit(spc, input.Left, input.Right));
+        }
+
+        private static void Emit(SourceProductionContext context, ImmutableArray<ClassResult> results, string assemblyName)
+        {
+            var models = new List<ClassModel>();
+            var seen = new HashSet<string>();
+            foreach (var result in results)
+            {
+                foreach (var diagnostic in result.Diagnostics)
+                {
+                    var descriptor = diagnostic.Id == TtLeanClrGenerator.UnsupportedClass.Id
+                        ? TtLeanClrGenerator.UnsupportedClass
+                        : TtLeanClrGenerator.UnsupportedMethod;
+                    context.ReportDiagnostic(Diagnostic.Create(descriptor, diagnostic.Location?.ToLocation(),
+                        diagnostic.Arguments.Cast<object>().ToArray()));
+                }
+                if (result.Class != null && seen.Add(result.Class.FullName))
+                    models.Add(result.Class);
+            }
+
+            if (models.Count == 0)
+                return;
+
+            models.Sort((l, r) => string.CompareOrdinal(l.FullName, r.FullName));
+
+            // 注册表编入 GameProject.dll
+            var safeAssemblyName = ToSafeIdentifier(assemblyName);
+            context.AddSource($"TtLeanClrRegistry_{safeAssemblyName}.g.cs", LeanClrEmitter.EmitRegistry(models, assemblyName));
+            // 桩源码作为额外产物（用于镜像工程编译）
+            context.AddSource($"TtLeanClrStubs_{safeAssemblyName}.g.cs", LeanClrEmitter.EmitStubs(models));
+
+            // 基线清单草稿：MethodId + Signature
+            var allMethods = models.SelectMany(c => c.Methods.Select(m => m)).ToList();
+
+            // MethodId 冲突检测
+            var idMap = new Dictionary<ulong, string>();
+            foreach (var method in allMethods)
+            {
+                var id = ComputeFnv1a64(method.Signature);
+                if (idMap.TryGetValue(id, out var existing))
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(MethodIdCollision, Location.None,
+                        method.Signature, existing, id));
+                }
+                else
+                {
+                    idMap[id] = method.Signature;
+                }
+            }
+
+            // baseline_draft.json
+            var sb = new StringBuilder();
+            sb.AppendLine("[");
+            for (var i = 0; i < allMethods.Count; ++i)
+            {
+                var method = allMethods[i];
+                var id = ComputeFnv1a64(method.Signature);
+                sb.Append($"  {{ \"MethodId\": \"0x{id:X16}\", \"Signature\": \"{EscapeJson(method.Signature)}\" }}");
+                sb.AppendLine(i < allMethods.Count - 1 ? "," : "");
+            }
+            sb.AppendLine("]");
+            context.AddSource($"TtMacrossPatchBaseline_{safeAssemblyName}.g.cs",
+                EmitBaselineArtifact(safeAssemblyName, sb.ToString()));
+        }
+
+        private static string EmitBaselineArtifact(string safeAssemblyName, string json)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("// <auto-generated/>");
+            sb.AppendLine("namespace EngineNS.LeanCLR.Generated");
+            sb.AppendLine("{");
+            sb.AppendLine($"    internal static class TtMacrossPatchBaseline_{safeAssemblyName}");
+            sb.AppendLine("    {");
+            sb.Append("        internal const string DraftJson = @\"");
+            sb.Append(json.Replace("\"", "\"\""));
+            sb.AppendLine("\";");
+            sb.AppendLine("    }");
+            sb.AppendLine("}");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// 提取 [TtMacross] 类——复用 TtLeanClrGenerator 的 Extract 逻辑。
+        /// 要求类也标注了 [TtLeanClr]（否则跳过）。
+        /// </summary>
+        private static ClassResult Extract(INamedTypeSymbol type, CancellationToken cancellationToken)
+        {
+            // MirrorGenerator 只处理同时标注 [TtMacross] 和 [TtLeanClr] 的类
+            if (!type.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == TtLeanClrGenerator.LeanClrAttributeName))
+                return new ClassResult(null, new EquatableArray<DiagnosticInfo>(System.Array.Empty<DiagnosticInfo>()));
+
+            return TtLeanClrGenerator.ExtractClass(type, cancellationToken);
+        }
+
+        /// <summary>
+        /// FNV-1a 64 over UTF-16 code units（与 TtMacrossPatchId.Compute 一致）。
+        /// </summary>
+        internal static ulong ComputeFnv1a64(string input)
+        {
+            const ulong basis = 14695981039346656037UL;
+            const ulong prime = 1099511628211UL;
+            var hash = basis;
+            foreach (var c in input)
+            {
+                hash ^= (byte)(c & 0xFF);
+                hash *= prime;
+                hash ^= (byte)((c >> 8) & 0xFF);
+                hash *= prime;
+            }
+            return hash;
+        }
+
+        private static string EscapeJson(string value) => value.Replace("\\", "\\\\").Replace("\"", "\\\"");
+
+        private static string ToSafeIdentifier(string name)
+        {
+            var sb = new StringBuilder(name.Length);
+            foreach (var c in name)
+                sb.Append(char.IsLetterOrDigit(c) || c == '_' ? c : '_');
+            if (sb.Length == 0 || char.IsDigit(sb[0]))
+                sb.Insert(0, '_');
+            return sb.ToString();
+        }
+    }
+}

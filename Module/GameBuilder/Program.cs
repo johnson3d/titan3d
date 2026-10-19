@@ -48,7 +48,7 @@ try
     System.Console.WriteLine($"config file: {cfgFile}");
     System.Console.WriteLine($"TitanEngine GameBuilder: {assemblyFile}");
 
-    EngineNS.Macross.TtMacrossModule.CompileGameProject(csFilesPath, projectFile, assemblyFile, TtEngine.Instance.CurrentPlatform);
+    EngineNS.Macross.TtMacrossModule.CompileGameProject(csFilesPath, projectFile, assemblyFile, TtEngine.Instance.CurrentPlatform, enableMirror: true);
 }
 catch(System.Exception e)
 {

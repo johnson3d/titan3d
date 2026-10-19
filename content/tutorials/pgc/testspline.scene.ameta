@@ -2,7 +2,7 @@
 <Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="362f1a508f6068144d5ed3edd84f04b60a2bd85536daee00d549ea634ec0307d" />
+      <Hash Type="System.String@Unknown" Value="7ad77e6b6f77349acd3ff29bd5ba7eac5d3bf0669fd8e366d3ae888512543a6e" />
       <Path Type="System.String@Unknown" Value="testspline.scene/testspline.scene" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
@@ -21,11 +21,13 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="4">
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="6">
     <e_0 Value="Game,tutorials/common/box.vms,fefaa1e1-5deb-4b9e-bc04-4e5da924cc22" />
     <e_1 Value="Engine,material/sysdft.material,8c2e9c64-ae7a-4172-9e64-114a3d36cc40" />
     <e_2 Value="Game,tutorials/pgc/spline_sample.pgc,4f9a2296-8a3e-483f-aab3-9202cdf286ba" />
     <e_3 Value="Game,tutorials/common/mesh01.ums,15ec2216-bf13-481e-a2ef-d3a8a9b739a8" />
+    <e_4 Value="Game,tutorials/pgc/roadgen.pgc,05504e37-94fe-48fd-8810-a4118b5c5581" />
+    <e_5 Value="Engine,material/gridline.material,fe431749-ed31-45b1-93d8-34462bd00922" />
   </RefAssetRNames>
   <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="Default" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />

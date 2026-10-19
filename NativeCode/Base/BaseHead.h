@@ -8,6 +8,7 @@
 #if defined(PLATFORM_WIN)
 
 #define HasModule_Windows
+#define HasModule_LeanCLR
 #define HasModule_ImGui
 #define HasModule_Base
 #define HasModule_Math

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Titan.Tests.LeanCLR": {
+      "commandName": "Project",
+      "debugEngines": "managed,native"
+    }
+  }
+}

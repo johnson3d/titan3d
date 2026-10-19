@@ -57,7 +57,8 @@
       "version": "4.10.0",
       "restoreProjects": [
         "Module/CSharpCodeTools/CSharpCodeTools.csproj",
-        "Module/Engine.Window/Engine.Window.csproj"
+        "Module/Engine.Window/Engine.Window.csproj",
+        "Tests/Titan.Tests.LeanClrGenerator/Titan.Tests.LeanClrGenerator.csproj"
       ],
       "requiredPaths": [
         "lib/netstandard2.0/Microsoft.CodeAnalysis.CSharp.dll"
@@ -78,6 +79,46 @@
       "version": "20.1.2",
       "restoreProjects": [
         "Module/CppWeavingTools/CppWeavingTools.csproj"
+      ]
+    },
+    {
+      "id": "NUnit",
+      "version": "4.2.2",
+      "restoreProjects": [
+        "Tests/Titan.Tests.Base/Titan.Tests.Base.csproj",
+        "Tests/Titan.Tests.LeanClrGenerator/Titan.Tests.LeanClrGenerator.csproj"
+      ]
+    },
+    {
+      "id": "NUnit3TestAdapter",
+      "version": "4.6.0",
+      "restoreProjects": [
+        "Tests/Titan.Tests.Base/Titan.Tests.Base.csproj",
+        "Tests/Titan.Tests.LeanClrGenerator/Titan.Tests.LeanClrGenerator.csproj"
+      ]
+    },
+    {
+      "id": "Microsoft.NET.Test.Sdk",
+      "version": "17.11.1",
+      "restoreProjects": [
+        "Tests/Titan.Tests.Base/Titan.Tests.Base.csproj",
+        "Tests/Titan.Tests.LeanClrGenerator/Titan.Tests.LeanClrGenerator.csproj"
+      ]
+    },
+    {
+      "id": "NUnit.Analyzers",
+      "version": "4.3.0",
+      "restoreProjects": [
+        "Tests/Titan.Tests.Base/Titan.Tests.Base.csproj",
+        "Tests/Titan.Tests.LeanClrGenerator/Titan.Tests.LeanClrGenerator.csproj"
+      ]
+    },
+    {
+      "id": "JunitXml.TestLogger",
+      "version": "3.1.12",
+      "restoreProjects": [
+        "Tests/Titan.Tests.Base/Titan.Tests.Base.csproj",
+        "Tests/Titan.Tests.LeanClrGenerator/Titan.Tests.LeanClrGenerator.csproj"
       ]
     }
   ],
@@ -327,6 +368,23 @@
         "3rd/native/Vulkan/Lib/SPIRV-Tools.lib",
         "3rd/native/Vulkan/Lib/SPIRV-Tools-opt.lib"
       ]
+    },
+    {
+      "id": "LeanCLR coreclr runtime",
+      "version": "489cb5fc2e2d0e71d994506f469c5539f0b007a2",
+      "references": [
+        "Core.Window/Core.Window.vcxproj",
+        "NativeCode/Bricks/LeanCLR"
+      ],
+      "requiredTools": [
+        "cmake"
+      ],
+      "requiredPaths": [
+        "3rd/native/LeanCLR/LICENSE",
+        "3rd/native/LeanCLR/UPSTREAM.md",
+        "3rd/native/LeanCLR/runtime/CMakeLists.txt",
+        "3rd/native/LeanCLR/runtime/public/leanclr.h"
+      ]
     }
   ],
   "vendoredNativePaths": [
@@ -342,7 +400,8 @@
     "3rd/native/EtcLib/Etc.h",
     "3rd/native/Image.Shared/Image.Shared.vcxitems",
     "3rd/native/iconv/iconv.h",
-    "3rd/native/atlmfc/lib/x64/atls.lib"
+    "3rd/native/atlmfc/lib/x64/atls.lib",
+    "3rd/native/LeanCLR/LeanCLR.vcxitems"
   ],
   "vendoredCSharpPaths": [
     "3rd/csharp/System.Windows.Forms.dll",

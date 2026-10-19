@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- LeanCLR VM 内的引擎桩程序集：只放宿主对象基类，热更脚本与插件桩工程引用它 -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Titan.LeanClr.EngineStub</AssemblyName>
+    <RootNamespace>EngineNS.LeanCLR</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+  <!-- 部署到 content\LeanCLR 根目录，VM 启动以扫到本程序集为准 -->
+  <Import Project="..\..\BuildScript\LeanClrDeploy.targets" />
+</Project>

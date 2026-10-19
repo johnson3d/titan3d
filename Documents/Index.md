@@ -53,6 +53,7 @@
 - - **[RendPolicyEditor](editor/RendPolicyEditor.md)**
 - - **[SceneEditor](editor/SceneEditor.md)**
 - - **[MacrossEditor](editor/MacrossEditor.md)**
+- - **[GameProject Macross HotPatch](editor/GameProjectHotPatch.md)**
 - - **[PGCEditor](editor/PGCEditor.md)**
 - - **[UIEditor](editor/UIEditor.md)**
 

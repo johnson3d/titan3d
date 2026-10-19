@@ -360,6 +360,8 @@ namespace EngineNS.Bricks.AssemblyLoader
             var assembly = context.LoadOnMemory(AssemblyPath);
             Rtti.TtAssemblyDesc.UpdateRtti(this.Name, assembly, UnsafeGetAssembly());
             ModuleAssembly = new WeakReference<Assembly>(assembly);
+            // [TtLeanClr] 代理必须在插件初始化（可能加载热更脚本）之前注册
+            TtEngine.Instance?.LeanClrIntrinsicDispatcher?.RegisterAssembly(assembly);
             if (GetPluginObjectImpl() == false)
                 return false;
 
@@ -407,6 +409,7 @@ namespace EngineNS.Bricks.AssemblyLoader
         }
         private void UnloadImpl(bool bUnregAssembly)
         {
+            TtEngine.Instance?.LeanClrIntrinsicDispatcher?.UnregisterAssembly(this.UnsafeGetAssembly());
             if (bUnregAssembly)
             {
                 Rtti.TtTypeDescManager.Instance.UnregAssembly(this.UnsafeGetAssembly());

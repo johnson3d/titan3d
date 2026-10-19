@@ -43,6 +43,13 @@
 /binaries/LocalizationTool/
 /binaries/cache/
 /binaries/aftermath-shaders/
+/binaries/LeanClrStub/
+# LeanCLR VM 程序集由构建部署（BuildScript/LeanClrDeploy.targets），只有 BCL 入库
+/content/LeanCLR/*
+!/content/LeanCLR/mscorlib.dll
+!/content/LeanCLR/System.dll
+!/content/LeanCLR/System.Core.dll
+!/content/LeanCLR/netstandard.dll
 /binaries/Core.Window.lib
 /binaries/Core.Window.dll
 /binaries/Core.Window.exp
@@ -66,6 +73,7 @@ intermediate
 # ==============================================================================
 /artifacts/
 /cache
+/docs/
 packages
 /codegen/**/*.h
 /codegen/**/*.cpp
@@ -80,6 +88,7 @@ Plugins/**/binaries/
 # ==============================================================================
 # 第三方库构建中间产物
 # ==============================================================================
+/3rd/native/LeanCLR/lib/
 3rd/native/crunch/lib/
 3rd/native/lp_solve/lpsolve55/x64/Release/
 
@@ -108,3 +117,7 @@ Desktop.ini
 # ==============================================================================
 content/Sheng
 /3rd/native/renderdoc/Development
+
+# Test results
+/TestResults/
+/content/UTest/sequencer_t0.xnd

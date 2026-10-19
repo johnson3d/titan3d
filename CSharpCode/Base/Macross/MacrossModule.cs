@@ -296,6 +296,11 @@ namespace EngineNS.Macross
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Error, $"{assemblyPath} contain static fields");
             }
 
+            // 救命热更：GameProject 加载后、Rtti 更新前激活补丁（无补丁或未启用 LeanCLR 时无操作）
+            var leanClr = TtEngine.Instance.LeanClrIntrinsicDispatcher;
+            if (leanClr.IsRuntimeReady)
+                leanClr.MacrossPatch?.StageB(leanClr, newAssembly, () => TtEngine.Instance.IsThread(Thread.Async.EAsyncTarget.Logic));
+
             var oldAssembly = mAssembly?.Target as System.Reflection.Assembly;
             var desc = EngineNS.Rtti.TtAssemblyDesc.UpdateRtti("GameProject", newAssembly, oldAssembly);
             mAssembly = new WeakReference(newAssembly);

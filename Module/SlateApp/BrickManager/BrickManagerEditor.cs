@@ -14,6 +14,7 @@ namespace BrickManager
         private BrickDependencyResolver resolver;
         private bool hasResolved = false;
         private string filterText = string.Empty;
+        private TtCreatePluginDialog createPluginDialog;
 
         public TtBrickManagerEditor()
         {
@@ -32,6 +33,7 @@ namespace BrickManager
             var engineRoot = TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.EngineSource);
             resolver = new BrickDependencyResolver(engineRoot);
             allBricks = resolver.ScanAllBricks();
+            createPluginDialog = new TtCreatePluginDialog(engineRoot);
 
             return true;
         }
@@ -62,6 +64,8 @@ namespace BrickManager
                 DrawBrickSelector();
                 ImGuiAPI.Separator();
                 DrawResolvedDependencies();
+                // 弹窗需与 OpenPopup 处于同一窗口 ID 作用域内绘制。
+                createPluginDialog?.Draw();
             }
             EngineNS.EGui.UIProxy.DockProxy.EndMainForm(result);
         }
@@ -102,6 +106,11 @@ namespace BrickManager
             if (ImGuiAPI.Button("Resolve Dependencies", in Vector2.Zero))
             {
                 ResolveDependencies();
+            }
+            ImGuiAPI.SameLine(0, 10);
+            if (ImGuiAPI.Button("Create Plugin...", in Vector2.Zero))
+            {
+                createPluginDialog?.Open();
             }
 
             ImGuiAPI.Spacing();

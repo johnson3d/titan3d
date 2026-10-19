@@ -18,6 +18,19 @@ using (new Profiler.TimeScopeHelper(ScopeChildren))
 }
 ```
 ## 2.插件开发
+新建插件工程不要再在 VS 里手工建，用脚本一次生成目录、`.plugin`、shproj/projitems、`Plugin.cs`、各平台 csproj（均开启 `AllowUnsafeBlocks`），并登记到 `EngineAll.sln`：
+- 图形入口：BrickManager 工具栏 `Create Plugin...`，填写后点 `Create`，脚本日志显示在弹窗下方。
+- 命令行入口（仓库根目录执行）：
+```powershell
+# 平台缺省 All；-Platforms 'Windows,Android' 生成分平台工程；-NoLoadOnInit / -LeanClr / -Build 可选
+.\BuildScript\New-TitanPlugin.ps1 -Name MyPlugin -Category Game -Dependencies Inventory
+# Category 可多级；-Folder 指定插件目录名（缺省同插件名），下例生成 Plugins\GameServer\Lobby\LobbyServer.plugin（同 Gate/GateServer 的结构）
+.\BuildScript\New-TitanPlugin.ps1 -Name LobbyServer -Category GameServer -Folder Lobby -Platforms Windows
+```
+- 生成后需自己把插件名加到对应 jscfg 的 Plugins 列表，并在 VS 中重新加载 `EngineAll.sln`。
+
+下面是生成内容的说明，手工维护已有插件时参考：
+
 1.确保插件dll包含如下实现
 TtPluginLoader是用来描述插件的
 AssemblyEntry是用来描述DLL模块在TtTypeDesc的信息的，通常处理类型和Meta信息
@@ -799,6 +812,110 @@ public float ColorWeight { get; set; }
 游戏层留空则沿用引擎层。要新增硬编码文本的批量提取, 走 LocalizationTool
 (`content/applocalization.jscfg` 启动): 只更新目录用 Scan → Save Catalog; 同时改源码用
 Scan → Preview Rewrite → Apply Rewrite (Apply 会先自动保存 catalog)。
+
+## 15.让游戏插件支持 LeanCLR 热更
+
+> 强制约束与背后原因见 `CodingGuidelines.md` §11 (产物分工 / 暴露规则 / targets 职责 /
+> 构建顺序引用 / 部署与自动注册)。下面只给可直接照抄的写法, 以 `<Game>` 代指插件名。
+
+接入后的产物:
+
+```text
+binaries\Plugins\...\<Game>.All.dll                  ← 真实实现 + intrinsic 代理
+content\LeanCLR\<Game>\<Game>.All.LeanClrStub.dll   ← VM 用的同名空壳, 引擎启动自动注册
+```
+
+### 15.1 标注要暴露的类与方法
+
+```csharp
+namespace Game
+{
+    // 类级白名单: 不被子类继承, 派生类要进 VM 也得单独标
+    [EngineNS.LeanCLR.TtLeanClr]
+    public class TtMonster
+    {
+        // 方法级: 必须标 [Rtti.Meta], 且不带 NoMacrossUseable
+        [EngineNS.Rtti.Meta]
+        public int Hit(int damage) { ... }
+
+        // 其它 [TtLeanClr] 宿主类型可以作参数/返回值
+        [EngineNS.Rtti.Meta]
+        public void Attack(TtMonster target, float scale) { ... }
+
+        // string 按值拷贝, null 透传
+        [EngineNS.Rtti.Meta]
+        public string Say(string text) { ... }
+
+        // 不暴露给 VM
+        [EngineNS.Rtti.Meta(Flags = EngineNS.Rtti.MetaAttribute.EMetaFlags.NoMacrossUseable)]
+        public void InternalTick() { ... }
+    }
+}
+```
+
+❗ 枚举 / 数组 (含 `string[]`) / `TtTask` / 委托 / 泛型 / `ref`·`out`·`in` / `params` 参数的方法会被跳过并报
+`TTLC001`; 嵌套类、泛型类报 `TTLC002`。
+
+### 15.2 用脚本接入宿主与桩工程
+
+宿主工程必须位于 `Plugins\` 下、面向 `net8.0`，并设置
+`<AllowUnsafeBlocks>true</AllowUnsafeBlocks>`。从仓库根目录执行：
+
+```powershell
+.\BuildScript\New-LeanClrStub.ps1 `
+    -HostProject Plugins\Game\<Game>\<Game>.All\<Game>.All.csproj
+```
+
+脚本根据宿主上层唯一的 `.plugin` 文件确定 `<Game>`，并自动完成：
+
+- 给宿主补充 `LeanClrPlugin.targets` Import（已有时不重复添加）。
+- 生成同级 `<Game>.LeanClrStub\<Game>.LeanClrStub.csproj`。
+- 把桩工程加入 `EngineAll.sln`，并放进宿主所在的 solution folder。
+
+默认重跑是幂等的：已有桩工程不会被覆盖。只有确认要恢复标准模板时才使用 `-Force`：
+
+```powershell
+.\BuildScript\New-LeanClrStub.ps1 `
+    -HostProject Plugins\Game\<Game>\<Game>.All\<Game>.All.csproj `
+    -Force
+```
+
+生成结果可在 VS “依赖项 → 分析器 → Titan.LeanClrGenerator” 下实时查看；
+`obj\LeanClrGenerated\` 下是供桩工程收集的落盘副本，不要手改。
+
+### 15.3 桩工程职责与特殊用法
+
+生成的桩工程不写源码；目标框架、程序集名 (`<Game>.All.LeanClrStub`)、EngineStub 引用、
+对宿主的构建顺序引用和部署都由 `LeanClrStub.targets` 提供。
+
+- 测试/探针用桩不进正式扫描目录时加 `<LeanClrDeployToContent>false</LeanClrDeployToContent>`
+  （参考 `Tests/Titan.Tests.LeanCLR.HostGame.Stub`）。
+- 非插件桩的 VM 程序集只需部署时，直接导入 `LeanClrDeploy.targets`
+  （参考 `Module/LeanClrEngineStub`）：
+
+```xml
+<Import Project="..\..\BuildScript\LeanClrDeploy.targets" />
+```
+
+### 15.4 构建与验证
+
+首次接入时可让脚本生成后立即构建 Debug 桩工程：
+
+```powershell
+.\BuildScript\New-LeanClrStub.ps1 `
+    -HostProject Plugins\Game\<Game>\<Game>.All\<Game>.All.csproj `
+    -Build
+# 期望输出: LeanCLR: <Game>.All.LeanClrStub -> ...\content\LeanCLR\<Game>\
+```
+
+也可以直接构建已生成的桩工程：
+
+```powershell
+dotnet build Plugins\Game\<Game>\<Game>.LeanClrStub\<Game>.LeanClrStub.csproj -c Debug -p:SolutionDir=e:\GitHub\titanengine\
+```
+
+不需要修改 `TtEngineConfig.LeanClrAssemblies`：引擎启动时会递归扫描 `content\LeanCLR` 自动注册。
+部署产物已被 `.gitignore` 忽略，不要提交。
 
 ## 这是没用的LaTex测试，请忽略
 $$\sum_{i=0}^{^9}{\left(\frac{a_i}{b_i}\right)}$$

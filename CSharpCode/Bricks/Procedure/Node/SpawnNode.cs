@@ -6,6 +6,19 @@ using EngineNS.Bricks.NodeGraph;
 namespace EngineNS.Bricks.Procedure.Node
 {
     /// <summary>
+    /// Spawn Node 的一个候选模板。每个点按 Weight 加权、以点种子确定性地选一个。
+    /// </summary>
+    [Rtti.Meta("")]
+    public class TtPgcSpawnEntry : IO.BaseSerializer
+    {
+        [Rtti.Meta("")]
+        [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
+        public RName Mesh { get; set; }
+        [Rtti.Meta("")]
+        public float Weight { get; set; } = 1.0f;
+    }
+
+    /// <summary>
     /// 将点数据转换为场景节点生成请求。实际场景修改由 PGC 宿主在图执行完成后统一处理。
     /// </summary>
     [Bricks.CodeBuilder.ContextMenu("Spawn Node", "Scene\\Spawn Node", TtPgcGraph.PgcEditorKeyword)]
@@ -48,6 +61,17 @@ namespace EngineNS.Bricks.Procedure.Node
         [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
         public RName MeshName { get; set; }
 
+        /// <summary>
+        /// 多模板加权随机。非空且至少有一个有效条目时覆盖 MeshName。
+        /// </summary>
+        [Rtti.Meta("")]
+        [Category("Spawn")]
+        public List<TtPgcSpawnEntry> MeshEntries { get; set; } = new List<TtPgcSpawnEntry>();
+
+        [Rtti.Meta("")]
+        [Category("Spawn")]
+        public int SelectionSeed { get; set; } = 7;
+
         [Rtti.Meta("")]
         [Category("Spawn")]
         public string NamePrefix { get; set; } = "PgcNode";
@@ -79,6 +103,13 @@ namespace EngineNS.Bricks.Procedure.Node
             base.UpdateAMetaReferences(ameta);
             if (MeshName != null)
                 ameta.AddReferenceAsset(MeshName);
+            if (MeshEntries == null)
+                return;
+            foreach (var entry in MeshEntries)
+            {
+                if (entry?.Mesh != null)
+                    ameta.AddReferenceAsset(entry.Mesh);
+            }
         }
 
         public override TtBufferCreator GetOutBufferCreator(PinOut pin)
@@ -120,11 +151,13 @@ namespace EngineNS.Bricks.Procedure.Node
                 if (nodeType == null || nodeType.IsAbstract || !nodeType.IsSubclassOf(typeof(GamePlay.Scene.TtNode)) ||
                     GamePlay.Scene.TtNode.GetNodeAttribute(nodeType) == null)
                     return Fail(graph, "NodeType must be a non-abstract TtNode type with TtNodeAttribute");
-                if (typeof(GamePlay.Scene.TtMeshNode).IsAssignableFrom(nodeType) && MeshName == null)
-                    return Fail(graph, "MeshName is required when spawning TtMeshNode");
+                var entries = CollectValidEntries(out float totalWeight);
+                if (typeof(GamePlay.Scene.TtMeshNode).IsAssignableFrom(nodeType) && MeshName == null && entries.Count == 0)
+                    return Fail(graph, "MeshName or at least one weighted MeshEntries item is required when spawning TtMeshNode");
 
                 var transforms = new FTransform[count];
                 var requestSeeds = new int[count];
+                var meshNames = entries.Count > 0 ? new RName[count] : null;
                 for (int i = 0; i < count; i++)
                 {
                     var point = GetLinearPixel<Vector3>(points, i);
@@ -136,10 +169,12 @@ namespace EngineNS.Bricks.Procedure.Node
                     transforms[i] = FTransform.CreateTransform(point.AsDVector(), scale, rotation);
                     requestSeeds[i] = seeds == null ? unchecked(graph.ExecutionContext.Seed + i) :
                         GetLinearPixel<int>(seeds, GetOptionalIndex(seeds, i));
+                    if (meshNames != null)
+                        meshNames[i] = SelectEntry(entries, totalWeight, requestSeeds[i], SelectionSeed);
                 }
 
                 graph.ExecutionContext.AddSpawnRequest(new TtPgcSpawnRequest(
-                    NodeId, Name, nodeType, MeshName, NamePrefix, transforms, requestSeeds));
+                    NodeId, Name, nodeType, MeshName, NamePrefix, transforms, requestSeeds, meshNames));
                 return true;
             }
             finally
@@ -150,6 +185,37 @@ namespace EngineNS.Bricks.Procedure.Node
                 graph.ReleaseInput(ScalesPin);
                 graph.ReleaseInput(SeedsPin);
             }
+        }
+
+        List<TtPgcSpawnEntry> CollectValidEntries(out float totalWeight)
+        {
+            totalWeight = 0.0f;
+            var result = new List<TtPgcSpawnEntry>();
+            if (MeshEntries == null)
+                return result;
+            foreach (var entry in MeshEntries)
+            {
+                if (entry?.Mesh == null || !float.IsFinite(entry.Weight) || entry.Weight <= 0.0f)
+                    continue;
+                result.Add(entry);
+                totalWeight += entry.Weight;
+            }
+            return result;
+        }
+
+        internal static RName SelectEntry(IReadOnlyList<TtPgcSpawnEntry> entries, float totalWeight,
+            int pointSeed, int selectionSeed)
+        {
+            if (entries == null || entries.Count == 0 || !(totalWeight > 0.0f))
+                return null;
+            float pick = TtPgcHash.ToUnit(TtPgcHash.Hash(pointSeed, 0, selectionSeed, 0x5bd1e995u)) * totalWeight;
+            for (int i = 0; i < entries.Count; i++)
+            {
+                pick -= entries[i].Weight;
+                if (pick <= 0.0f)
+                    return entries[i].Mesh;
+            }
+            return entries[entries.Count - 1].Mesh;
         }
 
         bool ValidateOptionalCount(TtPgcGraph graph, TtBufferComponent buffer, int pointCount, string inputName)
@@ -263,6 +329,27 @@ namespace EngineNS.Bricks.Procedure.Node
             forward = Quaternion.RotateVector3(rotation, Vector3.Forward);
             UnitTest.TtUnitTestManager.TAssert(Vector3.Distance(forward, Vector3.Right) <= 1e-4f,
                 "Spawn Node did not align local forward with tangent");
+
+            var meshA = RName.GetRName("pgc_test_a.ums", RName.ERNameType.Transient);
+            var meshB = RName.GetRName("pgc_test_b.ums", RName.ERNameType.Transient);
+            var entries = new List<TtPgcSpawnEntry>
+            {
+                new TtPgcSpawnEntry { Mesh = meshA, Weight = 3.0f },
+                new TtPgcSpawnEntry { Mesh = meshB, Weight = 1.0f },
+            };
+            int countA = 0;
+            const int sampleCount = 4000;
+            for (int i = 0; i < sampleCount; i++)
+            {
+                var selected = TtSpawnNode.SelectEntry(entries, 4.0f, i * 7919, 7);
+                UnitTest.TtUnitTestManager.TAssert(selected == TtSpawnNode.SelectEntry(entries, 4.0f, i * 7919, 7),
+                    "Spawn Node weighted selection is not deterministic");
+                if (selected == meshA)
+                    countA++;
+            }
+            float ratioA = countA / (float)sampleCount;
+            UnitTest.TtUnitTestManager.TAssert(Math.Abs(ratioA - 0.75f) <= 0.05f,
+                $"Spawn Node weighted selection ratio is incorrect: {ratioA}");
         }
     }
 }

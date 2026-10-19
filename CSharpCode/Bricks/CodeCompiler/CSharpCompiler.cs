@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -34,6 +35,17 @@ namespace EngineNS.CodeCompiler
                 mLastEmitResult = value;
             }
         }
+
+        /// <summary>
+        /// 额外挂到 GeneratorDriver 的增量生成器（如 TtMacrossMirrorGenerator）。
+        /// 调用方需在 CompilerCSharpWithArguments 前设置、调用后清除。
+        /// </summary>
+        public static IIncrementalGenerator[] ExtraGenerators { get; set; }
+
+        /// <summary>
+        /// 上次编译中所有生成器产出的源码，键为 HintName。可用于提取镜像桩源码和基线清单。
+        /// </summary>
+        public static IReadOnlyDictionary<string, string> LastGeneratedSources { get; private set; }
 
         public class CustomAnalyzerConfigOptionsProvider : AnalyzerConfigOptionsProvider
         {
@@ -104,11 +116,20 @@ namespace EngineNS.CodeCompiler
                 var name = IO.TtFileManager.GetPureName(outputFile);
                 var compilation = CSharpCompilation.Create(name, syntaxTrees, metaRefs, option);
                 var generator = new CompilingGenerator.BindingCodeIncrementalGenerator();
-                GeneratorDriver generatorDriver = CSharpGeneratorDriver.Create(new[] { generator });
+                var generators = new List<IIncrementalGenerator> { generator };
+                if (ExtraGenerators != null)
+                {
+                    foreach (var extra in ExtraGenerators)
+                        generators.Add(extra);
+                }
+                GeneratorDriver generatorDriver = CSharpGeneratorDriver.Create(generators.ToArray());
                 //generatorDriver.WithUpdatedAnalyzerConfigOptions(optionsProvider)
                 //               .RunGeneratorsAndUpdateCompilation(compilation, out var updateCompilation, out var diagnostics);
                 generatorDriver = generatorDriver.RunGeneratorsAndUpdateCompilation(compilation, out var updateCompilation, out var diagnostics);
                 var genResult = generatorDriver.GetRunResult();
+                // 捕获所有生成器产出的源码——镜像编译与基线提取需要它
+                LastGeneratedSources = genResult.Results.SelectMany(r => r.GeneratedSources)
+                    .ToDictionary(s => s.HintName, s => s.SourceText.ToString());
                 if(genResult.Results.Length > 0)
                 {
                     var incremental = genResult.Results[0].Generator as IIncrementalGenerator;

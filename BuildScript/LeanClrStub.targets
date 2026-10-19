@@ -1,0 +1,43 @@
+<Project>
+  <!--
+    LeanCLR 桩工程导入本文件（导入前设置 LeanClrHostProject 指向导入了 LeanClrPlugin.targets 的宿主插件工程）。
+    桩工程编译宿主生成的 TtLeanClrStubs.g.cs，产出 {宿主程序集名}.LeanClrStub.dll，部署到 content\LeanCLR\{插件名}\ 供 VM 自动扫描注册。
+  -->
+  <PropertyGroup>
+    <LeanClrContentSubDir Condition="'$(LeanClrContentSubDir)' == ''">$(TtPluginName)</LeanClrContentSubDir>
+    <LeanClrHostProject>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\$(LeanClrHostProject)'))</LeanClrHostProject>
+    <LeanClrHostAssemblyName Condition="'$(LeanClrHostAssemblyName)' == ''">$([System.IO.Path]::GetFileNameWithoutExtension('$(LeanClrHostProject)'))</LeanClrHostAssemblyName>
+    <LeanClrHostGeneratedDir>$([System.IO.Path]::GetDirectoryName('$(LeanClrHostProject)'))\obj\LeanClrGenerated\</LeanClrHostGeneratedDir>
+
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName Condition="'$(AssemblyName)' == '' Or '$(AssemblyName)' == '$(MSBuildProjectName)'">$(LeanClrHostAssemblyName).LeanClrStub</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <DebugType>portable</DebugType>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <DefineConstants>$(DefineConstants);TITAN_LEANCLR_STUB</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\Module\LeanClrEngineStub\LeanClrEngineStub.csproj" />
+    <!-- 只为保证构建顺序：宿主是 net8 插件，不引用其输出 -->
+    <ProjectReference Include="$(LeanClrHostProject)"
+                      ReferenceOutputAssembly="false"
+                      SkipGetTargetFrameworkProperties="true"
+                      GlobalPropertiesToRemove="TargetFramework" />
+  </ItemGroup>
+
+  <Target Name="LeanClrCollectHostStubs" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <LeanClrHostStubSource Include="$(LeanClrHostGeneratedDir)**\TtLeanClrStubs.g.cs" />
+    </ItemGroup>
+    <Error Condition="'@(LeanClrHostStubSource)' == ''"
+           Text="LeanCLR: 未在 $(LeanClrHostGeneratedDir) 找到 TtLeanClrStubs.g.cs，确认 $(LeanClrHostProject) 已导入 LeanClrPlugin.targets 并构建成功。" />
+    <ItemGroup>
+      <Compile Include="@(LeanClrHostStubSource)" />
+    </ItemGroup>
+  </Target>
+
+  <Import Project="$(MSBuildThisFileDirectory)LeanClrDeploy.targets" />
+</Project>

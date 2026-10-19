@@ -76,6 +76,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)TName.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IModule.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SlateApplication.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UTest\TtJUnitReporter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UTest\TtTestResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UTest\TtTestRunner.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UTest\UnitTester.cs" />
   </ItemGroup>
   <ItemGroup>
