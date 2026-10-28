@@ -9,5 +9,5 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Module\Engine.Window\Engine.Window.csproj" />
   </ItemGroup>
-  <Import Project="..\..\BuildScript\LeanClrPlugin.targets" />
+  <Import Project="..\..\BuildScript\leanclr\LeanClrPlugin.targets" />
 </Project>

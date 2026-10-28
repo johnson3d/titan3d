@@ -1,0 +1,24 @@
+<Project>
+  <!-- 只求值并采集输入，不依赖 Build/Restore/ResolveReferences 或生成目标。 -->
+  <Target Name="TitanCollectSourceInputs" DependsOnTargets="AddImplicitDefineConstants">
+    <Error Condition="'$(TitanPlatform)' != 'Windows' and '$(TitanPlatform)' != 'Mac' and '$(TitanPlatform)' != 'Android'" Text="TitanPlatform must be Windows, Mac or Android, got $(TitanPlatform)." />
+    <Error Condition="'$(Configuration)' != 'Debug' and '$(Configuration)' != 'Release'" Text="Configuration must be Debug or Release, got $(Configuration)." />
+    <Error Condition="'$(TitanEnginePlatform)' != '' and '$(TitanPlatform)' != '$(TitanEnginePlatform)'" Text="$(MSBuildProjectName) requires TitanPlatform=$(TitanEnginePlatform); got $(TitanPlatform)." />
+    <Error Condition="'$(TargetFramework)' == '' or '$(TargetFrameworkIdentifier)' == ''" Text="$(MSBuildProjectFullPath) must select a single managed TargetFramework." />
+    <PropertyGroup>
+      <_TitanGeneratedRoot>$([MSBuild]::NormalizeDirectory('$(TitanRoot)', 'codegen'))</_TitanGeneratedRoot>
+      <_TitanProjectGeneratedRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', 'codegen'))</_TitanProjectGeneratedRoot>
+      <_TitanProjectBinRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', 'bin'))</_TitanProjectBinRoot>
+      <_TitanProjectObjRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', 'obj'))</_TitanProjectObjRoot>
+      <_TitanPathComparison Condition="$([MSBuild]::IsOSPlatform('Windows'))">OrdinalIgnoreCase</_TitanPathComparison>
+      <_TitanPathComparison Condition="'$(_TitanPathComparison)' == ''">Ordinal</_TitanPathComparison>
+    </PropertyGroup>
+    <ItemGroup>
+      <TitanSourceFile Include="@(Compile->'%(FullPath)')" Condition="'%(Compile.TitanGenerated)' != 'true'" />
+      <!-- 不存在的显式项不会被通配 Exclude 展开；按规范化路径分类，不能剔除所有缺失项。 -->
+      <TitanSourceFile Remove="@(TitanSourceFile)"
+                       Condition="$([System.String]::Copy('%(TitanSourceFile.FullPath)').StartsWith('$(_TitanGeneratedRoot)', System.StringComparison.$(_TitanPathComparison))) or $([System.String]::Copy('%(TitanSourceFile.FullPath)').StartsWith('$(_TitanProjectGeneratedRoot)', System.StringComparison.$(_TitanPathComparison))) or $([System.String]::Copy('%(TitanSourceFile.FullPath)').StartsWith('$(_TitanProjectBinRoot)', System.StringComparison.$(_TitanPathComparison))) or $([System.String]::Copy('%(TitanSourceFile.FullPath)').StartsWith('$(_TitanProjectObjRoot)', System.StringComparison.$(_TitanPathComparison)))" />
+    </ItemGroup>
+    <Error Condition="'%(TitanSourceFile.Identity)' != '' and !Exists('%(TitanSourceFile.Identity)')" Text="Missing ordinary source: %(TitanSourceFile.Identity)" />
+  </Target>
+</Project>

@@ -167,7 +167,7 @@
       <Label Type="System.String@Unknown" Value="Set Location" />
       <Name Type="System.String@Unknown" Value="Set Location" />
       <NodeId Type="System.Guid@Unknown" Value="48106096-66c4-4bc9-a2dd-c27779131d92" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="1342.4001,58.755028" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="1338.4,39.75502" />
       <ClassPropertyMeta Type="System.String@Unknown" Value="EngineNS.Bricks.Particle.TtEmitter@EngineCore#Location" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="1">
         <e_0 Type="EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore">
@@ -297,7 +297,7 @@
       <SaveData Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassPropertyVar.TSaveData@EngineCore" />
     </e_9>
   </Nodes>
-  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore,&gt;@Unknown" Count="11">
+  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore,&gt;@Unknown" Count="12">
     <e_0 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="c45cbc44-443f-4e28-b370-6a0727c8822b" />
@@ -394,5 +394,14 @@
       </SaveData>
       <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
     </e_10>
+    <e_11 Type="EngineNS.Bricks.NodeGraph.TtPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.TtPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="48106096-66c4-4bc9-a2dd-c27779131d92" />
+        <InPinName Type="System.String@Unknown" Value="Self" />
+        <OutNodeId Type="System.Guid@Unknown" Value="b2bb40f6-2596-4e5e-8c1f-3f9a445241ed" />
+        <OutPinName Type="System.String@Unknown" Value="emitter" />
+      </SaveData>
+      <ShowState Type="EngineNS.Bricks.NodeGraph.TtPinLinker.EShowState@EngineCore" Value="Normal" />
+    </e_11>
   </Linkers>
 </Root>

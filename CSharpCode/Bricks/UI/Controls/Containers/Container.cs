@@ -982,27 +982,3 @@ namespace EngineNS.UI.Controls.Containers
         }
     }
 }
-
-
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace EngineNS.UI.Controls.Containers
-{
-	partial class TtUIElementCollection
-	{
-		public unsafe void macross_Add (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtUIElement item) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			Add(item);
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

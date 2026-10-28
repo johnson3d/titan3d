@@ -131,6 +131,7 @@ namespace EngineNS.Graphics.Mesh
                 public TtMeshImportSetting Setting;
                 public string Error;
             }
+#if PWindow
             public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.TtContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)
@@ -448,6 +449,7 @@ namespace EngineNS.Graphics.Mesh
 
                 return retValue;
             }
+#endif
 
             public override bool IsAssetSource(string fileExt)
             {

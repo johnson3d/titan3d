@@ -23,7 +23,7 @@ NS_END
 
 namespace	VFX_Memory
 {
-	typedef void(*FOnMemAlloc)(size_t size, const char* file, size_t line, size_t id);
+	typedef void(*FOnMemAlloc)(void* ptr, size_t size, const char* file, size_t line, size_t id);
 	typedef void(*FOnMemFree)(size_t size, const char* file, size_t line, size_t id);
 	typedef void(*FOnMemLeak)(void* ptr, size_t size, const char* file, size_t line, size_t id, const char* debugInfo);
 

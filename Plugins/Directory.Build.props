@@ -5,8 +5,8 @@
 
   <!-- Define macros for easy and consistent access to various parts of the tree -->
   <PropertyGroup Label="UserMacros">
-	<TtTitanRoot Condition="'$(TitanRoot)' == ''">$(SolutionDir)</TtTitanRoot>
-	<TtTitanRoot Condition="'$(TitanRoot)' != ''">$(TitanRoot)</TtTitanRoot>
+	<TtTitanRoot Condition="'$(TitanRoot)' == ''">$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..'))</TtTitanRoot>
+	<TtTitanRoot Condition="'$(TitanRoot)' != ''">$([MSBuild]::NormalizeDirectory('$(TitanRoot)'))</TtTitanRoot>
 	<TtOsDir Condition="$([MSBuild]::IsOSPlatform('Linux'))">Linux</TtOsDir>
 	<TtOsDir Condition="$([MSBuild]::IsOSPlatform('Windows'))">Win64</TtOsDir>
 	<TtOsDir Condition="$([MSBuild]::IsOSPlatform('OSX'))">MacOS</TtOsDir>

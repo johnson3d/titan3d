@@ -183,7 +183,9 @@ namespace EngineNS.IO
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.CookedAssets));
             SureDirectory(GetRoot(ERootDir.Cache) + "snapshots/");
 
+#if PWindow
             GpuDump.NvAftermath.SetOutputRoot(GetPath(ERootDir.Cache, ESystemDir.AfterMath));
+#endif
         }
         partial void InitDirectory(string[] args);
         public enum ERootDir
@@ -265,8 +267,13 @@ namespace EngineNS.IO
         #region Path Op
         public static string GetValidDirectory(string path)
         {
+            return GetValidDirectory(path, System.OperatingSystem.IsWindows());
+        }
+        // Unix 绝对路径以 '/' 开头，只有 Windows 上才去掉前导 '/'
+        public static string GetValidDirectory(string path, bool isWindowsHost)
+        {
             path = path.Replace('\\', '/');
-            if (path.StartsWith("/"))
+            if (isWindowsHost && path.StartsWith("/"))
             {
                 path = path.Substring(1, path.Length - 1);
             }
@@ -274,16 +281,20 @@ namespace EngineNS.IO
             {
                 path += "/";
             }
-            return path.ToLower();
+            return isWindowsHost ? path.ToLower() : path;
         }
         public static string GetValidFileName(string path)
         {
+            return GetValidFileName(path, System.OperatingSystem.IsWindows());
+        }
+        public static string GetValidFileName(string path, bool isWindowsHost)
+        {
             path = path.Replace('\\', '/');
-            if (path.StartsWith("/"))
+            if (isWindowsHost && path.StartsWith("/"))
             {
                 path = path.Substring(1, path.Length - 1);
             }
-            return path.ToLower();
+            return isWindowsHost ? path.ToLower() : path;
         }
         public static string GetBaseDirectory(string path, int numOfParents = 1)
         {

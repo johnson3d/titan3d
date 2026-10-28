@@ -244,9 +244,11 @@ namespace EngineNS
             }
 
             io.DisplaySize = new Vector2((float)w, (float)h);
+            //ImGui 用逻辑坐标布局；像素/逻辑比交给 FramebufferScale（渲染端 ScaleClipRects 用）
             if (w > 0 && h > 0)
             {
-                io.DisplayFramebufferScale = new Vector2(1, 1);
+                var px = NativeWindow.GetWindowSizeInPixels();
+                io.DisplayFramebufferScale = new Vector2(px.X / w, px.Y / h);
             }
             else
             {

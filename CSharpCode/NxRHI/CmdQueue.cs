@@ -47,11 +47,13 @@ namespace EngineNS.NxRHI
             {
                 return false;
             }
+#if PWindow
             if (IRenderDocTool.GetInstance().IsFrameCapturing())
             {
                 return false;
             }
             IRenderDocTool.GetInstance().StartFrameCapture();
+#endif
             return true;
         }
         int CaptureId = 0;
@@ -63,6 +65,7 @@ namespace EngineNS.NxRHI
             }
             //System.Diagnostics.Debug.Assert(IRenderDocTool.GetInstance().IsFrameCapturing());
             CaptureRenderDocFrame = false;
+#if PWindow
             IRenderDocTool.GetInstance().EndFrameCapture();
 
             if (RemainingCaptureFrames > 0)
@@ -101,6 +104,7 @@ namespace EngineNS.NxRHI
                 LastCaptureFile = tarFile;
                 return tarFile;
             }
+#endif
             return null;
         }
         #endregion

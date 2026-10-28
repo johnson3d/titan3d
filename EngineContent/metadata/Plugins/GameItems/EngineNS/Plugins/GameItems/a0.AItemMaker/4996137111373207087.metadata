@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_4996137111373207087 Type="EngineNS.Plugins.GameItems.AItemMaker@GameItems">
+  <Catalyzers Type="System.Collections.Generic.List&lt;EngineNS.Plugins.GameItems.AItemRequirement@GameItems,&gt;@Unknown" Order="0" />
+  <InputItems Type="System.Collections.Generic.List&lt;EngineNS.Plugins.GameItems.AItemRequirement@GameItems,&gt;@Unknown" Order="0" />
+  <OutputItems Type="System.Collections.Generic.List&lt;EngineNS.Plugins.GameItems.AItemMakeSuccess@GameItems,&gt;@Unknown" Order="0" />
+</Hash_4996137111373207087>

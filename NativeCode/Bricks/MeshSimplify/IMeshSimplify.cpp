@@ -8,7 +8,11 @@
 #include <CGAL/point_generators_3.h>
 #include <CGAL/Triangulation_vertex_base_with_info_3.h>
 
+// gmp.lib 只是 Windows 侧的实体库；Android 没有它，且 clang 会把 #pragma comment(lib)
+// 写进 ELF 的 link 选项，导致 ld.lld 报 dependent library 找不到。
+#if defined(_MSC_VER)
 #pragma comment(lib,"gmp.lib")
+#endif
 
 #define new VNEW
 

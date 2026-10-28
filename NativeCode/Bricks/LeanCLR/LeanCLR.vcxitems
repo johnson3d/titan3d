@@ -16,5 +16,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)LeanClrRuntime.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Debug'">%(PreprocessorDefinitions);LEANCLR_GC_DEBUG=1</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)LeanClrMemory.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)'=='Debug'">%(PreprocessorDefinitions);LEANCLR_GC_DEBUG=1</PreprocessorDefinitions>
+    </ClCompile>
   </ItemGroup>
 </Project>

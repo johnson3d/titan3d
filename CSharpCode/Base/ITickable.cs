@@ -174,37 +174,3 @@ namespace EngineNS
 
     
 }
-
-
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace EngineNS
-{
-	partial class TtTickableManager
-	{
-		public unsafe void macross_AddTickable (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, ITickable tickable) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			AddTickable(tickable);
-		}
-		public unsafe void macross_RemoveTickable (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, ITickable tickable) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			RemoveTickable(tickable);
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

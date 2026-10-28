@@ -8,6 +8,7 @@ using System.Text;
 
 namespace EngineNS.DistanceField
 {
+#if PWindow
     public class FSparseMeshDistanceFieldAsyncTask
     {
 	    public FSparseMeshDistanceFieldAsyncTask(
@@ -222,6 +223,7 @@ namespace EngineNS.DistanceField
         }
 
     };
+#endif
 
 
     public class UMeshUtilities
@@ -290,6 +292,7 @@ namespace EngineNS.DistanceField
             bool bGenerateAsIfTwoSided,
             ref TtSdfAsset OutData)
         {
+#if PWindow
             if (DistanceFieldResolutionScale <= 0)
                 return;
 
@@ -491,6 +494,9 @@ namespace EngineNS.DistanceField
             }
 
             embreeManager.Dispose();
+#else
+            Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, $"SDF Generate: Embree unavailable on this platform, skip {MeshName}");
+#endif
         }
     }
 }

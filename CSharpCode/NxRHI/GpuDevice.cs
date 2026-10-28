@@ -85,6 +85,7 @@ namespace EngineNS.NxRHI
             this.mDescriptorPoolManager?.Dispose();
             base.Dispose();
         }
+#if PWindow
         public unsafe NxRHI.DX12GpuDevice AsDX12Deivce
         {
             get
@@ -94,6 +95,7 @@ namespace EngineNS.NxRHI
                 return new NxRHI.DX12GpuDevice();
             }
         }
+#endif
         public ERhiType RhiType
         {
             get

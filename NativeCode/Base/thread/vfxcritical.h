@@ -60,7 +60,7 @@ struct VSLLock
 	{
 		mLocker = 0;
 	}
-	std::atomic<long> mLocker;
+	std::atomic<int> mLocker;
 	inline void Lock() {
 		while (mLocker.exchange(1))
 			Sleep(0);
@@ -76,7 +76,7 @@ struct VSLLockSpin
 	{
 		mLocker = 0;
 	}
-	std::atomic<long> mLocker;
+	std::atomic<int> mLocker;
 	inline void Lock() {
 		while (mLocker.exchange(1))
 		{

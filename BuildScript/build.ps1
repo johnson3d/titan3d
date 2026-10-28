@@ -1,4 +1,4 @@
-#requires -Version 5.1
+﻿#requires -Version 5.1
 [CmdletBinding()]
 param(
     [ValidateSet('Debug', 'Release', 'All')]
@@ -17,7 +17,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-. "$PSScriptRoot\common.ps1"
+. "$PSScriptRoot\common\common.ps1"
 
 Assert-WindowsHost
 
@@ -32,10 +32,9 @@ Import-VsDevEnvironment $msbuild
 $configs = if ($Configuration -eq 'All') { @('Debug', 'Release') } else { @($Configuration) }
 $toolConfig = if ($Configuration -eq 'Release') { 'Release' } else { 'Debug' }
 
-$generatorToolProjects = @(
-    'Module\CppWeavingTools\CppWeavingTools.csproj',
-    'Module\CSharpCodeTools\CSharpCodeTools.csproj'
-)
+# 两种生成工具独立编译自身源码；完成自举后才按配置执行生成。
+$cppWeavingProject = 'Module\CppWeavingTools\CppWeavingTools.csproj'
+$csharpCodeToolsProject = 'Module\CSharpCodeTools\CSharpCodeTools.csproj'
 
 $analyzerProjects = @(
     'Module\CompilingGenerator\CompilingGenerator.csproj',
@@ -66,6 +65,8 @@ foreach ($pluginFile in (Get-ChildItem -Path $pluginsRoot -Filter '*.plugin' -Re
     }
 }
 $pluginProjects = $pluginProjects | Select-Object -Unique
+# DataCopyer.All 依赖反射阶段生成的 Copyer 与插件引用清单，由 TitanRunDataCopyerStage 在其他插件之后构建。
+$pluginProjects = @($pluginProjects | Where-Object { $_ -notmatch '(^|\\)DataCopyer\.All\.csproj$' })
 
 function Invoke-DotNetRestore {
     param([Parameter(Mandatory = $true)][string]$Project)
@@ -99,38 +100,53 @@ function Invoke-DotNetBuild {
         $BuildConfiguration,
         ('/p:SolutionDir=' + $repoRoot + '\'),
         ('/p:TitanRoot=' + $repoRoot + '\'),
+        '/p:TitanPlatform=Windows',
+        '/p:SkipTitanCodeGen=true',
         '--no-restore'
     )
 
     Invoke-External $dotnet $args $repoRoot
 }
 
-function Invoke-CodeGeneration {
-    $toolsDir = Join-Path $repoRoot 'binaries\Tools\net8.0'
-    $cppWeaving = Join-Path $toolsDir 'CppWeavingTools.exe'
-    $csharpTools = Join-Path $toolsDir 'CSharpCodeTools.exe'
+function Get-GeneratorTool {
+    param([Parameter(Mandatory = $true)][string]$Name)
 
-    if (-not (Test-Path -LiteralPath $cppWeaving)) {
-        throw "CppWeavingTools was not built at '$cppWeaving'."
+    $tool = Join-Path $repoRoot ('binaries\Tools\net8.0\' + $Name + '.exe')
+    if (-not (Test-Path -LiteralPath $tool)) {
+        throw "$Name was not built at '$tool'."
     }
+    return $tool
+}
 
-    if (-not (Test-Path -LiteralPath $csharpTools)) {
-        throw "CSharpCodeTools was not built at '$csharpTools'."
-    }
+function Invoke-CppWeaving {
+    param([Parameter(Mandatory = $true)][string]$BuildConfiguration)
 
-    $nativeBinderDir = Join-Path $repoRoot 'codegen\NativeBinder\'
+    $cppWeaving = Get-GeneratorTool 'CppWeavingTools'
+    $nativeBinderDir = Join-Path $repoRoot 'codegen\Windows\NativeBinder'
     Invoke-External $cppWeaving @(
         ('vcxproj=' + (Test-RepoFile 'Core.Window\Core.Window.vcxproj')),
+        ('TitanRoot=' + $repoRoot),
+        'Platform=Windows',
+        ('Configuration=' + $BuildConfiguration),
         ('CppOut=' + $nativeBinderDir),
         ('CsOut=' + $nativeBinderDir),
         'ModuleNC=EngineNS.CoreSDK.CoreModule',
         ('Pch=' + (Test-RepoFile 'Core.Window\pch.h')),
         ('TargetCppPOD=' + (Join-Path $nativeBinderDir 'PODStructDefine.h'))
     ) $repoRoot
+}
 
+function Invoke-CSharpCodeTools {
+    param([Parameter(Mandatory = $true)][string]$BuildConfiguration)
+
+    $csharpTools = Get-GeneratorTool 'CSharpCodeTools'
     Invoke-External $csharpTools @(
         (Test-RepoFile 'Rpc_Engine.txt'),
-        'mode=Rpc+AutoSync+Macross'
+        'mode=Rpc+AutoSync+Macross',
+        ('TitanRoot=' + $repoRoot),
+        'Platform=Windows',
+        ('Configuration=' + $BuildConfiguration),
+        ('csproj=' + (Test-RepoFile 'Module\Engine.Window\Engine.Window.csproj'))
     ) $repoRoot
 }
 
@@ -188,46 +204,41 @@ if (-not $SkipDependencyCheck) {
     Write-Host ''
     Write-Host '== Check external dependencies =='
     if ($SkipRestore) {
-        & "$PSScriptRoot\deps.ps1"
+        & "$PSScriptRoot\check\deps.ps1"
     }
     else {
-        & "$PSScriptRoot\deps.ps1" -Restore
+        & "$PSScriptRoot\check\deps.ps1" -Restore
     }
 }
 
 if (-not $SkipTools) {
     Write-Host ''
-    Write-Host "== Build generator tools ($toolConfig) =="
-    foreach ($project in $generatorToolProjects) {
-        Invoke-DotNetBuild $project $toolConfig
-    }
+    Write-Host "== Build CppWeavingTools ($toolConfig) =="
+    Invoke-DotNetBuild $cppWeavingProject $toolConfig
+    Write-Host "== Build CSharpCodeTools ($toolConfig) =="
+    Invoke-DotNetBuild $csharpCodeToolsProject $toolConfig
 }
 
-if (-not $SkipCodeGen) {
-    Write-Host ''
-    Write-Host '== Generate NativeBinder/RPC/AutoSync/Macross code =='
-    Invoke-CodeGeneration
-}
-
-if ($CodeGenOnly) {
-    Write-Host ''
-    if ($SkipCodeGen) {
-        Write-Host 'Code generation skipped.'
+# 同一平台输出根逐配置串行消费，避免 All 先发布 Release 却编译 Debug。
+foreach ($config in $configs) {
+    if (-not $SkipCodeGen) {
+        Write-Host ''
+        Write-Host "== Generate NativeBinder code ($config) =="
+        Invoke-CppWeaving $config
+        Write-Host "== Generate RPC/AutoSync/Macross code ($config) =="
+        Invoke-CSharpCodeTools $config
     }
-    else {
-        Write-Host 'Code generation completed.'
+
+    if ($CodeGenOnly) {
+        continue
     }
-    return
-}
 
-if (-not $SkipNative) {
-    Write-Host ''
-    Write-Host '== Build LeanCLR Windows x64 static libraries =='
-    & "$PSScriptRoot\build-leanclr.ps1" -Configuration $Configuration
+    if (-not $SkipNative) {
+        Write-Host ''
+        Write-Host "== Build LeanCLR Windows x64 static libraries ($config) =="
+        & "$PSScriptRoot\leanclr\build-leanclr.ps1" -Configuration $config
 
-    Write-Host ''
-    Write-Host '== Build Core.Window x64 =='
-    foreach ($config in $configs) {
+        Write-Host "== Build Core.Window x64 ($config) =="
         Invoke-External $msbuild @(
             (Test-RepoFile 'Core.Window\Core.Window.vcxproj'),
             '/m',
@@ -236,50 +247,65 @@ if (-not $SkipNative) {
             '/t:Build',
             ('/p:Configuration=' + $config),
             ('/p:SolutionDir=' + $repoRoot + '\'),
+            ('/p:TitanRoot=' + $repoRoot + '\'),
+            '/p:TitanPlatform=Windows',
+            '/p:SkipTitanCodeGen=true',
             '/p:Platform=x64'
         ) $repoRoot
         Copy-NativeRuntimeDependencies $config
     }
-}
 
-if (-not $SkipManaged) {
-    if (-not $SkipTools) {
-        Write-Host ''
-        Write-Host '== Build analyzer/tool support projects =='
-        foreach ($config in $configs) {
+    if (-not $SkipManaged) {
+        if (-not $SkipTools) {
+            Write-Host ''
+            Write-Host "== Build analyzer/tool support projects ($config) =="
             foreach ($project in $analyzerProjects) {
                 Invoke-DotNetBuild $project $config
             }
         }
-    }
 
-    Write-Host ''
-    Write-Host '== Build Engine.Window and MainEditor =='
-    foreach ($config in $configs) {
+        Write-Host ''
+        Write-Host "== Build Engine.Window and MainEditor ($config) =="
         foreach ($project in $managedProjects) {
             Invoke-DotNetBuild $project $config
         }
-    }
 
-    if (-not $SkipTools) {
-        Write-Host ''
-        Write-Host '== Build tool projects =='
-        foreach ($config in $configs) {
+        if (-not $SkipTools) {
+            Write-Host ''
+            Write-Host "== Build tool projects ($config) =="
             foreach ($project in $additionalToolProjects) {
                 Invoke-DotNetBuild $project $config
             }
         }
-    }
 
-    if (-not $SkipPlugins) {
-        Write-Host ''
-        Write-Host '== Build Windows plugin projects =='
-        foreach ($config in $configs) {
+        if (-not $SkipPlugins) {
+            Write-Host ''
+            Write-Host "== Build Windows plugin projects ($config) =="
             foreach ($project in $pluginProjects) {
                 Invoke-DotNetBuild $project $config
             }
+
+            Write-Host ''
+            Write-Host "== Generate DataCopyer from built Engine.Window ($config) =="
+            Invoke-External $dotnet @(
+                'msbuild',
+                (Test-RepoFile 'Module\Engine.Window\Engine.Window.csproj'),
+                '-nologo',
+                '-t:TitanRunDataCopyerStage',
+                ('-p:Configuration=' + $config),
+                ('/p:SolutionDir=' + $repoRoot + '\'),
+                ('/p:TitanRoot=' + $repoRoot + '\'),
+                '/p:TitanPlatform=Windows'
+            ) $repoRoot
         }
     }
+}
+
+if ($CodeGenOnly) {
+    Write-Host ''
+    if ($SkipCodeGen) { Write-Host 'Code generation skipped.' }
+    else { Write-Host 'Code generation completed.' }
+    return
 }
 
 Write-Host ''

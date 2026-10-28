@@ -167,9 +167,10 @@ VCritical::VCritical()
 	//pthread_mutex_init(&m_Critical, &attr);
 	pthread_mutexattr_t attr;
 	pthread_mutexattr_init(&attr);
-#if defined(ANDROID) || defined(PLATFORM_WIN)
+#if defined(ANDROID)
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE_NP);
-#elif defined(IOS)
+#elif defined(IOS) || defined(PLATFORM_MAC)
+	// Windows 的 CRITICAL_SECTION 可重入，引擎存在同线程嵌套加锁，Mac 必须用递归锁
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
 #endif
 	//pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_PRIVATE);

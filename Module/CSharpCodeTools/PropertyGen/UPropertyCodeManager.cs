@@ -22,6 +22,13 @@ namespace CSharpCodeTools.PropertyGen
 
         public override void IterateClass(CompilationUnitSyntax root, MemberDeclarationSyntax decl)
         {
+            if (decl is BaseNamespaceDeclarationSyntax scope)
+            {
+                foreach (var member in scope.Members) IterateClass(root, member);
+                return;
+            }
+            if (decl is TypeDeclarationSyntax enclosing)
+                foreach (var nested in enclosing.Members.OfType<TypeDeclarationSyntax>()) IterateClass(root, nested);
             switch (decl.Kind())
             {
                 case SyntaxKind.ClassDeclaration:
@@ -29,7 +36,7 @@ namespace CSharpCodeTools.PropertyGen
                         var kls = decl as ClassDeclarationSyntax;
                         var fullname = ClassDeclarationSyntaxExtensions.GetFullName(kls);
 
-                        if (GetClassAttribute(kls))
+                        if (ProjectDeclarations[fullname].Any(GetClassAttribute))
                         {
                             var klsDefine = FindOrCreate(fullname) as UPropertyClassDefine;
                             foreach (var i in root.Usings)
@@ -77,6 +84,8 @@ namespace CSharpCodeTools.PropertyGen
                                             }
                                         }
                                     }
+                                    if (string.IsNullOrWhiteSpace(prop.Index))
+                                        throw SourceError(field, fullname + "." + prop.Name + " 必须显式声明 AutoSync Index");
                                     break;
                                 }
                             }
@@ -111,66 +120,12 @@ namespace CSharpCodeTools.PropertyGen
 
         public void GatherAutoSyncClass(string dir)
         {
-            const string StartString = "#if TitanEngine_AutoGen_AutoSync";
-            const string EndString = "#endif//TitanEngine_AutoGen_AutoSync";
-            foreach (var i in SourceCodes)
+            GatherClass();
+            foreach (var definition in ClassDefines.Values.OrderBy(d => d.FullName, StringComparer.Ordinal))
             {
-                string beforeStr = null;
-                string afterStr = null;
-                var code = System.IO.File.ReadAllText(i);
-                var savedCode = code;
-                var iStart = code.IndexOf(StartString);
-                if (iStart >= 0)
-                {
-                    beforeStr = code.Substring(0, iStart);
-                    var iEnd = code.IndexOf(EndString, iStart);
-                    if (iEnd >= 0)
-                    {
-                        afterStr = code.Substring(iEnd + EndString.Length);
-                    }
-                }
-                if (beforeStr != null)
-                {
-                    code = beforeStr + afterStr;
-                }
-
-                var tree = CSharpSyntaxTree.ParseText(code);
-                var root = tree.GetCompilationUnitRoot();
-
-                ClassDefines.Clear();
-
-                foreach (var j in root.Members)
-                {
-                    IterateClass(root, j);
-                }
-
-                foreach (var j in ClassDefines)
-                {
-                    j.Value.Build();
-                }
-
-                var genCode = "";
-                foreach (var j in ClassDefines)
-                {
-                    (j.Value as UPropertyClassDefine).GenCode(dir, i);
-                    if (j.Value.ClassCode.Length > 0)
-                    {
-                        genCode += j.Value.ClassCode;
-                    }
-                }
-
-                if (genCode.Length > 0)
-                {
-                    code += StartString;
-                    code += "\r\n";
-                    code += "#region TitanEngine_AutoGen_AutoSync\r\n";
-                    code += genCode;
-                    code += "#endregion//TitanEngine_AutoGen_AutoSync\r\n";
-                    code += EndString;
-                }
-
-                if (savedCode != code)
-                    System.IO.File.WriteAllText(i, code);
+                definition.ResetWriter();
+                ((UPropertyClassDefine)definition).GenCode(null, "");
+                WriteGeneratedCode(definition, dir, ".prop.cs");
             }
         }
     }

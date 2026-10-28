@@ -53,7 +53,6 @@ typedef int64_t 				INT64;
 
 typedef unsigned short			USHORT;
 typedef unsigned int			UINT;
-typedef unsigned long			ULONG;
 typedef unsigned char			UINT8;
 typedef unsigned short			UINT16;
 typedef unsigned int			UINT;
@@ -102,7 +101,6 @@ typedef const INT64 * 			LPCINT64;
 typedef BYTE *					LPBYTE;
 typedef USHORT *				LPUSHORT;
 typedef	UINT *					LPUINT;
-typedef ULONG *				LPULONG;
 typedef INT8 *					LPINT8;
 typedef INT16 *				LPINT16;
 typedef INT32 *				LPINT32;
@@ -115,7 +113,6 @@ typedef QWORD *				LPQWORD;
 typedef const BYTE *			LPCBYTE;
 typedef const USHORT *			LPCUSHORT;
 typedef	const UINT *			LPCUINT;
-typedef const ULONG *			LPCULONG;
 typedef const INT8 *			LPCINT8;
 typedef const INT16 *			LPCINT16;
 typedef const INT32 *			LPCINT32;
@@ -157,7 +154,6 @@ typedef unsigned short		uint16;
 typedef unsigned int		uint32;
 typedef unsigned long long	uint64;
 
-typedef ULONG	ulong;
 typedef USHORT		ushort;
 typedef BYTE		uchar;
 

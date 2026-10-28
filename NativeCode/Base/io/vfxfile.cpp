@@ -304,7 +304,7 @@ INT_PTR  VFile::Seek(INT_PTR lOff, SeekPosition nFrom)
 {
 	if (m_hFile == NULL)
 		return 0;
-	fseek(m_hFile, (long)lOff, nFrom);
+	fseek(m_hFile, (long)lOff, nFrom); // lp64-ok: fseek 的 long 参数
 	auto result = ftell(m_hFile);
 	return result;
 }
@@ -351,7 +351,7 @@ void  VFile::Abort()
 
 vBOOL  VFile::SetLength(UINT_PTR dwNewLen)
 {
-	return fseek(m_hFile, (long)dwNewLen, SEEK_SET)==dwNewLen;
+	return fseek(m_hFile, (long)dwNewLen, SEEK_SET)==dwNewLen; // lp64-ok: fseek 的 long 参数
 }
 
 void VFile::UpdateFileLength()

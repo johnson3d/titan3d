@@ -28,76 +28,22 @@ namespace CSharpCodeTools
             result.FullName = fullname;
             return result;
         }
-        public void GatherRpcClass(string dir)
+        public void GatherRpcClass(string dir, string callerDir)
         {
-            const string Start_String = "#if TitanEngine_AutoGen_RPC";
-            const string End_String = "#endif//TitanEngine_AutoGen_RPC";
-            foreach (var i in SourceCodes)
+            GatherClass();
+            foreach (var definition in ClassDefines.Values.OrderBy(d => d.FullName, StringComparer.Ordinal))
             {
-                string beforeStr = null;
-                string afterStr = null;
-                var code = System.IO.File.ReadAllText(i);
-                var saved_code = code;
-                var istart = code.IndexOf(Start_String);
-                if (istart >= 0)
-                {
-                    beforeStr = code.Substring(0, istart);
-                    var iend = code.IndexOf(End_String, istart);
-                    if (iend >= 0)
-                    {
-                        afterStr = code.Substring(iend + End_String.Length);
-                    }
-                }
-                if (beforeStr != null)
-                {
-                    code = beforeStr + afterStr;
-                }
-                SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
-
-                CompilationUnitSyntax root = tree.GetCompilationUnitRoot();
-
-                ClassDefines.Clear();
-
-                foreach (var j in root.Members)
-                {
-                    IterateClass(root, j);
-                }
-
-                foreach (var j in ClassDefines)
-                {
-                    var klsDefine = j.Value;
-                    klsDefine.Build();
-                }
-
-                string genCode = "";
-                foreach (var j in ClassDefines)
-                {
-                    //j.Value.Usings.Clear();
-                    //j.Value.GenCode(null);
-                    (j.Value as URpcClassDefine).GenCode(dir, i);
-                    if (j.Value.ClassCode.Length > 0)
-                    {
-                        genCode += j.Value.ClassCode;
-                        //genCode += "\r\n";
-                    }
-                }
-
-                if (genCode.Length > 0)
-                {
-                    code += Start_String;
-                    code += "\r\n";
-
-                    code += "#region TitanEngine_AutoGen_RPC\r\n";
-
-                    code += genCode;
-
-                    code += "#endregion//TitanEngine_AutoGen_RPC\r\n";
-
-                    code += End_String;
-
-                    if (saved_code != code)
-                        System.IO.File.WriteAllText(i, code);
-                }
+                var rpc = (URpcClassDefine)definition;
+                // 共享调用方在另一程序集编译，嵌套类型无法在该程序集重建外层类型。
+                if (!rpc.CallerInClass && rpc.Methods.Count > 0 && rpc.Declaration.Parent is TypeDeclarationSyntax)
+                    throw SourceError(rpc.Declaration, rpc.FullName + " 是嵌套类型，必须声明 TtRpcClass(CallerInClass=true)");
+                // 共享调用方与基线一致，不携带源码 using，避免依赖拥有工程私有命名空间。
+                rpc.ResetWriter();
+                rpc.GenCallerCode();
+                WriteGeneratedCode(rpc, callerDir, ".rpc.cs", "|caller", false);
+                rpc.ResetWriter();
+                rpc.GenCode();
+                WriteGeneratedCode(rpc, dir, ".rpc.cs");
             }
         }
         protected override void OnVisitMethod(UClassCodeBase kls, MethodDeclarationSyntax method)
@@ -106,6 +52,13 @@ namespace CSharpCodeTools
         }
         public override void IterateClass(CompilationUnitSyntax root, MemberDeclarationSyntax decl)
         {
+            if (decl is BaseNamespaceDeclarationSyntax scope)
+            {
+                foreach (var member in scope.Members) IterateClass(root, member);
+                return;
+            }
+            if (decl is TypeDeclarationSyntax enclosing)
+                foreach (var nested in enclosing.Members.OfType<TypeDeclarationSyntax>()) IterateClass(root, nested);
             switch (decl.Kind())
             {
                 case SyntaxKind.ClassDeclaration:
@@ -119,10 +72,9 @@ namespace CSharpCodeTools
                                 klsDeffine.Usings.Add(i.ToString());
                             }
                         }
-                        string target, executer;
-                        bool callerInClass = false;
-                        if (GetRpcClassAttribute(kls, out target, out executer, out callerInClass))
+                        foreach (var partial in ProjectDeclarations[fullname])
                         {
+                            if (!GetRpcClassAttribute(partial, out var target, out var executer, out var callerInClass)) continue;
                             var klsDeffine = FindOrCreate(fullname) as URpcClassDefine;
                             klsDeffine.RunTarget = target;
                             klsDeffine.Executer = executer;
@@ -151,6 +103,10 @@ namespace CSharpCodeTools
                                             klsDeffine.Methods.Add(rpcMethod);
                                             rpcMethod.ArgDataType = URpcMethod.EDataType.Unmanaged;
                                             bool bReturnISerializer = false;
+                                            if (klsDeffine.RunTarget == null)
+                                                throw SourceError(method, fullname + "." + rpcMethod.Name + " 缺少 TtRpcClass");
+                                            if (k.ArgumentList == null)
+                                                throw SourceError(method, fullname + "." + rpcMethod.Name + " 必须显式声明 RPC Index");
                                             foreach (var m in k.ArgumentList.Arguments)
                                             {
                                                 var argName = m.NormalizeWhitespace().ToFullString();
@@ -185,12 +141,12 @@ namespace CSharpCodeTools
                                                 }
                                             }
 
+                                            if (string.IsNullOrWhiteSpace(rpcMethod.Index))
+                                                throw SourceError(method, fullname + "." + rpcMethod.Name + " 必须显式声明 RPC Index");
                                             rpcMethod.ArgTypes.Clear();
-                                            var lstParam = method.ParameterList.Parameters.Last();
-                                            if (lstParam.Type.ToString().Contains("TtCallContext") == false)
-                                            {
-                                                Console.WriteLine($"RPC {klsDeffine.Name}.{rpcMethod.Name} parameter error");
-                                            }
+                                            var lstParam = method.ParameterList.Parameters.LastOrDefault();
+                                            if (lstParam?.Type?.ToString().Split('.').Last() != "TtCallContext")
+                                                throw SourceError(method, fullname + "." + rpcMethod.Name + " 的末参必须是 TtCallContext");
                                             for (int n = 0; n < method.ParameterList.Parameters.Count - 1; n++)
                                             {
                                                 var a = method.ParameterList.Parameters[n];
@@ -261,7 +217,7 @@ namespace CSharpCodeTools
                     {
                         target = "EngineNS.Bricks.Network.RPC.ERunTarget.None";
                         executer = "EngineNS.Bricks.Network.RPC.EExecuter.Root";
-                        foreach (var m in j.ArgumentList.Arguments)
+                        foreach (var m in j.ArgumentList?.Arguments ?? default)
                         {
                             var argName = m.NormalizeWhitespace().ToFullString();
                             if (m.NameEquals != null && m.Expression != null)
@@ -297,28 +253,14 @@ namespace CSharpCodeTools
 
         public static string GetFullName(this ClassDeclarationSyntax source)
         {
-            Contract.Requires(null != source);
-
-            var items = new List<string>();
-            var parent = source.Parent;
-            while (parent.IsKind(SyntaxKind.ClassDeclaration))
+            var items = source.Ancestors().Reverse().Select(node => node switch
             {
-                var parentClass = parent as ClassDeclarationSyntax;
-                Contract.Assert(null != parentClass);
-                items.Add(parentClass.Identifier.Text);
-
-                parent = parent.Parent;
-            }
-
-            var nameSpace = parent as NamespaceDeclarationSyntax;
-            Contract.Assert(null != nameSpace);
-            var sb = new StringBuilder().Append(nameSpace.Name).Append(NAMESPACE_CLASS_DELIMITER);
-            items.Reverse();
-            items.ForEach(i => { sb.Append(i).Append(NESTED_CLASS_DELIMITER); });
-            sb.Append(source.Identifier.Text);
-
-            var result = sb.ToString();
-            return result;
+                BaseNamespaceDeclarationSyntax scope => scope.Name.ToString(),
+                TypeDeclarationSyntax type => type.Identifier.Text + type.TypeParameterList,
+                _ => null
+            }).Where(name => name != null).ToList();
+            items.Add(source.Identifier.Text + source.TypeParameterList);
+            return string.Join(".", items);
         }
     }
 }

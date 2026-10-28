@@ -1,4 +1,6 @@
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.CodeBuilder.MacrossNode;
+using EngineNS.ECS;
 using EngineNS.EGui.Controls;
 using EngineNS.Thread;
 //using Microsoft.Toolkit.HighPerformance;
@@ -292,6 +294,11 @@ namespace EngineNS.IO
             System.Diagnostics.Debug.Assert(false);
             await Thread.TtAsyncDummyClass.DummyFunc();
             return null;
+        }
+        public virtual async Thread.Async.TtTask<bool> CookAsset(params object[] args)
+        {
+            await Thread.TtAsyncDummyClass.DummyFunc();
+            return true;
         }
 
         #region Asset Op

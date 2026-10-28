@@ -2,9 +2,11 @@
   <PropertyGroup>
     <!-- 编译 Survivor.All 生成的 VM 桩源码，产出 Survivor.All.LeanClrStub.dll，部署到 content\LeanCLR\Survivor\ 由引擎自动扫描注册 -->
     <LeanClrHostProject>..\Survivor.All\Survivor.All.csproj</LeanClrHostProject>
+    <!-- VM 桩只消费宿主生成的 LeanCLR 源码，不拥有 RPC/Property/Macross 输出。 -->
+    <TitanConsumeSourceOutputs>false</TitanConsumeSourceOutputs>
     <!-- Plugins\Directory.Build.targets 的 PreBuild 会清空 TtOutputBasePath；与 Survivor.All 共用目录会删掉插件 dll -->
     <TtOutputBasePath>$(TtTitanRoot)binaries\LeanClrStub\$(TtPluginName)\</TtOutputBasePath>
     <OutDir>$(TtOutputBasePath)</OutDir>
   </PropertyGroup>
-  <Import Project="..\..\..\..\BuildScript\LeanClrStub.targets" />
+  <Import Project="..\..\..\..\BuildScript\leanclr\LeanClrStub.targets" />
 </Project>

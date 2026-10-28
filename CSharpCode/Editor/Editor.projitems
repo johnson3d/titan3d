@@ -30,6 +30,17 @@
     <Compile Include="$(MSBuildThisFileDirectory)Forms\AssetReferViewer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\CpuProfiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\EditorSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\TtAndroidBuildPanel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidRepository.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidToolchainDocument.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidContentSpec.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidBuildRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidBuildCommandLine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidBuildLogParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidBuildSession.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidProcessLauncher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidSdkInventory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidDeployCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\FileDialog.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\Inspector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\MaterialInstanceEditor.cs" />

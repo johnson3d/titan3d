@@ -49,27 +49,3 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
         }
     }
 }
-
-
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace EngineNS.Bricks.WorldSimulator.GOAP
-{
-	partial class IActor
-	{
-		public unsafe void macross_OnPickedItem (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, IItem item, IInventory invetory, IItemContain contain) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			OnPickedItem(item, invetory, contain);
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

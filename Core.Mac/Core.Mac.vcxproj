@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM64"><Configuration>Debug</Configuration><Platform>ARM64</Platform></ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64"><Configuration>Release</Configuration><Platform>ARM64</Platform></ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{80E946A7-5C48-4C44-8E6A-2B44B02791BC}</ProjectGuid>
+    <Keyword>MakeFileProj</Keyword><RootNamespace>CoreMac</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType><UseDebugLibraries>true</UseDebugLibraries><PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType><UseDebugLibraries>false</UseDebugLibraries><PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <!-- 只维护模块引用和 IntelliSense；实际编译请在 Mac 使用 CMake。 -->
+  <ImportGroup Label="Shared">
+    <Import Project="..\NativeCode\Base\Base.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Math\Math.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\NextRHI\NextRHI.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\NextRHI\NullDevice\NullDevice.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\NextRHI\Vulkan\Vulkan.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\ImGui\ImGui.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Graphics\Mesh\Mesh.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Graphics\Pipeline\Pipeline.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\Animation\Animation.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\Terrain\Terrain.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\Particle\Particle.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\Canvas\Canvas.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\MathLib\MathLib.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\TextConverter\TextConverter.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\TcpClient\TcpClient.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\ImageDecoder\ImageDecoder.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\Localization\Localization.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\TTStrip\TTStrip.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\DestinyPX\NxMath\NxMath.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\DestinyPX\NxPhysics\NxPhysics.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\Quark\Quark.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\RecastBuilder\RecastBuilder.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\RecastRuntime\RecastRuntime.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\Recast\Recast\Recast.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\Recast\Detour\Detour.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\Recast\DetourCrowd\DetourCrowd.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\Recast\DetourTileCache\DetourTileCache.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\Recast\DebugUtils\DebugUtils.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\Image.Shared\Image.Shared.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\FreeType\FreeType.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\MeshOptimizer\MeshOptimizer.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\EtcLib\EtcLib.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\zstd\zstd.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\zlib\zlib.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\xatlas\xatlas.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\SpirvCross\SpirvCross.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\LeanCLR\LeanCLR.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\LeanCLR\LeanCLR.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\PhysicsCore\PhysicsCore.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\PhysicsCore\NvPhysX5\NvPhysX5.vcxitems" Label="Shared" />
+    <Import Project="..\codegen\Mac\NativeBinder\CodeGen.vcxitems" Label="Shared" Condition="Exists('..\codegen\Mac\NativeBinder\CodeGen.vcxitems')" />
+  </ImportGroup>
+  <PropertyGroup>
+    <NMakeBuildCommandLine>cmd /c "echo Core.Mac: 请在 macOS 使用 cmake -S Core.Mac -B Core.Mac/build -G Ninja &amp; exit /b 1"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>$(NMakeBuildCommandLine)</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>$(NMakeBuildCommandLine)</NMakeCleanCommandLine>
+    <NMakeOutput>$(ProjectDir)..\binaries\debug\Core.Mac.dylib</NMakeOutput>
+    <NMakeIncludeSearchPath>$(ProjectDir);$(ProjectDir)..;$(ProjectDir)../NativeCode;$(ProjectDir)../3rd/native/PhysX5/include;$(ProjectDir)../3rd/native/Vulkan/Include;$(ProjectDir)../3rd/native/Dxc/Include;$(ProjectDir)../3rd/native/eigen-3.4.0;$(ProjectDir)../3rd/native/FreeType/include;$(ProjectDir)../3rd/native/Recast/Recast/Include;$(ProjectDir)../3rd/native/Recast/Detour/Include;$(ProjectDir)../3rd/native/Recast/DetourCrowd/Include;$(ProjectDir)../3rd/native/Recast/DetourTileCache/Include;$(ProjectDir)../3rd/native/Recast/DebugUtils/Include;$(ProjectDir)../3rd/native/LeanCLR/runtime</NMakeIncludeSearchPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <NMakePreprocessorDefinitions>PLATFORM_MAC;PTR_64;VFX_EXPORTS;AS_DLLMODULE;NOMINMAX;_CRT_SECURE_NO_WARNINGS;TINYEXR_USE_MINIZ=0;FT2_BUILD_LIBRARY;LEANCLR_STATIC;_DEBUG</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <NMakePreprocessorDefinitions>PLATFORM_MAC;PTR_64;VFX_EXPORTS;AS_DLLMODULE;NOMINMAX;_CRT_SECURE_NO_WARNINGS;TINYEXR_USE_MINIZ=0;FT2_BUILD_LIBRARY;LEANCLR_STATIC;NDEBUG</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>.;..;../NativeCode;../3rd/native/PhysX5/include;../3rd/native/Vulkan/Include;../3rd/native/Dxc/Include;../3rd/native/eigen-3.4.0;../3rd/native/FreeType/include;../3rd/native/Recast/Recast/Include;../3rd/native/Recast/Detour/Include;../3rd/native/Recast/DetourCrowd/Include;../3rd/native/Recast/DetourTileCache/Include;../3rd/native/Recast/DebugUtils/Include;../3rd/native/LeanCLR/runtime;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PLATFORM_MAC;PTR_64;VFX_EXPORTS;AS_DLLMODULE;NOMINMAX;_CRT_SECURE_NO_WARNINGS;TINYEXR_USE_MINIZ=0;FT2_BUILD_LIBRARY;LEANCLR_STATIC;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>.;..;../NativeCode;../3rd/native/PhysX5/include;../3rd/native/Vulkan/Include;../3rd/native/Dxc/Include;../3rd/native/eigen-3.4.0;../3rd/native/FreeType/include;../3rd/native/Recast/Recast/Include;../3rd/native/Recast/Detour/Include;../3rd/native/Recast/DetourCrowd/Include;../3rd/native/Recast/DetourTileCache/Include;../3rd/native/Recast/DebugUtils/Include;../3rd/native/LeanCLR/runtime;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PLATFORM_MAC;PTR_64;VFX_EXPORTS;AS_DLLMODULE;NOMINMAX;_CRT_SECURE_NO_WARNINGS;TINYEXR_USE_MINIZ=0;FT2_BUILD_LIBRARY;LEANCLR_STATIC;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup><ClInclude Include="pch.h" /><ClInclude Include="generated\TitanMacModules.h" /></ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

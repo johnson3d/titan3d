@@ -382,7 +382,9 @@ namespace EngineNS
             var tmpDir = $"{System.DateTime.Now.Year}_{System.DateTime.Now.Month}_{System.DateTime.Now.Day}_{System.DateTime.Now.Hour}_{System.DateTime.Now.Minute}_{System.DateTime.Now.Second}";
             var tmpFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "dred/" + tmpDir + "/";
             IO.TtFileManager.SureDirectory(tmpFile);
+#if PWindow
             GpuDump.NvAftermath.OnDredDump(arg0, tmpFile);
+#endif
         }
         private static CoreSDK.FDelegate_FOnGpuDeviceRemoved OnGpuDeviceRemoved = NativeOnGpuDeviceRemoved;
         #endregion
@@ -398,7 +400,7 @@ namespace EngineNS
         public void InitConfigs(string cfgFile)
         {
             if (cfgFile == null)
-                cfgFile = FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) + "EngineConfigDX11.jscfg";
+                cfgFile = FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) + "config/engineconfig_windows_dx11.jscfg";
             Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Load Application Config:{cfgFile}");
 
             if (IO.TtFileManager.GetExtName(cfgFile) == ".jscfg")
@@ -439,10 +441,12 @@ namespace EngineNS
         }
         public void InitTypes(string cfgFile, bool bNatvieMemory, bool bLoadPluginModuel)
         {
+#if PWindow
             var clrMgr = CoreCLRManager.GetInstance();
             clrMgr.PauseLog = true;
             clrMgr.Flags = 0xffffffff;//(uint)((1 << (int)EClrLogStringType.ObjectAlloc) | (1 << (int)EClrLogStringType.ObjectsAllocdByClass));
             clrMgr.IsCacheClassLoadFinished = false;
+#endif
 
             IsCLRProfiling = false;
             int IsProfiling = 0;
@@ -469,7 +473,7 @@ namespace EngineNS
 
             //EngineNS.Rtti.TtTypeDescManager.Instance.InitTypes();
             EngineNS.Rtti.TtTypeDescManager.Instance.InitAssembly(this, "System.Private.CoreLib");
-            EngineNS.Rtti.TtTypeDescManager.Instance.InitAssembly(this, "Engine.Window");
+            EngineNS.Rtti.TtTypeDescManager.Instance.InitAssembly(this, typeof(TtEngine).Assembly.GetName().Name);
 
             foreach(var assembly in Config.TypeAssemblies)
             {
@@ -823,34 +827,3 @@ namespace EngineNS
         }
     }
 }
-
-
-
-
-
-
-
-
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace EngineNS
-{
-	partial class TtEngine
-	{
-		public static unsafe RName macross_GetRName (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name, RName.ERNameType type) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			var _return_value = GetRName(name, type);
-			return _return_value;
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

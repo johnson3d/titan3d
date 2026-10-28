@@ -9,5 +9,5 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <!-- 部署到 content\LeanCLR 根目录，VM 启动以扫到本程序集为准 -->
-  <Import Project="..\..\BuildScript\LeanClrDeploy.targets" />
+  <Import Project="..\..\BuildScript\leanclr\LeanClrDeploy.targets" />
 </Project>

@@ -158,10 +158,9 @@ namespace CSharpCodeTools.Macross
             //}
             NewLine();
 
-            AddLine($"namespace {this.Namespace}");
-            PushBrackets();
+            BeginNamespaceAndOuter();
             {
-                AddLine($"partial class {this.Name}");
+                AddLine(PartialDeclaration());
                 PushBrackets();
                 {
                     foreach (var i in Functions)
@@ -184,23 +183,8 @@ namespace CSharpCodeTools.Macross
                         var funName = i.GetDefineString(this);
                         string constraint = "";
                         string genericDef = "";
-                        if (i.IsGeneric)
-                        {
-                            genericDef = "<";
-                            foreach (var j in i.MethodSyntax.ConstraintClauses)
-                            {
-                                if (genericDef == "<")
-                                {
-                                    genericDef += j.Name.ToString();
-                                }
-                                else
-                                {
-                                    genericDef += "," + j.Name.ToString();
-                                }
-                                constraint += j.ToString() + " ";
-                            }
-                            genericDef += ">";
-                        }
+                        genericDef = i.MethodSyntax.TypeParameterList?.ToString() ?? "";
+                        constraint = string.Join(" ", i.MethodSyntax.ConstraintClauses);
                         
                         //AddLine($"private static EngineNS.Macross.TtMacrossBreak macross_break_{i.MethodSyntax.Identifier.Text}_{i.GetParameterHashCode()} = new EngineNS.Macross.TtMacrossBreak(\"{funName}\");");
                         if (i.ParamenterCount > 0)
@@ -241,9 +225,9 @@ namespace CSharpCodeTools.Macross
                                 i.MethodSyntax.ReturnType.ToString() == "TtTask")
                             {
                                 if (isAsync)
-                                    AddLine($"await {i.MethodSyntax.Identifier.Text}({i.GetParameterCallee()});");
+                                    AddLine($"await {i.MethodSyntax.Identifier.Text}{genericDef}({i.GetParameterCallee()});");
                                 else
-                                    AddLine($"{i.MethodSyntax.Identifier.Text}({i.GetParameterCallee()});");
+                                    AddLine($"{i.MethodSyntax.Identifier.Text}{genericDef}({i.GetParameterCallee()});");
                             }
                             else
                             {
@@ -287,7 +271,7 @@ namespace CSharpCodeTools.Macross
                 }
                 PopBrackets();
             }
-            PopBrackets();
+            EndNamespaceAndOuter();
 
             //var file = dir + "/" + FullName + ".macross.cs";
             //if (!UMacrossClassManager.Instance.WritedFiles.Contains(file.Replace("\\", "/").ToLower()))

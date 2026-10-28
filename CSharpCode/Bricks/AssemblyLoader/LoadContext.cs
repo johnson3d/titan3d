@@ -19,7 +19,15 @@ namespace EngineNS.Bricks.AssemblyLoader
         // main plugin assembly.
         private AssemblyDependencyResolver _resolver;
 
-        public TtLoadContext(string pluginPath) : base(isCollectible: true)
+        // Android 的 Mono 运行时既不支持可回收 ALC 的卸载，也不做插件热重载；
+        // 用非可回收上下文装载，避免第一次加载就被判为不可卸载。
+        public TtLoadContext(string pluginPath) : base(
+#if PAndroid
+            isCollectible: false
+#else
+            isCollectible: true
+#endif
+        )
         {
             _resolver = new AssemblyDependencyResolver(pluginPath);
         }
@@ -438,6 +446,10 @@ namespace EngineNS.Bricks.AssemblyLoader
             if (ModuleSate == EPluginModuleState.Unloaded)
                 return true;
 
+            // 非可回收上下文永远不能卸载；直接拒绝，不伪造成功，也不去等待 GC。
+            if (mLoader?.Target is TtLoadContext active && !active.IsCollectible)
+                return false;
+
             UnloadImpl(bUnregAssembly);
 
             for (int i = 0; mLoader.IsAlive; i++)
@@ -542,6 +554,9 @@ namespace EngineNS.Bricks.AssemblyLoader
                     break;
                 case EPlatformType.PLTF_Android:
                     PlatformSuffix = ".Android.dll";
+                    break;
+                case EPlatformType.PLTF_Mac:
+                    PlatformSuffix = ".Mac.dll";
                     break;
             }
 

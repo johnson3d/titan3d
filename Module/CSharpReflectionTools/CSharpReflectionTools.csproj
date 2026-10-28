@@ -1,0 +1,38 @@
+<Project>
+  <!-- 反射宿主按平台隔离 obj；必须在 SDK props 之前确定中间目录。 -->
+  <PropertyGroup>
+    <TitanPlatform Condition="'$(TitanPlatform)' == '' and $([MSBuild]::IsOSPlatform('OSX'))">Mac</TitanPlatform>
+    <TitanPlatform Condition="'$(TitanPlatform)' == ''">Windows</TitanPlatform>
+    <BaseIntermediateOutputPath>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..', 'intermediate', 'csharp', 'tools', 'CSharpReflectionTools', '$(TitanPlatform)'))</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <Import Project="../../BuildScript/msbuild/TitanManagedProject.props" />
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <OutputPath>$(TtTitanRoot)binaries/Tools/Reflection/$(TitanPlatform)/$(Configuration)/</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 只引用父构建已经编译完成的真实平台引擎，不导入共享源码，也不经 ProjectReference 重建引擎。 -->
+    <Reference Include="$(TitanEngineAssemblyName)">
+      <HintPath>$(TitanEngineAssemblyPath)</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <AssemblyMetadata Include="TitanPlatform" Value="$(TitanPlatform)" />
+    <!-- 平台能力源码属于引擎工程；宿主只编译自身源码，避免与引擎内同名类型重复。 -->
+    <Compile Remove="$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', '..', '..', 'Core.Mac', 'generated', 'TitanMacCapabilities.cs'))" />
+    <Compile Remove="$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', '..', '..', 'Core.Android', 'generated', 'TitanAndroidCapabilities.cs'))" />
+  </ItemGroup>
+
+  <Target Name="TitanValidateReflectionHostEngine" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="'$(TitanPlatform)' != 'Windows' and '$(TitanPlatform)' != 'Mac' and '$(TitanPlatform)' != 'Android'" Text="TitanPlatform must be Windows, Mac or Android, got '$(TitanPlatform)'." />
+    <Error Condition="!Exists('$(TitanEngineAssemblyPath)')" Text="反射宿主需要已构建的 $(TitanEngineAssemblyName)：$(TitanEngineAssemblyPath)" />
+  </Target>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

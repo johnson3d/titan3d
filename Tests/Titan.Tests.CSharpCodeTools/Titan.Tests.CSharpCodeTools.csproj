@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NUnit" />
+    <PackageReference Include="NUnit3TestAdapter" PrivateAssets="all" />
+    <PackageReference Include="NUnit.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="JunitXml.TestLogger" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Module/CSharpCodeTools/CSharpCodeTools.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- 宿主的参数、插件选择和增量状态只依赖 BCL，可不加载引擎直接测试。 -->
+    <Compile Include="../../Module/CSharpReflectionTools/ReflectionHostOptions.cs" Link="CSharpReflectionTools/ReflectionHostOptions.cs" />
+    <!-- 内容安装器同样只依赖 BCL：直接编同一份源码，不引入 MAUI/Android 目标框架。 -->
+    <Compile Include="../../Module/AloneGame.Maui/Services/TitanContentInstaller.cs" Link="AloneGame.Maui/TitanContentInstaller.cs" />
+    <!-- Android 构建面板的纯逻辑只依赖 BCL 与 System.Text.Json，直接链接源文件单测。 -->
+    <Compile Include="../../CSharpCode/Editor/AndroidBuild/TtAndroidRepository.cs" Link="Editor/AndroidBuild/TtAndroidRepository.cs" />
+    <Compile Include="../../CSharpCode/Editor/AndroidBuild/TtAndroidToolchainDocument.cs" Link="Editor/AndroidBuild/TtAndroidToolchainDocument.cs" />
+    <Compile Include="../../CSharpCode/Editor/AndroidBuild/TtAndroidContentSpec.cs" Link="Editor/AndroidBuild/TtAndroidContentSpec.cs" />
+    <Compile Include="../../CSharpCode/Editor/AndroidBuild/TtAndroidBuildRequest.cs" Link="Editor/AndroidBuild/TtAndroidBuildRequest.cs" />
+    <Compile Include="../../CSharpCode/Editor/AndroidBuild/TtAndroidBuildCommandLine.cs" Link="Editor/AndroidBuild/TtAndroidBuildCommandLine.cs" />
+    <Compile Include="../../CSharpCode/Editor/AndroidBuild/TtAndroidBuildLogParser.cs" Link="Editor/AndroidBuild/TtAndroidBuildLogParser.cs" />
+    <Compile Include="../../CSharpCode/Editor/AndroidBuild/TtAndroidBuildSession.cs" Link="Editor/AndroidBuild/TtAndroidBuildSession.cs" />
+    <Compile Include="../../CSharpCode/Editor/AndroidBuild/TtAndroidSdkInventory.cs" Link="Editor/AndroidBuild/TtAndroidSdkInventory.cs" />
+    <Compile Include="../../CSharpCode/Editor/AndroidBuild/TtAndroidDeployCommand.cs" Link="Editor/AndroidBuild/TtAndroidDeployCommand.cs" />
+  </ItemGroup>
+</Project>

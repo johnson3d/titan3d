@@ -75,7 +75,7 @@ namespace EngineNS.Plugins.GameTasks
         {
             return "GameTask";
         }
-        public override async Thread.Async.TtTask<IO.IAsset> LoadAsset(params object[] args)
+        public override async Thread.Async.TtTask<IO.IAsset> GetAsset(params object[] args)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
             return ((UGameTaskPlugin)TtPluginLoader.mPluginObject).TaskDescriptorManager.FindDescriptor(GetAssetName());

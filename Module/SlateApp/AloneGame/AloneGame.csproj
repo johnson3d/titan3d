@@ -1,5 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- 平台选择必须先于 SDK 属性求值；引擎引用由 TitanEngineProject 按 TitanPlatform 解析。 -->
+  <Import Project="../../../BuildScript/msbuild/TitanManagedProject.props" />
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
@@ -11,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Engine.Window\Engine.Window.csproj" />
+    <ProjectReference Include="$(TitanEngineProject)" />
   </ItemGroup>
 
 </Project>

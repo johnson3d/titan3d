@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace ProjectCooker.Command
 {
+#if PWindow
     class TtStartDS : TtCookCommand
     {
         public override async EngineNS.Thread.Async.TtTask<int> ExecuteCommand(string[] args)
@@ -18,4 +19,5 @@ namespace ProjectCooker.Command
             return 0;
         }
     }
+#endif
 }

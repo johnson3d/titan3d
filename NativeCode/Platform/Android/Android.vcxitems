@@ -18,5 +18,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)PlatformAndroid.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)MetisStub.cpp" />
   </ItemGroup>
 </Project>

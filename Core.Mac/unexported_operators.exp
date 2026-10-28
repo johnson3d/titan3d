@@ -1,0 +1,13 @@
+# 标准 C++ operator new/delete 不导出：libc++ 的同名符号是弱符号，
+# 强导出会被 dyld 合并选中，劫持 Metal/AppKit 等框架的 new/delete，
+# 造成全进程堆错配（AGXMetalG17G 的 MTLCopyAllDevices 首个受害者）。
+# 引擎内部引用在静态链接期已绑定本地定义，不受导出表影响。
+__Znwm
+__Znam
+__ZdlPv
+__ZdlPvm
+__ZdaPv
+__ZnwmRKSt9nothrow_t
+__ZnamRKSt9nothrow_t
+__ZdlPvRKSt9nothrow_t
+__ZdaPvRKSt9nothrow_t

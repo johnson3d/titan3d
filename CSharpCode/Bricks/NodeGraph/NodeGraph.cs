@@ -2239,28 +2239,3 @@ namespace EngineNS.Bricks.NodeGraph
         public virtual void SetConfigUnionNode(IUnionNode node) { }
     }
 }
-
-
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace EngineNS.Bricks.NodeGraph
-{
-	partial class TtNodeGraph
-	{
-		public unsafe TtNodeBase macross_FindFirstNode (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, string name, bool findInSubGraphs) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			var _return_value = FindFirstNode(name, findInSubGraphs);
-			return _return_value;
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

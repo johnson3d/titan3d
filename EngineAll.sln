@@ -83,6 +83,7 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Procedure", "CSharpCode\Bri
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Window", "Module\Engine.Window\Engine.Window.csproj", "{0D4FC498-20F3-445F-8F8A-43CBE8891938}"
 	ProjectSection(ProjectDependencies) = postProject
+		{AD0E23E3-ECA5-4E52-B69D-BB6E669C48C6} = {AD0E23E3-ECA5-4E52-B69D-BB6E669C48C6}
 		{9536C797-8D72-4B0D-BE38-BD1EA4A2FC97} = {9536C797-8D72-4B0D-BE38-BD1EA4A2FC97}
 	EndProjectSection
 EndProject
@@ -120,6 +121,8 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Sequencer", "CSharpCode\Bricks\Sequencer\Sequencer.shproj", "{135ED5F5-BD8E-41B6-9459-8EEB18343ECA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpCodeTools", "Module\CSharpCodeTools\CSharpCodeTools.csproj", "{9536C797-8D72-4B0D-BE38-BD1EA4A2FC97}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpReflectionTools", "Module\CSharpReflectionTools\CSharpReflectionTools.csproj", "{72645E87-9AC2-4475-870F-A5C05F281E54}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CodeCompiler", "CSharpCode\Bricks\CodeCompiler\CodeCompiler.shproj", "{9A454650-729C-496E-BAE4-71B863EA036E}"
 EndProject
@@ -316,8 +319,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RpcCaller", "RpcCaller", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RpcCaller.Window", "Plugins\RpcCaller\RpcCaller.Window\RpcCaller.Window.csproj", "{AF942B2C-A649-4A96-834E-3B2A3588C7BB}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "EngineRPC", "codegen\Rpc\Engine\EngineRPC.shproj", "{E25AF610-5AD0-4646-B7EE-0FBBAB8DFD5D}"
-EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "RpcCaller", "Plugins\RpcCaller\RpcCaller\RpcCaller.shproj", "{783D5FC1-27AF-45FE-9041-D7C621E49223}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SourceGit", "SourceGit", "{58AE2A47-114C-4C10-B95D-DCA4B4610D72}"
@@ -365,7 +366,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PythonRuntime", "NativeCode
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "JitherOpenEXR", "3rd\csharp\JitherOpenEXR\JitherOpenEXR.shproj", "{B1766C5B-0A9B-442E-A42D-39AE93B6FDF2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crnlib.2008", "3rd\native\crunch\crnlib\crnlib.2008.vcxproj", "{CF2E70E8-7133-4D96-92C7-68BB406C0664}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crnlib", "3rd\native\crunch\crnlib\crnlib.2008.vcxproj", "{CF2E70E8-7133-4D96-92C7-68BB406C0664}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "VirtualShadowMaps", "CSharpCode\Bricks\VirtualShadowMaps\VirtualShadowMaps.shproj", "{91C46B9C-A9C1-4AB1-9C41-E493041E9244}"
 EndProject
@@ -567,9 +568,81 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildScript", "BuildScript", "{655071C1-7C02-45CB-ABF9-B291A4A153F2}"
 	ProjectSection(SolutionItems) = preProject
 		BuildScript\build.ps1 = BuildScript\build.ps1
-		BuildScript\common.ps1 = BuildScript\common.ps1
-		BuildScript\dependencies.json = BuildScript\dependencies.json
-		BuildScript\deps.ps1 = BuildScript\deps.ps1
+		BuildScript\test.ps1 = BuildScript\test.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "android", "android", "{6A1D3E10-1C01-4C01-9A01-000000000001}"
+	ProjectSection(SolutionItems) = preProject
+		BuildScript\android\AndroidToolchain.example.json = BuildScript\android\AndroidToolchain.example.json
+		BuildScript\android\AndroidTools.ps1 = BuildScript\android\AndroidTools.ps1
+		BuildScript\android\build-android.ps1 = BuildScript\android\build-android.ps1
+		BuildScript\android\Stage-AndroidContent.ps1 = BuildScript\android\Stage-AndroidContent.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "check", "check", "{6A1D3E10-1C01-4C01-9A01-000000000002}"
+	ProjectSection(SolutionItems) = preProject
+		BuildScript\check\check-android-toolchain.ps1 = BuildScript\check\check-android-toolchain.ps1
+		BuildScript\check\Check-NativeLongTypes.ps1 = BuildScript\check\Check-NativeLongTypes.ps1
+		BuildScript\check\deps.ps1 = BuildScript\check\deps.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cmake", "cmake", "{6A1D3E10-1C01-4C01-9A01-000000000003}"
+	ProjectSection(SolutionItems) = preProject
+		BuildScript\cmake\TitanBuildLayout.cmake = BuildScript\cmake\TitanBuildLayout.cmake
+		BuildScript\cmake\TitanCodegen.cmake = BuildScript\cmake\TitanCodegen.cmake
+		BuildScript\cmake\TitanCodegenGen.cmake = BuildScript\cmake\TitanCodegenGen.cmake
+		BuildScript\cmake\TitanPlatformContext.cmake = BuildScript\cmake\TitanPlatformContext.cmake
+		BuildScript\cmake\TitanProjectMetadata.cmake = BuildScript\cmake\TitanProjectMetadata.cmake
+		BuildScript\cmake\TitanRefreshSources.cmake = BuildScript\cmake\TitanRefreshSources.cmake
+		BuildScript\cmake\TitanSourceList.cmake = BuildScript\cmake\TitanSourceList.cmake
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{6A1D3E10-1C01-4C01-9A01-000000000004}"
+	ProjectSection(SolutionItems) = preProject
+		BuildScript\common\common.ps1 = BuildScript\common\common.ps1
+		BuildScript\common\dependencies.json = BuildScript\common\dependencies.json
+		BuildScript\common\SolutionTools.ps1 = BuildScript\common\SolutionTools.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "leanclr", "leanclr", "{6A1D3E10-1C01-4C01-9A01-000000000005}"
+	ProjectSection(SolutionItems) = preProject
+		BuildScript\leanclr\build-leanclr.ps1 = BuildScript\leanclr\build-leanclr.ps1
+		BuildScript\leanclr\LeanClrDeploy.targets = BuildScript\leanclr\LeanClrDeploy.targets
+		BuildScript\leanclr\LeanClrPlugin.targets = BuildScript\leanclr\LeanClrPlugin.targets
+		BuildScript\leanclr\LeanClrStub.targets = BuildScript\leanclr\LeanClrStub.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "msbuild", "msbuild", "{6A1D3E10-1C01-4C01-9A01-000000000006}"
+	ProjectSection(SolutionItems) = preProject
+		BuildScript\msbuild\TitanCodeGen.targets = BuildScript\msbuild\TitanCodeGen.targets
+		BuildScript\msbuild\TitanDataCopyer.targets = BuildScript\msbuild\TitanDataCopyer.targets
+		BuildScript\msbuild\TitanManagedEngine.props = BuildScript\msbuild\TitanManagedEngine.props
+		BuildScript\msbuild\TitanManagedProject.props = BuildScript\msbuild\TitanManagedProject.props
+		BuildScript\msbuild\TitanPlatform.props = BuildScript\msbuild\TitanPlatform.props
+		BuildScript\msbuild\TitanSourceInputs.targets = BuildScript\msbuild\TitanSourceInputs.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scaffold", "scaffold", "{6A1D3E10-1C01-4C01-9A01-000000000007}"
+	ProjectSection(SolutionItems) = preProject
+		BuildScript\scaffold\New-LeanClrStub.ps1 = BuildScript\scaffold\New-LeanClrStub.ps1
+		BuildScript\scaffold\New-TitanPlugin.ps1 = BuildScript\scaffold\New-TitanPlugin.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{6A1D3E10-1C01-4C01-9A01-000000000008}"
+	ProjectSection(SolutionItems) = preProject
+		BuildScript\tests\AndroidBuild.Tests.ps1 = BuildScript\tests\AndroidBuild.Tests.ps1
+		BuildScript\tests\AndroidToolchain.Tests.ps1 = BuildScript\tests\AndroidToolchain.Tests.ps1
+		BuildScript\tests\BuildScriptLayout.Tests.ps1 = BuildScript\tests\BuildScriptLayout.Tests.ps1
+		BuildScript\tests\EngineConfigLayout.Tests.ps1 = BuildScript\tests\EngineConfigLayout.Tests.ps1
+		BuildScript\tests\LeanClrBuild.Tests.ps1 = BuildScript\tests\LeanClrBuild.Tests.ps1
+		BuildScript\tests\LeanClrStubScaffold.Tests.ps1 = BuildScript\tests\LeanClrStubScaffold.Tests.ps1
+		BuildScript\tests\NativeLongTypes.Tests.ps1 = BuildScript\tests\NativeLongTypes.Tests.ps1
+		BuildScript\tests\TitanPluginScaffold.Tests.ps1 = BuildScript\tests\TitanPluginScaffold.Tests.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{6A1D3E10-1C01-4C01-9A01-000000000009}"
+	ProjectSection(SolutionItems) = preProject
+		BuildScript\cmake\tests\titan_cmake_tests.cmake = BuildScript\cmake\tests\titan_cmake_tests.cmake
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BlenderImporter", "BlenderImporter", "{A75388A8-6F39-45BB-8038-8CB07E0CE585}"
@@ -581,23 +654,22 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlenderImporter.Window", "P
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EngineConfig", "EngineConfig", "{7B9584F6-DF19-4534-8F85-1EF3F782E876}"
 	ProjectSection(SolutionItems) = preProject
-		content\alonegame.jscfg = content\alonegame.jscfg
-		content\appbrickmanager.jscfg = content\appbrickmanager.jscfg
-		content\applocalization.jscfg = content\applocalization.jscfg
-		content\apptracer.jscfg = content\apptracer.jscfg
-		content\engineconfigdx11.jscfg = content\engineconfigdx11.jscfg
-		content\engineconfigdx12.jscfg = content\engineconfigdx12.jscfg
-		content\engineconfigforcook.jscfg = content\engineconfigforcook.jscfg
-		content\engineconfigforrootserver.jscfg = content\engineconfigforrootserver.jscfg
-		content\engineconfigvk.jscfg = content\engineconfigvk.jscfg
-		content\slateapp.jscfg = content\slateapp.jscfg
+		content\config\engineconfig_android_smoke.jscfg = content\config\engineconfig_android_smoke.jscfg
+		content\config\engineconfig_mac_cmd.jscfg = content\config\engineconfig_mac_cmd.jscfg
+		content\config\engineconfig_mac_vk.jscfg = content\config\engineconfig_mac_vk.jscfg
+		content\config\engineconfig_windows_alonegame.jscfg = content\config\engineconfig_windows_alonegame.jscfg
+		content\config\engineconfig_windows_brickmanager.jscfg = content\config\engineconfig_windows_brickmanager.jscfg
+		content\config\engineconfig_windows_cook.jscfg = content\config\engineconfig_windows_cook.jscfg
+		content\config\engineconfig_windows_dx11.jscfg = content\config\engineconfig_windows_dx11.jscfg
+		content\config\engineconfig_windows_dx12.jscfg = content\config\engineconfig_windows_dx12.jscfg
+		content\config\engineconfig_windows_localization.jscfg = content\config\engineconfig_windows_localization.jscfg
+		content\config\engineconfig_windows_rootserver.jscfg = content\config\engineconfig_windows_rootserver.jscfg
+		content\config\engineconfig_windows_slateapp.jscfg = content\config\engineconfig_windows_slateapp.jscfg
+		content\config\engineconfig_windows_tracer.jscfg = content\config\engineconfig_windows_tracer.jscfg
+		content\config\engineconfig_windows_vk.jscfg = content\config\engineconfig_windows_vk.jscfg
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{248F27CD-7D18-4E2F-BB3C-890DE6F4942C}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CodeGen", "codegen\NativeBinder\CodeGen.vcxitems", "{7B7B0D28-CD9D-4E61-8B18-7D5D0EDCF0AD}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CodeGenCSharp", "codegen\NativeBinder\CodeGenCSharp.shproj", "{CBEC1EAE-ECA1-4442-935F-0D923ABA94B9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
 EndProject
@@ -625,9 +697,23 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titan.Tests.LeanCLR.HostGam
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titan.Tests.LeanCLR.Patch", "Tests\Titan.Tests.LeanCLR.Patch\Titan.Tests.LeanCLR.Patch.csproj", "{B6AF837A-92EB-4438-8522-A685FEFFC174}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Module", "Module", "{8B5F1146-71F5-B789-E571-DCFF4CD75A63}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LeanClr", "LeanClr", "{8B5F1146-71F5-B789-E571-DCFF4CD75A63}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameProject.Patch", "Module\GameProject.Patch\GameProject.Patch.csproj", "{E59D7BC5-1F8E-492B-BC95-B836092FEB37}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titan.Tests.CppWeaving", "Tests\Titan.Tests.CppWeaving\Titan.Tests.CppWeaving.csproj", "{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core.Mac", "Core.Mac\Core.Mac.vcxproj", "{80E946A7-5C48-4C44-8E6A-2B44B02791BC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Mac", "Module\Engine.Mac\Engine.Mac.csproj", "{C9407BB7-F57E-46C8-BA6E-04F303DA50B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titan.Tests.CSharpCodeTools", "Tests\Titan.Tests.CSharpCodeTools\Titan.Tests.CSharpCodeTools.csproj", "{DA496643-0972-4C16-8F89-C692F93845E6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AloneGame.Maui", "Module\AloneGame.Maui\AloneGame.Maui.csproj", "{64549C06-AD3D-6A64-F65D-427FEDC7348F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Platform", "Platform", "{800C423E-A8B8-454A-B963-8EC33AA8FB20}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CodeTools", "CodeTools", "{389897D9-A9AB-403D-B3A7-AF814D5A6A69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -732,6 +818,15 @@ Global
 		{9536C797-8D72-4B0D-BE38-BD1EA4A2FC97}.Release|x64.Build.0 = Release|Any CPU
 		{9536C797-8D72-4B0D-BE38-BD1EA4A2FC97}.Release|x86.ActiveCfg = Release|Any CPU
 		{9536C797-8D72-4B0D-BE38-BD1EA4A2FC97}.Release|x86.Build.0 = Release|Any CPU
+		{72645E87-9AC2-4475-870F-A5C05F281E54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72645E87-9AC2-4475-870F-A5C05F281E54}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{72645E87-9AC2-4475-870F-A5C05F281E54}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{72645E87-9AC2-4475-870F-A5C05F281E54}.DebugOnlyCS|Any CPU.ActiveCfg = Debug|Any CPU
+		{72645E87-9AC2-4475-870F-A5C05F281E54}.DebugOnlyCS|x64.ActiveCfg = Debug|Any CPU
+		{72645E87-9AC2-4475-870F-A5C05F281E54}.DebugOnlyCS|x86.ActiveCfg = Debug|Any CPU
+		{72645E87-9AC2-4475-870F-A5C05F281E54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72645E87-9AC2-4475-870F-A5C05F281E54}.Release|x64.ActiveCfg = Release|Any CPU
+		{72645E87-9AC2-4475-870F-A5C05F281E54}.Release|x86.ActiveCfg = Release|Any CPU
 		{C88C6D79-B722-489E-BCA2-0E5309C0CECD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C88C6D79-B722-489E-BCA2-0E5309C0CECD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C88C6D79-B722-489E-BCA2-0E5309C0CECD}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -1499,6 +1594,79 @@ Global
 		{E59D7BC5-1F8E-492B-BC95-B836092FEB37}.Release|x64.Build.0 = Release|Any CPU
 		{E59D7BC5-1F8E-492B-BC95-B836092FEB37}.Release|x86.ActiveCfg = Release|Any CPU
 		{E59D7BC5-1F8E-492B-BC95-B836092FEB37}.Release|x86.Build.0 = Release|Any CPU
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}.Debug|x64.Build.0 = Debug|Any CPU
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}.Debug|x86.Build.0 = Debug|Any CPU
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}.DebugOnlyCS|Any CPU.ActiveCfg = Debug|Any CPU
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}.DebugOnlyCS|Any CPU.Build.0 = Debug|Any CPU
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}.DebugOnlyCS|x64.ActiveCfg = Debug|Any CPU
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}.DebugOnlyCS|x64.Build.0 = Debug|Any CPU
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}.DebugOnlyCS|x86.ActiveCfg = Debug|Any CPU
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}.DebugOnlyCS|x86.Build.0 = Debug|Any CPU
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}.Release|x64.ActiveCfg = Release|Any CPU
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}.Release|x64.Build.0 = Release|Any CPU
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}.Release|x86.ActiveCfg = Release|Any CPU
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6}.Release|x86.Build.0 = Release|Any CPU
+		{80E946A7-5C48-4C44-8E6A-2B44B02791BC}.Debug|Any CPU.ActiveCfg = Debug|ARM64
+		{80E946A7-5C48-4C44-8E6A-2B44B02791BC}.Debug|x64.ActiveCfg = Debug|ARM64
+		{80E946A7-5C48-4C44-8E6A-2B44B02791BC}.Debug|x86.ActiveCfg = Debug|ARM64
+		{80E946A7-5C48-4C44-8E6A-2B44B02791BC}.DebugOnlyCS|Any CPU.ActiveCfg = Debug|ARM64
+		{80E946A7-5C48-4C44-8E6A-2B44B02791BC}.DebugOnlyCS|x64.ActiveCfg = Debug|ARM64
+		{80E946A7-5C48-4C44-8E6A-2B44B02791BC}.DebugOnlyCS|x86.ActiveCfg = Debug|ARM64
+		{80E946A7-5C48-4C44-8E6A-2B44B02791BC}.Release|Any CPU.ActiveCfg = Release|ARM64
+		{80E946A7-5C48-4C44-8E6A-2B44B02791BC}.Release|x64.ActiveCfg = Release|ARM64
+		{80E946A7-5C48-4C44-8E6A-2B44B02791BC}.Release|x86.ActiveCfg = Release|ARM64
+		{C9407BB7-F57E-46C8-BA6E-04F303DA50B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9407BB7-F57E-46C8-BA6E-04F303DA50B1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C9407BB7-F57E-46C8-BA6E-04F303DA50B1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C9407BB7-F57E-46C8-BA6E-04F303DA50B1}.DebugOnlyCS|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9407BB7-F57E-46C8-BA6E-04F303DA50B1}.DebugOnlyCS|x64.ActiveCfg = Debug|Any CPU
+		{C9407BB7-F57E-46C8-BA6E-04F303DA50B1}.DebugOnlyCS|x86.ActiveCfg = Debug|Any CPU
+		{C9407BB7-F57E-46C8-BA6E-04F303DA50B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9407BB7-F57E-46C8-BA6E-04F303DA50B1}.Release|x64.ActiveCfg = Release|Any CPU
+		{C9407BB7-F57E-46C8-BA6E-04F303DA50B1}.Release|x86.ActiveCfg = Release|Any CPU
+		{DA496643-0972-4C16-8F89-C692F93845E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA496643-0972-4C16-8F89-C692F93845E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA496643-0972-4C16-8F89-C692F93845E6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DA496643-0972-4C16-8F89-C692F93845E6}.Debug|x64.Build.0 = Debug|Any CPU
+		{DA496643-0972-4C16-8F89-C692F93845E6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DA496643-0972-4C16-8F89-C692F93845E6}.Debug|x86.Build.0 = Debug|Any CPU
+		{DA496643-0972-4C16-8F89-C692F93845E6}.DebugOnlyCS|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA496643-0972-4C16-8F89-C692F93845E6}.DebugOnlyCS|Any CPU.Build.0 = Debug|Any CPU
+		{DA496643-0972-4C16-8F89-C692F93845E6}.DebugOnlyCS|x64.ActiveCfg = Debug|Any CPU
+		{DA496643-0972-4C16-8F89-C692F93845E6}.DebugOnlyCS|x64.Build.0 = Debug|Any CPU
+		{DA496643-0972-4C16-8F89-C692F93845E6}.DebugOnlyCS|x86.ActiveCfg = Debug|Any CPU
+		{DA496643-0972-4C16-8F89-C692F93845E6}.DebugOnlyCS|x86.Build.0 = Debug|Any CPU
+		{DA496643-0972-4C16-8F89-C692F93845E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA496643-0972-4C16-8F89-C692F93845E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA496643-0972-4C16-8F89-C692F93845E6}.Release|x64.ActiveCfg = Release|Any CPU
+		{DA496643-0972-4C16-8F89-C692F93845E6}.Release|x64.Build.0 = Release|Any CPU
+		{DA496643-0972-4C16-8F89-C692F93845E6}.Release|x86.ActiveCfg = Release|Any CPU
+		{DA496643-0972-4C16-8F89-C692F93845E6}.Release|x86.Build.0 = Release|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.Debug|x64.Build.0 = Debug|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.Debug|x86.Build.0 = Debug|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.DebugOnlyCS|Any CPU.ActiveCfg = Debug|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.DebugOnlyCS|Any CPU.Build.0 = Debug|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.DebugOnlyCS|x64.ActiveCfg = Debug|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.DebugOnlyCS|x64.Build.0 = Debug|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.DebugOnlyCS|x86.ActiveCfg = Debug|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.DebugOnlyCS|x86.Build.0 = Debug|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.Release|x64.ActiveCfg = Release|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.Release|x64.Build.0 = Release|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.Release|x86.ActiveCfg = Release|Any CPU
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1538,7 +1706,7 @@ Global
 		{E0AD6C9D-2AF8-43E8-BBB5-8BD96FE1DEE2} = {1BEAD919-8866-4753-B5EE-64ACC9CC2E5B}
 		{6EB3104E-609F-4157-9DD5-5E510D939BF2} = {1BEAD919-8866-4753-B5EE-64ACC9CC2E5B}
 		{10AEE1EB-9CE5-4B81-9973-960D39A80141} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
-		{0D4FC498-20F3-445F-8F8A-43CBE8891938} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
+		{0D4FC498-20F3-445F-8F8A-43CBE8891938} = {800C423E-A8B8-454A-B963-8EC33AA8FB20}
 		{6D8C1A1C-C33F-4034-80C4-4CF08530B3D5} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{D52D7FE3-C34D-4337-9B82-E917F8D29B4C} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{3C885B44-0233-4B59-9E6D-3F5BD2AD67DC} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
@@ -1552,11 +1720,12 @@ Global
 		{78931D6F-319B-4176-9E0D-C4057910315B} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{FD56162E-FCD2-46A7-89FB-E4A0079DFE3E} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{135ED5F5-BD8E-41B6-9459-8EEB18343ECA} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
-		{9536C797-8D72-4B0D-BE38-BD1EA4A2FC97} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
+		{9536C797-8D72-4B0D-BE38-BD1EA4A2FC97} = {389897D9-A9AB-403D-B3A7-AF814D5A6A69}
+		{72645E87-9AC2-4475-870F-A5C05F281E54} = {389897D9-A9AB-403D-B3A7-AF814D5A6A69}
 		{9A454650-729C-496E-BAE4-71B863EA036E} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
-		{C88C6D79-B722-489E-BCA2-0E5309C0CECD} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
+		{C88C6D79-B722-489E-BCA2-0E5309C0CECD} = {389897D9-A9AB-403D-B3A7-AF814D5A6A69}
 		{A415EB90-CF3A-4CBC-BD98-14EED4D0FCD1} = {041F2057-6090-446E-8CEF-D524C973477F}
-		{4B151A28-784F-4ED5-9490-FA959B23C9E0} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
+		{4B151A28-784F-4ED5-9490-FA959B23C9E0} = {389897D9-A9AB-403D-B3A7-AF814D5A6A69}
 		{8DE1FCD5-27C3-4AF6-8FC3-3590240A7A5F} = {892AFF4D-69EA-4061-8F59-320A21A0814A}
 		{5325AAB3-27C6-4B3B-BC33-4A7C1E1272E2} = {5DF48BD8-2DD5-4225-B211-929683D01CB7}
 		{9F919C6F-01E0-4560-9706-7F9CDEA2C1C9} = {041F2057-6090-446E-8CEF-D524C973477F}
@@ -1595,7 +1764,7 @@ Global
 		{F8B576D2-A578-4F55-B513-95BB92ABE489} = {041F2057-6090-446E-8CEF-D524C973477F}
 		{EF01B997-E212-488D-83C0-9F250EB73429} = {4A69F69C-6D09-4798-838A-BCE0C8C785F9}
 		{926CC83F-7D65-49F1-B7A0-95AD346E863A} = {892AFF4D-69EA-4061-8F59-320A21A0814A}
-		{2B57F697-2492-4D3B-859C-7D47E12E6819} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
+		{2B57F697-2492-4D3B-859C-7D47E12E6819} = {800C423E-A8B8-454A-B963-8EC33AA8FB20}
 		{3DA775BF-8DF6-4000-9458-5975DC3377A2} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{A47B5C92-1F0E-4B83-9A6E-CD3F8B7D2E14} = {9DD1EA3E-A1BD-43B5-9F2A-B1AA3DD5F01A}
 		{2D753BA1-FE34-4E01-A68D-61DB69050471} = {4A69F69C-6D09-4798-838A-BCE0C8C785F9}
@@ -1630,7 +1799,6 @@ Global
 		{AD2975EF-E6FA-4559-9D40-FD7960BEC64E} = {006DAA11-6114-4428-B8EC-8F264085C746}
 		{264CFD78-B3C0-42D6-8E6E-26772CA1A864} = {E5CE3791-9C8E-4476-8528-B81DFB5FDDF5}
 		{AF942B2C-A649-4A96-834E-3B2A3588C7BB} = {264CFD78-B3C0-42D6-8E6E-26772CA1A864}
-		{E25AF610-5AD0-4646-B7EE-0FBBAB8DFD5D} = {B1391DAF-2B68-4BD1-9F0B-2A4A15E882E1}
 		{783D5FC1-27AF-45FE-9041-D7C621E49223} = {264CFD78-B3C0-42D6-8E6E-26772CA1A864}
 		{58AE2A47-114C-4C10-B95D-DCA4B4610D72} = {E5CE3791-9C8E-4476-8528-B81DFB5FDDF5}
 		{FE1739B7-4B97-49CA-A7FF-F360F036E475} = {58AE2A47-114C-4C10-B95D-DCA4B4610D72}
@@ -1647,7 +1815,7 @@ Global
 		{A3697CE8-7369-4D92-84E6-6F5667D03C79} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{0BF2A284-4A10-49B3-A4B0-048DF20C0A4D} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{B5A79F1B-B78B-4162-9673-0175692217F7} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
-		{015286DF-5ED8-4FA9-9B45-0E73ED25D3A7} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
+		{015286DF-5ED8-4FA9-9B45-0E73ED25D3A7} = {389897D9-A9AB-403D-B3A7-AF814D5A6A69}
 		{0B0E118D-0C89-4304-8494-B24AAB147A2E} = {1BEAD919-8866-4753-B5EE-64ACC9CC2E5B}
 		{B250DCC4-B510-47BB-9CF4-19CDDE36EFEE} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
 		{D21C4A2F-7C4B-4A5C-BD49-D538D741821D} = {041F2057-6090-446E-8CEF-D524C973477F}
@@ -1719,26 +1887,40 @@ Global
 		{F1A2B3C4-D5E6-4F78-9A0B-C1D2E3F4A5B6} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{D2E3F4A5-B6C7-4D89-0E1F-A2B3C4D5E6F7} = {F1A2B3C4-D5E6-4F78-9A0B-C1D2E3F4A5B6}
 		{B8C4F1A2-5D7E-4B9C-AE3F-2D4A6B8C0D1E} = {F1A2B3C4-D5E6-4F78-9A0B-C1D2E3F4A5B6}
-		{C139E700-C23E-42FF-9581-DC319D48D550} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
+		{C139E700-C23E-42FF-9581-DC319D48D550} = {389897D9-A9AB-403D-B3A7-AF814D5A6A69}
 		{0E150C09-B1D7-4AF3-B402-6F9CC209FBF6} = {9DD1EA3E-A1BD-43B5-9F2A-B1AA3DD5F01A}
+		{6A1D3E10-1C01-4C01-9A01-000000000001} = {655071C1-7C02-45CB-ABF9-B291A4A153F2}
+		{6A1D3E10-1C01-4C01-9A01-000000000002} = {655071C1-7C02-45CB-ABF9-B291A4A153F2}
+		{6A1D3E10-1C01-4C01-9A01-000000000003} = {655071C1-7C02-45CB-ABF9-B291A4A153F2}
+		{6A1D3E10-1C01-4C01-9A01-000000000004} = {655071C1-7C02-45CB-ABF9-B291A4A153F2}
+		{6A1D3E10-1C01-4C01-9A01-000000000005} = {655071C1-7C02-45CB-ABF9-B291A4A153F2}
+		{6A1D3E10-1C01-4C01-9A01-000000000006} = {655071C1-7C02-45CB-ABF9-B291A4A153F2}
+		{6A1D3E10-1C01-4C01-9A01-000000000007} = {655071C1-7C02-45CB-ABF9-B291A4A153F2}
+		{6A1D3E10-1C01-4C01-9A01-000000000008} = {655071C1-7C02-45CB-ABF9-B291A4A153F2}
+		{6A1D3E10-1C01-4C01-9A01-000000000009} = {6A1D3E10-1C01-4C01-9A01-000000000003}
 		{A75388A8-6F39-45BB-8038-8CB07E0CE585} = {E5CE3791-9C8E-4476-8528-B81DFB5FDDF5}
 		{8B1F305F-9E3D-B764-EB64-B746105EA798} = {A75388A8-6F39-45BB-8038-8CB07E0CE585}
-		{7B9584F6-DF19-4534-8F85-1EF3F782E876} = {655071C1-7C02-45CB-ABF9-B291A4A153F2}
-		{7B7B0D28-CD9D-4E61-8B18-7D5D0EDCF0AD} = {B1391DAF-2B68-4BD1-9F0B-2A4A15E882E1}
-		{CBEC1EAE-ECA1-4442-935F-0D923ABA94B9} = {B1391DAF-2B68-4BD1-9F0B-2A4A15E882E1}
 		{7D0B45D4-80EA-4377-B0DA-39B5F2DAB084} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{31207761-6876-4E76-972B-04FF62F8B0CF} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{D06B9194-1F8A-4C86-AF3F-19029EEB9B61} = {041F2057-6090-446E-8CEF-D524C973477F}
 		{4535C758-13C7-9D57-9DA1-EAF0179EB739} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{C30426BC-1164-6FD2-73F7-81437AE9283F} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
-		{71DF3EA5-A824-9750-C7E5-185A3D22564A} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
-		{C85F9710-927B-9A40-1DB3-29CE6D8FD336} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
+		{71DF3EA5-A824-9750-C7E5-185A3D22564A} = {8B5F1146-71F5-B789-E571-DCFF4CD75A63}
+		{C85F9710-927B-9A40-1DB3-29CE6D8FD336} = {8B5F1146-71F5-B789-E571-DCFF4CD75A63}
 		{39C06A67-E689-AB8F-D26A-814B560AD3B6} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{85BFE3D2-A145-3AF4-A92A-FC10BD76BCB0} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{E625906A-4E55-2C0E-13FF-B91B8551ED8A} = {893908DF-998A-4265-80F5-8899A5DDC813}
 		{32612FEF-D5E2-8459-1EB1-526833681DCD} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{B6AF837A-92EB-4438-8522-A685FEFFC174} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{8B5F1146-71F5-B789-E571-DCFF4CD75A63} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
 		{E59D7BC5-1F8E-492B-BC95-B836092FEB37} = {8B5F1146-71F5-B789-E571-DCFF4CD75A63}
+		{4171ED2C-6C82-46F3-8786-F2E92FF5B2C6} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{80E946A7-5C48-4C44-8E6A-2B44B02791BC} = {892AFF4D-69EA-4061-8F59-320A21A0814A}
+		{C9407BB7-F57E-46C8-BA6E-04F303DA50B1} = {800C423E-A8B8-454A-B963-8EC33AA8FB20}
+		{DA496643-0972-4C16-8F89-C692F93845E6} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{64549C06-AD3D-6A64-F65D-427FEDC7348F} = {6B4A4482-77DE-480A-896A-5DAD2AB44780}
+		{800C423E-A8B8-454A-B963-8EC33AA8FB20} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
+		{389897D9-A9AB-403D-B3A7-AF814D5A6A69} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}
@@ -1765,9 +1947,6 @@ Global
 		3rd\csharp\StbImageSharp\StbImageSharp.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		3rd\csharp\StbImageWriteSharp\StbImageWriteSharp.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		3rd\csharp\xxHash\xxHash.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
-		codegen\Macross\Engine\EngineMacross.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
-		codegen\NativeBinder\CodeGenCSharp.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
-		codegen\Serializer\Engine\EngineSerializer.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Base\Base.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\AdvanceShadow\AdvanceShadow.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\AIGC\AIGC.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -1842,37 +2021,46 @@ Global
 		Plugins\GameServer\Level\LevelServer\LevelServer.projitems*{210be2e1-b7a6-4892-815d-b6f2058dd61e}*SharedItemsImports = 5
 		NativeCode\NextRHI\Vulkan\Vulkan.vcxitems*{2508205e-97e6-40b9-9bc1-32e602967674}*SharedItemsImports = 9
 		3rd\native\Recast\DetourCrowd\DetourCrowd.vcxitems*{259a5db5-f6a1-40a1-82b6-6d15da35f99f}*SharedItemsImports = 9
+		3rd\csharp\AstcDecoder\AstcDecoder.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		3rd\csharp\JitherOpenEXR\JitherOpenEXR.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		3rd\csharp\NvTriStrip\NvTriStrip.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		3rd\csharp\Sprache\Sprache.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		3rd\csharp\StbImageSharp\StbImageSharp.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		3rd\csharp\StbImageWriteSharp\StbImageWriteSharp.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		3rd\csharp\xxHash\xxHash.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
-		codegen\Macross\Engine\EngineMacross.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
-		codegen\NativeBinder\CodeGenCSharp.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
-		codegen\Serializer\Engine\EngineSerializer.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Base\Base.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\AdvanceShadow\AdvanceShadow.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\AIGC\AIGC.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Animation\Animation.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\AssemblyLoader\AssemblyLoader.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\AssetImpExp\AssetImpExp.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\BehaviorTree\BehaviorTree.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\CodeBuilder\CodeBuilder.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\CodeCompiler\CodeCompiler.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Collision\Collision.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\CSScripting\CSScripting.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\DataCopyer\DataCopyer.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\DataSet\DataSet.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
-		CSharpCode\Bricks\FBX\FBX.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\DesignMacross\DesignMacross.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\DestinyPX\NxMath\NxMath.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\DestinyPX\NxPhysics\NxPhysics.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\DevIDE\DevIDE.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\DistanceField\DistanceField.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Font\Font.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\FX\Hair\Hair.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\FX\Skin\Skin.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\FX\Water\Water.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\FX\Weather\Weather.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\GI\PRT\PRT.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\GpuDriven\GpuDriven.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\ImageDecoder\ImageDecoder.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Input\Input.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Localization\Localization.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\Meshly\Meshly.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Network\Network.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\NodeGraph\NodeGraph.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Particle\Particle.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\PhysicsCore\PhysicsCore.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
-		CSharpCode\Bricks\Plugins\Plugins.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Procedure\Procedure.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\ProjectGen\ProjectGen.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Recast\Recast.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
@@ -1880,12 +2068,14 @@ Global
 		CSharpCode\Bricks\Sequencer\Sequencer.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\SourceControl\SourceControl.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\StateMachine\StateMachine.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
-		CSharpCode\Bricks\TcpServer\TcpServer.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Terrain\Terrain.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\UI\UI.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\VirtualShadowMaps\VirtualShadowMaps.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\VirtualTexture\VirtualTexture.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\VXGI\VXGI.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\WindowSDL\WindowSDL.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\WorldSimulator\WorldSimulator.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\CompilingGenerator\CompilingGenerator.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Editor\Editor.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\GamePlay\GamePlay.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Grapics\Mesh\Mesh.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
@@ -1944,17 +2134,58 @@ Global
 		NativeCode\Bricks\Canvas\Canvas.vcxitems*{7728662f-e281-4e3b-af11-c2ee3d68bea1}*SharedItemsImports = 9
 		Plugins\RpcCaller\RpcCaller\RpcCaller.projitems*{783d5fc1-27af-45fe-9041-d7c621e49223}*SharedItemsImports = 13
 		CSharpCode\Bricks\Network\Network.projitems*{78931d6f-319b-4176-9e0d-c4057910315b}*SharedItemsImports = 13
-		codegen\NativeBinder\CodeGen.vcxitems*{7b7b0d28-cd9d-4e61-8b18-7d5d0edcf0ad}*SharedItemsImports = 9
 		CSharpCode\Bricks\Terrain\Terrain.projitems*{7b80263d-fa2f-477c-9b3b-0aa4dac27aae}*SharedItemsImports = 13
 		enginecontent\shaders\CoreShader.vcxitems*{7edc3425-c745-477d-906a-69d82cda1283}*SharedItemsImports = 9
 		Plugins\GameServer\Login\LoginServer\LoginServer.projitems*{7f28becc-80b5-41e7-bff7-e10a9f5de596}*SharedItemsImports = 5
 		NativeCode\Math\Math.vcxitems*{7f39f73c-1410-498f-a711-6a13209642e4}*SharedItemsImports = 9
 		NativeCode\Bricks\PhysicsCore\PhysicsCore.vcxitems*{7fdc9cd7-e523-4067-b5ea-0ae6c697a858}*SharedItemsImports = 9
+		3rd\native\EtcLib\EtcLib.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		3rd\native\FreeType\FreeType.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		3rd\native\Image.Shared\Image.Shared.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		3rd\native\LeanCLR\LeanCLR.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		3rd\native\MeshOptimizer\MeshOptimizer.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		3rd\native\Recast\DebugUtils\DebugUtils.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		3rd\native\Recast\DetourCrowd\DetourCrowd.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		3rd\native\Recast\DetourTileCache\DetourTileCache.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		3rd\native\Recast\Detour\Detour.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		3rd\native\Recast\Recast\Recast.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		3rd\native\SpirvCross\SpirvCross.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		3rd\native\xatlas\xatlas.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		3rd\native\zlib\zlib.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		3rd\native\zstd\zstd.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Base\Base.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\Animation\Animation.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\Canvas\Canvas.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\DestinyPX\NxMath\NxMath.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\DestinyPX\NxPhysics\NxPhysics.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\ImageDecoder\ImageDecoder.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\LeanCLR\LeanCLR.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\Localization\Localization.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\MathLib\MathLib.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\Particle\Particle.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\PhysicsCore\NvPhysX5\NvPhysX5.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\PhysicsCore\PhysicsCore.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\Quark\Quark.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\RecastBuilder\RecastBuilder.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\RecastRuntime\RecastRuntime.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\TcpClient\TcpClient.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\Terrain\Terrain.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\TextConverter\TextConverter.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Bricks\TTStrip\TTStrip.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Graphics\Mesh\Mesh.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Graphics\Pipeline\Pipeline.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\ImGui\ImGui.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\Math\Math.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\NextRHI\NextRHI.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\NextRHI\NullDevice\NullDevice.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
+		NativeCode\NextRHI\Vulkan\Vulkan.vcxitems*{80e946a7-5c48-4c44-8e6a-2b44b02791bc}*SharedItemsImports = 4
 		CSharpCode\Bricks\DistanceField\DistanceField.projitems*{8481f1e1-e0ea-4805-95bc-e74c65b16a00}*SharedItemsImports = 13
 		CSharpCode\Bricks\DestinyPX\NxPhysics\NxPhysics.projitems*{8d584d87-62a1-41de-af08-4e4527fe106e}*SharedItemsImports = 13
 		3rd\native\FreeType\FreeType.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\iconv\iconv.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\Image.Shared\Image.Shared.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
+		3rd\native\LeanCLR\LeanCLR.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\MeshOptimizer\MeshOptimizer.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\miniz\miniz.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\Recast\DebugUtils\DebugUtils.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
@@ -1966,18 +2197,22 @@ Global
 		3rd\native\xatlas\xatlas.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\zlib\zlib.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\zstd\zstd.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
-		codegen\Cs2Cpp\cpp\Cs2Cpp.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
-		codegen\NativeBinder\CodeGen.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
+		codegen\Android\NativeBinder\CodeGen.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Base\Base.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\Animation\Animation.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\Canvas\Canvas.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
+		NativeCode\Bricks\DestinyPX\NxMath\NxMath.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
+		NativeCode\Bricks\DestinyPX\NxPhysics\NxPhysics.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
+		NativeCode\Bricks\ImageDecoder\ImageDecoder.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
+		NativeCode\Bricks\LeanCLR\LeanCLR.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\Localization\Localization.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\MathLib\MathLib.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\MeshSimplify\MeshSimplify.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\Particle\Particle.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\PhysicsCore\NvPhysX\NvPhysX.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\PhysicsCore\PhysicsCore.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
+		NativeCode\Bricks\Quark\Quark.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\RecastBuilder\RecastBuilder.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\RecastRuntime\RecastRuntime.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\TcpClient\TcpClient.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
@@ -2007,77 +2242,6 @@ Global
 		NativeCode\ImGui\ImGui.vcxitems*{926cc83f-7d65-49f1-b7a0-95ad346e863a}*SharedItemsImports = 4
 		NativeCode\Math\Math.vcxitems*{926cc83f-7d65-49f1-b7a0-95ad346e863a}*SharedItemsImports = 4
 		NativeCode\NextRHI\NextRHI.vcxitems*{926cc83f-7d65-49f1-b7a0-95ad346e863a}*SharedItemsImports = 4
-		3rd\csharp\AstcDecoder\AstcDecoder.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		3rd\csharp\JitherOpenEXR\JitherOpenEXR.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		3rd\csharp\NvTriStrip\NvTriStrip.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		3rd\csharp\Sprache\Sprache.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		3rd\csharp\StbImageSharp\StbImageSharp.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		3rd\csharp\StbImageWriteSharp\StbImageWriteSharp.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		3rd\csharp\xxHash\xxHash.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		codegen\Macross\Engine\EngineMacross.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		codegen\NativeBinder\CodeGenCSharp.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		codegen\Rpc\Engine\EngineRPC.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		codegen\Serializer\Engine\EngineSerializer.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Base\Base.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\AdvanceShadow\AdvanceShadow.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\AIGC\AIGC.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\Animation\Animation.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\AssemblyLoader\AssemblyLoader.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\AssetImpExp\AssetImpExp.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\BehaviorTree\BehaviorTree.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\CodeBuilder\CodeBuilder.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\CodeCompiler\CodeCompiler.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\Collision\Collision.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\CSScripting\CSScripting.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\DataCopyer\DataCopyer.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\DataSet\DataSet.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\DesignMacross\DesignMacross.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\DestinyPX\NxMath\NxMath.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\DestinyPX\NxPhysics\NxPhysics.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\DevIDE\DevIDE.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\DistanceField\DistanceField.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\FBX\FBX.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\Font\Font.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\FX\Hair\Hair.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\FX\Skin\Skin.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\FX\Water\Water.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\FX\Weather\Weather.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\GI\PRT\PRT.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\GpuDriven\GpuDriven.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\ImageDecoder\ImageDecoder.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\Input\Input.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\Localization\Localization.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\Meshly\Meshly.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\Network\Network.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\NodeGraph\NodeGraph.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\Particle\Particle.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\PhysicsCore\PhysicsCore.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\Procedure\Procedure.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\ProjectGen\ProjectGen.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\PythonRuntime\PythonRuntime.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\Recast\Recast.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\RenderPolicyEditor\RenderPolicyEditor.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\Sequencer\Sequencer.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\SourceControl\SourceControl.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\StateMachine\StateMachine.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\TcpServer\TcpServer.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\Terrain\Terrain.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\UI\UI.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\VirtualShadowMaps\VirtualShadowMaps.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\VirtualTexture\VirtualTexture.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\VXGI\VXGI.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\WindowSDL\WindowSDL.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Bricks\WorldSimulator\WorldSimulator.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\CompilingGenerator\CompilingGenerator.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Editor\Editor.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\GamePlay\GamePlay.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Grapics\Mesh\Mesh.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Grapics\Pipeline\Pipeline.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\ImGui\ImGui.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Math\Math.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\NxRHI\NxRHI.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Platform\Windows\Windows.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
-		CSharpCode\Rtti\Rtti.projitems*{9536c797-8d72-4b0d-be38-bd1ea4a2fc97}*SharedItemsImports = 5
 		NativeCode\NextRHI\NullDevice\NullDevice.vcxitems*{955f58dd-eae0-4dd8-9e4b-cb695020e752}*SharedItemsImports = 9
 		3rd\native\iconv\iconv.vcxitems*{977204fe-461a-4786-b996-f125b5496c61}*SharedItemsImports = 9
 		Plugins\VisualStudioPlugin\VisualStudioPlugin\VisualStudioPlugin.projitems*{978b42a8-a64a-ab99-2368-70b21ca18e1f}*SharedItemsImports = 5
@@ -2109,7 +2273,6 @@ Global
 		3rd\native\xatlas\xatlas.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		3rd\native\zlib\zlib.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		3rd\native\zstd\zstd.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
-		codegen\NativeBinder\CodeGen.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Base\Base.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\Animation\Animation.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\Canvas\Canvas.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
@@ -2150,7 +2313,6 @@ Global
 		NativeCode\Platform\Windows\Windows.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		Plugins\GameServer\Gate\GateServer\GateServer.projitems*{ad2975ef-e6fa-4559-9d40-fd7960bec64e}*SharedItemsImports = 5
 		NativeCode\Bricks\TextureCompress\TextureCompress.vcxitems*{ae238df4-cb91-4cbe-81ea-72c8a2738a33}*SharedItemsImports = 9
-		codegen\Rpc\Engine\EngineRPC.projitems*{af942b2c-a649-4a96-834e-3b2a3588c7bb}*SharedItemsImports = 5
 		Plugins\RpcCaller\RpcCaller\RpcCaller.projitems*{af942b2c-a649-4a96-834e-3b2a3588c7bb}*SharedItemsImports = 5
 		CSharpCode\Bricks\RenderPolicyEditor\RenderPolicyEditor.projitems*{b158ac21-f715-4be5-8827-b147607f90de}*SharedItemsImports = 13
 		3rd\csharp\JitherOpenEXR\JitherOpenEXR.projitems*{b1766c5b-0a9b-442e-a42d-39ae93b6fdf2}*SharedItemsImports = 13
@@ -2173,9 +2335,72 @@ Global
 		Plugins\GameServer\Login\LoginServer\LoginServer.projitems*{c24b3899-e5a9-44ba-89ac-d1b7940b390e}*SharedItemsImports = 13
 		Plugins\AIGC\TencentAIGC\TencentAIGC\TencentAIGC.projitems*{c29ec9f5-ffc9-4086-b1c7-58fac9534ba6}*SharedItemsImports = 13
 		Plugins\GameCore\Inventory\Inventory.projitems*{c5a6cd32-252a-4f89-b45a-39fe2ae04ce2}*SharedItemsImports = 13
+		3rd\csharp\AstcDecoder\AstcDecoder.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		3rd\csharp\JitherOpenEXR\JitherOpenEXR.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		3rd\csharp\NvTriStrip\NvTriStrip.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		3rd\csharp\Sprache\Sprache.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		3rd\csharp\StbImageSharp\StbImageSharp.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		3rd\csharp\StbImageWriteSharp\StbImageWriteSharp.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		3rd\csharp\xxHash\xxHash.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Base\Base.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\AdvanceShadow\AdvanceShadow.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\AIGC\AIGC.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\Animation\Animation.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\AssemblyLoader\AssemblyLoader.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\AssetImpExp\AssetImpExp.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\BehaviorTree\BehaviorTree.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\CodeBuilder\CodeBuilder.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\CodeCompiler\CodeCompiler.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\Collision\Collision.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\CSScripting\CSScripting.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\DataCopyer\DataCopyer.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\DataSet\DataSet.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\DesignMacross\DesignMacross.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\DestinyPX\NxMath\NxMath.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\DestinyPX\NxPhysics\NxPhysics.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\DevIDE\DevIDE.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\DistanceField\DistanceField.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\Font\Font.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\FX\Hair\Hair.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\FX\Skin\Skin.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\FX\Water\Water.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\FX\Weather\Weather.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\GI\PRT\PRT.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\GpuDriven\GpuDriven.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\ImageDecoder\ImageDecoder.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\Input\Input.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\Localization\Localization.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\Meshly\Meshly.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\Network\Network.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\NodeGraph\NodeGraph.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\Particle\Particle.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\PhysicsCore\PhysicsCore.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\Procedure\Procedure.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\ProjectGen\ProjectGen.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\Recast\Recast.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\RenderPolicyEditor\RenderPolicyEditor.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\Sequencer\Sequencer.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\SourceControl\SourceControl.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\StateMachine\StateMachine.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\Terrain\Terrain.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\UI\UI.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\VirtualShadowMaps\VirtualShadowMaps.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\VirtualTexture\VirtualTexture.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\VXGI\VXGI.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\WindowSDL\WindowSDL.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Bricks\WorldSimulator\WorldSimulator.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\CompilingGenerator\CompilingGenerator.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Editor\Editor.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\GamePlay\GamePlay.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Grapics\Mesh\Mesh.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Grapics\Pipeline\Pipeline.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\ImGui\ImGui.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Math\Math.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\NxRHI\NxRHI.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Platform\Mac\Mac.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
+		CSharpCode\Rtti\Rtti.projitems*{c9407bb7-f57e-46c8-ba6e-04f303da50b1}*SharedItemsImports = 5
 		Plugins\GameServer\CSCommon\CSCommon.projitems*{cb0d3b5c-182b-4fab-8ddb-6c9e201e55fd}*SharedItemsImports = 5
 		Plugins\GameServer\ServerCommon\ServerCommon.projitems*{cb0d3b5c-182b-4fab-8ddb-6c9e201e55fd}*SharedItemsImports = 5
-		codegen\NativeBinder\CodeGenCSharp.projitems*{cbec1eae-eca1-4442-935f-0d923aba94b9}*SharedItemsImports = 13
 		CSharpCode\Bricks\AIGC\AIGC.projitems*{cc2b85ff-9c07-4808-8fbb-5b14f47b30f6}*SharedItemsImports = 13
 		NativeCode\Bricks\LeanCLR\LeanCLR.vcxitems*{d06b9194-1f8a-4c86-af3f-19029eeb9b61}*SharedItemsImports = 9
 		CSharpCode\Bricks\DevIDE\DevIDE.projitems*{d0c12daf-ba2a-46e8-b93a-831d4efdd59d}*SharedItemsImports = 13
@@ -2191,7 +2416,6 @@ Global
 		CSharpCode\GamePlay\GamePlay.projitems*{df4345b3-0c74-43e1-890c-190395767fce}*SharedItemsImports = 13
 		3rd\csharp\StbImageSharp\StbImageSharp.projitems*{e0ad6c9d-2af8-43e8-bbb5-8bd96fe1dee2}*SharedItemsImports = 13
 		NativeCode\Bricks\PythonRuntime\PythonRuntime.vcxitems*{e0f6a79a-007a-4f5d-8c93-07c753a1ca67}*SharedItemsImports = 9
-		codegen\Rpc\Engine\EngineRPC.projitems*{e25af610-5ad0-4646-b7ee-0fbbab8dfd5d}*SharedItemsImports = 13
 		NativeCode\Bricks\RenderDoc\RenderDoc.vcxitems*{e35e90df-5548-4c48-87fd-d9efec2d50eb}*SharedItemsImports = 9
 		Plugins\GameServer\Gate\GateServer\GateServer.projitems*{e51c14de-46de-43a5-8ccf-c274f65acd90}*SharedItemsImports = 13
 		Plugins\GameServer\ServerCommon\ServerCommon.projitems*{e57c9402-d948-41e2-b824-01217f1b10b7}*SharedItemsImports = 13

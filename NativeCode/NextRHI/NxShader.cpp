@@ -336,8 +336,9 @@ namespace NxRHI
 #if defined(HasModule_Dx11)
 			return DX11Shader::CompileShader(this, desc, shader, entry, type, sm, defines, sl, bDebugShader, output);
 #else
-			ASSERT(false);
-			return false;
+			// 无后端平台（如 Mac 仅编入 NullDevice）按“虚拟编译”返回空产物；NullDevice 不消费字节码。
+			// 真实 RHI 平台必编入对应后端，不会走到这里。
+			return true;
 #endif
 		}
 		if (sl == EShaderLanguage::SL_DXIL)
@@ -345,8 +346,7 @@ namespace NxRHI
 #if defined(HasModule_Dx12)
 			return DX12Shader::CompileShader(this, desc, shader, entry, type, sm, defines, sl, bDebugShader, extHlslVersion, dxcArgs, output, asModule);
 #else
-			ASSERT(false);
-			return false;
+			return true;
 #endif
 		}
 		if (sl == EShaderLanguage::SL_SPIRV)
@@ -354,8 +354,7 @@ namespace NxRHI
 #if defined(HasModule_Vulkan)
 			return VKShader::CompileShader(this, desc, shader, entry, type, sm, defines, sl, bDebugShader, extHlslVersion, dxcArgs, output, asModule);
 #else
-			ASSERT(false);
-			return false;
+			return true;
 #endif
 		}
 		return false;

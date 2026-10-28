@@ -215,7 +215,7 @@ INT_PTR VFile_Android::Seek(INT_PTR lOff, SeekPosition nFrom)
 vBOOL VFile_Android::SetLength(UINT_PTR dwNewLen)
 {
 	if(m_hFile != NULL)
-		return fseek(m_hFile, (long)dwNewLen, SEEK_SET) == dwNewLen;
+		return fseek(m_hFile, (long)dwNewLen, SEEK_SET) == dwNewLen; // lp64-ok: fseek 的 long 参数
 	if (m_pAsset != NULL)
 		return AAsset_seek(m_pAsset, dwNewLen, SEEK_SET) == dwNewLen;
 

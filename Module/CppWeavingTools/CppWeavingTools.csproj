@@ -16,7 +16,21 @@
 
   <ItemGroup>
     <PackageReference Include="ClangSharp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Titan.Tests.CppWeaving" />
+    <Content Include="../../codegen/Templates/*" Link="Templates/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- ClangSharp 的 native 依赖靠 runtime.json 选包，无 RID 构建不会带出；按宿主显式引用（Mac 仅支持 Apple Silicon） -->
+  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
     <PackageReference Include="libclang.runtime.win-x64" />
+    <PackageReference Include="libClangSharp.runtime.win-x64" />
+  </ItemGroup>
+  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+    <PackageReference Include="libclang.runtime.osx-arm64" />
+    <PackageReference Include="libClangSharp.runtime.osx-arm64" />
   </ItemGroup>
 
 </Project>

@@ -364,8 +364,9 @@ void TestReflection()
 	rtti->FindMember("TestString")->SetValue(tmp, (std::string*)nullptr);
 
 	auto pMember = rtti->FindMember("Size");
-	ASSERT(pMember->MemberType.Type->Name == "UInt32");
-	ASSERT(pMember->Offset == __vsizeof(Test_ConstantVarDesc, Size));
+	// UINT 注册名为 "uint32"（见 BuildClassInfo<unsigned int>("uint32")）；Offset 校验登记值与真实布局一致
+	ASSERT(pMember->MemberType.Type->Name == "uint32");
+	ASSERT(pMember->Offset == __voffsetof(Test_ConstantVarDesc, Size));
 	ASSERT(pMember->MemberName == "Size");
 
 	bool isIUnknown = rtti->IsA(GetClassObject<IWeakRefObject>());
@@ -392,8 +393,11 @@ void RttiStructManager::BuildRtti()
 	pRtti->BuildClassInfo<short>("short", nullptr);
 	pRtti = GetClassObject<int>();
 	pRtti->BuildClassInfo<int>("int", nullptr);
-	pRtti = GetClassObject<long>();
-	pRtti->BuildClassInfo<long>("int32", nullptr);
+	if constexpr (sizeof(long) == 4) // lp64-ok: LLP64 下 long 即 int32；LP64 下 long 是 64 位独立类型，不按 int32 注册
+	{
+		pRtti = GetClassObject<long>(); // lp64-ok: 仅 LLP64 编译，注册 long 的类型身份
+		pRtti->BuildClassInfo<long>("int32", nullptr); // lp64-ok: 同上
+	}
 	pRtti = GetClassObject<long long>();
 	pRtti->BuildClassInfo<long long>("int64", nullptr);
 	pRtti = GetClassObject<unsigned char>();
@@ -402,8 +406,11 @@ void RttiStructManager::BuildRtti()
 	pRtti->BuildClassInfo<unsigned short>("uint16", nullptr);
 	pRtti = GetClassObject<unsigned int>();
 	pRtti->BuildClassInfo<unsigned int>("uint32", nullptr);
-	pRtti = GetClassObject<unsigned long>();
-	pRtti->BuildClassInfo<unsigned long>("uint32", nullptr);
+	if constexpr (sizeof(unsigned long) == 4) // lp64-ok: 同上
+	{
+		pRtti = GetClassObject<unsigned long>(); // lp64-ok: 仅 LLP64 编译，注册 unsigned long 的类型身份
+		pRtti->BuildClassInfo<unsigned long>("uint32", nullptr); // lp64-ok: 同上
+	}
 	pRtti = GetClassObject<unsigned long long>();
 	pRtti->BuildClassInfo<unsigned long long>("uint64", nullptr);
 	pRtti = GetClassObject<float>();

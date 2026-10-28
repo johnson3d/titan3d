@@ -411,7 +411,7 @@ namespace NxRHI
 	public:
 		ENGINE_RTTI(IGpuResource);
 		~IGpuResource();
-		virtual long AddRef() const override
+		virtual int AddRef() const override
 		{
 			return IResourceBase::AddRef();
 		}

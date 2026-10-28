@@ -2,7 +2,7 @@
   "profiles": {
     "ProjectCooker": {
       "commandName": "Project",
-      "commandLineArgs": "ExeCmd=SaveAsLastest CookCfg=$(SolutionDir)content\\EngineConfigForCook.jscfg Blacklist=$(SolutionDir)\\cache\\cook_blacklist.txt",
+      "commandLineArgs": "ExeCmd=SaveAsLastest CookCfg=$(SolutionDir)content\\config\\engineconfig_windows_cook.jscfg Blacklist=$(SolutionDir)\\cache\\cook_blacklist.txt",
       "workingDirectory": "..\\..\\binaries\\",
       "nativeDebugging": true
     }

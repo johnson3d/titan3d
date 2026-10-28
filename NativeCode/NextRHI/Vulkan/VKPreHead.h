@@ -8,6 +8,10 @@
 #ifdef PLATFORM_WIN
     #define VK_USE_PLATFORM_WIN32_KHR
     //#include <vulkan/vulkan_win32.h>
+#elif defined(PLATFORM_MAC)
+    #define VK_USE_PLATFORM_MACOS_MVK
+    #define VK_USE_PLATFORM_METAL_EXT
+    #define VK_ENABLE_BETA_EXTENSIONS
 #elif defined(PLATFORM_DROID)
     #define VK_USE_PLATFORM_ANDROID_KHR
     //#include <vulkan/vulkan_android.h>

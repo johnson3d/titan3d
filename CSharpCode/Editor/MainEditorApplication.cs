@@ -125,6 +125,7 @@ namespace EngineNS.Editor
 
             mBrickManager = new Bricks.ProjectGen.UBrickManager();
             mEditorSettings = new Forms.TtEditorSettings();
+            mAndroidBuildPanel = new Forms.TtAndroidBuildPanel();
             mPIEController = new TtPIEController();
         }
         private bool IsVisible = true;
@@ -137,6 +138,7 @@ namespace EngineNS.Editor
         public TtMetaVersionViewer mMetaViewer;
         public Bricks.ProjectGen.UBrickManager mBrickManager = null;
         public Editor.Forms.TtEditorSettings mEditorSettings;
+        public Editor.Forms.TtAndroidBuildPanel mAndroidBuildPanel;
         public TtPIEController mPIEController;
         public TtPluginMenuManager PluginMenuManager { get; } = new TtPluginMenuManager();
 
@@ -153,8 +155,10 @@ namespace EngineNS.Editor
 #if (UseWindowTest)
             mWinTest.Cleanup();
 #endif
+#if PWindow
             CoreCLRManager.Stop();
             CoreSDK.DisposeObject(ref mClrProfiler);
+#endif
             base.Cleanup();
         }
         public override async Thread.Async.TtTask<bool> InitializeApplication(NxRHI.TtGpuDevice rc, RName rpName)
@@ -169,6 +173,7 @@ namespace EngineNS.Editor
             await mMainInspector.Initialize();
 
             await mEditorSettings.Initialize();
+            await mAndroidBuildPanel.Initialize();
             //TtEngine.Instance.Config.PlayGameName = RName.GetRName("utest/test_game01.macross");
 
             mMainInspector.PropertyGrid.PGName = TtLocalization.Label("MainInspector", "###MainInspector");
@@ -328,8 +333,10 @@ namespace EngineNS.Editor
                             {
                                 unsafe
                                 {
+#if PWindow
                                     IRenderDocTool.GetInstance().SetGpuDevice(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject);
                                     IRenderDocTool.GetInstance().SetActiveWindow(this.NativeWindow.HWindow.ToPointer());
+#endif
                                     var frameCount = Math.Max(1, TtEngine.Instance.EditorInstance.RenderDocCaptureFrameCount);
                                     TtEngine.Instance.GfxDevice.RenderQueue.RemainingCaptureFrames = frameCount - 1;
                                     TtEngine.Instance.GfxDevice.RenderQueue.CaptureRenderDocFrame = true;
@@ -383,7 +390,7 @@ namespace EngineNS.Editor
                                             var startInfo = new ProcessStartInfo();
                                             var dir = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
                                             startInfo.FileName = IO.TtFileManager.CombinePath(dir, $"Binaries/Tracer/debug/{TtEngine.DotNetVersion}/Tracer.exe");
-                                            startInfo.Arguments = $"EngineRoot={dir} config={dir}content\\apptracer.jscfg NativeDLL={TtEngine.Instance.Config.NativeDll}";
+                                            startInfo.Arguments = $"EngineRoot={dir} config={dir}content\\config\\engineconfig_windows_tracer.jscfg NativeDLL={TtEngine.Instance.Config.NativeDll}";
                                             startInfo.UseShellExecute = false;
                                             startInfo.RedirectStandardOutput = true;
                                             var ProcessTracer = new Process();
@@ -557,6 +564,18 @@ namespace EngineNS.Editor
                                 item.Selected = mEditorSettings.Visible;
                                 if(mEditorSettings.Visible)
                                     TtEngine.Instance.TaskCollector.AddWaitTask(mEditorSettings.Initialize());
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = TtLocalization.Tr("Android Build"),
+                            Selected = false,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                mAndroidBuildPanel.Visible = !mAndroidBuildPanel.Visible;
+                                item.Selected = mAndroidBuildPanel.Visible;
+                                if(mAndroidBuildPanel.Visible)
+                                    TtEngine.Instance.TaskCollector.AddWaitTask(mAndroidBuildPanel.Initialize());
                             },
                         },
                     },

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_13357432123849139846 Type="EngineNS.Plugins.GameTasks.AGameTaskDescriptor@GameTasks">
+  <AcceptRequireItems Type="System.Collections.Generic.List&lt;EngineNS.Plugins.GameItems.AItemRequirement@GameItems,&gt;@Unknown" Order="0" />
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <FinishRequireItems Type="System.Collections.Generic.List&lt;EngineNS.Plugins.GameItems.AItemRequirement@GameItems,&gt;@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <RequireTasks Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Order="0" />
+  <RewardItems Type="System.Collections.Generic.List&lt;EngineNS.Plugins.GameItems.AItemMakeSuccess@GameItems,&gt;@Unknown" Order="0" />
+  <Uid Type="EngineNS.RName@EngineCore" Order="0" />
+</Hash_13357432123849139846>

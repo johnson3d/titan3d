@@ -551,29 +551,3 @@ namespace EngineNS
         public Bricks.Font.TtFontModule FontModule { get; } = new Bricks.Font.TtFontModule();
     }
 }
-
-
-
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace EngineNS.Bricks.Font
-{
-	partial class TtFontHLSLMethod
-	{
-		public static unsafe Vector4 macross_GetFontSDF (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int effect, Vector3 baseColor, Vector3 borderColor, float alpha, float lowThreshold, float highThreshold, float smoothValue) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			var _return_value = GetFontSDF(effect, baseColor, borderColor, alpha, lowThreshold, highThreshold, smoothValue);
-			return _return_value;
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

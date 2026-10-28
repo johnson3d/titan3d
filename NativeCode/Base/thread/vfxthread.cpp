@@ -54,7 +54,11 @@ const char* vfxThread::GetCurrentThreadName()
 #endif
 
 	auto id = std::hash<std::thread::id>{}(std::this_thread::get_id());
+#if defined(PLATFORM_WIN)
 	sprintf_s(current_thread_name, 256, "Thread-%zu", id);
+#else
+	snprintf(current_thread_name, sizeof(current_thread_name), "Thread-%zu", id);
+#endif
 	return current_thread_name;
 }
 

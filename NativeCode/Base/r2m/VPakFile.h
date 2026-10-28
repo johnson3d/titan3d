@@ -91,7 +91,7 @@ class VPackFile2Memory : public VRes2Memory
 {
 	friend class VPakFile;
 protected:
-	std::atomic<long> mPtrRef;
+	std::atomic<int> mPtrRef;
 	TWeakRefHandle<VPakFile>			mPakFile;
 	
 	VPakAssetDesc					mAssetDesc;

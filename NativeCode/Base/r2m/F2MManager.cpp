@@ -30,13 +30,13 @@ void VRes2Memory::OnAfterWriteFile(LPCSTR pszFile)
 }
 
 //////////////////////////////////////////////////////////////////////////
-extern "C"  void vfxMemory_SetDebugInfo(void* memory, LPCSTR info);
+extern "C"  void vfxMemory_SetDebugInfo(void* memory, LPCSTR info, bool needLock);
 VFile2Memory* F2MManager::CreateFile2Memory(LPCSTR psz, vBOOL bShareWrite/* = FALSE*/)
 {
 	if (psz == NULL || psz[0] == 0)
 		return NULL;
 	VFile2Memory* pFM = new VFile2Memory;
-	vfxMemory_SetDebugInfo(pFM, psz);
+	vfxMemory_SetDebugInfo(pFM, psz, true);
 	if (FALSE == pFM->Create(psz, bShareWrite))
 	{
 		pFM->Release();

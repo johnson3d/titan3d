@@ -1,4 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- TitanPlatform 未指定时按主机系统选择（Windows | Mac），并给出对应的引擎工程与平台宏 -->
+  <Import Project="..\..\BuildScript\msbuild\TitanManagedProject.props" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<ProjectReference Include="..\Engine.Window\Engine.Window.csproj" />
+    <ProjectReference Include="$(TitanEngineProject)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,11 +19,12 @@
     <Content Include="Resources\TitanEditor.ico" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Resources\TitanEditor.png" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
-	
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>..\..\binaries\</OutputPath>
-    <PlatformTarget>x64</PlatformTarget>
-    <DefineConstants>TRACE;PWindow</DefineConstants>
+    <!--arm64 mac 载入 AMD64 标记的入口程序集会 FileLoadException(0x80131621)，x64 仅 Windows-->
+    <PlatformTarget Condition="'$(TitanPlatform)' != 'Mac'">x64</PlatformTarget>
+    <DefineConstants>$(DefineConstants);TRACE</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>full</DebugType>
     <Optimize>False</Optimize>
@@ -29,8 +32,8 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>..\..\binaries\</OutputPath>
-    <PlatformTarget>x64</PlatformTarget>
-    <DefineConstants>TRACE;PWindow</DefineConstants>
+    <PlatformTarget Condition="'$(TitanPlatform)' != 'Mac'">x64</PlatformTarget>
+    <DefineConstants>$(DefineConstants);TRACE</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>full</DebugType>
     <Optimize>True</Optimize>

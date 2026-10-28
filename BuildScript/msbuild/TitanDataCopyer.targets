@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TitanDataCopyer.targets
+  =======================
+  引擎构建完成后的反射阶段：先构建只编译自身源码的 CSharpReflectionTools 宿主，
+  再用父构建的精确 TargetPath 与匹配配置的原生库生成 codegen/<Platform>/DataCopyer。
+
+  子构建显式关闭源码生成和反射阶段，宿主以普通程序集引用消费已构建的引擎，不重建父引擎。
+  Windows 手动执行：dotnet msbuild Module/Engine.Window/Engine.Window.csproj -t:TitanRunDataCopyerStage -p:Configuration=Debug
+  Mac 在 CMake 源码/native 与 Engine.Mac 构建成功后执行：dotnet msbuild Module/Engine.Mac/Engine.Mac.csproj -t:TitanRunDataCopyerStage -p:TitanPlatform=Mac -p:Configuration=Debug -p:SkipTitanCodeGen=true
+  Android 在 Windows 主机上以 Core.Window.dll 承载导入执行：dotnet msbuild Module/Engine.Android/Engine.Android.csproj -t:TitanRunDataCopyerStage -p:TitanPlatform=Android -p:Configuration=Debug -p:SkipTitanCodeGen=true
+  自定义产物目录通过 TitanReflectionNativeDirectory / TitanReflectionPluginDirectory 显式传入。
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <SkipTitanCodeGen Condition="'$(SkipTitanCodeGen)' == ''">false</SkipTitanCodeGen>
+    <SkipTitanDataCopyerGen Condition="'$(SkipTitanDataCopyerGen)' == ''">false</SkipTitanDataCopyerGen>
+  </PropertyGroup>
+
+  <Target Name="TitanGenerateDataCopyer"
+          AfterTargets="Build"
+          DependsOnTargets="TitanRunDataCopyerStage"
+          Condition="'$(SkipTitanCodeGen)' != 'true' AND '$(SkipTitanDataCopyerGen)' != 'true' AND '$(TitanEnginePlatform)' != ''" />
+
+  <Target Name="TitanRunDataCopyerStage">
+    <PropertyGroup>
+      <_TitanDataCopyerRoot Condition="'$(TitanRoot)' != ''">$([MSBuild]::NormalizeDirectory('$(TitanRoot)'))</_TitanDataCopyerRoot>
+      <_TitanDataCopyerRoot Condition="'$(_TitanDataCopyerRoot)' == ''">$(TitanRepositoryRoot)</_TitanDataCopyerRoot>
+      <TitanReflectionNativeDirectory Condition="'$(TitanReflectionNativeDirectory)' == ''">$([MSBuild]::NormalizePath('$(_TitanDataCopyerRoot)', 'binaries', $([System.String]::Copy('$(Configuration)').ToLowerInvariant())))</TitanReflectionNativeDirectory>
+      <!-- Android 默认插件目录必须先于桌面默认值求值；否则会命中 binaries/Plugins 而混用桌面产物。 -->
+      <TitanReflectionPluginDirectory Condition="'$(TitanReflectionPluginDirectory)' == '' AND '$(TitanPlatform)' == 'Android'">$([MSBuild]::NormalizePath('$(_TitanDataCopyerRoot)', 'binaries', 'android', 'Plugins'))</TitanReflectionPluginDirectory>
+      <TitanReflectionPluginDirectory Condition="'$(TitanReflectionPluginDirectory)' == ''">$([MSBuild]::NormalizePath('$(_TitanDataCopyerRoot)', 'binaries', 'Plugins'))</TitanReflectionPluginDirectory>
+      <_TitanReflectionProject>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', '..', '..', 'Module', 'CSharpReflectionTools', 'CSharpReflectionTools.csproj'))</_TitanReflectionProject>
+      <_TitanReflectionHost>$([MSBuild]::NormalizePath('$(_TitanDataCopyerRoot)', 'binaries', 'Tools', 'Reflection', '$(TitanPlatform)', '$(Configuration)', 'net8.0', 'CSharpReflectionTools.dll'))</_TitanReflectionHost>
+    </PropertyGroup>
+    <Error Condition="'$(TitanPlatform)' != 'Windows' AND '$(TitanPlatform)' != 'Mac' AND '$(TitanPlatform)' != 'Android'" Text="反射阶段只支持 TitanPlatform=Windows|Mac|Android，当前为 '$(TitanPlatform)'。" />
+    <Error Condition="'$(TargetPath)' == '' OR !Exists('$(TargetPath)')" Text="反射阶段需要已构建的引擎程序集：$(TargetPath)" />
+    <Message Importance="high" Text="[TitanDataCopyer] Platform=$(TitanPlatform) Configuration=$(Configuration) Engine=$(TargetPath)" />
+    <Exec Command="dotnet build &quot;$(_TitanReflectionProject)&quot; -c $(Configuration) --nologo -p:TitanPlatform=$(TitanPlatform) -p:TitanEngineAssemblyPath=&quot;$(TargetPath)&quot; -p:SkipTitanCodeGen=true -p:SkipTitanDataCopyerGen=true -p:TitanRoot=&quot;$(_TitanDataCopyerRoot).&quot;"
+          WorkingDirectory="$(_TitanDataCopyerRoot)" StdOutEncoding="UTF-8" StdErrEncoding="UTF-8" />
+    <Exec Command="dotnet &quot;$(_TitanReflectionHost)&quot; TitanRoot=&quot;$(_TitanDataCopyerRoot).&quot; Platform=$(TitanPlatform) Configuration=$(Configuration) EngineAssembly=&quot;$(TargetPath)&quot; NativeDirectory=&quot;$(TitanReflectionNativeDirectory)&quot; PluginDirectory=&quot;$(TitanReflectionPluginDirectory)&quot;"
+          WorkingDirectory="$(_TitanDataCopyerRoot)" LogStandardErrorAsError="true" StdOutEncoding="UTF-8" StdErrEncoding="UTF-8" />
+  </Target>
+
+</Project>

@@ -925,26 +925,3 @@ namespace EngineNS
         public GamePlay.Scene.TtSceneManager SceneManager { get; } = new GamePlay.Scene.TtSceneManager();
     }
 }
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace EngineNS.GamePlay.Scene
-{
-	partial class TtScene
-	{
-		public async Thread.Async.TtTask<TtRenderPolicy> macross_SetRenderPolicyToViewport (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtViewportSlate slate) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			var _return_value = await SetRenderPolicyToViewport(slate);
-			return _return_value;
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

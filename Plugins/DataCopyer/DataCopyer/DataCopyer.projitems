@@ -9,7 +9,6 @@
     <Import_RootNamespace>DataCopyer</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Copyer.gen.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugin.cs" />
   </ItemGroup>
 </Project>

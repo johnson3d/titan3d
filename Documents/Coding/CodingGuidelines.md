@@ -2628,7 +2628,7 @@ DockProxy.BeginMainForm(TtLocalization.Label("CpuProfiler", "###CpuProfiler"), t
 
 ### 10.10 LocalizationTool 工作流 (改键 vs 改源码)
 
-工具是独立 SlateApp, 配置 `content/applocalization.jscfg`
+工具是独立 SlateApp, 配置 `content/config/engineconfig_windows_localization.jscfg`
 (`MainWindowType = LocalizationTool.TtLocalizationApplication`), 四个动作**语义不同**:
 
 | 动作 | 作用 | 是否动源码 |

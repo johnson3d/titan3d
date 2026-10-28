@@ -992,28 +992,3 @@ namespace EngineNS.Graphics.Mesh
         }
     }
 }
-
-
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace EngineNS.Graphics.Mesh
-{
-	partial class TtRenderMesh
-	{
-		public unsafe Pipeline.Shader.TtMaterial macross_GetMaterial (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, uint subMesh, uint atom) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			var _return_value = GetMaterial(subMesh, atom);
-			return _return_value;
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

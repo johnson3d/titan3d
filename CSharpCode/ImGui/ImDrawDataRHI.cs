@@ -426,7 +426,9 @@ namespace EngineNS.EGui
                         // Render command lists
                         int vtx_offset = 0;
                         int idx_offset = 0;
-                        Vector2 clip_off = draw_data.DisplayPos;
+                        //ClipRect 已被 ScaleClipRects 乘过 FramebufferScale，DisplayPos 也要同样缩放，
+                        //否则 scissor 整体偏移 DisplayPos*(scale-1)——窗口不在屏幕原点时内容与窗口错位
+                        Vector2 clip_off = new Vector2(draw_data.DisplayPos.X * fb_scale.X, draw_data.DisplayPos.Y * fb_scale.Y);
                         for (int n = 0; n < draw_data.CmdListsCount; n++)
                         {
                             var cmd_list = new ImDrawList(draw_data.GetCmdLists()[n]);

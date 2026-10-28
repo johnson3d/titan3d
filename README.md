@@ -1,4 +1,4 @@
-## [English Version](README-Eng.md)
+﻿## [English Version](README-Eng.md)
 
 # 为什么用TitanEngine
 
@@ -86,7 +86,7 @@
 2. 编译Engine.Android程（C#）
 # 调试与运行
 1. 设置MainEditor为当前项目
-2. 调试命令行参数为config=\$(SolutionDir)content\EngineConfig.cfg use_renderdoc=false
+2. 调试命令行参数为config=\$(SolutionDir)content\config\engineconfig_windows_dx12.jscfg use_renderdoc=false
 3. 调试工作目录为$(SolutionDir)binaries\
 4. 运行与调试，请阅读[**引擎配置与编辑器使用文档**](Documents/Index.md)。
 5. 遇到一些奇怪IO相关Crash或者异常，可以尝试删除本地cache目录
@@ -100,13 +100,13 @@
 - 2.ExtraCmd={n}这个n是确定启动后，控制台可以输入的参数个数
 ## 保存资产到最新
 - 保存指定资产到最新版本，解决MetaVersion爆炸问题
-ExeCmd=SaveAsLastest AssetType=Scene+Mesh+Material+MaterialInst+Texture CookCfg=\$(SolutionDir)content\EngineConfigForCook.cfg 
+ExeCmd=SaveAsLastest AssetType=Scene+Mesh+Material+MaterialInst+Texture CookCfg=\$(SolutionDir)content\config\engineconfig_windows_cook.jscfg 
 ## 启动Root服务器
-- 方法1：ExeCmd=StartRootServer CookCfg=\$(SolutionDir)content\EngineConfigForRootServer.cfg 
-- 方法2：ExtraCmd=1 CookCfg=$(SolutionDir)content\EngineConfigForRootServer.cfg 在控制台输入ExeCmd=StartRootServer
+- 方法1：ExeCmd=StartRootServer CookCfg=\$(SolutionDir)content\config\engineconfig_windows_rootserver.jscfg 
+- 方法2：ExtraCmd=1 CookCfg=$(SolutionDir)content\config\engineconfig_windows_rootserver.jscfg 在控制台输入ExeCmd=StartRootServer
 ## 启动Login服务器
-- 方法1：ExeCmd=StartLoginServer CookCfg=\$(SolutionDir)content\EngineConfigForRootServer.cfg 
-- 方法2：ExtraCmd=1 CookCfg=$(SolutionDir)content\EngineConfigForRootServer.cfg 在控制台输入ExeCmd=StartLoginServer
+- 方法1：ExeCmd=StartLoginServer CookCfg=\$(SolutionDir)content\config\engineconfig_windows_rootserver.jscfg 
+- 方法2：ExtraCmd=1 CookCfg=$(SolutionDir)content\config\engineconfig_windows_rootserver.jscfg 在控制台输入ExeCmd=StartLoginServer
 ## 升级CppWeavingTools
 - 升级Nuget的libclang，本机查找Microsoft Visual Studio\2022\Enterprise\VC\Tools\Llvm\x64\bin拷贝到binaries\Tools\对应.net版本
 - 右键libClangSharp查看nuget文件位置

@@ -1,10 +1,10 @@
-#requires -Version 5.1
+﻿#requires -Version 5.1
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).ProviderPath
-$scriptPath = Join-Path $repoRoot 'BuildScript\build-leanclr.ps1'
-$manifestPath = Join-Path $repoRoot 'BuildScript\dependencies.json'
+$scriptPath = Join-Path $repoRoot 'BuildScript\leanclr\build-leanclr.ps1'
+$manifestPath = Join-Path $repoRoot 'BuildScript\common\dependencies.json'
 $ignorePath = Join-Path $repoRoot '.gitignore'
 $coreWindowProjectPath = Join-Path $repoRoot 'Core.Window\Core.Window.vcxproj'
 $leanClrRuntimeHeaderPath = Join-Path $repoRoot 'NativeCode\Bricks\LeanCLR\LeanClrRuntime.h'
@@ -223,7 +223,7 @@ if (-not $arrayClass.Contains('new_method->user_data = nullptr;')) {
     throw 'Inflated RtMethodInfo copies must clear the intrinsic user-data slot.'
 }
 
-$leanClrDeployTargetsPath = Join-Path $repoRoot 'BuildScript\LeanClrDeploy.targets'
+$leanClrDeployTargetsPath = Join-Path $repoRoot 'BuildScript\leanclr\LeanClrDeploy.targets'
 if (-not (Test-Path -LiteralPath $leanClrDeployTargetsPath)) {
     throw "LeanCLR deploy targets was not found: $leanClrDeployTargetsPath"
 }
@@ -240,7 +240,7 @@ foreach ($expectedText in @(
     }
 }
 
-$leanClrStubTargets = Get-Content -Raw -LiteralPath (Join-Path $repoRoot 'BuildScript\LeanClrStub.targets')
+$leanClrStubTargets = Get-Content -Raw -LiteralPath (Join-Path $repoRoot 'BuildScript\leanclr\LeanClrStub.targets')
 foreach ($expectedText in @(
     '<LeanClrContentSubDir Condition="''$(LeanClrContentSubDir)'' == ''''">$(TtPluginName)</LeanClrContentSubDir>',
     'LeanClrDeploy.targets'
@@ -251,7 +251,7 @@ foreach ($expectedText in @(
 }
 
 $engineStubProject = Get-Content -Raw -LiteralPath (Join-Path $repoRoot 'Module\LeanClrEngineStub\LeanClrEngineStub.csproj')
-if (-not $engineStubProject.Contains('BuildScript\LeanClrDeploy.targets')) {
+if (-not $engineStubProject.Contains('BuildScript\leanclr\LeanClrDeploy.targets')) {
     throw 'LeanClrEngineStub.csproj must deploy Titan.LeanClr.EngineStub.dll to content\LeanCLR.'
 }
 
@@ -321,7 +321,7 @@ foreach ($sourceFile in @('LeanClrIntrinsicDispatcher.cs', 'LeanClrInvokeHelper.
     }
 }
 
-$nativeBinderProjectPath = Join-Path $repoRoot 'codegen\NativeBinder\CodeGen.vcxitems'
+$nativeBinderProjectPath = Join-Path $repoRoot 'codegen\Windows\NativeBinder\CodeGen.vcxitems'
 $nativeBinderProject = Get-Content -Raw -LiteralPath $nativeBinderProjectPath
 foreach ($expectedEntry in @(
     'FLeanClrIntrinsicCall_3640661289.cpp2cs.cpp',
@@ -337,7 +337,7 @@ foreach ($expectedEntry in @(
 # so per-entry Condition attributes cannot be persisted. Instead, verify that the
 # generated binder .cpp files are guarded by #if defined(HasModule_LeanCLR) so they
 # compile only in Core.Window (which defines that macro) and are dead code on Android/iOS.
-$leanClrBinderDir = Join-Path $repoRoot 'codegen\NativeBinder\EngineNS\LeanCLR'
+$leanClrBinderDir = Join-Path $repoRoot 'codegen\Windows\NativeBinder\EngineNS\LeanCLR'
 foreach ($binderCpp in @(
     'FLeanClrIntrinsicCall_3640661289.cpp2cs.cpp',
     'TtLeanClrMethod_3640661289.cpp2cs.cpp',
@@ -360,7 +360,7 @@ if ($compilingGeneratorItems.Contains('LeanClrGenerator')) {
     throw 'LeanCLR proxy generator must stay an opt-in analyzer and not be merged into CompilingGenerator.projitems.'
 }
 
-$leanClrPluginTargetsPath = Join-Path $repoRoot 'BuildScript\LeanClrPlugin.targets'
+$leanClrPluginTargetsPath = Join-Path $repoRoot 'BuildScript\leanclr\LeanClrPlugin.targets'
 $leanClrPluginTargets = Get-Content -Raw -LiteralPath $leanClrPluginTargetsPath
 # Plugins\Directory.Build.props 把 obj 移到 intermediate\，默认通配不再排除工程内 obj\；不移除会把落盘的 .g.cs 重复编译
 if (-not $leanClrPluginTargets.Contains('<Compile Remove="$(CompilerGeneratedFilesOutputPath)\**" />')) {
@@ -369,7 +369,7 @@ if (-not $leanClrPluginTargets.Contains('<Compile Remove="$(CompilerGeneratedFil
 
 $survivorProjectPath = Join-Path $repoRoot 'Plugins\Game\Survivor\Survivor.All\Survivor.All.csproj'
 $survivorProject = Get-Content -Raw -LiteralPath $survivorProjectPath
-if (-not $survivorProject.Contains('BuildScript\LeanClrPlugin.targets')) {
+if (-not $survivorProject.Contains('BuildScript\leanclr\LeanClrPlugin.targets')) {
     throw 'Survivor.All must import LeanClrPlugin.targets.'
 }
 
@@ -377,7 +377,7 @@ $survivorStubProjectPath = Join-Path $repoRoot 'Plugins\Game\Survivor\Survivor.L
 $survivorStubProject = Get-Content -Raw -LiteralPath $survivorStubProjectPath
 # Plugins\Directory.Build.targets 的 PreBuild 会清空 TtOutputBasePath，桩工程必须与插件本体分开目录
 foreach ($expectedText in @(
-    'BuildScript\LeanClrStub.targets',
+    'BuildScript\leanclr\LeanClrStub.targets',
     '<TtOutputBasePath>$(TtTitanRoot)binaries\LeanClrStub\',
     '<OutDir>$(TtOutputBasePath)</OutDir>'
 )) {

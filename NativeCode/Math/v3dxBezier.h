@@ -156,7 +156,7 @@ public:
 };
 typedef v3dxRange<int> v3dxIntRange;
 typedef v3dxRange<float> v3dxScalarRange;
-typedef v3dxRange<unsigned long> v3dxColorRange;
+typedef v3dxRange<unsigned int> v3dxColorRange;
 
 class v3dVariable : public IWeakRefObject
 {
@@ -244,7 +244,7 @@ private:
 
 	union
 	{
-		unsigned long mConstant;
+		unsigned int mConstant;
 		v3dxColorRange *mConstantRange;
 	};
 };

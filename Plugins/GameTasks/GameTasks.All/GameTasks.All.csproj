@@ -1,16 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../BuildScript/msbuild/TitanManagedProject.props" />
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <BaseOutputPath>$(SolutionDir)\binaries\Plugins</BaseOutputPath>
+    <BaseOutputPath>$(TtTitanRoot)binaries/Plugins</BaseOutputPath>
   </PropertyGroup>
 
   <Import Project="..\GameTasks\GameTasks.projitems" Label="Shared" />
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Module\Engine.Window\Engine.Window.csproj" />
+    <ProjectReference Include="$(TitanEngineProject)" />
     <ProjectReference Include="..\..\GameItems\GameItems.All\GameItems.All.csproj" />
   </ItemGroup>
 

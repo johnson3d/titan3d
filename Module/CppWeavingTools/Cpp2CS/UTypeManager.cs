@@ -136,13 +136,13 @@ namespace CppWeaving.Cpp2CS
             public override void Execute(TaskThread thread)
             {
                 var tmp = new TUCreator();
-                if (tmp.CreateTU(CppFile, Settings.Includes, Settings.MacroDefines))
+                if (tmp.CreateTU(CppFile, Settings.Includes, Settings.MacroDefines, Settings.Profile))
                 {
                     UTypeManager.Instance.CollectTypes(tmp, tmp.mTransUnit.TranslationUnitDecl);
                 }
             }
         }
-        public void ClangAnalyse(UProjectSettings settings)
+        public void ClangAnalyse(UProjectSettings settings, bool allowParseErrors = false)
         {
             //foreach (var i in settings.ParseSources) 
             //{
@@ -161,6 +161,9 @@ namespace CppWeaving.Cpp2CS
             }
             TaskThreadManager.Instance.StartThreads();
             TaskThreadManager.Instance.WaitAllThreadFinished();
+            // 解析失败不能覆盖上一轮有效输出；显式诊断放行仍由入口报告。
+            if (!allowParseErrors && ParseFailures.Snapshot().Count != 0)
+                return;
 
             var rmvDelegates = new List<string>();
             foreach (var i in DelegateTypes)
@@ -284,8 +287,8 @@ namespace CppWeaving.Cpp2CS
             //	}
             //}
 
-            MakeSharedProjectCpp(settings.CsOutputDir + "/", "CodeGen.vcxitems");
-            MakeSharedProjectCSharp(settings.CppOutputDir + "/", "CodeGenCSharp.projitems");
+            MakeSharedProjectCpp(settings.CppOutputDir + "/", "CodeGen.vcxitems");
+            MakeSharedProjectCSharp(settings.CsOutputDir + "/", "CodeGenCSharp.projitems");
         }
         public UTypeBase FindType(ClangSharp.Interop.CXType t)
         {

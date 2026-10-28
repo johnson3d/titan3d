@@ -48,7 +48,12 @@ namespace ProjectCooker
                 case "MakeSln":
                     return 0;
                 case "StartDS":
+#if PWindow
                     return await new Command.TtStartDS().ExecuteCommand(args);
+#else
+                    Console.WriteLine("StartDS is not supported on this platform (TcpServer/HPSocket closure missing).");
+                    return -1;
+#endif
                 case "LoadPlugin":
                     TtEngine.Instance.PluginModuleManager.GetPluginModule("SourceGit")?.SureLoad();
                     return 0;
@@ -111,8 +116,10 @@ namespace ProjectCooker
                 }
             }
 
+#if PWindow
             var handle = GetConsoleWindow();
             ShowWindow(handle, 1);
+#endif
 
             Console.WriteLine("Hello Titan");
             foreach(var arg in args)

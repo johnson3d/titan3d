@@ -49,7 +49,7 @@ public:
 	{
 		return false;
 	}
-	virtual long		GetRefCount()
+	virtual int		GetRefCount()
 	{
 		return 0;
 	}

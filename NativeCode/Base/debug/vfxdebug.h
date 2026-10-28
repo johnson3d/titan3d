@@ -66,6 +66,15 @@ extern vBOOL GIsSyncTick;
  void * _vfxMemoryNew(size_t nSize,const char * file,size_t line);
  void _vfxMemoryDelete(void * memory,const char * file,size_t line);
 
+// 以此指针作为 _vfxMemoryNew 的 file 参数分配的内存不参与泄露报告(仍做越界校验、仍计入内存统计)，
+// 用于第三方运行时(如 LeanCLR)这类进程级常驻、没有 shutdown 的内存；按指针比较，不能用同内容的其它字符串
+extern const char* const c_vfxMemoryNoLeakReport;
+// 把已分配内存的 file 改成 c_vfxMemoryNoLeakReport，关闭这块内存的泄露报告(用法同 vfxMemory_SetDebugInfo)；
+// memory 必须是 _vfxMemoryNew/引擎 operator new 返回的原始指针
+// needLock=false 仅用于调用线程已经持有内存锁的场景（如分配回调），不支持任意无锁并发调用
+extern "C" VFX_API void vfxMemory_SetNoLeakReport(void* memory, bool needLock = true);
+extern "C" VFX_API void vfxMemory_SetDebugInfo(void* memory, LPCSTR info, bool needLock = true);
+
 #include "vfxnew.h"
 
 enum TR_ENUM()

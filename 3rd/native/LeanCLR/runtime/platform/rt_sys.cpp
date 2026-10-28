@@ -644,12 +644,12 @@ uint8_t* RtSys::str_error_r(int32_t error, uint8_t* buffer, int32_t buffer_size)
         return nullptr;
 
     char* out = reinterpret_cast<char*>(buffer);
-#if defined(__GLIBC__) && !defined(_GNU_SOURCE)
+#if (defined(__GLIBC__) || defined(__BIONIC__)) && !defined(_GNU_SOURCE)
     int rc = ::strerror_r(error, out, static_cast<size_t>(buffer_size));
     if (rc != 0)
         return nullptr;
     return buffer;
-#elif defined(__GLIBC__)
+#elif defined(__GLIBC__) || defined(__BIONIC__)
     char* msg = ::strerror_r(error, out, static_cast<size_t>(buffer_size));
     if (msg == nullptr)
         return nullptr;

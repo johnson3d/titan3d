@@ -336,6 +336,7 @@ namespace EngineNS.Bricks.GpuDriven
         {
             Init();
 
+#if PWindow
             using (var Meshlets = new Support.TtBlobObject())
             using (var Materials = new Support.TtBlobObject())
             using (var Vertices = new Support.TtBlobObject())
@@ -396,6 +397,7 @@ namespace EngineNS.Bricks.GpuDriven
                 TrianglesBuffer = new TtGpuBuffer<uint>();
                 TrianglesBuffer.SetSize(maxIndex / 4 + 1, pTriangles, NxRHI.EBufferType.BFT_SRV);
             }
+#endif
         }
         public unsafe void LoadXnd(XndNode node)
         {

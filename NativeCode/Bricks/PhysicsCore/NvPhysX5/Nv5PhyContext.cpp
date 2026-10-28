@@ -8,7 +8,7 @@
 #include "Nv5PhyController.h"
 #include "../../../Graphics/Mesh/MeshDataProvider.h"
 
-#ifdef PLATFORM_IOS
+#if defined(PLATFORM_IOS) || defined(PLATFORM_MAC)
 	#include <malloc/malloc.h>
 #else
 	#include <stdlib.h>
@@ -60,7 +60,7 @@ class PxVictoryAllocator : public physx::PxAllocatorCallback
 		//return _mm_malloc(size, 16);
 		return memalign(16, size);
 		//return memalign(16, size);
-#elif defined PLATFORM_IOS
+#elif defined PLATFORM_IOS || defined PLATFORM_MAC
 		return malloc_zone_memalign(malloc_default_zone(), 16, size);
 #else // PLATFORM_WINDOW
 		return _aligned_malloc(size, 16);
@@ -69,7 +69,7 @@ class PxVictoryAllocator : public physx::PxAllocatorCallback
 
 	void deallocate(void* ptr)
 	{
-#if defined PLATFORM_DROID || defined PLATFORM_IOS
+#if defined PLATFORM_DROID || defined PLATFORM_IOS || defined PLATFORM_MAC
 		//return _mm_free(ptr);
 		return free(ptr);
 #else // PLATFORM_WINDOW

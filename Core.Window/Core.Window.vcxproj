@@ -26,7 +26,10 @@
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <VcpkgEnabled>false</VcpkgEnabled>
     <VcpkgAutoLink>false</VcpkgAutoLink>
+    <TitanPlatform Condition="'$(TitanPlatform)' == ''">Windows</TitanPlatform>
+    <TitanConsumeNativeOutputs>true</TitanConsumeNativeOutputs>
   </PropertyGroup>
+  <Import Project="..\BuildScript\msbuild\TitanPlatform.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -65,7 +68,6 @@
     <Import Project="..\NativeCode\Math\Math.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\Image.Shared\Image.Shared.vcxitems" Label="Shared" />
-    <Import Project="..\codegen\NativeBinder\CodeGen.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Graphics\Pipeline\Pipeline.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Graphics\Mesh\Mesh.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\FBX\FBX.vcxitems" Label="Shared" />
@@ -293,13 +295,13 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project=".\NativePackages.props" />
-  <Import Project="..\BuildScript\TitanCodeGen.targets" />
+  <Import Project="..\BuildScript\msbuild\TitanCodeGen.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(TitanPackagesDir)WinPixEventRuntime.$(WinPixEventRuntimeVersion)\build\WinPixEventRuntime.targets" Condition="Exists('$(TitanPackagesDir)WinPixEventRuntime.$(WinPixEventRuntimeVersion)\build\WinPixEventRuntime.targets')" />
   </ImportGroup>
   <PropertyGroup>
     <LeanClrLibraryPath>$(MSBuildProjectDirectory)\..\3rd\native\LeanCLR\lib\windows\$(Platform)\$(Configuration)\leanclr.lib</LeanClrLibraryPath>
-    <LeanClrBuildScript>$(MSBuildProjectDirectory)\..\BuildScript\build-leanclr.ps1</LeanClrBuildScript>
+    <LeanClrBuildScript>$(MSBuildProjectDirectory)\..\BuildScript\leanclr\build-leanclr.ps1</LeanClrBuildScript>
   </PropertyGroup>
   <Target Name="EnsureLeanClrStaticLibrary" BeforeTargets="PrepareForBuild" Condition="'$(Platform)' == 'x64' And ('$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Release') And !Exists('$(LeanClrLibraryPath)')">
     <Message Importance="high" Text="LeanCLR static library is missing; building $(Configuration) x64 from source." />

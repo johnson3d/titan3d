@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CSharpCodeTools
 {
@@ -16,18 +19,67 @@ namespace CSharpCodeTools
             Usings.Add(code);
         }
         public string FullName;
+        public ClassDeclarationSyntax Declaration;
+        private int NamespaceAndOuterDepth;
+        public string CallerName => Declaration.Identifier.Text + "_RpcCaller" + Declaration.TypeParameterList;
+
+        public string PartialDeclaration(bool caller = false)
+        {
+            return Shell(Declaration, caller ? Declaration.Identifier.Text + "_RpcCaller" : null, caller);
+        }
+
+        private static string Shell(TypeDeclarationSyntax declaration, string name = null, bool caller = false)
+        {
+            if (!declaration.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)))
+                throw new InvalidDataException("生成包装需要 partial 类型：" + declaration.Identifier.Text);
+            var modifiers = caller ? "public" : string.Join(" ", declaration.Modifiers.Where(m => !m.IsKind(SyntaxKind.PartialKeyword)).Select(m => m.Text));
+            var keyword = declaration is RecordDeclarationSyntax record ? "record " + record.ClassOrStructKeyword.Text : declaration.Keyword.Text;
+            return modifiers + " partial " + keyword + " " + (name ?? declaration.Identifier.Text) + declaration.TypeParameterList + " " + string.Join(" ", declaration.ConstraintClauses);
+        }
+
+        protected void BeginNamespaceAndOuter()
+        {
+            NamespaceAndOuterDepth = 0;
+            foreach (var scope in Declaration.Ancestors().Reverse())
+            {
+                if (scope is BaseNamespaceDeclarationSyntax ns)
+                {
+                    AddLine("namespace " + ns.Name);
+                    PushBrackets();
+                    NamespaceAndOuterDepth++;
+                    foreach (var directive in ns.Usings) AddLine(directive.ToString());
+                }
+                else if (scope is TypeDeclarationSyntax enclosing)
+                {
+                    AddLine(Shell(enclosing));
+                    PushBrackets();
+                    NamespaceAndOuterDepth++;
+                }
+            }
+        }
+
+        protected void EndNamespaceAndOuter()
+        {
+            while (NamespaceAndOuterDepth > 0)
+            {
+                PopBrackets();
+                NamespaceAndOuterDepth--;
+            }
+        }
         public string Namespace
         {
             get
             {
+                if (Declaration != null) return string.Join(".", Declaration.Ancestors().OfType<BaseNamespaceDeclarationSyntax>().Reverse().Select(n => n.Name.ToString()));
                 var pos = FullName.LastIndexOf('.');
-                return FullName.Substring(0, pos);
+                return pos < 0 ? "" : FullName.Substring(0, pos);
             }
         }
         public string Name
         {
             get
             {
+                if (Declaration != null) return Declaration.Identifier.Text + Declaration.TypeParameterList;
                 var pos = FullName.LastIndexOf('.');
                 return FullName.Substring(pos + 1);
             }

@@ -163,7 +163,11 @@ void FHashTable::Add_Concurrent(UINT Key, UINT Index)
     ASSERT(Index < IndexSize);
 
     Key &= HashMask;
-    NextIndex[Index] = (int)::_InterlockedExchange((long*)&Hash[Key], (long)Index);
+#if defined(PLATFORM_WIN)
+    NextIndex[Index] = (int)::_InterlockedExchange((long*)&Hash[Key], (long)Index); // lp64-ok: MSVC intrinsic 签名，Windows 下 long 为 4 字节
+#else
+    NextIndex[Index] = (int)__atomic_exchange_n(&Hash[Key], Index, __ATOMIC_SEQ_CST);
+#endif
 }
 
 inline void FHashTable::Remove(UINT Key, UINT Index)

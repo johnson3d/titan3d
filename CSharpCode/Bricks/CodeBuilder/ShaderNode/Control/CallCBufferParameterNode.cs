@@ -135,26 +135,3 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
     }
 }
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
-{
-	partial class TtCBufferSetter
-	{
-		public unsafe NxRHI.TtCbView macross_GetCBuffer (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, Graphics.Mesh.TtRenderMesh.TtAtom atom, TtCBufferParameter cbuffer, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			var _return_value = GetCBuffer(atom, cbuffer, drawcall, policy);
-			return _return_value;
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

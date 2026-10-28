@@ -15,15 +15,15 @@ extern "C"
 #include "png/pngdebug.h"
 }
 
+#ifndef PLATFORM_WIN
+extern void OutputDebugStringA(const char* lpOutputString);
+#endif
+
 NS_BEGIN
 
 #define max(a,b) (((a) > (b)) ? (a) : (b))
 #define min(a,b) (((a) < (b)) ? (a) : (b))
-//#define ASSERT(p) 
-
-#ifndef PLATFORM_WIN
-extern void OutputDebugStringA(const char* lpOutputString);
-#endif
+//#define ASSERT(p)
 
 #if !defined(PLATFORM_WIN)
 #pragma GCC diagnostic ignored "-Wunused-value"

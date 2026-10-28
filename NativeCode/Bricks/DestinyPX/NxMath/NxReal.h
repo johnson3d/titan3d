@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "NxUtility.h"
+#include <cfloat>
 
 #ifndef ASSERT
 #define ASSERT(t) assert(t)

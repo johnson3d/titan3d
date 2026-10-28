@@ -9,7 +9,7 @@
 - - - [支持的配置](editor/DynConfig.md)
 - - VS调试配置
 ![启动配置](picture/run_config.png)
-	- 启动一个配置文件，是一个json文件:config=$(SolutionDir)content\EngineConfigDX12.jscfg
+	- 启动一个配置文件，是一个json文件:config=$(SolutionDir)content\config\engineconfig_windows_dx12.jscfg
 	- 是否调试C++引擎代码:NativeDLL=debug
 	- 是否开启C++内存分析:NativeMem=1
 	- [引擎配置文件](engine/EngineConfig.md)

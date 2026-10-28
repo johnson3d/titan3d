@@ -79,6 +79,7 @@ namespace EngineNS.Editor.Forms
                             ImGuiAPI.Text(TtLocalization.Format("ICopyDraw Count = {0};", NxRHI.ICopyDraw.GetNumOfInstance()));
                         }
 
+#if PWindow
                         if (TtEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_D3D12)
                         {
                             if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("DX12"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
@@ -110,6 +111,7 @@ namespace EngineNS.Editor.Forms
                                 ImGuiAPI.Text(TtLocalization.Tr("End Heap"));
                             }
                         }
+#endif
 
                         if (ImGuiAPI.CollapsingHeader(TtLocalization.Tr("AttachCache"), ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                         {

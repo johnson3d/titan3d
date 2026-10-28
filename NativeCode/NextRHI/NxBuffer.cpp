@@ -132,7 +132,7 @@ namespace NxRHI
 		return cpBuffer;
 	}
 
-	long ISrView::AddRef() const
+	int ISrView::AddRef() const
 	{
 		/*if (Buffer != nullptr)
 			Buffer->AddRef();*/

@@ -997,4 +997,6 @@ namespace NxMath
 }
 
 //后续通过工具生成代码，不同的ValueType, FracBit产生不同的整形立即数
+#if !defined(__clang__)
 #include "NxFixedConstValue.inl"
+#endif

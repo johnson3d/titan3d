@@ -14,7 +14,7 @@
 #if defined(PLATFORM_DROID)
 #include <new>
 #define GNU_NEW
-#elif defined(PLATFORM_IOS)
+#elif defined(PLATFORM_IOS) || defined(PLATFORM_MAC)
 #include <new>
 #define APPLE_NEW
 #elif defined(PLATFORM_WIN)
@@ -47,6 +47,7 @@ void* operator new[](std::size_t size) VGLIBCXX_THROW(std::bad_alloc);
 void operator delete(void* p, const char* file, int line) VGLIBCXX_USE_NOEXCEPT;
 void operator delete(void* p)VGLIBCXX_USE_NOEXCEPT;
 void operator delete(void* p, std::size_t) VGLIBCXX_USE_NOEXCEPT;
+void operator delete[](void* p, std::size_t) VGLIBCXX_USE_NOEXCEPT;
 void operator delete[](void* p, const char* file, int line) VGLIBCXX_USE_NOEXCEPT;
 void operator delete[](void* p) VGLIBCXX_USE_NOEXCEPT;
 void* operator new(std::size_t size, const std::nothrow_t&) VGLIBCXX_USE_NOEXCEPT;
@@ -69,6 +70,7 @@ void* operator new[](std::size_t size) VGLIBCXX_THROW(std::bad_alloc);
 void operator delete(void* p, const char* file, int line) VGLIBCXX_USE_NOEXCEPT;
 void operator delete(void* p)VGLIBCXX_USE_NOEXCEPT;
 void operator delete(void* p, std::size_t) VGLIBCXX_USE_NOEXCEPT;
+void operator delete[](void* p, std::size_t) VGLIBCXX_USE_NOEXCEPT;
 void operator delete[](void* p, const char* file, int line) VGLIBCXX_USE_NOEXCEPT;
 void operator delete[](void* p) VGLIBCXX_USE_NOEXCEPT;
 void* operator new(std::size_t size, const std::nothrow_t&) VGLIBCXX_USE_NOEXCEPT;
@@ -86,6 +88,7 @@ void* operator new[](size_t size) VGLIBCXX_THROW(std::bad_alloc);
 void operator delete(void* p, const char* file, int line) VGLIBCXX_USE_NOEXCEPT;
 void operator delete(void* p) VGLIBCXX_USE_NOEXCEPT;
 void operator delete(void* p, size_t) VGLIBCXX_USE_NOEXCEPT;
+void operator delete[](void* p, size_t) VGLIBCXX_USE_NOEXCEPT;
 void operator delete[](void* p, const char* file, int line) VGLIBCXX_USE_NOEXCEPT;
 void operator delete[](void* p) VGLIBCXX_USE_NOEXCEPT;
 void* operator new(size_t size, const std::nothrow_t&) VGLIBCXX_USE_NOEXCEPT;

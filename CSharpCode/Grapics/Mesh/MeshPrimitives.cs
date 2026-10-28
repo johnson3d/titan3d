@@ -243,7 +243,9 @@ namespace EngineNS.Graphics.Mesh
                 mPendingImportSource = "";
                 mPendingImportMessage = "";
                 mImportError = "";
+#if PWindow
                 MeshType = "FromFile";
+#endif
                 await PGAsset.Initialize();
                 //mDesc.Desc.SetDefault();
                 //PGAsset.SingleTarget = mDesc;
@@ -252,11 +254,17 @@ namespace EngineNS.Graphics.Mesh
             {
                 //we also can import from other types
                 //return FBXCreateCreateDraw(ContentBrowser);
+#if PWindow
                 return AssimpCreateCreateDraw(ContentBrowser);
+#else
+                return false;
+#endif
             }
 
+#if PWindow
             public unsafe partial bool FBXCreateCreateDraw(EGui.Controls.TtContentBrowser ContentBrowser);
             public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.TtContentBrowser ContentBrowser);
+#endif
         }
         public TtMeshPrimitives()
         {

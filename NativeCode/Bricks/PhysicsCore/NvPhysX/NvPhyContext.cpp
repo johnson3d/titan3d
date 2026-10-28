@@ -30,20 +30,7 @@
 	#pragma comment(lib,"SceneQuery_static_64.lib")
 	#pragma comment(lib,"SimulationController_static_64.lib")
 #elif defined(PLATFORM_DROID)
-	/*PhysX3CharacterKinematic
-	PhysX3Extensions
-	PhysX3
-	PhysX3Cooking
-	SimulationController
-	LowLevel
-	PxTask
-	PhysX3Common
-	SceneQuery
-	LowLevelCloth
-	PhysX3Vehicle
-	PsFastXml
-	PxFoundation
-	PxPvdSDK*/
+	// PhysX 4.1 static libs (3rd/native/PhysX-4.1/physx/lib/android/arm64-v8a) are linked by Core.Android.vcxproj
 #endif
 
 #define new VNEW

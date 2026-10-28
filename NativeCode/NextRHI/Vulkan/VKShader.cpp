@@ -7,12 +7,16 @@
 #include "../../../3rd/native/SpirvCross/spirv_cross_c.h"
 //#include <spirv_cross/spirv_cross_c.h>//link problem
 
+// glslang/shaderc/spirv-tools 仅被下方两个无调用方的工具类引用；Mac 不链接这些库，
+// 头文件随平台屏蔽（Windows 链接面保持 pragma comment 原样）
+#if !defined(PLATFORM_MAC)
 #include <spirv-tools/libspirv.h>
 #include <spirv-tools/libspirv.hpp>
 #include <spirv-tools/optimizer.hpp>
 #include <glslang/Public/ShaderLang.h>
 #include <glslang/SPIRV/GlslangToSpv.h>
 #include <shaderc/shaderc.hpp>
+#endif
 
 #if defined(HasModule_GpuDump)
 #include "../../Bricks/GpuDump/NvAftermath.h"
@@ -101,6 +105,7 @@ namespace NxRHI
 
 		return true;
 	}
+#if !defined(PLATFORM_MAC)
 	class VKSpirvOptimizer
 	{
 
@@ -116,7 +121,7 @@ namespace NxRHI
 
 			// 检查是否是 OpDecorate 指令
 			if (inst->opcode == SPV_OPERAND_TYPE_DECORATION) {
-				
+
 			}
 
 			return SPV_SUCCESS;
@@ -196,6 +201,7 @@ namespace NxRHI
 			finalizeGlslang();
 		}
 	};
+#endif
 
 	bool VKShader::Reflect(FShaderDesc* desc)
 	{
@@ -615,6 +621,7 @@ namespace NxRHI
 			auto len = strlen(output_str);
 		}
 
+#if !defined(PLATFORM_MAC)
 		std::vector<uint32_t> spirvBinary;
 		EShLanguage lang;
 		switch (desc->Type)
@@ -639,6 +646,7 @@ namespace NxRHI
 			ASSERT(false);
 			break;
 		}
+#endif
 
 
 

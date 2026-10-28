@@ -1,0 +1,5 @@
+# Android 运行期内容：相对仓库根的路径；binaries/* 一律映射到 binaries/android 下的产物。
+content/config/engineconfig_android_smoke.jscfg
+enginecontent/metadata/**
+content/metadata/**
+binaries/Plugins/DataCopyer.plugin

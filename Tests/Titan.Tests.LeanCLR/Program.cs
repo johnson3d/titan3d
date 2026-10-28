@@ -10,12 +10,21 @@ const string configuration = "Release";
 #endif
 
 var repoRoot = FindRepoRoot();
-var nativeDirectory = Path.Combine(repoRoot, "binaries", configuration.ToLowerInvariant());
+var nativeDirectory = Environment.GetEnvironmentVariable("TITAN_TEST_NATIVE_DIRECTORY") ??
+    Path.Combine(repoRoot, "binaries", configuration.ToLowerInvariant());
 var nativeModule = Path.Combine(nativeDirectory, "Core.Window.dll");
 if (!File.Exists(nativeModule))
     throw new FileNotFoundException($"Build the {configuration} Core.Window native module before running this probe.", nativeModule);
 if (!NativeMethods.SetDllDirectory(nativeDirectory))
     throw new InvalidOperationException($"Failed to add the native module directory: {nativeDirectory}");
+
+RunNativeMemoryProbe();
+var loadedNativeModule = System.Diagnostics.Process.GetCurrentProcess().Modules
+    .Cast<System.Diagnostics.ProcessModule>().Single(module => module.ModuleName.Equals("Core.Window.dll", StringComparison.OrdinalIgnoreCase));
+if (!loadedNativeModule.FileName.Equals(Path.GetFullPath(nativeModule), StringComparison.OrdinalIgnoreCase))
+    throw new InvalidOperationException($"实际加载的 native DLL 与验证目标不同：{loadedNativeModule.FileName}");
+Console.WriteLine($"Native memory probes use: {loadedNativeModule.FileName}");
+RunNativeMemoryLockProbe();
 
 var bclDirectory = Path.Combine(repoRoot, "content", "LeanCLR");
 var scriptDirectory = Path.Combine(repoRoot, "Tests", "Titan.Tests.LeanCLR.Script", "bin", configuration, "netstandard2.0");
@@ -53,6 +62,7 @@ if (!runtime.Initialize())
 }
 unsafe
 {
+    RunDispatcherCleanupLifetimeProbe(runtime);
     var dispatcher = new TtLeanClrIntrinsicDispatcher();
     if (!dispatcher.AttachRuntime(runtime))
         throw new InvalidOperationException("LeanCLR dispatcher failed to attach the runtime.");
@@ -242,6 +252,154 @@ unsafe
         GC.KeepAlive(dispatcher);
         GC.KeepAlive(replacementHandler);
         GC.KeepAlive(instanceHandler);
+    }
+}
+
+static unsafe void RunDispatcherCleanupLifetimeProbe(TtLeanClrRuntime runtime)
+{
+    var pointer = runtime.NativePointer.ToPointer();
+    // 红灯时 Cleanup 会多 Release 一次；额外引用保证断言前不会销毁进程级 VM。
+    CoreSDK.IUnknown_AddRef(pointer);
+    var expectedReferences = CoreSDK.IUnknown_UnsafeGetRefCount(pointer);
+    try
+    {
+        var dispatcher = new TtLeanClrIntrinsicDispatcher();
+        if (!dispatcher.AttachRuntime(runtime))
+            throw new InvalidOperationException("Cleanup 探针无法接入已初始化的 VM。");
+        dispatcher.Cleanup(null!);
+        var actualReferences = CoreSDK.IUnknown_UnsafeGetRefCount(pointer);
+        if (actualReferences != expectedReferences)
+        {
+            // 补回错误消费的引用，随后安全撤销探针自身的保护引用。
+            if (actualReferences == expectedReferences - 1)
+                CoreSDK.IUnknown_AddRef(pointer);
+            throw new InvalidOperationException($"Cleanup 不得释放进程级 VM：expected={expectedReferences}, actual={actualReferences}。");
+        }
+        if (dispatcher.IsRuntimeReady || !runtime.IsInitialized())
+            throw new InvalidOperationException("Cleanup 应解除 dispatcher，但保持 VM 已初始化。");
+        dispatcher.Cleanup(null!);
+        if (CoreSDK.IUnknown_UnsafeGetRefCount(pointer) != expectedReferences)
+            throw new InvalidOperationException("重复 Cleanup 不得消费 VM 引用。");
+        Console.WriteLine("LeanCLR dispatcher cleanup lifetime probe passed.");
+        GC.KeepAlive(dispatcher);
+    }
+    finally
+    {
+        CoreSDK.IUnknown_Release(pointer);
+    }
+}
+
+static unsafe void RunNativeMemoryProbe()
+{
+    // 旧绑定只有四个参数：必须先确认 ABI，再注册委托，避免错误签名写坏堆。
+    var parameters = typeof(CoreSDK.FDelegate_FOnNativeMemAlloc).GetMethod("Invoke")!.GetParameters();
+    if (parameters.Length != 5 || parameters[0].ParameterType != typeof(void*))
+        throw new InvalidOperationException("分配回调必须透传原始 ptr，当前绑定仍是旧 ABI。");
+
+    var profiler = new EngineNS.Profiler.TtNativeMemory();
+    var pointers = new List<nint>();
+    var reported = new HashSet<nint>();
+    CoreSDK.FDelegate_FOnNativeMemLeak leakCallback = (ptr, size, file, line, id, info) => reported.Add((nint)ptr);
+    bool previous = EngineNS.Profiler.TtNativeMemory.IsNoReportLeaks;
+    try
+    {
+        profiler.BeginProfiler();
+        CoreSDK.SetMemLeakCallBack(leakCallback);
+        EngineNS.Profiler.TtNativeMemory.IsNoReportLeaks = true;
+        pointers.Add((nint)CoreSDK.Alloc(64, null!, 1));
+        pointers.Add((nint)CoreSDK.Alloc(4096, null!, 2));
+
+        // ThreadStatic 不得抑制其它线程的分配。
+        var worker = new System.Threading.Thread(() =>
+        {
+            pointers.Add((nint)CoreSDK.Alloc(64, null!, 3));
+            pointers.Add((nint)CoreSDK.Alloc(4096, null!, 4));
+        });
+        worker.Start();
+        if (!worker.Join(TimeSpan.FromSeconds(10)))
+            throw new InvalidOperationException("分配回调重入内存锁时发生阻塞。");
+
+        EngineNS.Profiler.TtNativeMemory.IsNoReportLeaks = false;
+        pointers.Add((nint)CoreSDK.Alloc(64, null!, 5));
+        pointers.Add((nint)CoreSDK.Alloc(4096, null!, 6));
+        CoreSDK.DumpNativeMemoryState("NativeMemoryProbe", 1);
+        if (pointers.Count != 6 || pointers.Any(ptr => ptr == 0) ||
+            reported.Contains(pointers[0]) || reported.Contains(pointers[1]) ||
+            pointers.Skip(2).Any(ptr => !reported.Contains(ptr)))
+            throw new InvalidOperationException("线程标记未正确区分大小块、其它线程及恢复后的分配。");
+        Console.WriteLine("Native memory probe passed: ptr ABI, small/large marking, thread isolation and flag restoration.");
+    }
+    finally
+    {
+        EngineNS.Profiler.TtNativeMemory.IsNoReportLeaks = previous;
+        profiler.EndProfiler();
+        // 已显式解除回调，避免终结器随后清掉下一个探针注册的回调。
+        GC.SuppressFinalize(profiler);
+        foreach (var ptr in pointers)
+            CoreSDK.Free((void*)ptr);
+        GC.KeepAlive(profiler);
+        GC.KeepAlive(leakCallback);
+    }
+}
+
+static unsafe void RunNativeMemoryLockProbe()
+{
+    if (typeof(CoreSDK).GetMethod(nameof(CoreSDK.SetMemDebugText), new[] { typeof(void*), typeof(string) }) == null)
+        throw new InvalidOperationException("SetMemDebugText 必须保留原二参数签名，兼容既有托管调用方。");
+
+    var pointers = new List<nint>();
+    var debugInfo = new Dictionary<nint, string?>();
+    // 分配回调已经持锁：两个设置接口都必须允许显式跳过锁。
+    CoreSDK.FDelegate_FOnNativeMemAlloc allocCallback = (ptr, size, file, line, id) =>
+    {
+        if (size == 64)
+            CoreSDK.SetMemDebugInfo(ptr, "callback", false);
+        else
+            CoreSDK.SetMemDebugText(ptr, "callback", false);
+    };
+    CoreSDK.FDelegate_FOnNativeMemLeak leakCallback = (ptr, size, file, line, id, info) =>
+        debugInfo[(nint)ptr] = Marshal.PtrToStringUTF8((nint)info);
+    try
+    {
+        CoreSDK.SetMemAllocCallBack(allocCallback);
+        CoreSDK.SetMemLeakCallBack(leakCallback);
+        pointers.Add((nint)CoreSDK.Alloc(64, null!, 1));
+        pointers.Add((nint)CoreSDK.Alloc(4096, null!, 2));
+        CoreSDK.SetMemAllocCallBack(null);
+        if (pointers.Count != 2 || pointers.Any(ptr => ptr == 0))
+            throw new InvalidOperationException("锁参数探针未成功分配大小块。");
+        CoreSDK.DumpNativeMemoryState("NativeMemoryLockProbe", 1);
+        foreach (var ptr in pointers)
+        {
+            if (!debugInfo.TryGetValue(ptr, out var info) || info != "callback")
+                throw new InvalidOperationException("持锁回调中 SetMemDebugInfo(false) 未写入正确说明。");
+        }
+
+        // 回调以外默认加锁，并验证重复更新 DebugInfo 和事后补标记。
+        CoreSDK.SetMemDebugInfo((void*)pointers[0], "outside");
+        CoreSDK.SetMemDebugText((void*)pointers[1], "outside");
+        debugInfo.Clear();
+        CoreSDK.DumpNativeMemoryState("NativeMemoryLockProbe", 1);
+        foreach (var ptr in pointers)
+        {
+            if (!debugInfo.TryGetValue(ptr, out var info) || info != "outside")
+                throw new InvalidOperationException("普通调用 SetMemDebugInfo(true) 未更新正确说明。");
+            CoreSDK.SetMemNoLeakReport((void*)ptr);
+        }
+        debugInfo.Clear();
+        CoreSDK.DumpNativeMemoryState("NativeMemoryLockProbe", 1);
+        if (pointers.Any(debugInfo.ContainsKey))
+            throw new InvalidOperationException("普通调用 SetMemNoLeakReport(true) 未关闭报告。");
+        Console.WriteLine("Native memory lock probe passed: explicit unlocked callbacks and default locked setters.");
+    }
+    finally
+    {
+        CoreSDK.SetMemAllocCallBack(null);
+        CoreSDK.SetMemLeakCallBack(null);
+        foreach (var ptr in pointers)
+            CoreSDK.Free((void*)ptr);
+        GC.KeepAlive(allocCallback);
+        GC.KeepAlive(leakCallback);
     }
 }
 

@@ -5,13 +5,30 @@
 		<TtPluginSourceRoot>$(ProjectDir)..\</TtPluginSourceRoot>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+		<!-- del/copy/rename 依赖 cmd，非 Windows 主机走下面的 MSBuild Copy；-p:TtUseCmdShell=false 可在 Windows 上验证该分支 -->
+		<TtUseCmdShell Condition="'$(TtUseCmdShell)' == ''">$([MSBuild]::IsOSPlatform('Windows'))</TtUseCmdShell>
 	</PropertyGroup>
-	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-		<Exec Command="del $(TtOutputBasePath) /q" />
-		<Exec Command="copy $(TtPluginSourceRoot)$(TtPluginName).plugin $(TtOutputBasePath)..\$(TtPluginName).plugin" />
+	<Target Name="TtValidateUseCmdShell" BeforeTargets="PreBuildEvent">
+		<Error Condition="'$(TtUseCmdShell)' != 'true' and '$(TtUseCmdShell)' != 'false'" Text="TtUseCmdShell must be true or false, got '$(TtUseCmdShell)'." />
+		<Error Condition="'$(TtUseCmdShell)' == 'false' and '$(TtTitanRoot)' == ''" Text="TtTitanRoot is required when TtUseCmdShell is false; pass -p:TitanRoot=&lt;repository-root&gt;." />
 	</Target>
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="rename $(TtOutputBasePath)*.pdb *.tpdb" />
-		<Exec Command="del $(TtIntermediateBasePath)$(MSBuildProjectName)\*.pdb /s /q" />
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(TtUseCmdShell)' == 'true'">
+		<Exec Command="del &quot;$([MSBuild]::NormalizeDirectory('$(TtOutputBasePath)'))&quot; /q" />
+		<Exec Command="copy &quot;$([MSBuild]::NormalizePath('$(TtPluginSourceRoot)', '$(TtPluginName).plugin'))&quot; &quot;$([MSBuild]::NormalizeDirectory('$(TtOutputBasePath)'))..\$(TtPluginName).plugin&quot;" />
+	</Target>
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(TtUseCmdShell)' == 'true'">
+		<Exec Command="rename &quot;$([MSBuild]::NormalizeDirectory('$(TtOutputBasePath)'))*.pdb&quot; *.tpdb" />
+		<Exec Command="del &quot;$([MSBuild]::NormalizeDirectory('$(TtIntermediateBasePath)', '$(MSBuildProjectName)'))*.pdb&quot; /s /q" />
+	</Target>
+	<!-- 生成由所选平台引擎的源码阶段统一执行；插件只消费自身程序集拥有的输出。 -->
+	<PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
+		<TitanConsumeSourceOutputs Condition="'$(TitanConsumeSourceOutputs)' == ''">true</TitanConsumeSourceOutputs>
+	</PropertyGroup>
+	<Import Project="$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', '..', 'BuildScript', 'msbuild', 'TitanPlatform.props'))" Condition="'$(MSBuildProjectExtension)' == '.csproj' AND '$(TitanPlatformPropsImported)' != 'true'" />
+	<Import Project="$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', '..', 'BuildScript', 'msbuild', 'TitanCodeGen.targets'))" Condition="'$(MSBuildProjectExtension)' == '.csproj'" />
+	<!-- 非 Windows 不清空输出、不改名 pdb；运行时会把 pdb 回退为 tpdb。 -->
+	<Target Name="TtCopyPluginDescriptor" BeforeTargets="PreBuildEvent" DependsOnTargets="TtValidateUseCmdShell" Condition="'$(TtUseCmdShell)' == 'false'">
+		<Copy SourceFiles="$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '..', '$(TtPluginName).plugin'))"
+			  DestinationFolder="$([MSBuild]::NormalizeDirectory($([MSBuild]::NormalizeDirectory('$(TtOutputBasePath)')), '..'))" />
 	</Target>
 </Project>

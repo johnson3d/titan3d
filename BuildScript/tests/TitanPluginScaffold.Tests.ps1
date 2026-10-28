@@ -1,9 +1,9 @@
-#requires -Version 5.1
+﻿#requires -Version 5.1
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).ProviderPath
-$scriptPath = Join-Path $repoRoot 'BuildScript\New-TitanPlugin.ps1'
+$scriptPath = Join-Path $repoRoot 'BuildScript\scaffold\New-TitanPlugin.ps1'
 $tempRoot = Join-Path $repoRoot ("cache\TitanPluginScaffold-{0}-{1}" -f $PID, (Get-Random))
 
 $folderType = '{2150E333-8FDC-42A3-9474-1A3956D46DE8}'
@@ -120,7 +120,7 @@ function New-FakeRepository {
 
     $inventoryRoot = Join-Path $Root 'Plugins\GameCore\Inventory'
     $ghostCopyRoot = Join-Path $Root 'Plugins\Tools\Ghost\Ghost.All\binaries\Plugins'
-    $buildScriptDirectory = Join-Path $Root 'BuildScript'
+    $buildScriptDirectory = Join-Path $Root 'BuildScript\leanclr'
     New-Item -ItemType Directory -Force -Path (Join-Path $inventoryRoot 'Inventory.All'), $ghostCopyRoot, $buildScriptDirectory | Out-Null
 
     Set-Content -LiteralPath (Join-Path $inventoryRoot 'Inventory.plugin') -Value '{}' -Encoding UTF8
@@ -313,10 +313,16 @@ function Assert-PluginFiles {
         Assert-True ($text -like "*<Import Project=`"..\$Name\$Name.projitems`" Label=`"Shared`" />*") "$Name.$hostName.csproj must import the shared project."
         Assert-True ($text -like "*Exclude=`"`$(TtTitanRoot)binaries\Plugins\$Name\*.dll*") "$Name.$hostName.csproj must not reference its own output."
         if ($hostName -eq 'Android') {
-            Assert-True ($text -like '*binaries\net8.0\Engine.Android.dll*') 'Android project must reference Engine.Android.dll.'
+            Assert-True ($text -like '*binaries\android\net8.0\Engine.Android.dll*') 'Android project must reference the isolated Android engine output.'
             Assert-True ($text -like '*binaries\Plugins\*\*.Android.dll*') 'Android project must reference other Android plugins.'
             Assert-True ($text -like '*<DefineConstants>$(DefineConstants);PAndroid</DefineConstants>*') 'Android project must define PAndroid.'
             Assert-True ($text -notlike '*Engine.Window.dll</HintPath>*') 'Android project must not reference Engine.Window.dll.'
+        }
+        elseif ($hostName -eq 'All') {
+            # All 宿主通过 TitanManagedProject.props 的平台映射引用引擎工程，不写死单平台 dll。
+            Assert-True ($text -like '*<ProjectReference Include="$(TitanEngineProject)" />*') 'All project must reference the engine through $(TitanEngineProject).'
+            Assert-True ($text -like '*Import Project=*TitanManagedProject.props*') 'All project must import TitanManagedProject.props.'
+            Assert-True ($text -like '*binaries\Plugins\*\*.All.dll*') 'All project must reference other All plugins.'
         }
         else {
             Assert-True ($text -like '*binaries\net8.0\Engine.Window.dll*') "$hostName project must reference Engine.Window.dll."

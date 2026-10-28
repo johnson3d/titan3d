@@ -2,7 +2,7 @@
   "profiles": {
     "BrickManager": {
       "commandName": "Project",
-      "commandLineArgs": "EngineRoot=$(SolutionDir) config=$(SolutionDir)content\\appbrickmanager.jscfg NativeDLL=debug"
+      "commandLineArgs": "EngineRoot=$(SolutionDir) config=$(SolutionDir)content\\config\\engineconfig_windows_brickmanager.jscfg NativeDLL=debug"
     }
   }
 }

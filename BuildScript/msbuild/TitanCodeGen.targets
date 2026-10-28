@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TitanCodeGen.targets
+  =====================
+  Automatically runs C++ → C# glue-code generation (CppWeavingTools + CSharpCodeTools)
+  before building Core.Window or Engine.Window.
+
+  Usage:
+    Core.Window.vcxproj  → <Import Project="..\BuildScript\msbuild\TitanCodeGen.targets" />
+    Engine.Window.csproj → <Import Project="..\..\BuildScript\msbuild\TitanCodeGen.targets" />
+
+  Incremental behaviour:
+    Native bindings compare input timestamps against codegen/<Platform>/NativeBinder/.codegen.stamp.
+    Managed sources are re-evaluated every build; CSharpCodeTools decides no-op by content fingerprint.
+
+  Skipping:
+    Pass /p:SkipTitanCodeGen=true on the command line to skip entirely.
+
+  Parse failures:
+    CppWeavingTools exits with code 2 when any header fails to parse.
+    Pass /p:TitanCodeGenAllowParseErrors=true only to collect the failing
+    headers; the generated bindings are incomplete in that mode.
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- ============================================================ -->
+  <!-- Resolve TitanRoot: prefer the explicit property, fall back    -->
+  <!-- to SolutionDir, then to walking up from ProjectDir.           -->
+  <!-- ============================================================ -->
+  <PropertyGroup>
+    <_TitanRoot Condition="'$(TitanRoot)' != ''">$([MSBuild]::NormalizeDirectory('$(TitanRoot)'))</_TitanRoot>
+    <_TitanRoot Condition="'$(_TitanRoot)' == ''">$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..'))</_TitanRoot>
+    <TitanPlatform Condition="'$(TitanPlatform)' == ''">Windows</TitanPlatform>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <TitanNativeBinderDirectory Condition="'$(TitanNativeBinderDirectory)' == ''">$([MSBuild]::NormalizePath('$(_TitanRoot)', 'codegen', '$(TitanPlatform)', 'NativeBinder'))</TitanNativeBinderDirectory>
+    <TitanCodeGenTemplatesDirectory Condition="'$(TitanCodeGenTemplatesDirectory)' == ''">$([MSBuild]::NormalizePath('$(_TitanRoot)', 'codegen', 'Templates'))</TitanCodeGenTemplatesDirectory>
+    <SkipTitanCodeGen Condition="'$(SkipTitanCodeGen)' == ''">false</SkipTitanCodeGen>
+    <SkipTitanDataCopyerGen Condition="'$(SkipTitanDataCopyerGen)' == ''">false</SkipTitanDataCopyerGen>
+    <!-- Android 能力清单由 Core.Android/RefreshSources.cmake 生成，未生成时不得继续 CoreCompile。 -->
+    <TitanAndroidCapabilitiesFile Condition="'$(TitanAndroidCapabilitiesFile)' == ''">$([MSBuild]::NormalizePath('$(_TitanRoot)', 'Core.Android', 'generated', 'TitanAndroidCapabilities.props'))</TitanAndroidCapabilitiesFile>
+  </PropertyGroup>
+
+  <!-- ============================================================ -->
+  <!-- Tool paths                                                    -->
+  <!-- ============================================================ -->
+  <PropertyGroup>
+    <_TitanToolsDir>$([MSBuild]::NormalizeDirectory('$(_TitanRoot)', 'binaries', 'Tools', 'net8.0'))</_TitanToolsDir>
+    <_CppWeavingExe>$(_TitanToolsDir)CppWeavingTools.exe</_CppWeavingExe>
+    <_CppWeavingDll>$(_TitanToolsDir)CppWeavingTools.dll</_CppWeavingDll>
+    <_CppWeavingBuildStamp>$(_TitanToolsDir).CppWeavingTools.build.stamp</_CppWeavingBuildStamp>
+    <_CSharpCodeToolsExe>$(_TitanToolsDir)CSharpCodeTools.exe</_CSharpCodeToolsExe>
+    <_CSharpCodeToolsDll>$(_TitanToolsDir)CSharpCodeTools.dll</_CSharpCodeToolsDll>
+    <_CSharpCodeToolsBuildStamp>$(_TitanToolsDir).CSharpCodeTools.build.stamp</_CSharpCodeToolsBuildStamp>
+    <_CodeGenSentinel>$(TitanNativeBinderDirectory)\.codegen.stamp</_CodeGenSentinel>
+    <_CodeGenPOD>$(TitanNativeBinderDirectory)\PODStructDefine.h</_CodeGenPOD>
+    <_CodeGenCppProject>$(TitanNativeBinderDirectory)\CodeGen.vcxitems</_CodeGenCppProject>
+    <_CodeGenCSharpProject>$(TitanNativeBinderDirectory)\CodeGenCSharp.projitems</_CodeGenCSharpProject>
+    <_TitanSourceProject Condition="'$(TitanEnginePlatform)' != ''">$(MSBuildProjectFullPath)</_TitanSourceProject>
+    <_TitanSourceProject Condition="'$(_TitanSourceProject)' == '' AND '$(TitanPlatform)' == 'Mac'">$([MSBuild]::NormalizePath('$(_TitanRoot)', 'Module', 'Engine.Mac', 'Engine.Mac.csproj'))</_TitanSourceProject>
+    <_TitanSourceProject Condition="'$(_TitanSourceProject)' == '' AND '$(TitanPlatform)' == 'Android'">$([MSBuild]::NormalizePath('$(_TitanRoot)', 'Module', 'Engine.Android', 'Engine.Android.csproj'))</_TitanSourceProject>
+    <_TitanSourceProject Condition="'$(_TitanSourceProject)' == ''">$([MSBuild]::NormalizePath('$(_TitanRoot)', 'Module', 'Engine.Window', 'Engine.Window.csproj'))</_TitanSourceProject>
+    <_CppWeavingProject>$([MSBuild]::NormalizePath('$(_TitanRoot)', 'Module', 'CppWeavingTools', 'CppWeavingTools.csproj'))</_CppWeavingProject>
+    <_CSharpCodeToolsProject>$([MSBuild]::NormalizePath('$(_TitanRoot)', 'Module', 'CSharpCodeTools', 'CSharpCodeTools.csproj'))</_CSharpCodeToolsProject>
+    <_TitanCodeGenWeavingExtraArgs Condition="'$(TitanCodeGenAllowParseErrors)' == 'true'">AllowParseErrors=1</_TitanCodeGenWeavingExtraArgs>
+  </PropertyGroup>
+
+  <!-- ============================================================ -->
+  <!-- Collect generator, project metadata, schema and C++ inputs    -->
+  <!-- Imported third-party headers also affect parsed declarations. -->
+  <!-- ============================================================ -->
+  <ItemGroup>
+    <_CppHeaderInputs Include="$(_TitanRoot)Core.Window\**\*.h;$(_TitanRoot)Core.Window\**\*.hpp;$(_TitanRoot)Core.Window\**\*.hxx;$(_TitanRoot)Core.Window\**\*.inl;$(_TitanRoot)Core.Window\**\*.ipp;$(_TitanRoot)Core.Window\**\*.inc" />
+    <_CppHeaderInputs Include="$(_TitanRoot)NativeCode\**\*.h;$(_TitanRoot)NativeCode\**\*.hpp;$(_TitanRoot)NativeCode\**\*.hxx;$(_TitanRoot)NativeCode\**\*.inl;$(_TitanRoot)NativeCode\**\*.ipp;$(_TitanRoot)NativeCode\**\*.inc" />
+    <_CppHeaderInputs Include="$(_TitanRoot)3rd\native\**\*.h;$(_TitanRoot)3rd\native\**\*.hpp;$(_TitanRoot)3rd\native\**\*.hxx;$(_TitanRoot)3rd\native\**\*.inl;$(_TitanRoot)3rd\native\**\*.ipp;$(_TitanRoot)3rd\native\**\*.inc" />
+    <_CppProjectInputs Include="$(_TitanRoot)Core.Window\Core.Window.vcxproj;$(_TitanRoot)NativeCode\**\*.vcxitems;$(_TitanRoot)3rd\native\**\*.vcxitems" />
+    <_TitanToolchainInputs Include="$(_TitanRoot)Directory.Packages.props" Condition="Exists('$(_TitanRoot)Directory.Packages.props')" />
+    <_TitanToolchainInputs Include="$(_TitanRoot)global.json" Condition="Exists('$(_TitanRoot)global.json')" />
+    <_CppWeavingBuildInputs Include="$(_CppWeavingProject);$(_TitanRoot)Module\CppWeavingTools\**\*.cs;@(_TitanToolchainInputs)"
+                            Exclude="$(_TitanRoot)Module\CppWeavingTools\bin\**;$(_TitanRoot)Module\CppWeavingTools\obj\**" />
+    <_CSharpCodeToolsBuildInputs Include="$(_CSharpCodeToolsProject);$(_TitanRoot)BuildScript\msbuild\TitanPlatform.props;$(_TitanRoot)Module\CSharpCodeTools\**\*.cs;@(_TitanToolchainInputs)"
+                                 Exclude="$(_TitanRoot)**\bin\**;$(_TitanRoot)**\obj\**" />
+    <_CppWeavingTemplates Include="$(TitanCodeGenTemplatesDirectory)\Empty_CodeGen.vcxitems;$(TitanCodeGenTemplatesDirectory)\Empty_CodeGenCSharp.projitems" />
+  </ItemGroup>
+
+  <!-- ============================================================ -->
+  <!-- Target: _EnsureCodeGenToolsBuilt                              -->
+  <!-- Build the generator tools if they don't exist yet.            -->
+  <!-- Both tools are lightweight and build without any generated   -->
+  <!-- binder, engine assembly or native library.                   -->
+  <!-- ============================================================ -->
+  <!-- 工具源码变化或部署缺失时刷新工具；模板独立同步，避免模板更新反复触发工具构建。 -->
+  <Target Name="_ValidateTitanGeneratedOutputRoot">
+    <Error Condition="'$(TitanPlatform)' != 'Windows' AND '$(TitanPlatform)' != 'Mac' AND '$(TitanPlatform)' != 'Android'" Text="TitanPlatform 必须是 Windows、Mac 或 Android。" />
+    <Error Condition="$([MSBuild]::NormalizeDirectory('$(TitanNativeBinderDirectory)')) != $([MSBuild]::NormalizeDirectory('$(_TitanRoot)', 'codegen', '$(TitanPlatform)', 'NativeBinder'))" Text="原生生成与消费要求统一目录 codegen/$(TitanPlatform)/NativeBinder；不允许覆盖到其他输出根。" />
+  </Target>
+  <!-- Android 无 MSVC 自动生成入口，能力清单来自 Core.Android 的 CMake；缺失时直接拒绝编译。 -->
+  <Target Name="TitanValidateAndroidCapabilities"
+          BeforeTargets="CoreCompile"
+          Condition="'$(TitanPlatform)' == 'Android'">
+    <Error Condition="!Exists('$(TitanAndroidCapabilitiesFile)')"
+           Text="缺少 Android 原生能力清单 $(TitanAndroidCapabilitiesFile)；请先运行 cmake -P Core.Android/RefreshSources.cmake 生成并提交，不能在没有能力清单的情况下编译。" />
+  </Target>
+  <Target Name="_ValidateTitanCodeGenHost" DependsOnTargets="_ValidateTitanGeneratedOutputRoot" Condition="'$(SkipTitanCodeGen)' != 'true'">
+    <Error Condition="!$([MSBuild]::IsOSPlatform('Windows'))"
+           Text="TitanCodeGen.targets 仅用于 Windows；macOS 请运行 cmake -P Core.Mac/GenerateCodegen.cmake，Android 请运行 Core.Android 的 CMake 生成入口（cmake -P Core.Android/GenerateCodegen.cmake），两者都需在托管构建传 -p:SkipTitanCodeGen=true。" />
+    <Error Condition="'$(TitanPlatform)' != 'Windows'" Text="Windows 生成入口要求 TitanPlatform=Windows；Mac/Android 原生生成必须由各自 CMake 入口执行（Core.Mac/GenerateCodegen.cmake、Core.Android/GenerateCodegen.cmake）。" />
+  </Target>
+
+  <Target Name="_EnsureCppWeavingBuilt"
+          Condition="'$(SkipTitanCodeGen)' != 'true'"
+          DependsOnTargets="_ValidateTitanCodeGenHost;_InvalidateMissingCppWeavingDeployment;_BuildCppWeavingTool;_DeployCppWeavingTemplates" />
+
+  <Target Name="_InvalidateMissingCppWeavingDeployment"
+          Condition="'$(SkipTitanCodeGen)' != 'true' AND (!Exists('$(_CppWeavingExe)') OR !Exists('$(_CppWeavingDll)') OR !Exists('$(_TitanToolsDir)CppWeavingTools.deps.json') OR !Exists('$(_TitanToolsDir)CppWeavingTools.runtimeconfig.json') OR !Exists('$(_TitanToolsDir)ClangSharp.dll') OR !Exists('$(_TitanToolsDir)ClangSharp.Interop.dll') OR !Exists('$(_TitanToolsDir)libclang.dll') OR !Exists('$(_TitanToolsDir)libClangSharp.dll'))">
+    <Delete Files="$(_CppWeavingBuildStamp)" />
+  </Target>
+
+  <Target Name="_BuildCppWeavingTool"
+          Condition="'$(SkipTitanCodeGen)' != 'true'"
+          Inputs="@(_CppWeavingBuildInputs);$(_TitanRoot)BuildScript\msbuild\TitanPlatform.props"
+          Outputs="$(_CppWeavingBuildStamp)">
+    <Message Importance="high" Text="[TitanCodeGen] Building CppWeavingTools..." />
+    <Exec Command="dotnet build &quot;$(_CppWeavingProject)&quot; -c Debug --nologo -v q"
+          WorkingDirectory="$(_TitanRoot)" />
+    <Touch Files="$(_CppWeavingBuildStamp)" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="_DeployCppWeavingTemplates" Condition="'$(SkipTitanCodeGen)' != 'true'">
+    <Copy SourceFiles="@(_CppWeavingTemplates)" DestinationFolder="$(_TitanToolsDir)Templates" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="_EnsureCSharpCodeToolsBuilt"
+          Condition="'$(SkipTitanCodeGen)' != 'true'"
+          DependsOnTargets="_ValidateTitanCodeGenHost;_InvalidateMissingCSharpCodeToolsDeployment;_BuildCSharpCodeTool" />
+
+  <Target Name="_InvalidateMissingCSharpCodeToolsDeployment"
+          Condition="'$(SkipTitanCodeGen)' != 'true' AND (!Exists('$(_CSharpCodeToolsExe)') OR !Exists('$(_CSharpCodeToolsDll)') OR !Exists('$(_TitanToolsDir)CSharpCodeTools.deps.json') OR !Exists('$(_TitanToolsDir)CSharpCodeTools.runtimeconfig.json'))">
+    <Delete Files="$(_CSharpCodeToolsBuildStamp)" />
+  </Target>
+
+  <Target Name="_BuildCSharpCodeTool"
+          Condition="'$(SkipTitanCodeGen)' != 'true'"
+          Inputs="@(_CSharpCodeToolsBuildInputs)"
+          Outputs="$(_CSharpCodeToolsBuildStamp)">
+    <Message Importance="high" Text="[TitanCodeGen] Building CSharpCodeTools..." />
+    <Exec Command="dotnet build &quot;$(_CSharpCodeToolsProject)&quot; -c Debug --nologo -v q"
+          WorkingDirectory="$(_TitanRoot)" />
+    <Touch Files="$(_CSharpCodeToolsBuildStamp)" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="_EnsureCodeGenToolsBuilt"
+          DependsOnTargets="_EnsureCppWeavingBuilt;_EnsureCSharpCodeToolsBuilt" />
+
+  <!-- ============================================================ -->
+  <!-- Target: TitanGenerateGlueCode                                 -->
+  <!-- Runs CppWeavingTools and CSharpCodeTools.                     -->
+  <!--                                                               -->
+  <!-- Inputs / Outputs give MSBuild incremental build support:      -->
+  <!-- if the sentinel is newer than every header, the target is     -->
+  <!-- skipped automatically.                                        -->
+  <!-- ============================================================ -->
+  <Target Name="_InvalidateMissingCodeGenOutputs"
+          Condition="'$(SkipTitanCodeGen)' != 'true' AND Exists('$(_CodeGenSentinel)') AND (!Exists('$(_CodeGenPOD)') OR !Exists('$(_CodeGenCppProject)') OR !Exists('$(_CodeGenCSharpProject)'))">
+    <Delete Files="$(_CodeGenSentinel)" />
+  </Target>
+
+  <Target Name="TitanGenerateGlueCode" BeforeTargets="Build;ClCompile;CoreCompile"
+          DependsOnTargets="TitanGenerateNativeBindings;TitanGenerateManagedSources" Condition="'$(SkipTitanCodeGen)' != 'true' AND '$(TitanConsumeSourceOutputs)' != 'true' AND '$(LeanClrHostProject)' == ''" />
+
+  <Target Name="TitanGenerateNativeBindings"
+          DependsOnTargets="_EnsureCodeGenToolsBuilt;_InvalidateMissingCodeGenOutputs"
+          Condition="'$(SkipTitanCodeGen)' != 'true'"
+          Inputs="@(_CppHeaderInputs);@(_CppProjectInputs);@(_CppWeavingBuildInputs);@(_CppWeavingTemplates);@(_TitanToolchainInputs);$(_TitanRoot)BuildScript\msbuild\TitanPlatform.props;$(_CppWeavingExe);$(MSBuildThisFileFullPath)"
+          Outputs="$(_CodeGenSentinel)">
+
+    <Message Importance="high" Text="[TitanCodeGen] Generating C++ ↔ C# glue code..." />
+
+    <!-- Step 1: CppWeavingTools – parse Core.Window headers, emit NativeBinder -->
+    <Exec Command="&quot;$(_CppWeavingExe)&quot; vcxproj=&quot;$(_TitanRoot)Core.Window\Core.Window.vcxproj&quot; TitanRoot=&quot;$(_TitanRoot).&quot; Platform=Windows Configuration=$(Configuration) CppOut=&quot;$(TitanNativeBinderDirectory)&quot; CsOut=&quot;$(TitanNativeBinderDirectory)&quot; ModuleNC=EngineNS.CoreSDK.CoreModule Pch=&quot;$(_TitanRoot)Core.Window\pch.h&quot; TargetCppPOD=&quot;$(_CodeGenPOD)&quot; $(_TitanCodeGenWeavingExtraArgs)"
+          WorkingDirectory="$(_TitanRoot)" LogStandardErrorAsError="true" StdOutEncoding="UTF-8" StdErrEncoding="UTF-8" />
+
+    <!-- Touch the stamp file so MSBuild knows generation is up-to-date -->
+    <Touch Files="$(_CodeGenSentinel)" AlwaysCreate="true" />
+
+    <Message Importance="high" Text="[TitanCodeGen] Code generation completed." />
+  </Target>
+
+  <!-- 源码输入必须每次重新求值，工具用内容指纹判断 no-op 和缺失自愈。 -->
+  <Target Name="TitanGenerateManagedSources" DependsOnTargets="_EnsureCSharpCodeToolsBuilt"
+          Condition="'$(SkipTitanCodeGen)' != 'true'">
+    <Exec Command="dotnet &quot;$(_CSharpCodeToolsDll)&quot; &quot;$(_TitanRoot)Rpc_Engine.txt&quot; mode=Rpc+AutoSync+Macross TitanRoot=&quot;$(_TitanRoot).&quot; Platform=$(TitanPlatform) Configuration=$(Configuration) csproj=&quot;$(_TitanSourceProject)&quot;"
+          WorkingDirectory="$(_TitanRoot)" LogStandardErrorAsError="true" StdOutEncoding="UTF-8" StdErrEncoding="UTF-8" />
+  </Target>
+
+  <ItemDefinitionGroup Condition="'$(TitanConsumeNativeOutputs)' == 'true'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(TitanNativeBinderDirectory);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <!-- 原生编译项同样在生成之后接入，保留工程默认编译元数据。 -->
+  <Target Name="TitanConsumeNativeGeneratedInputs"
+          BeforeTargets="ClCompile"
+          DependsOnTargets="_ValidateTitanGeneratedOutputRoot;TitanGenerateGlueCode"
+          Condition="'$(TitanConsumeNativeOutputs)' == 'true'">
+    <PropertyGroup>
+      <_TitanConsumeRoot>$(_TitanRoot)</_TitanConsumeRoot>
+      <_TitanNativeDirectory>$([MSBuild]::NormalizePath('$(_TitanConsumeRoot)', 'codegen', '$(TitanPlatform)', 'NativeBinder'))</_TitanNativeDirectory>
+      <_TitanNativeInputs>$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '$(IntDir)', 'titan-native.inputs'))</_TitanNativeInputs>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(_CSharpCodeToolsDll)')" Text="缺少轻量源码工具：$(_CSharpCodeToolsDll)" />
+    <Exec Command="dotnet &quot;$(_CSharpCodeToolsDll)&quot; ValidateOutputs=true SourceOwner=Engine Compiler=Cpp SourcesList=&quot;$(_TitanNativeInputs)&quot; TitanRoot=&quot;$(_TitanConsumeRoot).&quot; Platform=$(TitanPlatform) Configuration=$(Configuration)"
+          WorkingDirectory="$(_TitanConsumeRoot)" LogStandardErrorAsError="true" StdOutEncoding="UTF-8" StdErrEncoding="UTF-8" />
+    <ReadLinesFromFile File="$(_TitanNativeInputs)">
+      <Output TaskParameter="Lines" ItemName="_TitanOwnedNativeInputs" />
+    </ReadLinesFromFile>
+    <ItemGroup>
+      <ClCompile Include="@(_TitanOwnedNativeInputs)" Exclude="@(ClCompile->'%(FullPath)')" TitanGenerated="true" />
+    </ItemGroup>
+  </Target>
+
+  <!-- 在生成完成后接入清单拥有的源码；Import 不会在首次生成后重新求值。 -->
+  <Target Name="TitanConsumeManagedGeneratedInputs"
+          BeforeTargets="CoreCompile"
+          DependsOnTargets="_ValidateTitanGeneratedOutputRoot;TitanGenerateGlueCode"
+          Condition="'$(TitanEnginePlatform)' != '' OR '$(TitanConsumeSourceOutputs)' == 'true'">
+    <PropertyGroup>
+      <_TitanConsumeRoot>$(_TitanRoot)</_TitanConsumeRoot>
+      <_TitanSourceOwner Condition="'$(TitanEnginePlatform)' != ''">Engine</_TitanSourceOwner>
+      <_TitanSourceOwner Condition="'$(_TitanSourceOwner)' == ''">$(AssemblyName)</_TitanSourceOwner>
+      <_TitanManagedInputs>$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', 'titan-managed.inputs'))</_TitanManagedInputs>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(_CSharpCodeToolsDll)')" Text="缺少轻量源码工具：$(_CSharpCodeToolsDll)" />
+    <Exec Command="dotnet &quot;$(_CSharpCodeToolsDll)&quot; ValidateOutputs=true SourceOwner=&quot;$(_TitanSourceOwner)&quot; Compiler=CSharp SourcesList=&quot;$(_TitanManagedInputs)&quot; TitanRoot=&quot;$(_TitanConsumeRoot).&quot; Platform=$(TitanPlatform) Configuration=$(Configuration) csproj=&quot;$(MSBuildProjectFullPath)&quot; RpcCallers=$(TitanConsumeRpcCallers)"
+          WorkingDirectory="$(_TitanConsumeRoot)" LogStandardErrorAsError="true" StdOutEncoding="UTF-8" StdErrEncoding="UTF-8" />
+    <ReadLinesFromFile File="$(_TitanManagedInputs)">
+      <Output TaskParameter="Lines" ItemName="_TitanOwnedManagedInputs" />
+    </ReadLinesFromFile>
+    <ItemGroup>
+      <Compile Include="@(_TitanOwnedManagedInputs)" Exclude="@(Compile->'%(FullPath)')" TitanGenerated="true" />
+    </ItemGroup>
+  </Target>
+
+  <!-- DataCopyer 是引擎构建后的独立反射阶段，源码生成阶段不加载引擎。 -->
+  <Import Project="$(MSBuildThisFileDirectory)TitanDataCopyer.targets" />
+
+</Project>

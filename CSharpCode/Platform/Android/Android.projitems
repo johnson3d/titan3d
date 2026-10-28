@@ -9,7 +9,9 @@
     <Import_RootNamespace>Android</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\Windows\FileManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)InputSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NativeWindowAndroid.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlatformAndroid.cs" />
   </ItemGroup>
 </Project>

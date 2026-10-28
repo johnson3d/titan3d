@@ -221,9 +221,9 @@ namespace NxMath
 		}
 		inline static void MultiplyNoParentScale(ThisType& OutTransform, const ThisType& A, const ThisType& B)
 		{
-			OutTransform.Quat = A.mQuat * B.mQuat;
+			OutTransform.Quat = A.Quat * B.Quat;
 			OutTransform.Quat.Normalize();
-			OutTransform.Scale = A.mScale;
+			OutTransform.Scale = A.Scale;
 			OutTransform.Position = B.Quat * (A.Position) + B.Position;
 
 			//var mtx1 = A.ToMatrixWithScale();
@@ -352,7 +352,7 @@ namespace NxMath
 
 		}
 		inline static constexpr NxTransformNoScale GetIdentity() {
-			return NxTransformNoScale(Vector3::Zero(), NxQuat<Type>::Identity());
+			return NxTransformNoScale(Vector3::Zero(), Vector3::Zero(), NxQuat<Type>::Identity());
 		}
 
 		inline Matrix ToMatrixNoScale() const
@@ -414,10 +414,9 @@ namespace NxMath
 			// Translation = 1/S(B) *[Q(B)(-1)*(T(A)-T(B))*Q(B)]
 			// where A = this, B = Other
 
-			auto SafeRecipScale3D = GetSafeScaleReciprocal(ParentTransform.Scale);
 			auto InverseRot = ParentTransform.Quat.Inverse();
 
-			Position = (InverseRot * (Position - ParentTransform.Position)) * SafeRecipScale3D;
+			Position = InverseRot * (Position - ParentTransform.Position);
 			Quat = InverseRot * Quat;
 		}
 
@@ -432,8 +431,6 @@ namespace NxMath
 			ThisType Result;
 
 			{
-				Vector3 SafeRecipScale3D = GetSafeScaleReciprocal(Other.Scale);
-				
 				if (Other.Quat.IsNormalized() == false)
 				{
 					return GetIdentity();
@@ -443,8 +440,7 @@ namespace NxMath
 				Result.Quat = Inverse * Quat;
 
 				auto dist = Position - Other.Position;
-				auto tmp = (Inverse * dist);
-				Result.Position = tmp * SafeRecipScale3D;
+				Result.Position = Inverse * dist;
 			}
 			return Result;
 		}
@@ -483,7 +479,7 @@ namespace NxMath
 		}
 		inline static void MultiplyUsingMatrix(ThisType& OutTransform, const ThisType& A, const ThisType& B)
 		{
-			ConstructTransformFromMatrix(A.ToMatrixWithScale(), B.ToMatrixWithScale(), OutTransform);
+			ConstructTransformFromMatrix(A.ToMatrixNoScale(), B.ToMatrixNoScale(), OutTransform);
 		}
 		inline NxVector3<Type> TransformVector3(const NxVector3<Type>& V) const
 		{

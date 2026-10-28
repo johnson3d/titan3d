@@ -1,10 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../../BuildScript/msbuild/TitanManagedProject.props" />
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <BaseOutputPath>$(SolutionDir)\binaries\Plugins</BaseOutputPath>
+    <BaseOutputPath>$(TtTitanRoot)binaries/Plugins</BaseOutputPath>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -17,10 +18,10 @@
   </PropertyGroup>
 
   <Import Project="..\Survivor.projitems" Label="Shared" />
-  <Import Project="..\..\..\..\BuildScript\LeanClrPlugin.targets" />
+  <Import Project="..\..\..\..\BuildScript\leanclr\LeanClrPlugin.targets" />
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Module\Engine.Window\Engine.Window.csproj" />
+    <ProjectReference Include="$(TitanEngineProject)" />
     <ProjectReference Include="..\..\..\GameCore\Inventory\Inventory.All\Inventory.All.csproj" />
   </ItemGroup>
 

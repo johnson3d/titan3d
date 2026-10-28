@@ -57,6 +57,11 @@ endif()
 
 target_compile_definitions(leanclr PRIVATE LEANCLR_DLL_EXPORTS LEANCLR_USE_SHIPPING_ZLIB=1 Z_PREFIX)
 
+# zlib gz* need lseek from <unistd.h> on POSIX; zconf.h gates it on HAVE_UNISTD_H
+if(UNIX)
+    target_compile_definitions(leanclr PRIVATE HAVE_UNISTD_H)
+endif()
+
 if(LEANCLR_GC_ALGORITHM STREQUAL "MARK_SWEEP")
     target_compile_definitions(leanclr PUBLIC LEANCLR_GC_MARK_SWEEP=1)
 elseif(LEANCLR_GC_ALGORITHM STREQUAL "ZERO_GC")

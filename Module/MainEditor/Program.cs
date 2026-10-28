@@ -84,7 +84,7 @@ namespace MainEditor
             var dir = new System.IO.DirectoryInfo(System.IO.Path.GetFullPath(binDir));
             while (dir != null)
             {
-                var contentConfig = System.IO.Path.Combine(dir.FullName, "content", "engineconfigdx12.jscfg");
+                var contentConfig = System.IO.Path.Combine(dir.FullName, "content", "config", "engineconfig_windows_dx12.jscfg");
                 var pluginDir = System.IO.Path.Combine(dir.FullName, "binaries", "Plugins");
                 if (System.IO.File.Exists(contentConfig) && System.IO.Directory.Exists(pluginDir))
                     return EnsureDirectorySeparator(dir.FullName);
@@ -128,7 +128,7 @@ namespace MainEditor
         static string ResolveConfigPath(string cfg, string binDir, string engineRoot)
         {
             if (string.IsNullOrWhiteSpace(cfg))
-                cfg = System.IO.Path.Combine("content", "engineconfigdx12.jscfg");
+                cfg = System.IO.Path.Combine("content", "config", "engineconfig_windows_dx12.jscfg");
 
             if (System.IO.Path.IsPathRooted(cfg))
                 return cfg;
@@ -173,7 +173,7 @@ namespace MainEditor
             foreach (var candidate in candidates)
             {
                 var fullPath = System.IO.Path.GetFullPath(candidate);
-                if (TtFileManager.FileExists(System.IO.Path.Combine(fullPath, "Core.Window.dll")))
+                if (TtFileManager.FileExists(System.IO.Path.Combine(fullPath, EngineNS.CoreSDK.CoreModule)))
                     return fullPath;
             }
 
@@ -252,9 +252,9 @@ namespace MainEditor
             Console.WriteLine($"NativeDLL={bootstrapNativeDll}");
             var dllDir = ResolveNativeDllDirectory(mBin, engineRoot, bootstrapNativeDll);
 
-            if (!TtFileManager.FileExists(dllDir + "/Core.Window.dll"))
+            if (!TtFileManager.FileExists(dllDir + "/" + EngineNS.CoreSDK.CoreModule))
             {
-                TtNativeWindow.MessageBoxA(IntPtr.Zero, $"{dllDir}: not found native dll, please compile Core.Window project", "Error", 0);
+                TtNativeWindow.MessageBoxA(IntPtr.Zero, $"{dllDir}: not found native dll, please compile {EngineNS.CoreSDK.CoreModule} project", "Error", 0);
                 return;
             }
             EngineNS.TtNativeWindow.SetDllDirectoryA(dllDir);
@@ -360,11 +360,13 @@ namespace MainEditor
             
             while (true)
             {
+#if PWindow
                 var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.TtMainEditorApplication;
                 if (mainEditor != null)
                 {
                     mainEditor.mClrProfiler.UpdateLogs();
                 }
+#endif
                 if (EngineNS.TtEngine.Instance.Tick() == false)
                 {
                     break;

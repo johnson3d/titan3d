@@ -1,0 +1,15 @@
+<Project>
+
+  <!--
+    Android 宿主的中间产物统一落在仓库 intermediate 下：
+      intermediate/android/maui/obj/<Config>/<TFM>/   工程 obj（含 SDK 拷贝出的 assets/titan）
+      intermediate/android/content/<Config>/          build-android.ps1 暂存的内容与 manifest
+    BaseIntermediateOutputPath 必须在 Microsoft.Common.props 导入前设置，SDK 风格的 csproj
+    正文里再设已经太晚，所以只能放在本文件。bin（APK 交付物）仍留在工程目录下。
+  -->
+  <PropertyGroup>
+    <TitanAndroidIntermediateRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..', 'intermediate', 'android'))</TitanAndroidIntermediateRoot>
+    <BaseIntermediateOutputPath>$(TitanAndroidIntermediateRoot)maui/obj/</BaseIntermediateOutputPath>
+  </PropertyGroup>
+
+</Project>

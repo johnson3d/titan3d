@@ -2,7 +2,7 @@
   "profiles": {
     "LocalizationTool": {
       "commandName": "Project",
-      "commandLineArgs": "EngineRoot=$(SolutionDir) config=$(SolutionDir)content\\applocalization.jscfg NativeDLL=debug"
+      "commandLineArgs": "EngineRoot=$(SolutionDir) config=$(SolutionDir)content\\config\\engineconfig_windows_localization.jscfg NativeDLL=debug"
     }
   }
 }

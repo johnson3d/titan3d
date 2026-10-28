@@ -167,8 +167,10 @@ namespace EngineNS.Editor
 
         private unsafe void TriggerRenderDocCapture()
         {
+#if PWindow
             IRenderDocTool.GetInstance().SetGpuDevice(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject);
             TtEngine.Instance.GfxDevice.RenderQueue.CaptureRenderDocFrame = true;
+#endif
         }
     }
 }

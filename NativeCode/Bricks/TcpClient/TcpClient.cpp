@@ -1,5 +1,9 @@
 #include "TcpClient.h"
 
+#if !defined(PLATFORM_WIN)
+#include <fcntl.h>
+#endif
+
 #define new VNEW
 
 NS_BEGIN

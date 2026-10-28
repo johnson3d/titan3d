@@ -35,14 +35,20 @@ namespace VFX_Memory
 	
 	class auto_memory_lock
 	{
+		const bool mNeedLock;
 	public:
-		auto_memory_lock()
+		explicit auto_memory_lock(bool needLock = true)
+			: mNeedLock(needLock)
 		{
-			memory_lock();
+			if (mNeedLock)
+				memory_lock();
 		}
+		auto_memory_lock(const auto_memory_lock&) = delete;
+		auto_memory_lock& operator=(const auto_memory_lock&) = delete;
 		~auto_memory_lock()
 		{
-			memory_unlock();
+			if (mNeedLock)
+				memory_unlock();
 		}
 	};
 
@@ -290,6 +296,9 @@ const size_t c_uMalloc0xCC = 0xCCCCCCCC;
 				}
 			}
 
+			if (pStart->file == c_vfxMemoryNoLeakReport)
+				continue;
+
 			if (dumpUnknown || pStart->line != 0)
 			{
 				__MemoryTrace("%s(%Id) : Memory leak! There have %Id bytes memory had not be delete. Alloc ID : %Id Info : %s\n"
@@ -376,7 +385,7 @@ const size_t c_uMalloc0xCC = 0xCCCCCCCC;
 
 		if (GOnMemAllocCallBack)
 		{
-			GOnMemAllocCallBack(nSize, file, line, pMem->id);
+			GOnMemAllocCallBack(ret, nSize, file, line, pMem->id);
 		}
 
 		return ret;
@@ -493,6 +502,10 @@ const size_t c_uMalloc0xCC = 0xCCCCCCCC;
 	{
 		Inner_Free(p, NULL, 0);
 	}
+	void operator delete[](void* p, std::size_t) VGLIBCXX_USE_NOEXCEPT
+	{
+		Inner_Free(p, NULL, 0);
+	}
 	void* operator new(std::size_t size, const std::nothrow_t&) VGLIBCXX_USE_NOEXCEPT
 	{
 		return Inner_Alloc(size, NULL, 0);
@@ -568,6 +581,10 @@ void operator delete[](void* p) VGLIBCXX_USE_NOEXCEPT
 {
     Inner_Free(p, NULL, 0);
 }
+void operator delete[](void* p, std::size_t) VGLIBCXX_USE_NOEXCEPT
+{
+    Inner_Free(p, NULL, 0);
+}
 void* operator new(std::size_t size, const std::nothrow_t&) VGLIBCXX_USE_NOEXCEPT
 {
     return Inner_Alloc(size, NULL, 0);
@@ -640,6 +657,10 @@ void operator delete  (void*, void*, const char* file, int line) VGLIBCXX_USE_NO
 		Inner_Free(p, file, line);
 	}
 	void operator delete[](void* p) VGLIBCXX_USE_NOEXCEPT
+	{
+		Inner_Free(p, NULL, 0);
+	}
+	void operator delete[](void* p, std::size_t) VGLIBCXX_USE_NOEXCEPT
 	{
 		Inner_Free(p, NULL, 0);
 	}
@@ -727,13 +748,13 @@ extern "C"
 			__MemoryTrace("%s End _vfxCheckMemoryState\n", name);
 		}
 	}
-	VFX_API void vfxMemory_SetDebugInfo(void* memory, LPCSTR info)
+	VFX_API void vfxMemory_SetDebugInfo(void* memory, LPCSTR info, bool needLock)
 	{
 #if defined(NOTUSE_MEMMGR)
 		if (memory == 0)
 			return;
 
-		auto_memory_lock	lock;
+		auto_memory_lock	lock(needLock);
 		MemHead* p = (MemHead*)((INT_PTR)memory - sizeof(MemHead));
 		if (p->index >= MaxMemNumber)
 			return;
@@ -755,7 +776,7 @@ extern "C"
 		if (memory == 0)
 			return;
 
-		auto_memory_lock	lock;
+		auto_memory_lock	lock(needLock);
 
 		_small_cookie * p = reinterpret_cast<_small_cookie *>
 			((INT_PTR)memory - sizeof(_small_cookie) + sizeof(_small_cookie *));
@@ -771,7 +792,25 @@ extern "C"
 		p->debuginfo = str;
 #endif
 	}
-		LPCSTR vfxMemory_GetDebugInfo(void* memory)
+	VFX_API void vfxMemory_SetNoLeakReport(void* memory, bool needLock)
+	{
+		if (memory == 0)
+			return;
+
+		auto_memory_lock	lock(needLock);
+#if defined(NOTUSE_MEMMGR)
+		MemHead* p = (MemHead*)((INT_PTR)memory - sizeof(MemHead));
+		p->file = c_vfxMemoryNoLeakReport;
+		// MemInfo::IsValid 会比对 file，两边必须一起改
+		if (p->index < MaxMemNumber && MemInfo::GAllMems[p->index] != NULL)
+			MemInfo::GAllMems[p->index]->file = c_vfxMemoryNoLeakReport;
+#else
+		_small_cookie * p = reinterpret_cast<_small_cookie *>
+			((INT_PTR)memory - sizeof(_small_cookie) + sizeof(_small_cookie *));
+		p->file = c_vfxMemoryNoLeakReport;
+#endif
+	}
+	LPCSTR vfxMemory_GetDebugInfo(void* memory)
 	{
 #if defined(NOTUSE_MEMMGR)
 		if (memory == 0)

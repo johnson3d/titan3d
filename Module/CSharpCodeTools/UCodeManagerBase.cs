@@ -14,43 +14,41 @@ namespace CSharpCodeTools
         public List<string> SourceCodes = new List<string>();
         public List<string> WritedFiles = new List<string>();
         public List<string> WritedCppFiles = new List<string>();
+        protected ProjectSourceInputs ProjectInputs;
+        private string CurrentSourceFile;
+        private readonly Dictionary<string, string> ClassSources = new(StringComparer.Ordinal);
+        protected readonly Dictionary<string, List<ClassDeclarationSyntax>> ProjectDeclarations = new(StringComparer.Ordinal);
 
-        public void GatherCodeFiles(List<string> includes, List<string> excludes)
+        public void SetProjectInputs(ProjectSourceInputs inputs)
         {
-            List<string> stdExcludes = new List<string>();
-            foreach (var i in excludes)
-            {
-                bool error;
-                var s = NormalizePath(i, out error);
-                stdExcludes.Add(s);
-            }
-            foreach (var i in includes)
-            {
-                var files = System.IO.Directory.GetFiles(i, "*.cs", System.IO.SearchOption.AllDirectories);
-                foreach (var j in files)
-                {
-                    bool error;
-                    var s = NormalizePath(j, out error);
-                    if (IsExclude(s, stdExcludes))
-                    {
-                        continue;
-                    }
-                    SourceCodes.Add(s);
-                }
-            }
+            ProjectInputs = inputs;
+            SourceCodes.Clear();
+            SourceCodes.AddRange(inputs.SourceFiles);
+            WritedFiles.Clear();
+            ClassDefines.Clear();
+            ClassSources.Clear();
         }
-        bool IsExclude(string file, List<string> stdExcludes)
+
+        protected static InvalidDataException SourceError(SyntaxNode node, string message)
         {
-            foreach (var i in stdExcludes)
-            {
-                if (file.StartsWith(i))
-                {
-                    return true;
-                }
-            }
-            var code = System.IO.File.ReadAllText(file);
-            return CheckSourceCode(code) == false;
+            var location = node.GetLocation().GetLineSpan();
+            return new InvalidDataException($"{location.Path}({location.StartLinePosition.Line + 1}): {message}");
         }
+
+        protected void WriteGeneratedCode(UClassCodeBase definition, string directory, string suffix, string role = "", bool sourceUsings = true)
+        {
+            if (definition.ClassCode.Length == 0) return;
+            var relative = System.IO.Path.GetRelativePath(System.IO.Path.GetDirectoryName(ProjectInputs.ProjectFile), ClassSources[definition.FullName]);
+            var identity = relative.Replace('\\', '/') + "|" + definition.FullName + role;
+            var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(identity)));
+            var file = System.IO.Path.Combine(directory, hash + suffix);
+            var code = (sourceUsings ? string.Join("\n", definition.Usings.Distinct(StringComparer.Ordinal)) + "\n" : "") + definition.ClassCode;
+            System.IO.Directory.CreateDirectory(directory);
+            if (!System.IO.File.Exists(file) || System.IO.File.ReadAllText(file) != code)
+                System.IO.File.WriteAllText(file, code, new UTF8Encoding(false));
+            WritedFiles.Add(System.IO.Path.GetFullPath(file));
+        }
+
         protected virtual bool CheckSourceCode(string code)
         {
             return false;
@@ -220,8 +218,15 @@ namespace CSharpCodeTools
             }
 
             result = CreateClassDefine(fullname);
+            result.Declaration = ProjectDeclarations[fullname][0];
+            foreach (var declaration in ProjectDeclarations[fullname])
+            {
+                foreach (var directive in declaration.SyntaxTree.GetCompilationUnitRoot().Usings)
+                    result.AddUsing(directive.ToString());
+            }
 
             ClassDefines.Add(fullname, result);
+            ClassSources.Add(fullname, CurrentSourceFile);
 
             return result;
         }
@@ -237,35 +242,32 @@ namespace CSharpCodeTools
         }
         public void GatherClass()
         {
-            const string Start_String = "#if TitanEngine_AutoGen";
-            const string End_String = "#endif//TitanEngine_AutoGen";
-            foreach (var i in SourceCodes)
+            if (ProjectInputs == null) throw new InvalidOperationException("必须先提供目标工程源码上下文");
+            ClassDefines.Clear();
+            ClassSources.Clear();
+            ProjectDeclarations.Clear();
+            var roots = new List<(string File, CompilationUnitSyntax Root)>();
+            foreach (var file in SourceCodes.OrderBy(p => p, StringComparer.Ordinal))
             {
-                string beforeStr = null;
-                string afterStr = null;
-                var code = System.IO.File.ReadAllText(i);
-                var istart = code.IndexOf(Start_String);
-                if (istart >= 0)
+                CurrentSourceFile = file;
+                var code = LegacyGeneratedBlocks.Strip(System.IO.File.ReadAllText(file), file);
+                var tree = CSharpSyntaxTree.ParseText(code, ProjectInputs.ParseOptions, file);
+                var errors = tree.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToArray();
+                if (errors.Length != 0) throw new InvalidDataException(string.Join("\n", errors.Select(d => d.ToString())));
+                var root = tree.GetCompilationUnitRoot();
+                roots.Add((file, root));
+                foreach (var declaration in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
                 {
-                    beforeStr = code.Substring(0, istart);
-                    var iend = code.IndexOf(End_String);
-                    if (iend >= 0)
-                    {
-                        afterStr = code.Substring(iend + End_String.Length);
-                    }
+                    var fullname = declaration.GetFullName();
+                    if (!ProjectDeclarations.TryGetValue(fullname, out var partials))
+                        ProjectDeclarations.Add(fullname, partials = new List<ClassDeclarationSyntax>());
+                    partials.Add(declaration);
                 }
-                if (beforeStr != null)
-                {
-                    code = beforeStr + afterStr;
-                }
-                SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
-
-                CompilationUnitSyntax root = tree.GetCompilationUnitRoot();
-
-                foreach (var j in root.Members)
-                {
-                    IterateClass(root, j);
-                }
+            }
+            foreach (var (file, root) in roots)
+            {
+                CurrentSourceFile = file;
+                foreach (var declaration in root.Members) IterateClass(root, declaration);
             }
 
             foreach (var i in ClassDefines)
@@ -276,6 +278,13 @@ namespace CSharpCodeTools
         }
         public virtual void IterateClass(CompilationUnitSyntax root, MemberDeclarationSyntax decl)
         {
+            if (decl is BaseNamespaceDeclarationSyntax scope)
+            {
+                foreach (var member in scope.Members) IterateClass(root, member);
+                return;
+            }
+            if (decl is TypeDeclarationSyntax enclosing)
+                foreach (var nested in enclosing.Members.OfType<TypeDeclarationSyntax>()) IterateClass(root, nested);
             switch (decl.Kind())
             {
                 case SyntaxKind.ClassDeclaration:

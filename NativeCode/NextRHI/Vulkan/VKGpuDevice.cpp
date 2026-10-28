@@ -18,6 +18,12 @@
 
 #define new VNEW
 
+#if defined(PLATFORM_MAC)
+#include <mach-o/dyld.h>
+#include <limits.h>
+#include <unistd.h>
+#endif
+
 NS_BEGIN
 
 namespace NxRHI
@@ -93,8 +99,35 @@ namespace NxRHI
 		VFX_LTRACE(ELTT_Graphics, "Vulkan: %s\r\n", pCallbackData->pMessage);
 		return FALSE;
 	}
+#if defined(PLATFORM_MAC)
+	// 自带 ICD 优先：<exe目录>/vulkan/icd.d 存在时锁定驱动清单，否则 loader 还会扫描
+	// /opt/homebrew 等系统目录，重复加载两份 MoltenVK 会触发 objc 类重复警告甚至崩溃。
+	// 显式设置 VK_DRIVER_FILES/VK_ICD_FILENAMES 时尊重用户配置
+	static void BindBundledVulkanICD()
+	{
+		if (getenv("VK_DRIVER_FILES") != nullptr || getenv("VK_ICD_FILENAMES") != nullptr)
+			return;
+		char exePath[PATH_MAX];
+		uint32_t size = sizeof(exePath);
+		if (_NSGetExecutablePath(exePath, &size) != 0)
+			return;
+		std::string dir(exePath);
+		auto pos = dir.find_last_of('/');
+		if (pos == std::string::npos)
+			return;
+		dir.resize(pos);
+		std::string icd = dir + "/vulkan/icd.d/MoltenVK_icd.json";
+		if (access(icd.c_str(), R_OK) != 0)
+			return;
+		setenv("VK_DRIVER_FILES", icd.c_str(), 0);
+	}
+#endif
+
 	bool VKGpuSystem::InitGpuSystem(ERhiType type, const FGpuSystemDesc* desc)
 	{
+#if defined(PLATFORM_MAC)
+		BindBundledVulkanICD();
+#endif
 		uint32_t apiVersion = 0;
 		VkResult result = vkEnumerateInstanceVersion(&apiVersion);
 
@@ -140,6 +173,12 @@ namespace NxRHI
 #elif defined(PLATFORM_DROID)
 		if (FindExtension(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME))
 			extensionNames.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
+#elif defined(PLATFORM_MAC)
+		//MoltenVK 是 portability subset 驱动，必须显式开启 portability 枚举才能列出物理设备
+		if (FindExtension(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME))
+			extensionNames.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+		if (FindExtension(VK_EXT_METAL_SURFACE_EXTENSION_NAME))
+			extensionNames.push_back(VK_EXT_METAL_SURFACE_EXTENSION_NAME);
 #endif
 		
 		
@@ -187,6 +226,9 @@ namespace NxRHI
 		createInfo.enabledLayerCount = static_cast<uint32_t>(mValidationLayers.size());
 		if (mValidationLayers.size() > 0)
 			createInfo.ppEnabledLayerNames = mValidationLayers.data();
+#if defined(PLATFORM_MAC)
+		createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
 
 		if (vkCreateInstance(&createInfo, nullptr, &mVKInstance) != VK_SUCCESS) 
 		{
@@ -227,8 +269,19 @@ namespace NxRHI
 			createInfo_surf.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
 			createInfo_surf.pNext = nullptr;
 			createInfo_surf.hinstance = nullptr;
-			createInfo_surf.hwnd = (HWND)desc->WindowHandle; 
+			createInfo_surf.hwnd = (HWND)desc->WindowHandle;
 			vkCreateWin32SurfaceKHR(mVKInstance, &createInfo_surf, nullptr, &mSurface);
+		}
+#elif defined(PLATFORM_MAC)
+		//WindowHandle 是托管侧 SDL_Metal_GetLayer 给出的 CAMetalLayer*
+		if (desc->WindowHandle != nullptr)
+		{
+			VkMetalSurfaceCreateInfoEXT createInfo_surf = {};
+			createInfo_surf.sType = VK_STRUCTURE_TYPE_METAL_SURFACE_CREATE_INFO_EXT;
+			createInfo_surf.pNext = nullptr;
+			createInfo_surf.flags = 0;
+			createInfo_surf.pLayer = desc->WindowHandle;
+			vkCreateMetalSurfaceEXT(mVKInstance, &createInfo_surf, nullptr, &mSurface);
 		}
 #endif
 		return true;
@@ -452,9 +505,10 @@ namespace NxRHI
 
 		VkSurfaceFormatKHR SwapchainFormats[16];
 		vkGetPhysicalDeviceSurfaceFormatsKHR(mPhysicalDevice, mSurface, &mCaps.NumOfSwapchainFormats, nullptr);
+		//MoltenVK 报告的 surface format 可超过本表容量（Apple M5 上 >16），按容量截断避免栈溢出
 		if (mCaps.NumOfSwapchainFormats > 16)
 		{
-			ASSERT(false);
+			mCaps.NumOfSwapchainFormats = 16;
 		}
 		vkGetPhysicalDeviceSurfaceFormatsKHR(mPhysicalDevice, mSurface, &mCaps.NumOfSwapchainFormats, SwapchainFormats);
 		for (UINT i = 0; i < mCaps.NumOfSwapchainFormats; i++)
@@ -509,6 +563,11 @@ namespace NxRHI
 				extensions.push_back(VK_KHR_16BIT_STORAGE_EXTENSION_NAME);
 			if (HasExtension(VK_KHR_SWAPCHAIN_EXTENSION_NAME))
 				extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+#if defined(PLATFORM_MAC)
+			//MoltenVK 提供 portability subset，规范要求启用它时显式声明
+			if (HasExtension(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME))
+				extensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
+#endif
 			if (HasExtension(VK_KHR_16BIT_STORAGE_EXTENSION_NAME))
 				extensions.push_back(VK_KHR_16BIT_STORAGE_EXTENSION_NAME);
 			if (HasExtension(VK_KHR_SHADER_FLOAT16_INT8_EXTENSION_NAME))
@@ -598,7 +657,6 @@ namespace NxRHI
 
 		VkPhysicalDeviceRobustness2FeaturesEXT robustness2Features = {};
 		robustness2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT;
-		robustness2Features.nullDescriptor = VK_TRUE;
 
 		VkPhysicalDeviceAccelerationStructureFeaturesKHR asFeatures = {};
 		asFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
@@ -631,13 +689,16 @@ namespace NxRHI
 
 		VkPhysicalDeviceFeatures2 features2{};
 		features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
-		features2.pNext = &dynamicRenderingFeatures;
+		//robustness2 也挂进查询链：nullDescriptor 强制开启时 MoltenVK 报 FEATURE_NOT_PRESENT（不支持该特性），
+		//用查询值代替强制 TRUE，桌面驱动查询即 TRUE，行为不变
+		features2.pNext = &robustness2Features;
+		robustness2Features.pNext = &dynamicRenderingFeatures;
 		dynamicRenderingFeatures.pNext = &localReadFeatures;
 		localReadFeatures.pNext = &sync2Features;
 		vkGetPhysicalDeviceFeatures2(mPhysicalDevice, &features2);
 		features2.features.robustBufferAccess = VK_TRUE;
-		features2.features.geometryShader = VK_TRUE;
 		features2.features.multiViewport = VK_TRUE;
+		//geometryShader 保持查询值：MoltenVK 无几何着色器，强制开启 vkCreateDevice 会报 FEATURE_NOT_PRESENT
 
 		mVulkanExt.IsDynamicRendering = (dynamicRenderingFeatures.dynamicRendering == VK_TRUE);
 		mVulkanExt.IsDynamicRenderingLocalRead = (localReadFeatures.dynamicRenderingLocalRead == VK_TRUE);
@@ -730,16 +791,6 @@ namespace NxRHI
 			createInfo.pEnabledFeatures = &mDeviceFeatures;*/
 		}
 
-		std::vector<const char*>	mValidationLayers;
-		if (desc->CreateDebugLayer)
-		{
-			auto pLayer = pVkGpuSys->FindLayer("VK_LAYER_KHRONOS_validation");
-			if (pLayer != nullptr)
-			{
-				mValidationLayers.push_back("VK_LAYER_KHRONOS_validation");
-			}
-		}
-
 #if defined(HasModule_GpuDump)
 		VkDeviceDiagnosticsConfigCreateInfoNV nvDiagnosticsInfo{};
 		if (desc->IsAftermath && desc->IsNVIDIA())
@@ -758,18 +809,13 @@ namespace NxRHI
 			createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
 			createInfo.ppEnabledExtensionNames = extensions.data();
 		}
-		if (mValidationLayers.size() > 0)
-		{
-			createInfo.enabledLayerCount = static_cast<uint32_t>(mValidationLayers.size());
-			createInfo.ppEnabledLayerNames = mValidationLayers.data();
-		}
-		else
-		{
-			createInfo.enabledLayerCount = 0;
-		}
+		//设备级 layer 自 Vulkan 1.0 起废弃，loader 忽略并警告 enabledLayerCount 必须为 0；
+		//validation 统一在 vkCreateInstance 处启用
+		createInfo.enabledLayerCount = 0;
 		auto hr = vkCreateDevice(mPhysicalDevice, &createInfo, GetVkAllocCallBacks(), &mDevice);
 		if (hr != VK_SUCCESS)
 		{
+			VFX_LTRACE(ELTT_Graphics, "[VKGpuDevice] vkCreateDevice failed hr=0x%08x", (UINT)hr);
 			ASSERT(false);
 			return false;
 		}

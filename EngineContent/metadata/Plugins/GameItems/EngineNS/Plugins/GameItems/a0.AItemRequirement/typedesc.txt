@@ -1,0 +1,2 @@
+GameItems
+EngineNS.Plugins.GameItems.AItemRequirement@GameItems

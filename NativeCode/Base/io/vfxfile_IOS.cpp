@@ -153,12 +153,12 @@ INT_PTR	VFile_IOS::Seek(INT_PTR lOff, SeekPosition nFrom)
 {
 	if (m_hFile == NULL)
 		return 0;
-	fseek(m_hFile, (long)lOff, nFrom);
+	fseek(m_hFile, (long)lOff, nFrom); // lp64-ok: fseek 的 long 参数
 	return ftell(m_hFile);
 }
 vBOOL		VFile_IOS::SetLength(UINT_PTR dwNewLen)
 {
-	return fseek(m_hFile, (long)dwNewLen, SEEK_SET) == dwNewLen;
+	return fseek(m_hFile, (long)dwNewLen, SEEK_SET) == dwNewLen; // lp64-ok: fseek 的 long 参数
 }
 UINT_PTR	VFile_IOS::GetLength() const
 {

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- LeanCLR 插件代理生成器：只通过 BuildScript\LeanClrPlugin.targets 挂到游戏插件，不进入 CompilingGenerator.projitems -->
+  <!-- LeanCLR 插件代理生成器：只通过 BuildScript\leanclr\LeanClrPlugin.targets 挂到游戏插件，不进入 CompilingGenerator.projitems -->
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Titan.LeanClrGenerator</AssemblyName>

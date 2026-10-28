@@ -1130,7 +1130,7 @@ namespace EngineNS
                         {
 #if PWindow
                             var code = TtDataCopyer.GenCode(hash);
-                            var file = this.FileManager.GetRoot(IO.TtFileManager.ERootDir.PluginSource) + "DataCopyer/DataCopyer/Copyer.gen.cs";
+                            var file = this.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + "codegen/Windows/DataCopyer/Copyer.gen.cs";
                             TtFileManager.WriteAllText(file, code);
 
                             Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Plugin DataCopyer need build");

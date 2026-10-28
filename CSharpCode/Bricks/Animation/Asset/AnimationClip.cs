@@ -230,7 +230,9 @@ namespace EngineNS.Animation.Asset
                 return false;
             }
 
+#if PWindow
             public unsafe partial bool FBXCreateCreateDraw(EGui.Controls.TtContentBrowser ContentBrowser);
+#endif
             public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.TtContentBrowser ContentBrowser);
         }
         #endregion

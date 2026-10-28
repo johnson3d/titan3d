@@ -715,28 +715,3 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
 }
-
-
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace EngineNS.Bricks.Procedure.Node
-{
-	partial class TtBezier
-	{
-		public unsafe float macross_GetY (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, float x) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			var _return_value = GetY(x);
-			return _return_value;
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

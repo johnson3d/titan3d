@@ -18,6 +18,7 @@ namespace CppWeaving
         public string CppOutputDir;
         public string CsOutputDir;
         public string ExtInclude;
+        public ClangProfile Profile = new ClangProfile();
 
         public const string VReturnValueMarshal = "EngineNS::VReturnValueMarshal";
 		public const string VGetTypeDefault = "EngineNS::VGetTypeDefault";

@@ -372,28 +372,3 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
     }
 }
-
-
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace EngineNS.Bricks.Terrain.CDLOD
-{
-	partial class UTerrainMaterialId
-	{
-		public unsafe int macross_GetRandomPlant (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int rdValue) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			var _return_value = GetRandomPlant(rdValue);
-			return _return_value;
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

@@ -1,4 +1,4 @@
-{
+﻿{
   "  [{0}]": {
     "Translation": "",
     "Sources": [
@@ -9511,5 +9511,51 @@
         "Line": 52
       }
     ]
-  }
+  },
+  "Check Toolchain": "检查工具链",
+  "Cook Assets": "cook 资产",
+  "Native Build": "原生编译",
+  "Managed Build": "托管编译",
+  "Stage Content": "内容暂存",
+  "Package APK": "APK 打包",
+  " (failed, see log)": "（失败，见日志）",
+  "Repository root not found: make sure the editor runs inside the titanengine tree": "找不到仓库根：请确认编辑器在 titanengine 目录树下运行",
+  "Saved: {0} / {1}": "已保存：{0} / {1}",
+  "Repository root: {0}": "仓库根：{0}",
+  "Toolchain": "工具链",
+  "Pick {0} directory": "选择 {0} 目录",
+  "Installed SDK": "SDK 已安装",
+  "platforms: {0}": "platforms：{0}",
+  "build-tools: {0}": "build-tools：{0}",
+  "(not installed)": "（未安装）",
+  "adb: {0}": "adb：{0}",
+  "(platform-tools/adb.exe not found)": "（未找到 platform-tools/adb.exe）",
+  "Packaged Content (TitanContent.txt)": "打包内容（TitanContent.txt）",
+  "Already exists or invalid: {0}": "已存在或无效：{0}",
+  "Added: {0} (save and rebuild the APK to take effect)": "已添加：{0}（需保存并重新构建 APK 才会生效）",
+  "Build Options": "构建选项",
+  "Cook assets before build": "先 cook 再打包",
+  "Blacklist (optional)": "Blacklist（可空）",
+  "Save Config": "保存配置",
+  "Cancel Build": "取消构建",
+  "Start Build": "开始构建",
+  "Build started (phase: toolchain check)": "构建已启动（阶段：检查工具链）",
+  "Toolchain check started": "工具链检查已启动",
+  "Build finished": "构建完成",
+  "Status: {0}": "状态：{0}",
+  "APK: {0}": "APK：{0}",
+  "Open APK folder": "打开 APK 所在目录",
+  "Deploy: adb not found (androidSdk/platform-tools/adb.exe)": "部署：未找到 adb（androidSdk/platform-tools/adb.exe）",
+  "Cancel Deploy": "取消部署",
+  "Canceled.": "已取消。",
+  "List Devices": "列出设备",
+  "Listing devices…": "正在列出设备…",
+  "Deploy to Device": "部署到设备",
+  "Installing {0} …": "正在安装 {0} …",
+  "Deployed.": "部署完成。",
+  "Deploy failed, exit code {0}.": "部署失败，退出码 {0}。",
+  "Deploy: {0}": "部署：{0}"
 }
+
+
+

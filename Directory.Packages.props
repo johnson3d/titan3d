@@ -9,6 +9,9 @@
     <PackageVersion Include="ClangSharp" Version="20.1.2.1" />
     <PackageVersion Include="envdte100" Version="17.14.40260" />
     <PackageVersion Include="libclang.runtime.win-x64" Version="20.1.2" />
+    <PackageVersion Include="libclang.runtime.osx-arm64" Version="20.1.2" />
+    <PackageVersion Include="libClangSharp.runtime.win-x64" Version="20.1.2" />
+    <PackageVersion Include="libClangSharp.runtime.osx-arm64" Version="20.1.2" />
     <PackageVersion Include="MemoryInterop.ILPatcher" Version="2.2.1" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.10.0" />

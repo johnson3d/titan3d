@@ -119,10 +119,13 @@ void CoreSDK::SetMemLeakCallBack(FOnNativeMemLeak cb)
 	SDK_vfxMemory_SetMemLeakCallBack(cb);
 }
 
-extern "C" VFX_API void vfxMemory_SetDebugInfo(void* memory, LPCSTR info);
-void CoreSDK::SetMemDebugInfo(void* memory, const char* info)
+void CoreSDK::SetMemDebugInfo(void* memory, const char* info, bool needLock)
 {
-	vfxMemory_SetDebugInfo(memory, info);
+	vfxMemory_SetDebugInfo(memory, info, needLock);
+}
+void CoreSDK::SetMemNoLeakReport(void* memory, bool needLock)
+{
+	vfxMemory_SetNoLeakReport(memory, needLock);
 }
 
 void CoreSDK::UpdateEngineFrame(UINT64 frame)

@@ -2444,7 +2444,7 @@ namespace EngineNS.NxRHI
         public unsafe static int SaveDxtMips(XndNode mipsNode, StbImageSharp.TtMemImage curImage, TtPicDesc desc)
         {
             System.Diagnostics.Debug.Assert(desc.DontCompress == false);
-
+#if PWindow
             var srcImage = new TextureCompress.FCubeImage();
             fixed (byte* pImageData = &curImage.Data[0])
             {
@@ -2490,6 +2490,7 @@ namespace EngineNS.NxRHI
                     }
                 }
             }
+#endif
             return desc.MipLevel;
         }
         public unsafe static int SaveDxtMips_BcEncoder(XndNode mipsNode, StbImageSharp.ImageResultFloat curImage, TtPicDesc desc)

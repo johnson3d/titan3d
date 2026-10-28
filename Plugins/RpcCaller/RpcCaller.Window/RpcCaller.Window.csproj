@@ -5,10 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <BaseOutputPath>$(SolutionDir)\binaries\Plugins</BaseOutputPath>
+    <!-- 共享 RPC 调用方由生成清单校验后接入，不再导入旧生成工程。 -->
+    <TitanConsumeRpcCallers>true</TitanConsumeRpcCallers>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Module\Engine.Window\Engine.Window.csproj" />
   </ItemGroup>
-  <Import Project="..\..\..\codegen\Rpc\Engine\EngineRPC.projitems" Label="Shared" />
   <Import Project="..\RpcCaller\RpcCaller.projitems" Label="Shared" />
 </Project>

@@ -383,6 +383,17 @@ namespace NxRHI
 			createInfo_surf.hwnd = (HWND)desc.OutputWindow;
 			vkCreateWin32SurfaceKHR(device->GetVkInstance(), &createInfo_surf, nullptr, &mSurface);
 		}
+#elif defined(PLATFORM_MAC)
+		//OutputWindow 是托管侧 SDL_Metal_GetLayer 给出的 CAMetalLayer*
+		if (desc.OutputWindow != nullptr)
+		{
+			VkMetalSurfaceCreateInfoEXT createInfo_surf = {};
+			createInfo_surf.sType = VK_STRUCTURE_TYPE_METAL_SURFACE_CREATE_INFO_EXT;
+			createInfo_surf.pNext = nullptr;
+			createInfo_surf.flags = 0;
+			createInfo_surf.pLayer = desc.OutputWindow;
+			vkCreateMetalSurfaceEXT(device->GetVkInstance(), &createInfo_surf, nullptr, &mSurface);
+		}
 #endif
 		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device->mPhysicalDevice, mSurface, &mCapabilities);
 		
@@ -520,7 +531,23 @@ namespace NxRHI
 		SwapChainSupportDetails scs;
 		QuerySwapChainSupport(device->mPhysicalDevice, mSurface, scs);
 		if (false == CheckSwapSurfaceFormat(surfaceFormat, scs.formats))
-			return false;
+		{
+			//MoltenVK 的 surface 只有 Metal 原生 BGRA 等格式，不含 RGBA8；
+			//回退到首个受支持格式并同步 Desc.Format（Windows 请求格式必命中，不走此分支）
+			bool bFallback = false;
+			for (auto& i : scs.formats)
+			{
+				if (i.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+				{
+					surfaceFormat = i;
+					Desc.Format = VKFormat2Format(i.format);
+					bFallback = true;
+					break;
+				}
+			}
+			if (!bFallback)
+				return false;
+		}
 
 		VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
 		for (auto& i : scs.presentModes)
@@ -533,8 +560,19 @@ namespace NxRHI
 		}
 
 		VkExtent2D extent;
-		extent.width = std::max(scs.capabilities.minImageExtent.width, std::min(scs.capabilities.maxImageExtent.width, Desc.Width));
-		extent.height = std::max(scs.capabilities.minImageExtent.height, std::min(scs.capabilities.maxImageExtent.height, Desc.Height));
+		//MoltenVK 等 surface 的 currentExtent 是窗口像素尺寸且必须精确匹配（Retina 下是逻辑尺寸的整数倍），
+		//请求逻辑尺寸会被 clamp 成像素值但 Desc 不同步 → 视口只有窗口一半；以 currentExtent 为准并回写 Desc
+		if (scs.capabilities.currentExtent.width != UINT32_MAX)
+		{
+			extent = scs.capabilities.currentExtent;
+			Desc.Width = extent.width;
+			Desc.Height = extent.height;
+		}
+		else
+		{
+			extent.width = std::max(scs.capabilities.minImageExtent.width, std::min(scs.capabilities.maxImageExtent.width, Desc.Width));
+			extent.height = std::max(scs.capabilities.minImageExtent.height, std::min(scs.capabilities.maxImageExtent.height, Desc.Height));
+		}
 		mCapabilities = scs.capabilities;
 
 		VkSwapchainCreateInfoKHR createInfo = {};
@@ -591,6 +629,9 @@ namespace NxRHI
 			
 			pDx12Texture->Desc.Width = Desc.Width;
 			pDx12Texture->Desc.Height = Desc.Height;
+			//MoltenVK surface 只有 BGRA 格式，上面的回退会改 Desc.Format；
+			//backbuffer 的 view 必须与 swapchain image 实际格式一致，否则撞 validation 且颜色通道错乱
+			pDx12Texture->Desc.Format = Desc.Format;
 			pDx12Texture->mImage = swapChainImages[i];
 			pDx12Texture->GpuState = EGpuResourceState::GRS_Undefine;
 			FTransitionScope::TryAutoTransition(cmd, pDx12Texture, EGpuResourceState::GRS_Present, false);
@@ -727,7 +768,8 @@ namespace NxRHI
 			return;
 		
 		auto result = vkAcquireNextImageKHR(device->mDevice, mSwapChain, UINT64_MAX, VK_NULL_HANDLE, AcquireFence, &CurrentBackBuffer);
-		ASSERT(result == VK_SUCCESS);
+		// MoltenVK 在窗口刚创建/尺寸变化后的首帧 acquire 常返回 SUBOPTIMAL，索引仍有效可继续渲染
+		ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR);
 
 		vkWaitForFences(device->mDevice, 1, &AcquireFence, VK_TRUE, UINT64_MAX);
 		vkResetFences(device->mDevice, 1, &AcquireFence);
@@ -755,7 +797,8 @@ namespace NxRHI
 		presentInfo.waitSemaphoreCount = 0;
 		//presentInfo.pWaitSemaphores = &rfinishSemaphore->mSemaphore;
 		auto result = cmdQueue->SafeQueuePresentKHR(&presentInfo, EQueueType::QU_Default);
-		ASSERT(result == VK_SUCCESS);
+		// MoltenVK 在窗口首帧/尺寸变化后常返回 SUBOPTIMAL（上屏已完成，下一帧应重建交换链）
+		ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR);
 		
 		CurrentFrame = (CurrentFrame + 1) % (UINT)BackBuffers.size();
 	}

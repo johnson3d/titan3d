@@ -392,37 +392,3 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
     }
 }
-
-
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace EngineNS.Graphics.Pipeline.Shader
-{
-	partial class TtMacrossShaderUtility
-	{
-		public static unsafe void macross_InterlockedAddUInt32 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, ref uint location1, uint value, out uint oriValue) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			InterlockedAddUInt32(ref location1, value, out oriValue);
-		}
-		public static unsafe void macross_InterlockedAddInt32 (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, ref int location1, int value, out int oriValue) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			InterlockedAddInt32(ref location1, value, out oriValue);
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

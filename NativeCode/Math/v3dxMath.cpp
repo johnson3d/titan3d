@@ -141,11 +141,11 @@ float Math::Sign(float fValue)
 //-----------------------------------------------------------------------
 float Math::InvSqrt(float fValue)
 {
-	long i;
+	int i;
 	float y, r;
 
 	y = fValue * 0.5f;
-	i = *reinterpret_cast<long *>(&fValue);
+	i = *reinterpret_cast<int *>(&fValue);
 	i = 0x5f3759df - (i >> 1);
 	r = *reinterpret_cast<float *>(&i);
 	r = r * (1.5f - r * r * y);

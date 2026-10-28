@@ -1,14 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- 展示工程：真实构建由 BuildScript/android/build-android.ps1 -> CMake(Ninja, NDK r27) 完成。
+       源码唯一来源仍是下列 Label="Shared" 的 .vcxitems；Core.Android/RefreshSources.cmake 由它生成清单。 -->
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|ARM">
-      <Configuration>Debug</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|ARM">
-      <Configuration>Release</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|ARM64">
       <Configuration>Debug</Configuration>
       <Platform>ARM64</Platform>
@@ -17,79 +11,23 @@
       <Configuration>Release</Configuration>
       <Platform>ARM64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|x64">
-      <Configuration>Debug</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|x64">
-      <Configuration>Release</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|x86">
-      <Configuration>Debug</Configuration>
-      <Platform>x86</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|x86">
-      <Configuration>Release</Configuration>
-      <Platform>x86</Platform>
-    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}</ProjectGuid>
-    <Keyword>Android</Keyword>
+    <Keyword>MakeFileProj</Keyword>
     <RootNamespace>Core_Android</RootNamespace>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
-    <ApplicationType>Android</ApplicationType>
-    <ApplicationTypeRevision>3.0</ApplicationTypeRevision>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>Clang_5_0</PlatformToolset>
-    <AndroidAPILevel>android-28</AndroidAPILevel>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>Clang_5_0</PlatformToolset>
-    <AndroidAPILevel>android-28</AndroidAPILevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>Clang_5_0</PlatformToolset>
-    <AndroidAPILevel>android-28</AndroidAPILevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>Clang_5_0</PlatformToolset>
-    <AndroidAPILevel>android-28</AndroidAPILevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>Clang_5_0</PlatformToolset>
-    <AndroidAPILevel>android-28</AndroidAPILevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>Clang_5_0</PlatformToolset>
-    <AndroidAPILevel>android-28</AndroidAPILevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>Clang_5_0</PlatformToolset>
-    <AndroidAPILevel>android-28</AndroidAPILevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>Clang_5_0</PlatformToolset>
-    <AndroidAPILevel>android-28</AndroidAPILevel>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
@@ -103,13 +41,22 @@
     <Import Project="..\NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\Animation\Animation.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\Image.Shared\Image.Shared.vcxitems" Label="Shared" />
-    <Import Project="..\codegen\NativeBinder\CodeGen.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\ImageDecoder\ImageDecoder.vcxitems" Label="Shared" />
+    <!-- LeanCLR 运行期显式支持 Android（build_config.h: LEANCLR_PLATFORM_ANDROID），与 Mac 一样由 CMake add_subdirectory 编成静态 PIC 库。 -->
+    <Import Project="..\NativeCode\Bricks\LeanCLR\LeanCLR.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\LeanCLR\LeanCLR.vcxitems" Label="Shared" />
+    <Import Project="..\codegen\Android\NativeBinder\CodeGen.vcxitems" Label="Shared"
+            Condition="Exists('..\codegen\Android\NativeBinder\CodeGen.vcxitems')" />
     <Import Project="..\NativeCode\Platform\Android\Android.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\TcpClient\TcpClient.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\FreeType\FreeType.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\MeshOptimizer\MeshOptimizer.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\Particle\Particle.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\PhysicsCore\PhysicsCore.vcxitems" Label="Shared" />
+    <!-- DestinyPX 物理是纯 C++ 实现（无 Windows API），托管 NxPhysics.projitems 无条件接入，故与 Mac 一样编入原生与胶水清单。 -->
+    <Import Project="..\NativeCode\Bricks\DestinyPX\NxMath\NxMath.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\DestinyPX\NxPhysics\NxPhysics.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\Quark\Quark.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\Terrain\Terrain.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\Canvas\Canvas.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\MathLib\MathLib.vcxitems" Label="Shared" />
@@ -134,161 +81,43 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)binaries\android\$(Configuration)\</OutDir>
-    <UseMultiToolTask>true</UseMultiToolTask>
-    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)binaries\android\$(Configuration)\</OutDir>
-    <UseMultiToolTask>true</UseMultiToolTask>
-    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <OutDir>$(SolutionDir)binaries\android\$(Configuration)\</OutDir>
-    <UseMultiToolTask>true</UseMultiToolTask>
-    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <OutDir>$(SolutionDir)binaries\android\$(Configuration)\</OutDir>
-    <UseMultiToolTask>true</UseMultiToolTask>
-    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-    <OutDir>$(SolutionDir)binaries\android\$(Configuration)\</OutDir>
-    <UseMultiToolTask>true</UseMultiToolTask>
-    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <NMakeBuildCommandLine>powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)..\BuildScript\android\build-android.ps1&quot; -Configuration Debug -Stage Native</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>$(NMakeBuildCommandLine)</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>cmake --build &quot;$(ProjectDir)..\intermediate\cpp\Core.Android\Debug&quot; --target clean</NMakeCleanCommandLine>
+    <NMakeOutput>$(ProjectDir)..\binaries\android\Debug\libCore.Android.so</NMakeOutput>
+    <NMakePreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;PTR_64;_DEBUG</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-    <OutDir>$(SolutionDir)binaries\android\$(Configuration)\</OutDir>
-    <UseMultiToolTask>true</UseMultiToolTask>
-    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <NMakeBuildCommandLine>powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)..\BuildScript\android\build-android.ps1&quot; -Configuration Release -Stage Native</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>$(NMakeBuildCommandLine)</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>cmake --build &quot;$(ProjectDir)..\intermediate\cpp\Core.Android\Release&quot; --target clean</NMakeCleanCommandLine>
+    <NMakeOutput>$(ProjectDir)..\binaries\android\Release\libCore.Android.so</NMakeOutput>
+    <NMakePreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;PTR_64;NDEBUG</NMakePreprocessorDefinitions>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <OutDir>$(SolutionDir)binaries\android\$(Configuration)\</OutDir>
-    <UseMultiToolTask>true</UseMultiToolTask>
-    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <OutDir>$(SolutionDir)binaries\android\$(Configuration)\</OutDir>
-    <UseMultiToolTask>true</UseMultiToolTask>
-    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-  </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <EnableNeonCodegen>true</EnableNeonCodegen>
-      <CppLanguageStandard>c++1z</CppLanguageStandard>
-      <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <Link>
-      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <CppLanguageStandard>c++1z</CppLanguageStandard>
-      <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <Link>
-      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <CppLanguageStandard>c++1z</CppLanguageStandard>
-      <EnableNeonCodegen>true</EnableNeonCodegen>
-      <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <Link>
-      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <CppLanguageStandard>c++1z</CppLanguageStandard>
-      <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <Link>
-      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
-    </Link>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;PTR_64;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;PTR_64;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../3rd/native/FreeType/include;../3rd/native/eigen-3.4.0;../3rd/native/Vulkan/Include;../3rd/native/Recast/Detour/include;../3rd/native/Recast/DetourCrowd/include;../3rd/native/Recast/DetourTileCache/include;../3rd/native/Recast/DebugUtils/include;../3rd/native/Recast/Recast/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-frtti -Wno-format-security -Wno-unused-variable -Wno-unused-command-line-argument %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <Link>
-      <LibraryDependencies>c;m;atomic;log;android;EGL;GLESv2;vulkan;%(LibraryDependencies)</LibraryDependencies>
-    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;PTR_64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <CppLanguageStandard>c++1z</CppLanguageStandard>
-      <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>-frtti -Wno-format-security -Wno-unused-variable -Wno-unused-command-line-argument %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <Link>
-      <LibraryDependencies>c;m;atomic;log;android;EGL;GLESv2;vulkan;%(LibraryDependencies)</LibraryDependencies>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;PTR_64;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>../3rd/native/FreeType/include;../3rd/native/eigen-3.4.0;../3rd/native/Vulkan/Include;../3rd/native/Recast/Detour/include;../3rd/native/Recast/DetourCrowd/include;../3rd/native/Recast/DetourTileCache/include;../3rd/native/Recast/DebugUtils/include;../3rd/native/Recast/Recast/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-frtti -Wno-format-security -Wno-unused-variable -Wno-unused-command-line-argument %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <Link>
-      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>PLATFORM_DROID;VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <CppLanguageStandard>c++1z</CppLanguageStandard>
-      <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <Link>
-      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
-    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Core_Android.cpp" />

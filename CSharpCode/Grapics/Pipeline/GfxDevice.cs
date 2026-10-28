@@ -119,8 +119,8 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
             
-            if (await InitGPU(engine, engine.Config.AdaperId, engine.Config.RHIType, 
-                SlateApplication.NativeWindow.HWindow, engine.Config.HasDebugLayer, engine.Config.UseRenderDoc) == false)
+            if (await InitGPU(engine, engine.Config.AdaperId, engine.Config.RHIType,
+                SlateApplication.NativeWindow.SurfaceHandle, engine.Config.HasDebugLayer, engine.Config.UseRenderDoc) == false)
             {
                 return false;
             }
@@ -260,7 +260,7 @@ namespace EngineNS.Graphics.Pipeline
             RenderContext = null;
             RenderSystem?.Dispose();
             RenderSystem = null;
-#if PWindow
+#if PWindow || PMac
             SDL.SDL3.SDL_Quit();
 #endif
         }

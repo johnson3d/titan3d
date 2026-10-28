@@ -65,28 +65,8 @@
 
 #elif defined(PLATFORM_DROID)
 
-#define HasModule_Android
-#define HasModule_ImGui
-#define HasModule_Base
-#define HasModule_Math
-#define HasModule_OpenGL
-#define HasModule_RHI
-#define HasModule_CrossShaderCompiler
-#define HasModule_Image_Shared
-#define HasModule_Pipeline
-#define HasModule_Mesh
-#define HasModule_TextConverter
-#define HasModule_Animation
-#define HasModule_TcpClient
-#define HasModule_PhysicsCore
-#define HasModule_MeshSimplify
-#define HasModule_Terrain
-#define HasModule_Particle
-#define HasModule_MathLib
-#define HasModule_NextRHI
-#define HasModule_Vulkan
-#define HasModule_Canvas
-#define HasModule_TextFont
+// 模块能力由 Android 平台工程的 Shared Import 生成，与 CMake 编译源清单一致。
+#include "../../Core.Android/generated/TitanAndroidModules.h"
 
 #include <jni.h>
 #include <errno.h>
@@ -96,6 +76,19 @@
 #include <android/native_window_jni.h>
 #include <pthread.h>
 #include <sys/stat.h>
+
+#include "vfxtypes_nw.h"
+#elif defined(PLATFORM_MAC)
+
+// 模块能力由 Mac 平台工程的 Shared Import 生成，与 CMake 编译源清单一致。
+#include "../../Core.Mac/generated/TitanMacModules.h"
+
+#include <errno.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/mman.h>
 
 #include "vfxtypes_nw.h"
 #elif defined(PLATFORM_IOS)

@@ -19,7 +19,7 @@ TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention
 typedef void(*FWriteLogString)(const void* threadName, const void* logStr, ELevelTraceType level, const void* file, int line);
 
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
-typedef void(* FOnNativeMemAlloc)(size_t size, const char* file, size_t line, size_t id);
+typedef void(* FOnNativeMemAlloc)(void* ptr, size_t size, const char* file, size_t line, size_t id);
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void(* FOnNativeMemFree)(size_t size, const char* file, size_t line, size_t id);
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
@@ -119,7 +119,10 @@ public:
 	static void SetMemAllocCallBack(FOnNativeMemAlloc cb);
 	static void SetMemFreeCallBack(FOnNativeMemFree cb);
 	static void SetMemLeakCallBack(FOnNativeMemLeak cb);
-	static void SetMemDebugInfo(void* memory, const char* info);
+	// needLock=false 要求当前线程已持有内存锁，仅供分配回调等持锁调用使用。
+	static void SetMemDebugInfo(void* memory, const char* info, bool needLock = true);
+	static void SetMemNoLeakReport(void* memory, bool needLock = true);
+
 
 	static FOnGpuDeviceRemoved OnGpuDeviceRemoved;
 	static void SetOnGpuDeviceRemovedCallBack(FOnGpuDeviceRemoved fn) {

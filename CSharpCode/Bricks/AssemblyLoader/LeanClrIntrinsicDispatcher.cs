@@ -83,7 +83,19 @@ namespace EngineNS.LeanCLR
                 MacrossPatch = new EngineNS.Macross.TtMacrossPatchLoader(host.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "macrosspatch/");
                 MacrossPatch.StageA(assemblies.Assemblies, (name, path) => RegisterAssembly(runtime, name, path));
                 mRuntime = runtime;
-                if (!mRuntime.Initialize())
+                bool previousNoReportLeaks = Profiler.TtNativeMemory.IsNoReportLeaks;
+                bool initialized;
+                try
+                {
+                    // 仅覆盖同步 VM 初始化；ThreadStatic 作用域中不能 await。
+                    Profiler.TtNativeMemory.IsNoReportLeaks = true;
+                    initialized = mRuntime.Initialize();
+                }
+                finally
+                {
+                    Profiler.TtNativeMemory.IsNoReportLeaks = previousNoReportLeaks;
+                }
+                if (!initialized)
                 {
                     mRuntime = default;
                     CoreSDK.IUnknown_Release(runtime.NativePointer.ToPointer());
@@ -221,7 +233,10 @@ namespace EngineNS.LeanCLR
         {
             TtLeanClrRuntime.SetIntrinsicDispatcher(null);
             TtLeanClrHostBinding.Detach();
-            // 已初始化的 VM 不能释放：native 侧没有 shutdown，释放会留下悬空的 active runtime
+            // 已初始化的 VM 属于进程级单例；LeanCLR 不支持 shutdown，不能在模块清理时销毁。
+            // 想了一下Cleanup已经是系统退出了，LeanCLR的Runtime也应该随之退出，所以这里还是释放掉吧，虽然目前LeanClr的释放不会完整，但是以后他应该要做到vm是可以释放，并重新加载的吧
+            // 后续可以给mRuntime调用都做一下null判断，确保不会再调用到已经释放的Runtime
+            CoreSDK.IUnknown_Release(mRuntime);
             mRuntime = default;
             mOwnerManagedThreadId = 0;
             mRegistries.Clear();

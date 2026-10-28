@@ -64,7 +64,11 @@ namespace CppWeaving.Cpp2CS
 
     class USysClassManager
 	{
-		public static USysClassManager Instance = new USysClassManager();
+		public static USysClassManager Instance { get; private set; } = new USysClassManager(TargetPlatform.Windows);
+		public static void Init(TargetPlatform platform)
+		{
+			Instance = new USysClassManager(platform);
+		}
 		Dictionary<string, UClass> mTypes = new Dictionary<string, UClass>();
 		Dictionary<string, string> mTypeDefs = new Dictionary<string, string>();
 		public string FindTypeDef(string name)
@@ -74,7 +78,7 @@ namespace CppWeaving.Cpp2CS
 				return result;
 			return null;
 		}
-		public USysClassManager()
+		public USysClassManager(TargetPlatform platform)
 		{
 			RegClass("size_t", new USystemTypeClass() { CppName = "size_t", CSName = "IntPtr" });
 			RegClass("void", new USystemTypeClass() { CppName = "void", CSName = "void" });
@@ -83,12 +87,27 @@ namespace CppWeaving.Cpp2CS
             RegClass("wchar_t", new USystemTypeStruct() { CppName = "wchar_t", CSName = "wchar_t", RetPodName = "wchar_t" });
             RegClass("short", new USystemTypeStruct() { CppName = "short", CSName = "short", RetPodName = "short" });
 			RegClass("int", new USystemTypeStruct() { CppName = "int", CSName = "int", RetPodName = "int" });
-			RegClass("long", new USystemTypeStruct() { CppName = "int", CSName = "int", RetPodName = "int" });
+			if (platform != TargetPlatform.Windows)
+			{
+				// LP64：long/unsigned long 为 8 字节
+				RegClass("long", new USystemTypeStruct() { CppName = "long", CSName = "long", RetPodName = "long" });
+			}
+			else
+			{
+				RegClass("long", new USystemTypeStruct() { CppName = "int", CSName = "int", RetPodName = "int" });
+			}
 			RegClass("long long", new USystemTypeStruct() { CppName = "long long", CSName = "long", RetPodName = "long long" });
 			RegClass("unsigned char", new USystemTypeStruct() { CppName = "unsigned char", CSName = "byte", RetPodName = "unsigned char" });
 			RegClass("unsigned short", new USystemTypeStruct() { CppName = "unsigned short", CSName = "ushort", RetPodName = "unsigned short" });
 			RegClass("unsigned int", new USystemTypeStruct() { CppName = "unsigned int", CSName = "uint", RetPodName = "unsigned int" });
-			RegClass("unsigned long", new USystemTypeStruct() { CppName = "unsigned int", CSName = "uint", RetPodName = "unsigned long" });
+			if (platform != TargetPlatform.Windows)
+			{
+				RegClass("unsigned long", new USystemTypeStruct() { CppName = "unsigned long", CSName = "ulong", RetPodName = "unsigned long" });
+			}
+			else
+			{
+				RegClass("unsigned long", new USystemTypeStruct() { CppName = "unsigned int", CSName = "uint", RetPodName = "unsigned int" });
+			}
 			RegClass("unsigned long long", new USystemTypeStruct() { CppName = "unsigned long long", CSName = "ulong", RetPodName = "unsigned long long" });
 			RegClass("float", new USystemTypeStruct() { CppName = "float", CSName = "float", RetPodName = "float" });
 			RegClass("double", new USystemTypeStruct() { CppName = "double", CSName = "double", RetPodName = "double" });

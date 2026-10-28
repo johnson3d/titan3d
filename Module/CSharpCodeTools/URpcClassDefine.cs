@@ -45,37 +45,29 @@ namespace CSharpCodeTools
         public bool CallerInClass = false;
         public List<URpcMethod> Methods = new List<URpcMethod>();
         
-        public void GenCode(string dir, string source)
+        // CallerInClass=false 时调用方由共享调用方宿主单独编译，被调方仍归拥有源码的工程。
+        public void GenCallerCode()
+        {
+            if (Methods.Count == 0 || CallerInClass)
+                return;
+            SaveRpcCaller();
+        }
+        public void GenCode()
         {
             if (Methods.Count == 0)
                 return;
 
-            source = source.Replace('\\', '/');
-            var idx = source.LastIndexOf('/');
-            if (idx >= 0)
-            {
-                source = source.Substring(idx + 1);
-            }
-
-            if (CallerInClass == false)
-            {
-                SaveRpcCaller(dir, APHash(source).ToString());
-                this.ResetWriter();
-            }
-            else
-            {
-                SaveRpcCaller(null, APHash(source).ToString());
-            }
+            if (CallerInClass)
+                SaveRpcCaller();
             SaveRpcCallee();
         }
         public void SaveRpcCallee()
         {
             NewLine();
 
-            AddLine($"namespace {this.Namespace}");
-            PushBrackets();
+            BeginNamespaceAndOuter();
             {
-                AddLine($"partial class {this.Name}");
+                AddLine(PartialDeclaration());
                 PushBrackets();
                 {
                     foreach (var i in Methods)
@@ -86,7 +78,7 @@ namespace CSharpCodeTools
                 }
                 PopBrackets();
             }
-            PopBrackets();
+            EndNamespaceAndOuter();
         }
         private void BuildCallee(URpcMethod i)
         {
@@ -241,20 +233,19 @@ namespace CSharpCodeTools
 
                 if (i.RetType != URpcMethod.EDataType.Void)
                 {
-                    AddLine($"return await {this.Name}_RpcCaller.{i.Name}({argCallStr}rpcArg);");
+                    AddLine($"return await {this.CallerName}.{i.Name}({argCallStr}rpcArg);");
                 }
                 else
                 {
-                    AddLine($"{this.Name}_RpcCaller.{i.Name}({argCallStr}rpcArg);");
+                    AddLine($"{this.CallerName}.{i.Name}({argCallStr}rpcArg);");
                 }
             }
             PopBrackets();
         }
-        public void SaveRpcCaller(string dir, string source)
+        public void SaveRpcCaller()
         {
             AddLine("#pragma warning disable 105");
             
-            if (dir != null)
             {
                 //foreach (var i in Usings)
                 //{
@@ -268,10 +259,9 @@ namespace CSharpCodeTools
             
             NewLine();
 
-            AddLine($"namespace {this.Namespace}");
-            PushBrackets();
+            BeginNamespaceAndOuter();
             {
-                AddLine($"public partial class {this.Name}_RpcCaller");
+                AddLine(PartialDeclaration(caller: true));
                 PushBrackets();
                 {
                     foreach (var i in Methods)
@@ -372,24 +362,8 @@ namespace CSharpCodeTools
                 }
                 PopBrackets();
             }
-            PopBrackets();
+            EndNamespaceAndOuter();
 
-            if (dir == null)
-                return;
-            var file = dir + "/" + FullName + $"_{source}.rpc.cs";
-            if (!URpcCodeManager.Instance.WritedFiles.Contains(file.Replace("\\", "/").ToLower()))
-            {
-                URpcCodeManager.Instance.WritedFiles.Add(file.Replace("\\", "/").ToLower());
-            }
-
-            if (System.IO.File.Exists(file))
-            {
-                var oldCode = System.IO.File.ReadAllText(file);
-                if (oldCode == ClassCode)
-                    return;
-            }
-
-            System.IO.File.WriteAllText(file, ClassCode);
         }
     }
 }

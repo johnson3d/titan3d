@@ -26,38 +26,3 @@ namespace EngineNS.Bricks.FX.Skin
         }
     }
 }
-
-
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace EngineNS.Bricks.FX.Skin
-{
-	partial class TtSkinShader
-	{
-		public static unsafe void macross_Lut3S (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, CodeBuilder.ShaderNode.Var.Texture2D LutTex, float NoL, float Curvature, out Vector3 OutColor) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			Lut3S(LutTex, NoL, Curvature, out OutColor);
-		}
-		public static unsafe float macross_CalcCurvature (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, CodeBuilder.ShaderNode.Var.Texture2D normMap, Graphics.Pipeline.Shader.PS_INPUT input, float norBias) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			var _return_value = CalcCurvature(normMap, input, norBias);
-			return _return_value;
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

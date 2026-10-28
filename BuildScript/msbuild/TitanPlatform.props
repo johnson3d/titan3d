@@ -1,0 +1,27 @@
+<Project>
+  <!--
+    TitanPlatform: Windows | Mac | Android
+    未指定时按主机系统选择；Windows 主机上要探测 Mac/Android 编译可传 -p:TitanPlatform=Mac|Android。
+    TitanPlatformDefine 是对应的 C# 宏：PWindow | PMac | PAndroid。
+  -->
+  <PropertyGroup>
+    <TitanPlatformPropsImported>true</TitanPlatformPropsImported>
+    <TitanPlatform Condition="'$(TitanPlatform)' == '' and $([MSBuild]::IsOSPlatform('OSX'))">Mac</TitanPlatform>
+    <TitanPlatform Condition="'$(TitanPlatform)' == ''">Windows</TitanPlatform>
+    <TitanPlatformDefine Condition="'$(TitanPlatform)' == 'Mac'">PMac</TitanPlatformDefine>
+    <TitanPlatformDefine Condition="'$(TitanPlatform)' == 'Windows'">PWindow</TitanPlatformDefine>
+    <TitanPlatformDefine Condition="'$(TitanPlatform)' == 'Android'">PAndroid</TitanPlatformDefine>
+    <TitanRepositoryRoot Condition="'$(TitanRoot)' == ''">$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..'))</TitanRepositoryRoot>
+    <TitanRepositoryRoot Condition="'$(TitanRoot)' != ''">$([MSBuild]::NormalizeDirectory('$(TitanRoot)'))</TitanRepositoryRoot>
+    <TitanCodeGenRoot Condition="'$(TitanPlatform)' == 'Windows' or '$(TitanPlatform)' == 'Mac' or '$(TitanPlatform)' == 'Android'">$([MSBuild]::NormalizePath('$(TitanRepositoryRoot)', 'codegen', '$(TitanPlatform)'))</TitanCodeGenRoot>
+    <TitanNativeBinderDirectory Condition="'$(TitanNativeBinderDirectory)' == '' and '$(TitanCodeGenRoot)' != ''">$([MSBuild]::NormalizePath('$(TitanCodeGenRoot)', 'NativeBinder'))</TitanNativeBinderDirectory>
+    <TitanCodeGenTemplatesDirectory>$([MSBuild]::NormalizePath('$(TitanRepositoryRoot)', 'codegen', 'Templates'))</TitanCodeGenTemplatesDirectory>
+  </PropertyGroup>
+  <!-- 能力由各平台原生工程生成；缺失时由 TitanValidateAndroidCapabilities/TitanValidatePlatform 拒绝编译。 -->
+  <Import Project="../../Core.Mac/generated/TitanMacCapabilities.props" Condition="'$(TitanPlatform)' == 'Mac'" />
+  <Import Project="../../Core.Android/generated/TitanAndroidCapabilities.props"
+          Condition="'$(TitanPlatform)' == 'Android' and Exists('$(MSBuildThisFileDirectory)../../Core.Android/generated/TitanAndroidCapabilities.props')" />
+  <Target Name="TitanValidatePlatform" BeforeTargets="BeforeBuild">
+    <Error Condition="'$(TitanPlatform)' != 'Windows' and '$(TitanPlatform)' != 'Mac' and '$(TitanPlatform)' != 'Android'" Text="TitanPlatform must be Windows, Mac or Android, got '$(TitanPlatform)'." />
+  </Target>
+</Project>

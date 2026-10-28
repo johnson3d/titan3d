@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../BuildScript/msbuild/TitanManagedProject.props" />
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -11,17 +12,32 @@
 
   <Import Project="..\DataCopyer\DataCopyer.projitems" Label="Shared" />
 
+  <!-- 反射阶段生成的平台 Copyer 与插件引用清单；不再按通配符引用 binaries/Plugins。 -->
+  <PropertyGroup>
+    <TitanDataCopyerGenerated>$([MSBuild]::NormalizePath('$(TitanCodeGenRoot)', 'DataCopyer', 'Copyer.gen.cs'))</TitanDataCopyerGenerated>
+    <TitanDataCopyerReferences>$([MSBuild]::NormalizePath('$(TitanCodeGenRoot)', 'DataCopyer', 'Copyer.references'))</TitanDataCopyerReferences>
+  </PropertyGroup>
+
   <ItemGroup>
-	  <Reference Include="Engine.Window">
-		  <HintPath>$(TtTitanRoot)binaries\net8.0\Engine.Window.dll</HintPath>
+	  <Compile Include="$(TitanDataCopyerGenerated)" />
+	  <Reference Include="$(TitanEngineAssemblyName)">
+		  <HintPath>$(TitanEngineAssemblyPath)</HintPath>
 		  <Private>false</Private>
 	  </Reference>
-	  <Reference Include="$(TtTitanRoot)binaries\Plugins\*\*.All.dll" Exclude="$(TtTitanRoot)binaries\Plugins\DataCopyer\*.dll">
-		  <Private>false</Private>
-	  </Reference>
-	  <Reference Include="$(TtTitanRoot)binaries\Plugins\*\*.Window.dll" Exclude="$(TtTitanRoot)binaries\Plugins\DataCopyer\*.dll;$(TtTitanRoot)binaries\Plugins\*\Engine.Window.dll">
-		  <Private>false</Private>
-	  </Reference>
+  </ItemGroup>
+
+  <Target Name="TitanValidateDataCopyerGenerated" BeforeTargets="ResolveAssemblyReferences;CoreCompile">
+    <Error Condition="!Exists('$(TitanDataCopyerGenerated)') OR !Exists('$(TitanDataCopyerReferences)')"
+           Text="缺少反射阶段输出 $(TitanDataCopyerGenerated) 或 $(TitanDataCopyerReferences)；请先对 $(TitanEngineAssemblyName) 执行 TitanRunDataCopyerStage。" />
+    <ReadLinesFromFile File="$(TitanDataCopyerReferences)">
+      <Output TaskParameter="Lines" ItemName="_TitanDataCopyerPluginReference" />
+    </ReadLinesFromFile>
+    <ItemGroup>
+      <Reference Include="@(_TitanDataCopyerPluginReference)" Private="false" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
     <!--<ProjectReference Include="..\..\..\Module\Engine.Window\Engine.Window.csproj">
 		<Private>False</Private>
 	</ProjectReference>-->

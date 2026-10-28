@@ -1,0 +1,27 @@
+{
+  "_readme": [
+    "TitanEngine Android toolchain locations. Copy this file to cache/config/android-toolchain.json and fill in the paths on your machine.",
+    "Nothing is downloaded or guessed: an empty entry is reported as an error, and a wrong path is reported verbatim.",
+    "Relative paths (including -ConfigPath) are resolved against the repository root, never against the caller's current directory. Environment variables such as %LOCALAPPDATA% are NOT expanded - write full absolute paths.",
+    "Check your setup with: powershell -NoProfile -ExecutionPolicy Bypass -File BuildScript\\check\\check-android-toolchain.ps1 -Stage Native  (exit 0 = ready, exit 2 = something is missing)",
+    "Stages build on each other: Native (build libCore.Android.so) needs ndk + cmake + ninja; Managed (managed layer and APK) adds dotnet + androidSdk + javaHome; Device adds adb on top of Managed.",
+    "Override the config location with -ConfigPath or the TITAN_ANDROID_TOOLCHAIN_CONFIG environment variable."
+  ],
+  "schemaVersion": 1,
+  "abi": "arm64-v8a",
+  "apiLevel": 28,
+  "generator": "Ninja",
+  "stl": "c++_static",
+  "ndk": "",
+  "androidSdk": "",
+  "cmake": "",
+  "ninja": "",
+  "dotnet": "",
+  "javaHome": "",
+  "adb": "",
+  "requirements": {
+    "ndkMajor": 27,
+    "minimumCMakeVersion": "3.24",
+    "dotnetSdkMajor": 10
+  }
+}

@@ -532,28 +532,3 @@ namespace EngineNS.GamePlay.Scene
         }
     }
 }
-
-
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace EngineNS.Bricks.Collision.Octree
-{
-	partial class TtCollideOctree
-	{
-		public unsafe bool macross_IsColliding (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, in DRay checkRay, double maxDistance) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			var _return_value = IsColliding(in checkRay, maxDistance);
-			return _return_value;
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

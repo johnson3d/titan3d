@@ -29,7 +29,7 @@ public:
 public:	
 	IWeakRefObject();
 	virtual ~IWeakRefObject();
-	long UnsafeGetRefCount() {
+	int UnsafeGetRefCount() {
 		return RefCount;
 	}
 
@@ -249,6 +249,7 @@ enum TR_ENUM()
 	PLTF_Windows = (1 << 0),
 	PLTF_Android = (1 << 1),
 	PLTF_AppleIOS = (1 << 2),
+	PLTF_Mac = (1 << 3),
 	PLTF_ALL = 0xffffffff,
 };
 

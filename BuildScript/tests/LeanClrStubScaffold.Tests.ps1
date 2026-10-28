@@ -1,9 +1,9 @@
-#requires -Version 5.1
+﻿#requires -Version 5.1
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).ProviderPath
-$scriptPath = Join-Path $repoRoot 'BuildScript\New-LeanClrStub.ps1'
+$scriptPath = Join-Path $repoRoot 'BuildScript\scaffold\New-LeanClrStub.ps1'
 $survivorStubPath = Join-Path $repoRoot 'Plugins\Game\Survivor\Survivor.LeanClrStub\Survivor.LeanClrStub.csproj'
 $tempRoot = Join-Path $repoRoot ("cache\LeanClrStubScaffold-{0}-{1}" -f $PID, (Get-Random))
 
@@ -43,7 +43,8 @@ function Normalize-XmlText {
         [string]$Path
     )
 
-    $content = Get-Content -Raw -LiteralPath $Path
+    # 显式按 UTF-8 读取：生成物带 BOM、入库模板不带，默认编码会因 BOM 差异读出不同的中文
+    $content = Get-Content -Raw -Encoding UTF8 -LiteralPath $Path
     return (($content -replace "`r`n", "`n") -replace '^\s+|\s+$', '')
 }
 
@@ -60,7 +61,7 @@ function New-FakeRepository {
 
     $pluginRoot = Join-Path $Root "Plugins\Game\$PluginName"
     $hostDirectory = Join-Path $pluginRoot "$PluginName.All"
-    $buildScriptDirectory = Join-Path $Root 'BuildScript'
+    $buildScriptDirectory = Join-Path $Root 'BuildScript\leanclr'
     $mainEditorDirectory = Join-Path $Root 'Module\MainEditor'
     New-Item -ItemType Directory -Force -Path $hostDirectory, $buildScriptDirectory, $mainEditorDirectory | Out-Null
 
@@ -144,11 +145,11 @@ try {
     Assert-True (Test-Path -LiteralPath $stubPath -PathType Leaf) 'New plugin stub project was not generated.'
 
     $hostContent = Get-Content -Raw -LiteralPath $sample.HostProject
-    Assert-ContainsOnce $hostContent '<Import Project="..\..\..\..\BuildScript\LeanClrPlugin.targets" />' 'Host project must import LeanClrPlugin.targets exactly once.'
+    Assert-ContainsOnce $hostContent '<Import Project="..\..\..\..\BuildScript\leanclr\LeanClrPlugin.targets" />' 'Host project must import LeanClrPlugin.targets exactly once.'
 
     $stubContent = Get-Content -Raw -LiteralPath $stubPath
     Assert-True ($stubContent -like '*<LeanClrHostProject>..\SampleGame.All\SampleGame.All.csproj</LeanClrHostProject>*') 'Stub project must reference its host project.'
-    Assert-True ($stubContent -like '*<Import Project="..\..\..\..\BuildScript\LeanClrStub.targets" />*') 'Stub project must import LeanClrStub.targets.'
+    Assert-True ($stubContent -like '*<Import Project="..\..\..\..\BuildScript\leanclr\LeanClrStub.targets" />*') 'Stub project must import LeanClrStub.targets.'
 
     $solutionContent = Get-Content -Raw -LiteralPath $sample.Solution
     Assert-ContainsOnce $solutionContent 'SampleGame.LeanClrStub.csproj' 'Solution must contain the generated stub project exactly once.'

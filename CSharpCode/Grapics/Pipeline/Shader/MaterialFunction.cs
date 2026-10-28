@@ -797,27 +797,3 @@ namespace EngineNS.Graphics.Pipeline.Shader
     }
     
 }
-
-
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace EngineNS.Graphics.Pipeline.Shader
-{
-	partial class TtMaterialFunction
-	{
-		public unsafe void macross_SaveAssetTo (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, RName name) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			SaveAssetTo(name);
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

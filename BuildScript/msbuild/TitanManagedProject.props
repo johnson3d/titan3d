@@ -1,0 +1,20 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)TitanPlatform.props" />
+  <PropertyGroup>
+    <TitanEngineProject Condition="'$(TitanPlatform)' == 'Windows'">$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', '../../Module/Engine.Window/Engine.Window.csproj'))</TitanEngineProject>
+    <TitanEngineProject Condition="'$(TitanPlatform)' == 'Mac'">$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', '../../Module/Engine.Mac/Engine.Mac.csproj'))</TitanEngineProject>
+    <TitanEngineProject Condition="'$(TitanPlatform)' == 'Android'">$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', '../../Module/Engine.Android/Engine.Android.csproj'))</TitanEngineProject>
+    <TitanEngineAssemblyName Condition="'$(TitanPlatform)' == 'Windows'">Engine.Window</TitanEngineAssemblyName>
+    <TitanEngineAssemblyName Condition="'$(TitanPlatform)' == 'Mac'">Engine.Mac</TitanEngineAssemblyName>
+    <TitanEngineAssemblyName Condition="'$(TitanPlatform)' == 'Android'">Engine.Android</TitanEngineAssemblyName>
+    <TitanPluginPlatformSuffix Condition="'$(TitanPlatform)' == 'Windows'">Window</TitanPluginPlatformSuffix>
+    <TitanPluginPlatformSuffix Condition="'$(TitanPlatform)' == 'Mac'">Mac</TitanPluginPlatformSuffix>
+    <TitanPluginPlatformSuffix Condition="'$(TitanPlatform)' == 'Android'">Android</TitanPluginPlatformSuffix>
+    <DefineConstants>$(DefineConstants);$(TitanPlatformDefine);$(TitanNativeCapabilityDefines)</DefineConstants>
+    <TtTitanRoot Condition="'$(TitanRoot)' == ''">$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..'))</TtTitanRoot>
+    <TtTitanRoot Condition="'$(TitanRoot)' != ''">$([MSBuild]::NormalizeDirectory('$(TitanRoot)'))</TtTitanRoot>
+    <!-- Android 引擎与桌面输出隔离；显式传入的 TitanEngineAssemblyPath 优先。 -->
+    <TitanEngineAssemblyPath Condition="'$(TitanEngineAssemblyPath)' == '' and '$(TitanPlatform)' == 'Android'">$(TtTitanRoot)binaries/android/net8.0/Engine.Android.dll</TitanEngineAssemblyPath>
+    <TitanEngineAssemblyPath Condition="'$(TitanEngineAssemblyPath)' == ''">$(TtTitanRoot)binaries/net8.0/$(TitanEngineAssemblyName).dll</TitanEngineAssemblyPath>
+  </PropertyGroup>
+</Project>

@@ -652,26 +652,3 @@ namespace EngineNS.Graphics.Pipeline
         }
     }
 }
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace EngineNS.Graphics.Pipeline
-{
-	partial class TtRenderPolicy
-	{
-		public unsafe TtWorld macross_GetWorld (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			var _return_value = GetWorld();
-			return _return_value;
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

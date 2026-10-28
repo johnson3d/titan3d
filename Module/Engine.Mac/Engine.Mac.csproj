@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TitanEnginePlatform>Mac</TitanEnginePlatform>
+    <TitanPlatform Condition="'$(TitanPlatform)' == ''">Mac</TitanPlatform>
+  </PropertyGroup>
+  <Import Project="../../BuildScript/msbuild/TitanManagedEngine.props" />
+  <Import Project="../../BuildScript/msbuild/TitanCodeGen.targets" />
+  <!-- Mac 暂缺 FBX/Embree/Dx12/ClrProfiler/MeshSimplify(CGAL+gmp) 闭包；生成胶水在 CoreCompile 前才进 Compile，须用执行期 Remove。
+       PhysicsCore/NvPhysX5 已接入 Mac（Core.Mac 链接自建静态库），物理相关源码不再排除。
+       PointCloud 依赖 MeshSimplify 的 VPointCloud/FTetrahedron 绑定（IMeshSimplify.cpp 需 CGAL），唯一调用方 PrtProbeVolume 已排除。 -->
+  <Target Name="TitanMacExcludeWindowsOnlyClosureSources"
+          AfterTargets="TitanConsumeManagedGeneratedInputs"
+          BeforeTargets="CoreCompile"
+          Condition="'$(TitanPlatform)' == 'Mac'">
+    <ItemGroup>
+      <_TitanMacClosureRemove Include="@(Compile)" Condition="'%(Compile.FileName)' == 'PrtProbeVolume' OR
+        '%(Compile.FileName)' == 'Embree' OR
+        '%(Compile.FileName)' == 'ClrProfiler' OR
+        '%(Compile.FileName)' == 'PointCloud'" />
+      <_TitanMacClosureRemove Include="@(Compile)" Condition="$([System.String]::Copy('%(Compile.Identity)').Contains('7F021F1E9C8F0FBE20C51383DCEA2420F4A8A87BA9D42A6ED6E9E93C7EBB5341')) OR
+        $([System.String]::Copy('%(Compile.Identity)').Contains('6F9B8161FD893C9A21BA6C3EE1D0AB54DCC6A128788DE1CB5359FE538411CD74')) OR
+        $([System.String]::Copy('%(Compile.Identity)').Contains('642BDEAEC1C1003828BE12F13EAB1EA0723B6653AE28DE2068E2F4F48BE27E89')) OR
+        $([System.String]::Copy('%(Compile.Identity)').Contains('2F661E481FF4D9EA92B3DFE539B970A6B0EDB5B449B0FD5822E0B264B386BBF2'))" />
+      <Compile Remove="@(_TitanMacClosureRemove)" />
+    </ItemGroup>
+  </Target>
+</Project>

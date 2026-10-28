@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\BuildScript\msbuild\TitanManagedProject.props" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -7,12 +8,12 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>..\..\binaries\</OutputPath>
-    <DefineConstants>$(DefineConstants)TRACE;PWindow</DefineConstants>
+    <DefineConstants>$(DefineConstants)TRACE;$(TitanPlatformDefine)</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>..\..\binaries\</OutputPath>
-    <DefineConstants>$(DefineConstants)TRACE;PWindow</DefineConstants>
+    <DefineConstants>$(DefineConstants)TRACE;$(TitanPlatformDefine)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Engine.Window\Engine.Window.csproj" />
+    <ProjectReference Include="$(TitanEngineProject)" />
   </ItemGroup>
 
 </Project>

@@ -20,10 +20,9 @@ namespace CSharpCodeTools.PropertyGen
                 return;
 
             int numOfProp = -1;
-            AddLine($"namespace {Namespace}");
-            PushBrackets();
+            BeginNamespaceAndOuter();
             {
-                AddLine($"partial class {Name}");
+                AddLine(PartialDeclaration());
                 PushBrackets();
                 {
                     AddLine("public void AutoSyncWriteValue(IO.IWriter ar, int index)");
@@ -84,23 +83,8 @@ namespace CSharpCodeTools.PropertyGen
                 }
                 PopBrackets();
             }
-            PopBrackets();
+            EndNamespaceAndOuter();
 
-            var file = dir + "/" + FullName + ".prop.cs";
-            var normalizedFile = file.Replace("\\", "/").ToLower();
-            if (!UPropertyCodeManager.Instance.WritedFiles.Contains(normalizedFile))
-            {
-                UPropertyCodeManager.Instance.WritedFiles.Add(normalizedFile);
-            }
-
-            if (System.IO.File.Exists(file))
-            {
-                var oldCode = System.IO.File.ReadAllText(file);
-                if (oldCode == ClassCode)
-                    return;
-            }
-
-            System.IO.File.WriteAllText(file, ClassCode);
         }
     }
 }

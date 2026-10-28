@@ -18,7 +18,7 @@ namespace CppWeaving
         public ClangSharp.TranslationUnit mTransUnit;
 		public List<string> mUsings;
         public static List<string> ExpFlags = new List<string>();
-        public bool CreateTU(HppCollector.HppUnit file, List<string> includePath, List<string> macros)
+        public bool CreateTU(HppCollector.HppUnit file, List<string> includePath, List<string> macros, ClangProfile profile)
         {
             Hpp = file;
             var allCode = System.IO.File.ReadAllText(file.File);
@@ -40,29 +40,7 @@ namespace CppWeaving
 																			| ClangSharp.Interop.CXTranslationUnit_Flags.CXTranslationUnit_ForSerialization
 																			| ClangSharp.Interop.CXTranslationUnit_Flags.CXTranslationUnit_SkipFunctionBodies;
 
-            var args = new List<string>();
-            args.Add("-std=c++17");
-            //args.Add("-stdlib=libc++");
-            args.Add("-xc++");
-            args.Add("-Wno-pragma-once-outside-header");
-            args.Add("-Wno-address-of-temporary");
-            args.Add("-m64");
-            args.Add("-target");
-            args.Add("x86_64-pc-windows-msvc");
-            args.Add("-fms-extensions");
-            args.Add("-fms-compatibility");
-            args.Add("-D_M_X64=1");
-            args.Add("-D__EMSCRIPTEN__");
-            foreach (var i in includePath)
-            {
-                args.Add($"-I{i}");
-            }
-            foreach (var i in macros)
-            {
-                args.Add($"-D{i}");
-            }
-            
-            string[] DefaultClangCommandLineArgs = args.ToArray();
+            string[] DefaultClangCommandLineArgs = ClangArgs.Build(profile, includePath, macros).ToArray();
             var translationUnit = ClangSharp.Interop.CXTranslationUnit.Parse(index, file.File, DefaultClangCommandLineArgs, Array.Empty<ClangSharp.Interop.CXUnsavedFile>(), DefaultTranslationUnitFlags);
 
             if (translationUnit.NumDiagnostics != 0)
@@ -80,7 +58,9 @@ namespace CppWeaving
                         uint line, col, offset;
                         diagnostic.Location.GetFileLocation(out tfile, out line, out col, out offset);
                         Console.WriteLine($"Translation Unit Error: {tfile}:({line}:{col})");
-                        Console.WriteLine(diagnostic.Format(ClangSharp.Interop.CXDiagnosticDisplayOptions.CXDiagnostic_DisplayOption).ToString());
+                        var message = diagnostic.Format(ClangSharp.Interop.CXDiagnosticDisplayOptions.CXDiagnostic_DisplayOption).ToString();
+                        Console.WriteLine(message);
+                        ParseFailures.Record(file.File, message);
 
                         index.Dispose();
                         translationUnit.Dispose();

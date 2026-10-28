@@ -35,7 +35,7 @@ public:
 	}
 	virtual ~VIUnknown() {}
 
-	virtual long AddRef() const
+	virtual int AddRef() const
 	{
 		return ++RefCount;
 	}

@@ -1,0 +1,98 @@
+{
+  "suites": [
+    {
+      "name": "L1.Math",
+      "level": "L1",
+      "projects": [
+        "Tests/Titan.Tests.Base/Titan.Tests.Base.csproj"
+      ],
+      "capabilities": [],
+      "timeoutMinutes": 5,
+      "frequency": [
+        "pr",
+        "nightly"
+      ],
+      "status": "stable",
+      "owner": "Core"
+    },
+    {
+      "name": "L1.Animation",
+      "level": "L1",
+      "projects": [
+        "Tests/Titan.Tests.Animation/Titan.Tests.Animation.csproj"
+      ],
+      "capabilities": [],
+      "timeoutMinutes": 5,
+      "frequency": [
+        "pr",
+        "nightly"
+      ],
+      "status": "experimental",
+      "owner": "Animation"
+    },
+    {
+      "name": "L1.LeanClrGenerator",
+      "level": "L1",
+      "projects": [
+        "Tests/Titan.Tests.LeanClrGenerator/Titan.Tests.LeanClrGenerator.csproj"
+      ],
+      "capabilities": [],
+      "timeoutMinutes": 5,
+      "frequency": [
+        "pr",
+        "nightly"
+      ],
+      "status": "stable",
+      "owner": "Core"
+    },
+    {
+      "name": "L1.CppWeaving",
+      "level": "L1",
+      "projects": [
+        "Tests/Titan.Tests.CppWeaving/Titan.Tests.CppWeaving.csproj"
+      ],
+      "capabilities": [],
+      "timeoutMinutes": 5,
+      "frequency": [
+        "pr",
+        "nightly"
+      ],
+      "status": "stable",
+      "owner": "Core"
+    },
+    {
+      "name": "L1.CSharpCodeTools",
+      "level": "L1",
+      "projects": [
+        "Tests/Titan.Tests.CSharpCodeTools/Titan.Tests.CSharpCodeTools.csproj"
+      ],
+      "capabilities": [],
+      "timeoutMinutes": 5,
+      "frequency": [
+        "pr",
+        "nightly"
+      ],
+      "status": "stable",
+      "owner": "Core"
+    },
+    {
+      "name": "L2.Engine",
+      "level": "L2",
+      "projects": [
+        "Module/TitanCMD/TitanCMD.csproj",
+        "Plugins/DataCopyer/DataCopyer.All/DataCopyer.All.csproj"
+      ],
+      "capabilities": [
+        "engine",
+        "virtual-device",
+        "render-graph"
+      ],
+      "timeoutMinutes": 15,
+      "frequency": [
+        "nightly"
+      ],
+      "status": "experimental",
+      "owner": "Engine"
+    }
+  ]
+}

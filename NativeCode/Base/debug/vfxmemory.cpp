@@ -14,6 +14,10 @@
 
 #include "../CoreSDK.h"
 
+#if defined(PLATFORM_MAC)
+#include <mach/mach.h>
+#endif
+
 #if !defined(PLATFORM_WIN)
 	inline vBOOL IsBadReadPtr(CONST VOID *lp, UINT_PTR ucb)
 	{
@@ -26,6 +30,8 @@
 #		include <cassert>
 #		define ASSERT assert
 #	endif
+
+extern const char* const c_vfxMemoryNoLeakReport = "<NoLeakReport>";
 
 namespace VFX_Memory
 {
@@ -68,6 +74,32 @@ namespace VFX_Memory
 		size_t maxLen = (size_t)(((INT_PTR)mbi.BaseAddress + (INT_PTR)mbi.RegionSize) - (INT_PTR)str);
 		if (maxLen > c_uMaxTraceStrLen)
 			maxLen = c_uMaxTraceStrLen;
+		if (memchr(str, 0, maxLen) == nullptr)
+			return def;
+#elif defined(PLATFORM_MAC)
+		// 与 Windows 分支同构：mach 调用对无效地址只返回错误码，不会崩溃
+		const size_t c_uMaxTraceStrLen = 1024;
+		vm_address_t regionBase = (vm_address_t)str;
+		vm_size_t regionSize = 0;
+		vm_region_basic_info_data_64_t info;
+		mach_msg_type_number_t infoCnt = VM_REGION_BASIC_INFO_COUNT_64;
+		mach_port_t objectName = MACH_PORT_NULL;
+		if (vm_region_64(mach_task_self(), &regionBase, &regionSize, VM_REGION_BASIC_INFO_64,
+			(vm_region_info_t)&info, &infoCnt, &objectName) != KERN_SUCCESS)
+			return def;
+		if (objectName != MACH_PORT_NULL)
+			mach_port_deallocate(mach_task_self(), objectName);
+		// vm_region_64 返回“该地址或其后”第一个区域；地址落在已去提交的空洞时
+		// 返回的是下一区域，其保护位不能代表目标页，必须判无效
+		if (regionBase > (vm_address_t)str)
+			return def;
+		if ((info.protection & VM_PROT_READ) == 0 || info.reserved)
+			return def;
+		size_t maxLen = (size_t)(((INT_PTR)regionBase + (INT_PTR)regionSize) - (INT_PTR)str);
+		if (maxLen > c_uMaxTraceStrLen)
+			maxLen = c_uMaxTraceStrLen;
+		if (maxLen == 0)
+			return def;
 		if (memchr(str, 0, maxLen) == nullptr)
 			return def;
 #endif
@@ -192,11 +224,7 @@ namespace VFX_Memory
 		if(g_memory_max < g_memoey_used)
 			g_memory_max = g_memoey_used;
 
-		if (GOnMemAllocCallBack)
-		{
-			GOnMemAllocCallBack(size, file, line, free_list->id);
-		}
-
+		// 回调可能重入分配器，必须先将当前块移出空闲链表。
 		freePoint.freePoint = free_list->next;
 		
 		//*(size_t *)((INT_PTR)ret + size) = c_uMalloc0xCC;
@@ -204,6 +232,10 @@ namespace VFX_Memory
 		for (int i = 0; i < DCCCNUM; i++)
 		{
 			pTailDCCC[i] = c_uMalloc0xCC;
+		}
+		if (GOnMemAllocCallBack)
+		{
+			GOnMemAllocCallBack(ret, size, file, line, free_list->id);
 		}
 		return ret;
 	}
@@ -225,12 +257,6 @@ namespace VFX_Memory
 		size_t size = pcook->size;
 		ASSERT(size <= __max_bytes);
 
-		if (pcook->debuginfo)
-		{
-			VFX_Memory::__free((void*)pcook->debuginfo);
-			pcook->debuginfo = NULL;
-		}
-
 		//size_t * pdccc = reinterpret_cast<size_t*>((INT_PTR)memory + size);
 		//if(*pdccc != c_uMalloc0xCC)
 		size_t * pdccc = reinterpret_cast<size_t*>((INT_PTR)memory + size);
@@ -243,6 +269,12 @@ namespace VFX_Memory
 			else
 				__MemoryTrace("Unkown position : Free Verify pointer(0x%p) failed! Alloc ID : %d\n",memory,(int)pcook->id);
 			return;
+		}
+		// debuginfo 在尾部校验通过后再释放，原因同 large_alloc::free：外部堆指针的 cookie 是垃圾
+		if (pcook->debuginfo)
+		{
+			VFX_Memory::__free((void*)pcook->debuginfo);
+			pcook->debuginfo = NULL;
 		}
 		if (GOnMemFreeCallBack)
 		{
@@ -267,7 +299,7 @@ namespace VFX_Memory
 		size_t size = round_up(leak_size + sizeof(_small_cookie) - sizeof(_small_cookie *)) + sizeof(size_t) * DCCCNUM;
 		for(size_t i = 0 ; i < __pool_size ; ++i)
 		{
-			if (check->id != (size_t)-1)
+			if (check->id != (size_t)-1 && check->file != c_vfxMemoryNoLeakReport)
 			{
 				if (GOnMemLeakCallBack)
 					GOnMemLeakCallBack(check->data, check->size, check->file, check->line, check->id, check->debuginfo);
@@ -428,7 +460,7 @@ namespace VFX_Memory
 
 		if (GOnMemAllocCallBack)
 		{
-			GOnMemAllocCallBack(size, file, line, pcook->cookie.id);
+			GOnMemAllocCallBack(pcook->cookie.data, size, file, line, pcook->cookie.id);
 		}
 
 		return pcook->cookie.data;
@@ -438,11 +470,6 @@ namespace VFX_Memory
 	{
 		_large_cookie * pcook = reinterpret_cast<_large_cookie *>
 			((INT_PTR)memory - sizeof(_large_cookie) + sizeof(_large_cookie *));
-		if (pcook->cookie.debuginfo)
-		{
-			__free((void*)pcook->cookie.debuginfo);
-			pcook->cookie.debuginfo = NULL;
-		}
 		if(pcook->dccc != c_uMalloc0xCC || pcook->cookie.TestDCCC(c_uMalloc0xCC)==false)
 		{
 			if(file)
@@ -452,6 +479,14 @@ namespace VFX_Memory
 			else
 				__MemoryTrace(vT("Unkown position : Free Verify pointer(0x%p) failed!!! Alloc ID : %d\n"),memory, (int)pcook->cookie.id);
 			return ;
+		}
+		// debuginfo 必须在 cookie 校验通过后再释放：外部堆指针（Mac 上 libc++ 出线成员
+		// 的 std::string 缓冲区经引擎 operator delete 误入）的 cookie 是数据垃圾，
+		// 提前解引用会把文本字节当指针 free 掉直接 abort
+		if (pcook->cookie.debuginfo)
+		{
+			__free((void*)pcook->cookie.debuginfo);
+			pcook->cookie.debuginfo = NULL;
 		}
 		size_t * pdccc = reinterpret_cast<size_t *>((INT_PTR)memory + pcook->cookie.size);
 		if(*pdccc != c_uMalloc0xCC)
@@ -489,11 +524,16 @@ namespace VFX_Memory
 		_large_cookie * p = header.next;
 		while(p)
 		{
-			if (GOnMemLeakCallBack)
+			const bool bReportLeak = p->cookie.file != c_vfxMemoryNoLeakReport;
+			if (bReportLeak && GOnMemLeakCallBack)
 			{
 				GOnMemLeakCallBack(p->cookie.data, p->cookie.size, p->cookie.file, p->cookie.line, p->cookie.id, p->cookie.debuginfo);
 			}
-			if (p->cookie.file != nullptr)
+			if (!bReportLeak)
+			{
+				// 常驻内存不报泄露，但继续往下做越界校验
+			}
+			else if (p->cookie.file != nullptr)
 			{	
 				__MemoryTrace(vT("%s(%d) : Memory leak(0x%p)! There have %d bytes(%d K) memory had not be delete. Alloc ID : %d Info : %s\n")
 					, SafeTraceStr(p->cookie.file), (int)p->cookie.line, p->cookie.data, (int)p->cookie.size, (int)(p->cookie.size + 1023) / 1024, (int)p->cookie.id, SafeTraceStr(p->cookie.debuginfo, ""));

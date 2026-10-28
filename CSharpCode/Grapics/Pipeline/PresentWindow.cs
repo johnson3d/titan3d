@@ -59,10 +59,12 @@ namespace EngineNS.Graphics.Pipeline
                 System.Diagnostics.Debug.Assert(false);
             }
             //scDesc.BufferCount = 1;
-            var size = GetWindowSize();
+            //swapchain 必须用像素尺寸：Mac Retina 下 MoltenVK 的 currentExtent 强制为像素大小，
+            //用逻辑尺寸会得到 desc 与实际 surface 不一致的交换链（视口只有窗口一半）
+            var size = GetWindowSizeInPixels();
             scDesc.Width = (uint)size.X;
             scDesc.Height = (uint)size.Y;
-            scDesc.OutputWindow = HWindow.ToPointer();
+            scDesc.OutputWindow = SurfaceHandle.ToPointer();
             SwapChain = TtEngine.Instance.GfxDevice.RenderContext.CreateSwapChain(in scDesc);
             mHasPendingResize = false;
             mPendingResizeWidth = scDesc.Width;
@@ -106,6 +108,10 @@ namespace EngineNS.Graphics.Pipeline
 
             var width = (uint)x;
             var height = (uint)y;
+            //SDL resize 事件是逻辑尺寸，swapchain Desc 持有像素尺寸；按当前像素尺寸比较避免逻辑/像素反复触发 resize
+            var pxSize = GetWindowSizeInPixels();
+            width = (uint)pxSize.X;
+            height = (uint)pxSize.Y;
             if (width < 1 || height < 1)
                 return;
 

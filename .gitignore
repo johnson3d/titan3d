@@ -27,6 +27,14 @@
 *.ipdb
 
 # ==============================================================================
+# NuGet 本地生成物（还原过程自动写出，与构建环境相关，不入库）
+# ==============================================================================
+# 仓库级默认源配置，由 dotnet/nuget restore 生成
+/.nuget/
+# packages.config 工程的迁移标记目录
+**/NuGet/Migrations/
+
+# ==============================================================================
 # Binaries 构建输出
 # ==============================================================================
 /binaries/debug/
@@ -44,6 +52,8 @@
 /binaries/cache/
 /binaries/aftermath-shaders/
 /binaries/LeanClrStub/
+# Android 原生库产物由 CMake 直接写入（与 Core.Window 的 binaries/debug|release 并列）
+/binaries/android/
 # LeanCLR VM 程序集由构建部署（BuildScript/LeanClrDeploy.targets），只有 BCL 入库
 /content/LeanCLR/*
 !/content/LeanCLR/mscorlib.dll
@@ -79,6 +89,16 @@ packages
 /codegen/**/*.cpp
 /codegen/**/*.cs
 /codegen/**/*.stamp
+# 三个平台的源码、反射输出与生成清单均不入库；共用 Templates 入库。
+/codegen/Windows/
+/codegen/Mac/
+/codegen/Android/
+# 旧无平台前缀的生成目录已退出版本控制，本地残留不再入库。
+/codegen/NativeBinder/
+/codegen/Rpc/
+/codegen/Property/
+/codegen/Macross/
+/codegen/Serializer/
 
 # ==============================================================================
 # Plugins 构建输出
@@ -121,3 +141,6 @@ content/Sheng
 # Test results
 /TestResults/
 /content/UTest/sequencer_t0.xnd
+
+# macOS 原生构建目录
+/Core.Mac/build*/

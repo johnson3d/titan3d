@@ -96,7 +96,7 @@ public:
 				break;
 		return true;
 	}
-	static void SkipInputData(j_decompress_ptr cinfo, long num_bytes)
+	static void SkipInputData(j_decompress_ptr cinfo, long num_bytes) // lp64-ok: libjpeg skip_input_data 回调签名
 	{
 		VJpegReadStream	* pSrc = (VJpegReadStream *)cinfo->src;
 		if (num_bytes > 0)

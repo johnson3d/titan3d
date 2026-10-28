@@ -1019,38 +1019,3 @@ namespace EngineNS
         }
     }
 }
-
-
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace EngineNS.Graphics.Pipeline.Shader
-{
-	partial class TtShadingMacross
-	{
-		public unsafe Vector3ui macross_GetDispatchArg (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtMacrossShadingEnv shading) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			var _return_value = GetDispatchArg(shading);
-			return _return_value;
-		}
-		public unsafe void macross_CSMacrossShaderMain (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtMacrossShadingEnv shading) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			CSMacrossShaderMain(shading);
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

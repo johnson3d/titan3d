@@ -1,0 +1,17 @@
+include_guard(GLOBAL)
+
+# 平台工程生成的配置元数据供编译与胶水共同消费，不维护第二份宏表。
+include("${CMAKE_CURRENT_LIST_DIR}/../generated/TitanSources.cmake")
+if(NOT TITAN_CONFIGURATION)
+  if(CMAKE_BUILD_TYPE)
+    set(TITAN_CONFIGURATION "${CMAKE_BUILD_TYPE}")
+  else()
+    set(TITAN_CONFIGURATION Debug)
+  endif()
+endif()
+if(NOT TITAN_CONFIGURATION MATCHES "^(Debug|Release)$")
+  message(FATAL_ERROR "TITAN_CONFIGURATION must be Debug or Release")
+endif()
+string(TOUPPER "${TITAN_CONFIGURATION}" _titan_config)
+set(TITAN_MAC_DEFINES ${TITAN_MAC_DEFINES_${_titan_config}})
+set(TITAN_MAC_INCLUDES ${TITAN_MAC_INCLUDES_${_titan_config}})

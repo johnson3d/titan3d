@@ -657,27 +657,3 @@ namespace EngineNS.GamePlay
         #endregion
     }
 }
-
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace EngineNS.GamePlay
-{
-	partial class TtWorld
-	{
-		public unsafe Scene.TtSunNode macross_GetSun (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, int index) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			var _return_value = GetSun(index);
-			return _return_value;
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

@@ -102,7 +102,7 @@ namespace CppWeaving
         public void MakeSharedProjectCSharp(string genDir, string fileName)
         {
             System.Xml.XmlDocument myXmlDoc = new System.Xml.XmlDocument();
-            myXmlDoc.Load(genDir + "Empty_CodeGenCSharp.projitems");
+            myXmlDoc.Load(System.IO.Path.Combine(AppContext.BaseDirectory, "Templates", "Empty_CodeGenCSharp.projitems"));
             var root = myXmlDoc.LastChild;
             var compile = myXmlDoc.CreateElement("ItemGroup", root.NamespaceURI);
             root.AppendChild(compile);
@@ -148,7 +148,7 @@ namespace CppWeaving
         public void MakeSharedProjectCpp(string genDir, string fileName)
         {
             System.Xml.XmlDocument myXmlDoc = new System.Xml.XmlDocument();
-            myXmlDoc.Load(genDir + "Empty_CodeGen.vcxitems");
+            myXmlDoc.Load(System.IO.Path.Combine(AppContext.BaseDirectory, "Templates", "Empty_CodeGen.vcxitems"));
             var root = myXmlDoc.LastChild;
             var compile = myXmlDoc.CreateElement("ItemGroup", root.NamespaceURI);
             root.AppendChild(compile);

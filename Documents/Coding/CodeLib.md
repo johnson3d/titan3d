@@ -810,7 +810,7 @@ public float ColorWeight { get; set; }
 
 引擎自带译文放 `enginecontent/localization/zh-CN.json`; 游戏层非空译文覆盖引擎层,
 游戏层留空则沿用引擎层。要新增硬编码文本的批量提取, 走 LocalizationTool
-(`content/applocalization.jscfg` 启动): 只更新目录用 Scan → Save Catalog; 同时改源码用
+(`content/config/engineconfig_windows_localization.jscfg` 启动): 只更新目录用 Scan → Save Catalog; 同时改源码用
 Scan → Preview Rewrite → Apply Rewrite (Apply 会先自动保存 catalog)。
 
 ## 15.让游戏插件支持 LeanCLR 热更

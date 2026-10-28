@@ -28,15 +28,22 @@ namespace EngineNS.Profiler
         CoreSDK.FDelegate_FOnNativeMemAlloc OnNativeMemAlloc;
         //在做ClrProfiler的时候，不要MarshalString，否则会干扰ObjectAllocate统计!!!!!
         //static int testSize = 1048624;
-        private unsafe void OnNativeMemAllocImpl(IntPtr size, sbyte* file, IntPtr line, IntPtr id)
+        private unsafe void OnNativeMemAllocImpl(void* ptr, IntPtr size, sbyte* file, IntPtr line, IntPtr id)
         {
-            if (id == 5551)
+            if (IsNoReportLeaks)
+            {
+                // 原生分配器调用此回调时已经持有内存锁。
+                CoreSDK.SetMemNoLeakReport(ptr, false);
+            }
+            if ((id == 54986 || id == 54985) && size == 24)
             {
                 //var sourceFile = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)file);
                 return;
             }
         }
-        CoreSDK.FDelegate_FOnNativeMemAlloc OnNativeMemFree;
+        [ThreadStatic]
+        public static bool IsNoReportLeaks = false;
+        CoreSDK.FDelegate_FOnNativeMemFree OnNativeMemFree;
         private unsafe void OnNativeMemFreeImpl(IntPtr size, sbyte* file, IntPtr line, IntPtr id)
         {
             //var sourceFile = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)file);

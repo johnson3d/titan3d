@@ -41,7 +41,7 @@ public:
 	inline  void SetName(const VStringA & str){
 		mFile.SetFileName(str.c_str());
 	}
-	virtual long GetRefCount() override{
+	virtual int GetRefCount() override{
 		return mPtrRef;
 	}
 	virtual void OnBeforeWriteFile() override;
@@ -51,7 +51,7 @@ private:
 	UINT64		mCachedStarter;
 	std::vector<BYTE>	mCachedBuffer;
 	
-	std::atomic<long> mPtrRef;
+	std::atomic<int> mPtrRef;
 };
 
 class VMemoryResPtr : public VRes2Memory

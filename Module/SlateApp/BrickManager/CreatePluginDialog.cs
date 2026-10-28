@@ -8,7 +8,7 @@ using EngineNS;
 namespace BrickManager
 {
     /// <summary>
-    /// "Create Plugin..." 弹窗：收集参数后调用 BuildScript/New-TitanPlugin.ps1，生成与 sln 登记都由脚本完成，这里只负责表单和日志。
+    /// "Create Plugin..." 弹窗：收集参数后调用 BuildScript/scaffold/New-TitanPlugin.ps1，生成与 sln 登记都由脚本完成，这里只负责表单和日志。
     /// </summary>
     public class TtCreatePluginDialog
     {
@@ -387,7 +387,7 @@ namespace BrickManager
             lastExitCode = null;
             lastCreatedName = pluginName;
 
-            var scriptPath = Path.GetFullPath(Path.Combine(engineRootPath, "BuildScript", "New-TitanPlugin.ps1"));
+            var scriptPath = Path.GetFullPath(Path.Combine(engineRootPath, "BuildScript", "scaffold", "New-TitanPlugin.ps1"));
             if (!File.Exists(scriptPath))
             {
                 AppendLog($"Script not found: {scriptPath}");

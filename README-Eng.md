@@ -1,4 +1,4 @@
-# Architecture Highlights (Industry Comparison)
+﻿# Architecture Highlights (Industry Comparison)
 
 > **TitanEngine's Render Dependency Graph (`TtRenderGraph` / `TtAttachmentCache`) is benchmarked against UE5 RDG / Unity URP-HDRP Render Graph / Frostbite FrameGraph / Granite / O3DE Atom / Stride GraphicsCompositor / Falcor / Bevy bevy_render.**
 >
@@ -74,7 +74,7 @@ All rendering pipelines are configured through node connections. Therefore, don'
 
 # Compilation and Building
 ## Windows Engine Compilation
-1. **First-time compilation often requires manually running CppWeavingTools and CSharpCodeTools projects once to generate necessary temporary cpp/cs files in codegen/NativeBinder and Cs2Cpp directories**
+1. **First-time compilation often requires manually running CppWeavingTools and CSharpCodeTools projects once to generate necessary temporary cpp/cs files in codegen/<Platform>/NativeBinder and Cs2Cpp directories**
 2. If NativeBinder generation fails initially, LLVM installation may be required
 3. Compile Core.Window project (C++)
 4. Compile Engine.Window project (C#)
@@ -91,7 +91,7 @@ All rendering pipelines are configured through node connections. Therefore, don'
 
 # Debugging and Execution
 1. Set MainEditor as startup project
-2. Debug command line arguments: config=$(SolutionDir)content\EngineConfig.cfg use_renderdoc=false
+2. Debug command line arguments: config=$(SolutionDir)content\config\engineconfig_windows_dx12.jscfg use_renderdoc=false
 3. Debug working directory: $(SolutionDir)binaries\
 4. For runtime and debugging, read [**Engine Configuration and Editor Usage Documentation**](Documents/Index.md)
 5. For unexpected IO-related crashes/exceptions, try deleting local cache directory

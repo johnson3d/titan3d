@@ -11,6 +11,8 @@ namespace NS_tutorials.particles
         [EngineNS.Rtti.MetaAttribute]
         public override void OnUpdateEmitter(EngineNS.Bricks.Particle.TtNebulaParticle nebula,EngineNS.Bricks.Particle.TtEmitter emitter,EngineNS.Bricks.Particle.TtParticleGraphNode particleSystem,System.Single elpased)
         {
+            if (EngineNS.Macross.TtMacrossPatch.Active && EngineNS.Macross.TtMacrossPatch.TryInvoke(0x0FFA2AFA84A3777CUL, this, nebula, emitter, particleSystem, elpased))
+                return;
             #if !disable_macross_fea33170_dbce_4809_94ce_fd890ebf6fde
             using(var guard_OnUpdateEmitter = new EngineNS.Macross.TtMacrossStackGuard(mStack_OnUpdateEmitter_363922588,mFrame_OnUpdateEmitter_363922588))
             {
@@ -30,7 +32,7 @@ namespace NS_tutorials.particles
                 breaker_CreateVector3f_3352141493.TryBreak(mStack_OnUpdateEmitter_363922588, this);
                 tmp_r_CreateVector3f_3352141493 = EngineNS.MathHelper.CreateVector3f(0f,(tmp_r_Sin_1260400330 * 10f),0f);
                 mFrame_OnUpdateEmitter_363922588.SetWatchVariable("tmp_r_CreateVector3f_3352141493", tmp_r_CreateVector3f_3352141493);
-                Location = tmp_r_CreateVector3f_3352141493;
+                emitter.Location = tmp_r_CreateVector3f_3352141493;
             }
             #endif //!disable_macross_fea33170_dbce_4809_94ce_fd890ebf6fde
         }

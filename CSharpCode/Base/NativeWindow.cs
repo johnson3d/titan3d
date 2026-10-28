@@ -106,7 +106,7 @@ namespace EngineNS
         }
         public bool Initialize()
         {
-#if PWindow
+#if PWindow || PMac
             if (SDL.SDL3.SDL_Init(SDL.SDL_InitFlags.SDL_INIT_EVENTS) == false)
                 return false;
             PropertiesID_WindowData = SDL.SDL3.SDL_CreateProperties();
@@ -151,13 +151,46 @@ namespace EngineNS
         }
         public unsafe static IntPtr GetWindowHandle(SDL.SDL_Window* WinSDL)
         {
+#if PWindow
             return SDL.SDL3.SDL_GetPointerProperty(SDL.SDL3.SDL_GetWindowProperties(WinSDL), SDL.SDL3.SDL_PROP_WINDOW_WIN32_HWND_POINTER, 0);
+#elif PMac
+            return SDL.SDL3.SDL_GetPointerProperty(SDL.SDL3.SDL_GetWindowProperties(WinSDL), SDL.SDL3.SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, 0);
+#else
+            return IntPtr.Zero;
+#endif
         }
         public unsafe IntPtr HWindow
         {
             get
             {
                 return GetWindowHandle(WindowSDL);
+            }
+        }
+#if PMac
+        IntPtr MetalView;
+        //Vulkan(MoltenVK) surface 需要的 CAMetalLayer*；视图随窗口释放
+        public unsafe IntPtr MetalLayer
+        {
+            get
+            {
+                if (MetalView == IntPtr.Zero)
+                    MetalView = (IntPtr)SDL.SDL3.SDL_Metal_CreateView(WindowSDL);
+                if (MetalView == IntPtr.Zero)
+                    return IntPtr.Zero;
+                return (IntPtr)SDL.SDL3.SDL_Metal_GetLayer(MetalView);
+            }
+        }
+#endif
+        //传给 RHI 当 swapchain 目标：Windows 是 HWND，Mac 是 CAMetalLayer*
+        public unsafe IntPtr SurfaceHandle
+        {
+            get
+            {
+#if PMac
+                return MetalLayer;
+#else
+                return HWindow;
+#endif
             }
         }
         public unsafe bool IsMinimized
@@ -242,6 +275,13 @@ namespace EngineNS
             }
             if (Window != IntPtr.Zero)
             {
+#if PMac
+                if (MetalView != IntPtr.Zero)
+                {
+                    SDL.SDL3.SDL_Metal_DestroyView(MetalView);
+                    MetalView = IntPtr.Zero;
+                }
+#endif
                 windowManager?.UnregisterNativeWindow(this);
                 SDL.SDL3.SDL_StopTextInput(WindowSDL);
                 SDL.SDL3.SDL_DestroyWindow(WindowSDL);
@@ -292,9 +332,11 @@ namespace EngineNS
             WindowName = $"NativeWindow_{WindowID}";
             SDL.SDL3.SDL_SetPointerProperty(windowManager.PropertiesID_WindowData, this.WindowID.ToString(), ThisHandle);
             SDL.SDL3.SDL_StartTextInput(WindowSDL);
+#if PWindow
             var hwnd = GetWindowHandle(WindowSDL);
             int darkMode = 1;
             DwmSetWindowAttribute(hwnd, (DwmWindowAttribute)20, ref darkMode, sizeof(int));
+#endif
             windowManager.RegisterNativeWindow(this);
             return Window;
         }
@@ -320,6 +362,13 @@ namespace EngineNS
         {
             int x = 0, y = 0;
             SDL.SDL3.SDL_GetWindowSize(WindowSDL, &x, &y);
+            return new Vector2((float)x, (float)y);
+        }
+        //Retina/HiDPI 下与 GetWindowSize(逻辑点) 相差整数倍，swapchain/视口须用像素尺寸
+        public unsafe Vector2 GetWindowSizeInPixels()
+        {
+            int x = 0, y = 0;
+            SDL.SDL3.SDL_GetWindowSizeInPixels(WindowSDL, &x, &y);
             return new Vector2((float)x, (float)y);
         }
         public unsafe void SetWindowFocus()
@@ -399,6 +448,7 @@ namespace EngineNS
         }
         public void TickEvent(in Bricks.Input.Event evt)
         {
+#if PWindow
             if (evt.Type == Bricks.Input.EventType.KEYDOWN && evt.Keyboard.Keysym.Scancode == Bricks.Input.Scancode.SCANCODE_F1)
             {
                 unsafe
@@ -408,6 +458,7 @@ namespace EngineNS
                     TtEngine.Instance.GfxDevice.RenderQueue.CaptureRenderDocFrame = true;
                 }
             }
+#endif
 
             OnTickWindow(in evt);
             

@@ -72,7 +72,7 @@ namespace EngineNS.Editor
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
                     FileName = $"{TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute)}{TtEngine.DotNetVersion}/TitanCMD.exe",
-                    Arguments = $"ExeCmd=StartDS DS_Port={dsPort} CookCfg={path}content/EngineConfigForCook.jscfg",
+                    Arguments = $"ExeCmd=StartDS DS_Port={dsPort} CookCfg={path}content/config/engineconfig_windows_cook.jscfg",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,

@@ -9,5 +9,5 @@
     <!-- 共享枚举/结构体定义，桩方法签名需要这些类型 -->
     <Compile Include="..\Titan.Tests.LeanCLR.HostGame\SharedTypes.cs" Link="SharedTypes.cs" />
   </ItemGroup>
-  <Import Project="..\..\BuildScript\LeanClrStub.targets" />
+  <Import Project="..\..\BuildScript\leanclr\LeanClrStub.targets" />
 </Project>

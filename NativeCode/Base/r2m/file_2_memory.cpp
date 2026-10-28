@@ -45,7 +45,7 @@ VFile2Memory::~VFile2Memory()
 	Close();
 }
 
-std::atomic<long> GPtrRef(0);
+std::atomic<int> GPtrRef(0);
 VResPtr VFile2Memory::Ptr(UINT64 offset , UINT64 size)
 {
 	mLocker.Lock();

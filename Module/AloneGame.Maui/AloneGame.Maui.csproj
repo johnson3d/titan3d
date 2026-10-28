@@ -1,0 +1,74 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX')) or '$(TitanEnableIOS)' == 'true'">net10.0-android;net10.0-ios</TargetFrameworks>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>AloneGame.Maui</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- 仓库根 Directory.Packages.props 开了 CPM；MAUI SDK 自带版本，不能走集中版本。 -->
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <MauiVersion>10.0.110</MauiVersion>
+    <ApplicationTitle>Titan AloneGame</ApplicationTitle>
+    <ApplicationId>com.titan3d.alonegame</ApplicationId>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <ApplicationVersion>1</ApplicationVersion>
+    <TitanRepositoryRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..'))</TitanRepositoryRoot>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
+    <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <SupportedOSPlatformVersion>28.0</SupportedOSPlatformVersion>
+    <RuntimeIdentifiers>android-arm64</RuntimeIdentifiers>
+    <AndroidPackageFormats>apk</AndroidPackageFormats>
+    <AndroidKeyStore>false</AndroidKeyStore>
+    <PublishTrimmed>false</PublishTrimmed>
+    <RunAOTCompilation>false</RunAOTCompilation>
+    <TitanAndroidNativeLibrary>$(TitanRepositoryRoot)binaries/android/$([System.String]::Copy('$(Configuration)').ToLowerInvariant())/libCore.Android.so</TitanAndroidNativeLibrary>
+    <!-- 暂存内容落坐标见 Directory.Build.props：中间产物只进 intermediate/android。 -->
+    <TitanAndroidContentDirectory>$(TitanAndroidIntermediateRoot)content/$(Configuration)/</TitanAndroidContentDirectory>
+    <TitanAndroidDataCopyerState>$(TitanRepositoryRoot)codegen/Android/DataCopyer/.datacopyer.state.json</TitanAndroidDataCopyerState>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+    <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+    <MauiFont Include="Resources\Fonts\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <!-- 引擎由 build-android.ps1 -Stage Managed 预先构建到 binaries/android/net8.0；
+         Apk 阶段用 BuildProjectReferences=false 直接消费 S1 已经验证过的产物。
+         移除 MAUI/RID 全局属性，避免把 net8.0 引擎改成 MAUI 工程或写进 android-arm64 子目录。 -->
+    <ProjectReference Include="../Engine.Android/Engine.Android.csproj"
+      AdditionalProperties="TitanPlatform=Android;SkipTitanCodeGen=true;SkipTitanDataCopyerGen=true"
+      GlobalPropertiesToRemove="RuntimeIdentifier;RuntimeIdentifiers;UseMaui;SingleProject" />
+    <AndroidNativeLibrary Include="$(TitanAndroidNativeLibrary)">
+      <Abi>arm64-v8a</Abi>
+    </AndroidNativeLibrary>
+    <AndroidAsset Include="$(TitanAndroidContentDirectory)**/*"
+      LogicalName="titan/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <!-- 直接 dotnet build 时前置缺失必须立刻失败，不能产出一个没有引擎的空 APK。 -->
+  <Target Name="TitanValidateAndroidPrerequisites" BeforeTargets="BeforeBuild"
+          Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <Error Condition="!Exists('$(TitanAndroidNativeLibrary)')"
+           Text="缺少原生库 $(TitanAndroidNativeLibrary)；先运行 BuildScript/android/build-android.ps1 -Configuration $(Configuration) -Stage Native" />
+    <Error Condition="!Exists('$(TitanAndroidContentDirectory)manifest.txt')"
+           Text="缺少 Android 内容暂存 $(TitanAndroidContentDirectory)manifest.txt；先运行 BuildScript/android/build-android.ps1 -Configuration $(Configuration) -Stage Apk" />
+    <Error Condition="!Exists('$(TitanAndroidDataCopyerState)')"
+           Text="缺少 DataCopyer 状态 $(TitanAndroidDataCopyerState)；先运行 BuildScript/android/build-android.ps1 -Configuration $(Configuration) -Stage Managed" />
+  </Target>
+
+</Project>

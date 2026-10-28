@@ -491,26 +491,3 @@ namespace Survivor
         }
     }
 }
-
-#if TitanEngine_AutoGen_Macross
-#region TitanEngine_AutoGen_Macross
-
-
-namespace Survivor
-{
-	partial class TtWeaponNode
-	{
-		public unsafe void macross_Attack (EngineNS.Macross.TtMacrossStackTracer mcStack, string nodeName, TtNode targetNode, TtNode bulletNode) 
-		{
-			var stackframe = mcStack.TopFrame;
-			{
-				if(stackframe != null)
-				{
-				}
-			}
-			Attack(targetNode, bulletNode);
-		}
-	}
-}
-#endregion//TitanEngine_AutoGen_Macross
-#endif//TitanEngine_AutoGen_Macross

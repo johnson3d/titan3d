@@ -8,10 +8,30 @@ namespace EngineNS
 {
     public unsafe partial struct CoreSDK
     {
+#if PMac
+        public const string CoreModule = "Core.Mac.dylib";
+#elif PAndroid
+        // 生成绑定的 DllImport 名；Android 实际文件名由 TtNativeWindow 的 DllImportResolver 映射到 libCore.Android.so。
+        public const string CoreModule = "Core.Android";
+#else
         public const string CoreModule = "Core.Window.dll";
+#endif
+        // 生成绑定不保留 C++ 默认参数，用重载保持普通调用默认加锁。
+        public static void SetMemDebugInfo(void* memory, string info)
+        {
+            SetMemDebugInfo(memory, info, true);
+        }
+        public static void SetMemNoLeakReport(void* memory)
+        {
+            SetMemNoLeakReport(memory, true);
+        }
         public static void SetMemDebugText(void* memory, string info)
         {
-            SetMemDebugInfo(memory, info);
+            SetMemDebugText(memory, info, true);
+        }
+        public static void SetMemDebugText(void* memory, string info, bool needLock)
+        {
+            SetMemDebugInfo(memory, info, needLock);
         }
         public static void CopyString2Ansi(BigStackBuffer buffer, string srcStr)
         {

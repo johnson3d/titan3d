@@ -909,7 +909,7 @@ namespace NxRHI
 		virtual FResourceState* GetResourceState() override{
 			return &ResourceState;
 		}
-		virtual long AddRef() const override;
+		virtual int AddRef() const override;
 		virtual void Release() const override;
 		
 	public:

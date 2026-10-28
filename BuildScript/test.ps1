@@ -20,7 +20,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-. "$PSScriptRoot\common.ps1"
+. "$PSScriptRoot\common\common.ps1"
 
 function Resolve-RepoPath {
     param(
@@ -296,7 +296,7 @@ try {
             }
 
             $titanCmd = Test-RepoFile 'binaries\net8.0\TitanCMD.exe'
-            $engineConfig = Test-RepoFile 'content\config\engineconfigfortest.jscfg'
+            $engineConfig = Test-RepoFile 'content\config\engineconfig_windows_test.jscfg'
             $nativeConfiguration = if ($Configuration -eq 'Debug') { 'debug' } else { 'release' }
             $arguments = @(
                 'ExeCmd=RunTests',

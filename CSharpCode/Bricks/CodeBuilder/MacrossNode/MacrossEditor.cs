@@ -2152,6 +2152,9 @@ namespace EngineNS.Rtti
                         case EPlatformType.PLTF_AppleIOS:
                             platform = "iOS";
                             break;
+                        case EPlatformType.PLTF_Mac:
+                            platform = "Mac";
+                            break;
                     }
                 }
                 arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(
