@@ -35,6 +35,84 @@ errors=0
 fail() { echo "[TitanSetup][缺失] $1"; errors=$((errors+1)); }
 have() { command -v "$1" >/dev/null 2>&1; }
 
+# 静态 libc++ 源码构建（install-mac/lib/libc++.a 缺失时由 setup 自动补齐）。
+# 引擎必须用源码 libc++.a 替换系统 libc++（跨堆错配，见 Core.Mac/CMakeLists.txt titan-libcxx 段）；
+# 构建参数与 libcxx 22.1.8 standalone 的已验证配置一致，源码保持 sparse + blobless。
+LLVM_TAG="llvmorg-22.1.8"
+LLVM_DIR="$ROOT/3rd/native/llvm-project"
+LIBCXX_PREFIX="$LLVM_DIR/install-mac"
+build_libcxx() {
+  local bdir="$LLVM_DIR/build-mac/cxx"
+  if [ ! -d "$LLVM_DIR/.git" ]; then
+    echo "[TitanSetup] 克隆 llvm-project ${LLVM_TAG}（sparse + blobless）"
+    git clone --depth 1 --branch "$LLVM_TAG" --filter=blob:none --sparse \
+      https://github.com/llvm/llvm-project.git "$LLVM_DIR" || return 1
+  elif [ "$(git -C "$LLVM_DIR" describe --tags 2>/dev/null)" != "$LLVM_TAG" ]; then
+    echo "[TitanSetup][错误] ${LLVM_DIR} 不是 ${LLVM_TAG}，请手动处理后重跑"
+    return 1
+  fi
+  # libc++ 22.x 的 shared 头与 LLVM-libc 共享源码在 libc/ 下，必须一并 checkout
+  git -C "$LLVM_DIR" sparse-checkout set \
+    cmake libc/hdr libc/include libc/shared libc/src/__support \
+    libcxx libcxxabi libunwind llvm/cmake llvm/include llvm/runtimes runtimes third-party || return 1
+  ln -sfn ../../../libc/shared "$LLVM_DIR/libcxx/src/include/shared"
+
+  # 两处构建补丁（幂等）：
+  # 1) shared 头按 ../libc 解析；2) refstring 的 rep 块用 malloc/free——系统 libc++abi 的
+  #    dtor 用 free 释放，走 ::operator new 会落进引擎 VFX 堆，被系统 free 时 abort
+  python3 - "$LLVM_DIR" <<'PY' || return 1
+import pathlib
+import sys
+
+root = pathlib.Path(sys.argv[1])
+
+p = root / "libcxx/src/CMakeLists.txt"
+s = p.read_text()
+if "../libc}" not in s:
+    for tgt in ("cxx_shared", "cxx_static"):
+        old = f"target_include_directories({tgt} PRIVATE ${{CMAKE_CURRENT_SOURCE_DIR}})"
+        s = s.replace(old, old[:-1] + " ${CMAKE_CURRENT_SOURCE_DIR}/../libc)")
+    p.write_text(s)
+
+p = root / "libcxx/src/include/refstring.h"
+s = p.read_text()
+if "_LIBCPP_REFSTRING_ALLOC" not in s:
+    s = s.replace("#include <cstddef>\n", "#include <cstddef>\n#include <cstdlib>\n", 1)
+    macros = (
+        "\n// TitanEngine (Mac)：本 dylib 静态链接 libc++.a，而 runtime_error 的析构由系统\n"
+        "// libc++abi.dylib 提供，其 dtor 用 free() 释放 rep 块；这里必须用 malloc() 分配，\n"
+        "// 否则会落进引擎 VFX 堆并被系统 free 释放（malloc abort）。\n"
+        "#define _LIBCPP_REFSTRING_ALLOC(s) std::malloc(s)\n"
+        "#define _LIBCPP_REFSTRING_FREE(p) std::free(p)\n"
+    )
+    s = s.replace("#include <stdexcept>\n", "#include <stdexcept>\n" + macros, 1)
+    s = s.replace("::operator new(sizeof(*rep) + len + 1)",
+                  "_LIBCPP_REFSTRING_ALLOC(sizeof(*rep) + len + 1)")
+    s = s.replace("static_cast<_Rep_base*>(_LIBCPP_REFSTRING_ALLOC(sizeof(*rep) + len + 1));",
+                  "static_cast<_Rep_base*>(_LIBCPP_REFSTRING_ALLOC(sizeof(*rep) + len + 1));\n"
+                  "  if (rep == nullptr)\n"
+                  "    abort();")
+    s = s.replace("::operator delete(old_rep)", "_LIBCPP_REFSTRING_FREE(old_rep)")
+    s = s.replace("::operator delete(rep)", "_LIBCPP_REFSTRING_FREE(rep)")
+    p.write_text(s)
+PY
+
+  echo "[TitanSetup] 构建 libc++.a（${LLVM_TAG}，Release/arm64）"
+  cmake -S "$LLVM_DIR/libcxx" -B "$bdir" -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX="$LIBCXX_PREFIX" \
+    -DCMAKE_OSX_ARCHITECTURES=arm64 \
+    -DLIBCXX_CXX_ABI=system-libcxxabi \
+    -DLIBCXX_CXX_ABI_INCLUDE_PATHS="$LLVM_DIR/libcxxabi/include" \
+    -DLIBCXX_ENABLE_NEW_DELETE_DEFINITIONS=OFF \
+    -DLIBCXX_ENABLE_SHARED=OFF \
+    -DLIBCXX_ENABLE_STATIC=ON \
+    -DLIBCXX_INSTALL_MODULES=OFF || return 1
+  cmake --build "$bdir" || return 1
+  cmake --install "$bdir" || return 1
+  [ -f "$LIBCXX_PREFIX/lib/libc++.a" ]
+}
+
 echo "[TitanSetup] === 1/4 环境校验（仓库根: ${ROOT}）==="
 
 # --- 工具链 ---
@@ -62,9 +140,19 @@ elif ! dotnet --list-sdks 2>/dev/null | grep -q '^8\.'; then
 fi
 
 # --- vendored 原生依赖（与 Core.Mac/CMakeLists.txt 的要求一一对应）---
-LIBCXX="$ROOT/3rd/native/llvm-project/install-mac"
-if [ ! -f "$LIBCXX/lib/libc++.a" ]; then
-  fail "缺少静态 libc++: $LIBCXX/lib/libc++.a（见 CMakeLists.txt titan-libcxx 段与 3rd/native/llvm-project 构建说明）"
+if [ ! -f "$LIBCXX_PREFIX/lib/libc++.a" ]; then
+  if [ "$CHECK_ONLY" -eq 1 ]; then
+    fail "缺少静态 libc++: ${LIBCXX_PREFIX}/lib/libc++.a（正常 setup 会自动克隆并构建）"
+  elif [ "$errors" -gt 0 ]; then
+    fail "缺少静态 libc++，且工具链校验未通过，无法自动构建: ${LIBCXX_PREFIX}/lib/libc++.a"
+  elif ! have git; then
+    fail "缺少 git，无法克隆 llvm-project 构建静态 libc++"
+  else
+    echo "[TitanSetup] 未找到静态 libc++，自动从 GitHub 构建（首次约 10 分钟）"
+    if ! build_libcxx; then
+      fail "静态 libc++ 构建失败，见上方 cmake 输出"
+    fi
+  fi
 fi
 
 # 条件依赖按 TITAN_MAC_MODULES 实际包含的模块判定（与 CMake 的 IN_LIST 判断同源）

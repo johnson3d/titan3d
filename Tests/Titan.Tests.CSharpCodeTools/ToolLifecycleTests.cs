@@ -59,8 +59,8 @@ public class ToolLifecycleTests
             var mac = Generate("Mac");
             Assert.That(mac.Code, Is.Zero, mac.Log);
             foreach (var (file, code) in before) Assert.That(File.ReadAllText(file), Is.EqualTo(code));
-            var engineOutput = Path.Combine(directory, "codegen", "Mac", "Macross", "Engine");
-            var pluginOutput = Path.Combine(directory, "codegen", "Mac", "Macross", "Plugins", "Portable.All");
+            var engineOutput = Path.Combine(directory, "codegen", "Mac", "Macross", "Engine", "Debug");
+            var pluginOutput = Path.Combine(directory, "codegen", "Mac", "Macross", "Plugins", "Portable.All", "Debug");
             var engineCode = string.Join("\n", Directory.GetFiles(engineOutput, "*.cs").Select(File.ReadAllText));
             Assert.That(engineCode, Does.Contain("macross_Mac").And.Not.Contain("macross_Windows").And.Not.Contain("macross_Plugin"));
             Assert.That(string.Join("\n", Directory.GetFiles(pluginOutput, "*.cs").Select(File.ReadAllText)), Does.Contain("macross_Plugin"));
@@ -182,11 +182,11 @@ public class ToolLifecycleTests
             var rpc = Path.Combine(directory, "codegen", "Mac", "Rpc");
             string Code(string path) => string.Join("\n", Directory.GetFiles(path, "*.cs").Select(File.ReadAllText));
             // CallerInClass=false 的调用方由共享调用方宿主编译，被调方仍归拥有源码的插件。
-            var callers = Path.Combine(rpc, "Callers", "Plugins", "Portable.All");
+            var callers = Path.Combine(rpc, "Callers", "Plugins", "Portable.All", "Debug");
             Assert.That(Code(callers), Does.Contain("public partial class Remote_RpcCaller").And.Not.Contain("rpc_Call").And.Not.Contain("using PluginOnly;"));
-            var owner = Code(Path.Combine(rpc, "Plugins", "Portable.All"));
+            var owner = Code(Path.Combine(rpc, "Plugins", "Portable.All", "Debug"));
             Assert.That(owner, Does.Contain("rpc_Call").And.Contain("Remote_RpcCaller.Call(").And.Not.Contain("class Remote_RpcCaller"));
-            var engineCode = Code(Path.Combine(rpc, "Engine"));
+            var engineCode = Code(Path.Combine(rpc, "Engine", "Debug"));
             Assert.That(engineCode, Does.Contain("class Local_RpcCaller").And.Contain("rpc_Ping"));
             Assert.That(Directory.Exists(Path.Combine(rpc, "Callers", "Engine")) ? Directory.GetFiles(Path.Combine(rpc, "Callers", "Engine"), "*.cs") : Array.Empty<string>(), Is.Empty);
             var list = Path.Combine(directory, "obj", "callers.inputs");
@@ -229,7 +229,7 @@ public class ToolLifecycleTests
             File.WriteAllText(source, "namespace Test; [TtRpcClass(RunTarget=ERunTarget.Client,Executer=EExecuter.Client)] [UAutoSync] public partial class Item { [TtRpcMethod(Index=1)] public void Call(TtCallContext context) {} [UAutoSync(Index=0)] public int Value { get; set; } }");
             void Generate() => global::CSharpCodeTools.SourceGenerationRunner.Run(directory, project, "Mac", "Debug", null!, new[] { mode });
             Generate();
-            var output = Path.Combine(directory, "codegen", "Mac", mode == "AutoSync" ? "Property" : mode, "Engine");
+            var output = Path.Combine(directory, "codegen", "Mac", mode == "AutoSync" ? "Property" : mode, "Engine", "Debug");
             var saved = Directory.GetFiles(output).ToDictionary(p => p, File.ReadAllBytes);
             File.WriteAllText(source, "namespace Test; " + invalid);
             Assert.That(Generate, Throws.TypeOf<InvalidDataException>().With.Message.Contains(source));

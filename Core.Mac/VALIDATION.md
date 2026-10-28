@@ -104,7 +104,7 @@
 ./setup.sh --skip-codegen        # 跳过胶水生成（stamp 缺失时仍会强制执行）
 ```
 
-依赖校验覆盖：Xcode CLT、cmake ≥3.24、ninja、.NET 8 SDK、静态 libc++（`3rd/native/llvm-project/install-mac`），并按 `Core.Mac/generated/TitanSources.cmake` 的模块清单条件校验 PhysX5 / Vulkan(MoltenVK) 静态库与 dylib（metis 为可选链接，缺失仅警告）。构建目录 `intermediate/cpp/Core.Mac/<Cfg>` 缺 `build.ninja` 时自动补 configure，根治「直接构建 native 报目录不存在」。
+依赖校验覆盖：Xcode CLT、cmake ≥3.24、ninja、.NET 8 SDK、静态 libc++（`3rd/native/llvm-project/install-mac`，缺失时自动 sparse clone `llvmorg-22.1.8` 并源码构建），并按 `Core.Mac/generated/TitanSources.cmake` 的模块清单条件校验 PhysX5 / Vulkan(MoltenVK) 静态库与 dylib（metis 为可选链接，缺失仅警告）。构建目录 `intermediate/cpp/Core.Mac/<Cfg>` 缺 `build.ninja` 时自动补 configure，根治「直接构建 native 报目录不存在」。
 
 VS Code 中对应任务为 `Titan: Setup & Build Native (Debug)`（默认构建任务）与 `Titan: Setup Deps Check (Mac)`。
 

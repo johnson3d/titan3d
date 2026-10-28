@@ -112,6 +112,48 @@ public class SourceGenerationTests
     }
 
     [Test]
+    public void GeneratedManifests_ArePerConfiguration_BothConfigsRemainValid()
+    {
+        // 回归：清单曾按 owner 目录单份存放，Debug→Release 双轮生成后 Release 收尾，
+        // 另一个配置的插件 ValidateOutputs-only 消费即报「缺少或不匹配的源码成功清单」。
+        // 清单改为按 owner+configuration 子目录存放后，两个配置必须同时可校验。
+        var root = Path.Combine(Path.GetTempPath(), "Titan PerConfig Manifest " + Guid.NewGuid().ToString("N"));
+        var msbuildDir = Path.Combine(root, "BuildScript", "msbuild");
+        Directory.CreateDirectory(msbuildDir);
+        // Run 内部 LoadPlatformProjects 需要 ClonePlatformTargets 引擎侧输入采集目标
+        File.Copy(Path.Combine(ManagedProjectTests.Root(), "BuildScript", "msbuild", "TitanSourceInputs.targets"), Path.Combine(msbuildDir, "TitanSourceInputs.targets"));
+        try
+        {
+            var project = Path.Combine(root, "Synthetic.csproj");
+            File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup></Project>");
+            File.WriteAllText(Path.Combine(root, "Item.cs"), "namespace EngineNS.Test { [TtRpcClass(RunTarget=ERunTarget.Client,Executer=EExecuter.Client)] [UAutoSync] public partial class Item { [Meta][TtRpcMethod(Index=1)] public void Ping(int value, TtCallContext context) {} [UAutoSync(Index=0)] public int Value { get; set; } } }");
+            var binder = Path.Combine(root, "codegen", "Mac", "NativeBinder");
+            Directory.CreateDirectory(binder);
+            File.WriteAllText(Path.Combine(binder, "CodeGenCSharp.projitems"), "<Project />");
+            var runner = typeof(global::CSharpCodeTools.ProjectSourceInputs).Assembly.GetType("CSharpCodeTools.SourceGenerationRunner");
+            Assert.That(runner, Is.Not.Null);
+            var run = runner!.GetMethod("Run");
+            Assert.That(run, Is.Not.Null);
+            var export = runner.GetMethod("ExportInputs");
+            Assert.That(export, Is.Not.Null);
+            foreach (var configuration in new[] { "Debug", "Release" })
+            {
+                run!.Invoke(null, new object?[] { root, project, "Mac", configuration, null, new[] { "Rpc", "AutoSync", "Macross" } });
+                foreach (var category in new[] { "Rpc", "Property", "Macross" })
+                {
+                    var manifest = Path.Combine(root, "codegen", "Mac", category, "Engine", configuration, ".outputs.json");
+                    Assert.That(File.Exists(manifest), $"{category} 缺少 {configuration} 清单：{manifest}");
+                    Assert.That(File.ReadAllText(manifest), Does.Contain($"\"Configuration\": \"{configuration}\""));
+                }
+                var list = Path.Combine(root, $"inputs-{configuration}.txt");
+                export!.Invoke(null, new object?[] { root, "Engine", "Mac", configuration, project, list, "CSharp", true });
+                Assert.That(File.ReadAllText(list), Does.Contain(configuration));
+            }
+        }
+        finally { Directory.Delete(root, true); }
+    }
+
+    [Test]
     public void LeanClrStub_DoesNotConsumeRegularPluginGeneratedSources()
     {
         var result = ManagedProjectTests.Run("msbuild", Path.Combine(ManagedProjectTests.Root(), "Plugins/Game/Survivor/Survivor.LeanClrStub/Survivor.LeanClrStub.csproj"), "-nologo", "-t:TitanGenerateGlueCode,TitanConsumeManagedGeneratedInputs", "-p:_CSharpCodeToolsDll=does-not-exist.dll", "-getItem:Compile");

@@ -45,10 +45,11 @@ internal static class SourceGenerationRunner
                 {
                     var category = mode == "AutoSync" ? "Property" : mode;
                     var ownership = index == 0 ? "Engine" : Path.Combine("Plugins", input.AssemblyName);
-                    var directory = Path.Combine(outputRoot, category, ownership);
+                    // 清单按 owner+configuration 子目录隔离：任意配置组合的生成顺序都不再互相覆盖
+                    var directory = Path.Combine(outputRoot, category, ownership, configuration);
                     var previous = ReadManifest(directory);
                     // 共享 RPC 调用方与被调方同次解析，但归调用方宿主编译，单独记录成功清单。
-                    var callerDirectory = mode == "Rpc" ? Path.Combine(outputRoot, "Rpc", "Callers", ownership) : null;
+                    var callerDirectory = mode == "Rpc" ? Path.Combine(outputRoot, "Rpc", "Callers", ownership, configuration) : null;
                     var previousCallers = callerDirectory == null ? null : ReadManifest(callerDirectory);
                     var fingerprint = Fingerprint(input, mode, config, excludes);
                     Console.WriteLine($"Project={input.ProjectFile}; Platform={platform}; Configuration={configuration}; Assembly={input.AssemblyName}; Mode={mode}; Output={directory}; Sources={input.SourceFiles.Length}");
@@ -119,12 +120,23 @@ internal static class SourceGenerationRunner
                 var comparison = OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
                 var live = inputs.Skip(1).Select(i => i.AssemblyName).ToHashSet(comparison);
                 foreach (var stale in Directory.GetDirectories(pluginCallers).Where(d => !live.Contains(Path.GetFileName(d))))
+                    Directory.Delete(stale, true);
+            }
+            // 旧布局（清单与文件直存于 owner 目录，双配置互相覆盖）一次性迁移：随清单删除文件，新布局由本次生成重建。
+            foreach (var category in new[] { "Rpc", "Property", "Macross" })
+            {
+                var owners = new List<string> { Path.Combine(outputRoot, category, "Engine") };
+                var plugins = Path.Combine(outputRoot, category, "Plugins");
+                if (Directory.Exists(plugins)) owners.AddRange(Directory.GetDirectories(plugins));
+                var callerOwners = category == "Rpc" ? new List<string> { Path.Combine(outputRoot, "Rpc", "Callers", "Engine") } : new List<string>();
+                if (Directory.Exists(pluginCallers)) callerOwners.AddRange(Directory.GetDirectories(pluginCallers));
+                foreach (var owner in owners.Concat(callerOwners))
                 {
-                    var manifestPath = Path.Combine(stale, ".outputs.json");
-                    foreach (var name in ReadManifest(stale).Files.Keys)
-                        File.Delete(Path.Combine(stale, name));
-                    File.Delete(manifestPath);
-                    if (!Directory.EnumerateFileSystemEntries(stale).Any()) Directory.Delete(stale);
+                    if (!File.Exists(Path.Combine(owner, ".outputs.json"))) continue;
+                    foreach (var name in ReadManifest(owner).Files.Keys)
+                        File.Delete(Path.Combine(owner, name));
+                    File.Delete(Path.Combine(owner, ".outputs.json"));
+                    if (!Directory.EnumerateFileSystemEntries(owner).Any()) Directory.Delete(owner);
                 }
             }
         }
@@ -174,10 +186,10 @@ internal static class SourceGenerationRunner
             var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
             foreach (var category in new[] { "Rpc", "Property", "Macross" })
             {
-                var directory = Path.Combine(outputRoot, category, owner == "Engine" ? "Engine" : Path.Combine("Plugins", owner));
+                var directory = Path.Combine(outputRoot, category, owner == "Engine" ? "Engine" : Path.Combine("Plugins", owner), configuration);
                 var manifest = ReadManifest(directory);
                 if (manifest.Platform != platform || manifest.Configuration != configuration || !string.Equals(manifest.ProjectFile, project, comparison) || manifest.Fingerprint.Length != 64)
-                    throw new InvalidDataException("缺少或不匹配的源码成功清单：" + Path.Combine(directory, ".outputs.json"));
+                    throw new InvalidDataException($"缺少 {platform}/{configuration} 的源码成功清单（现存 Platform={manifest.Platform} Configuration={manifest.Configuration}）：{Path.Combine(directory, ".outputs.json")}。\n该工程为 ValidateOutputs-only，请先构建引擎工程（Engine.Window/Engine.Mac，会重新生成本配置全部清单）或运行 Setup 后重试。");
                 foreach (var (name, hash) in manifest.Files)
                 {
                     var file = Path.Combine(directory, name);
@@ -192,19 +204,31 @@ internal static class SourceGenerationRunner
             // 调用方宿主聚合当前平台所有工程的共享调用方；引擎清单缺失说明未完成本平台生成。
             var callers = Path.Combine(outputRoot, "Rpc", "Callers");
             var plugins = Path.Combine(callers, "Plugins");
-            var directories = new[] { Path.Combine(callers, "Engine") }.Concat(Directory.Exists(plugins) ? Directory.GetDirectories(plugins).OrderBy(d => d, StringComparer.Ordinal) : Enumerable.Empty<string>());
-            foreach (var directory in directories)
+            var engineCallers = Path.Combine(callers, "Engine");
+            var ownerRoots = new[] { engineCallers }.Concat(Directory.Exists(plugins) ? Directory.GetDirectories(plugins).OrderBy(d => d, StringComparer.Ordinal) : Enumerable.Empty<string>());
+            foreach (var ownerRoot in ownerRoots)
             {
-                if (directory != Path.Combine(callers, "Engine") && !File.Exists(Path.Combine(directory, ".outputs.json"))) continue;
-                var manifest = ReadManifest(directory);
-                if (manifest.Platform != platform || manifest.Configuration != configuration || manifest.Fingerprint.Length != 64)
-                    throw new InvalidDataException("缺少或不匹配的 RPC 调用方成功清单：" + Path.Combine(directory, ".outputs.json"));
-                foreach (var (name, hash) in manifest.Files)
+                var isEngineOwner = ownerRoot == engineCallers;
+                var matched = false;
+                foreach (var directory in Directory.Exists(ownerRoot) ? Directory.GetDirectories(ownerRoot).OrderBy(d => d, StringComparer.Ordinal) : Enumerable.Empty<string>())
                 {
-                    var file = Path.Combine(directory, name);
-                    if (!File.Exists(file) || HashFile(file) != hash) throw new InvalidDataException("缺少或已损坏的必需生成文件：" + file);
-                    files.Add(file);
+                    if (!File.Exists(Path.Combine(directory, ".outputs.json"))) continue;
+                    var manifest = ReadManifest(directory);
+                    // 清单按配置分目录后，异配置目录属于另一次生成，跳过即可。
+                    if (manifest.Platform != platform || manifest.Configuration != configuration) continue;
+                    if (manifest.Fingerprint.Length != 64)
+                        throw new InvalidDataException("缺少或不匹配的 RPC 调用方成功清单：" + Path.Combine(directory, ".outputs.json"));
+                    matched = true;
+                    foreach (var (name, hash) in manifest.Files)
+                    {
+                        var file = Path.Combine(directory, name);
+                        if (!File.Exists(file) || HashFile(file) != hash) throw new InvalidDataException("缺少或已损坏的必需生成文件：" + file);
+                        files.Add(file);
+                    }
                 }
+                // 引擎所有者必须存在本配置清单，缺失说明未完成本配置生成。
+                if (isEngineOwner && !matched)
+                    throw new InvalidDataException($"缺少 {platform}/{configuration} 的 RPC 调用方成功清单：{Path.Combine(ownerRoot, configuration, ".outputs.json")}（请先构建引擎工程或运行 Setup）");
             }
         }
         if (files.Any(f => f.Contains('\r') || f.Contains('\n'))) throw new InvalidDataException("生成输入路径含换行符");

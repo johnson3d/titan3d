@@ -23,11 +23,11 @@
 
   <Import Project="..\..\CSharpCode\Bricks\CodeBuilder\CodeBuilder.projitems" Label="Shared" />
 
-  <!-- 旧控制台工程未接入平台源码生成流水线，仅沿用 Windows 生成物。 -->
+  <!-- 旧控制台工程未接入平台源码生成流水线，仅沿用 Windows 生成物；生成物按配置分子目录，只取当前配置避免 Debug/Release 重复类型。 -->
   <Import Project="..\..\codegen\Windows\NativeBinder\CodeGenCSharp.projitems" Label="Shared" />
 
   <ItemGroup>
-    <Compile Include="..\..\codegen\Windows\Rpc\Engine\*.cs;..\..\codegen\Windows\Rpc\Callers\**\*.cs;..\..\codegen\Windows\Property\Engine\*.cs;..\..\codegen\Windows\Macross\Engine\*.cs" />
+    <Compile Include="..\..\codegen\Windows\Rpc\Engine\$(Configuration)\*.cs;..\..\codegen\Windows\Rpc\Callers\**\$(Configuration)\*.cs;..\..\codegen\Windows\Property\Engine\$(Configuration)\*.cs;..\..\codegen\Windows\Macross\Engine\$(Configuration)\*.cs" />
   </ItemGroup>
 
   <Import Project="..\..\CSharpCode\Editor\Editor.projitems" Label="Shared" />
