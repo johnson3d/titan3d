@@ -59,13 +59,11 @@ typedesc.txt    text eol=lf
 *.flac          binary
 *.mp4           binary
 # 编译产物 / 库
-*.dll filter=lfs diff=lfs merge=lfs -text
+# LFS 仅用于超过 GitHub 100MB 单文件限制的库，出现新的超限文件时在此逐个登记
+3rd/native/PhysX5/bin/mac.arm64.clang.mt/debug/libPhysX_static_64.a filter=lfs diff=lfs merge=lfs -text
 *.exe           binary
-*.lib filter=lfs diff=lfs merge=lfs -text
 *.pdb           binary
 *.so            binary
-*.a filter=lfs diff=lfs merge=lfs -text
-*.dylib filter=lfs diff=lfs merge=lfs -text
 *.exp           binary
 # .obj 兼指 MSVC 目标文件与 Wavefront 网格，
 # 本仓库现有 5 个 .obj 均为二进制
