@@ -121,6 +121,19 @@ namespace EngineNS.Editor.ShaderCompiler
         private NxRHI.FShaderCompiler.FDelegate_FnGetShaderCodeStream GetShaderCodeStream;
         public string MaterialCodeForDebug;
         //[UnmanagedFunctionPointer(System.Runtime.InteropServices.CallingConvention.Cdecl)]
+        private static NxRHI.TtShaderCode mEmptyShaderCode = null;
+        private static NxRHI.TtShaderCode GetEmptyShaderCode()
+        {
+            if (mEmptyShaderCode == null)
+            {
+                lock (typeof(TtHLSLCompiler))
+                {
+                    if (mEmptyShaderCode == null)
+                        mEmptyShaderCode = new NxRHI.TtShaderCode();
+                }
+            }
+            return mEmptyShaderCode;
+        }
         private NxRHI.FShaderCode* GetHLSLCode(sbyte* includeName, sbyte* includeOriName)
         {
             var oriInc = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)includeOriName);
@@ -157,7 +170,11 @@ namespace EngineNS.Editor.ShaderCompiler
             else if (file.EndsWith("/MaterialVar"))
             {
                 if (Material == null)
-                    return (NxRHI.FShaderCode*)0;
+                {
+                    // 屏幕空间 compute 不带材质(EffectManager 传 mtl=null)。Windows 的 include handler 把
+                    // 托管 nullptr 当成空 include 继续编译，Mac 的 UEngineDxcInclude 会把 nullptr 判成 file not found。
+                    return GetEmptyShaderCode().mCoreObject;
+                }
                 if (IsWriteDebugFile && Material.AssetName != null)
                 {
                     var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.DebugUtility) + $"/material/{Material.AssetName.RNameType}/{IO.TtFileManager.GetBaseDirectory(Material.AssetName.Name)}";

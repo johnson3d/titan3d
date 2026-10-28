@@ -130,6 +130,10 @@ namespace EngineNS.Plugins.MCPServer
             [Bricks.AIGC.TtMCPParameter("Tag appended to the capture filename, e.g. 'terrain_after_brush'")] string tag = "mcp",
             [Bricks.AIGC.TtMCPParameter("Number of consecutive frames to capture")] double frameCount = 1)
         {
+#if !PWindow
+            // IRenderDocTool 只在 Windows 原生工程里接入, 其余平台没有绑定。
+            return FailJson("RenderDoc frame capture is not supported on this platform");
+#else
             int frames = Math.Max(1, (int)frameCount);
             // tag 会直接进文件名, 挡掉路径分隔符之类会让 File.Move 失败的字符。
             tag = SanitizeCaptureTag(tag);
@@ -204,6 +208,7 @@ namespace EngineNS.Plugins.MCPServer
                 fileName = file,
                 frameCount = frames,
             });
+#endif
         }
 
         [Bricks.AIGC.TtMCPTool("list_renderdoc_captures",
