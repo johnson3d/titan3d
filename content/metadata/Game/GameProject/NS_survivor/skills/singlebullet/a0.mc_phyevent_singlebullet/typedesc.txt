@@ -1,0 +1,2 @@
+GameProject
+NS_survivor.skills.singlebullet.mc_phyevent_singlebullet@GameProject

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
+  <AssetId Type="System.Guid@Unknown" Value="fe1d69c9-9856-425f-9787-d7c3383a607a" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,project_factory/materials/m_common01.material,fe1d69c9-9856-425f-9787-d7c3383a607a" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterial&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
+    <e_0 Value="Game,project_factory/textures/pipe/t_pipes_round_bc.srv,5a6219d6-17c3-4842-aa9f-7608042a3425" />
+    <e_1 Value="Game,project_factory/textures/pipe/t_pipes_round_n.srv,644849a8-04e1-4cf1-956d-f0bee5d3257e" />
+    <e_2 Value="Game,project_factory/textures/robot/t_roboarm01_orm.srv,af6a3e1f-3985-4371-9b2c-037bb1ab68bf" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
+</Root>

@@ -17,7 +17,7 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return mView;
 		}
-		bool Init(DX12GpuDevice* device, const FSamplerDesc& desc);
+		bool Init(DX12GpuDevice* device, const FSamplerDesc& desc, const char* file = nullptr, int line = 0);
 	public:
 		TWeakRefHandle<DX12GpuDevice>			mDeviceRef;
 		AutoRef<DX12PagedHeap>	mView;

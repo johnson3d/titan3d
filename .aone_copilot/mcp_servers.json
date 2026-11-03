@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "titan-engine-mcp": {
+      "command": "python",
+      "args": [
+        "E:/GitHub/titanengine/Plugins/AIGC/MCPServer/Python/titan_mcp_server.py",
+        "--port",
+        "8818"
+      ]
+    },
+    "renderdoc" : {
+      "command": "python",
+      "args": [
+        "-m",
+        "renderdoc_mcp"
+      ],
+      "env": {
+        "RENDERDOC_MODULE_PATH": "E:/GitHub/titanengine/3rd/native/renderdoc/Development"
+      }
+    }
+  }
+}

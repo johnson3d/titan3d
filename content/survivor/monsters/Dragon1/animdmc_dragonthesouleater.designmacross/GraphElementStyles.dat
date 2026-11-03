@@ -1,0 +1,523 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyleCollection@EngineCore">
+  <GraphElementStyles Type="System.Collections.Generic.Dictionary&lt;System.Guid@Unknown,EngineNS.DesignMacross.Base.Graph.IGraphElementStyle@EngineCore,&gt;@Unknown" Count="74">
+    <e_0>
+      <Key Value="06eb9b1a-21c3-4cf8-8840-77a6e07a44d3" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_0>
+    <e_1>
+      <Key Value="bf05bc67-9648-4196-9c96-b89474df58ff" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="378,248" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_1>
+    <e_2>
+      <Key Value="51201426-9ba0-4c5b-b166-2c1ac22c5a15" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_2>
+    <e_3>
+      <Key Value="471a45ca-a012-4b56-9b01-d2ddd2cdb323" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_3>
+    <e_4>
+      <Key Value="9a3ccb17-622e-4367-8f51-97c59ad7f6e7" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_4>
+    <e_5>
+      <Key Value="ee94a4f9-59ae-49e3-87cc-459691fb304b" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_5>
+    <e_6>
+      <Key Value="6ca0acd0-ea4a-4a64-bc4b-7d37ff961284" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="-372,-7" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_6>
+    <e_7>
+      <Key Value="5881aace-3a56-4eb3-98b0-68027a05b30b" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_7>
+    <e_8>
+      <Key Value="eef018ac-ae68-4b2c-8a45-211f5a5d1286" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_8>
+    <e_9>
+      <Key Value="d2129cc7-04bd-4581-b4f3-49ed3bde7cef" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="556.2501,210.75006" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_9>
+    <e_10>
+      <Key Value="b3462142-b166-4549-878c-716d30efbf25" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_10>
+    <e_11>
+      <Key Value="fbd32943-2d0d-4852-9054-3235f8870de2" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_11>
+    <e_12>
+      <Key Value="e3e51b90-d65d-4770-bddf-863f19425453" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="925.33307,348.0002" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_12>
+    <e_13>
+      <Key Value="bfe8814b-6a7d-4524-b4a7-f256c2538391" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_13>
+    <e_14>
+      <Key Value="5e471c31-b25c-4bfa-b5e3-4fec37dfa266" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_14>
+    <e_15>
+      <Key Value="745a9a66-b351-4be7-867d-16364ca4075b" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="20,400" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_15>
+    <e_16>
+      <Key Value="2edf9efe-841d-401e-9a5c-229dc0b39b8a" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="500,400" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_16>
+    <e_17>
+      <Key Value="a0b2c7b2-4439-4a58-bd1c-5ad6eb7e4f22" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_17>
+    <e_18>
+      <Key Value="fd86d4c2-a57c-44e7-aa77-59f3f111f9ba" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="82,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_18>
+    <e_19>
+      <Key Value="be100423-6297-495f-919f-3ac5f8a43c7f" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,36" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_19>
+    <e_20>
+      <Key Value="edf197b2-b68e-47a5-98de-d28bda162b78" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_20>
+    <e_21>
+      <Key Value="f0993951-a00e-4ea8-b11f-b06a05f4d0ac" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,36" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_21>
+    <e_22>
+      <Key Value="40f01410-a940-40ec-bcfe-96458a9795cc" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="168,571" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_22>
+    <e_23>
+      <Key Value="5f39bea4-dcae-4f56-8b94-95a892fed6e8" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_23>
+    <e_24>
+      <Key Value="bbbb19ad-933a-4a5b-b1ce-08d9e36ba07d" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_24>
+    <e_25>
+      <Key Value="91324405-6d86-43b2-8024-3688377d9dcc" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="20,400" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_25>
+    <e_26>
+      <Key Value="fbc7f0cd-f75a-4706-85ef-1b5d1fe1a4de" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="144,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_26>
+    <e_27>
+      <Key Value="9fb68a9b-596f-4c2d-804d-05595dc0c654" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,36" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_27>
+    <e_28>
+      <Key Value="1cf730d4-2827-4280-91c6-3c95a6a9dfe0" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="-116,613" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_28>
+    <e_29>
+      <Key Value="0064de9d-993f-4a68-bdb8-e1130d2af37e" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_29>
+    <e_30>
+      <Key Value="6d20bb75-adac-4f66-ac78-df8356e6a5bb" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="14,614" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_30>
+    <e_31>
+      <Key Value="47756648-99e7-422f-82f1-7cde3239a425" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_31>
+    <e_32>
+      <Key Value="87c97758-b60a-48f7-8e9d-3ab262356b33" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_32>
+    <e_33>
+      <Key Value="6e4f09a5-b81e-48f0-8fdb-5b2a131f9333" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_33>
+    <e_34>
+      <Key Value="250c2c30-480f-43a4-95a3-7919f684aa8a" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="175,611" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_34>
+    <e_35>
+      <Key Value="96bda565-5503-4b22-97a5-0bf92021fc84" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_35>
+    <e_36>
+      <Key Value="abdf5a70-b884-49d8-8d9b-54196b699af4" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_36>
+    <e_37>
+      <Key Value="239aa67e-994e-45e2-a233-39af62ea65bd" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_37>
+    <e_38>
+      <Key Value="edceccba-cfc6-45bb-9a3f-07ed6b0b5d50" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="312,612" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_38>
+    <e_39>
+      <Key Value="5162b8be-f7d6-4ed6-b903-b5f0ebff3357" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_39>
+    <e_40>
+      <Key Value="5b0a516b-0355-4c48-a8ba-7eb6fd94be5a" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_40>
+    <e_41>
+      <Key Value="421370f7-0054-4da4-a51f-d59e46616725" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_41>
+    <e_42>
+      <Key Value="c59a304a-7120-41f3-8fd7-c61e938827cc" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="468,608" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_42>
+    <e_43>
+      <Key Value="d35a1565-304f-4416-9c1f-dcaf1993f0f6" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_43>
+    <e_44>
+      <Key Value="b157dac3-ddf9-4d5f-9046-6c8419ef8e09" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_44>
+    <e_45>
+      <Key Value="9f7a4690-cdb0-4430-b078-94c55b4ab3f6" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_45>
+    <e_46>
+      <Key Value="62c86152-7434-415c-bc01-e1e5e8c1ba9a" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="660,401" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_46>
+    <e_47>
+      <Key Value="c6dbab28-e141-4eb4-998a-f870e229a107" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_47>
+    <e_48>
+      <Key Value="db061e81-1a41-4711-99b3-f73e280cd3c5" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_48>
+    <e_49>
+      <Key Value="dc2a6216-ac3f-4308-91dd-2bf93e91921f" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,71" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_49>
+    <e_50>
+      <Key Value="e38f6c42-4b56-4ef8-aacd-c273a7da4867" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_50>
+    <e_51>
+      <Key Value="adfa6253-48d1-4ea4-b4a0-6be1523cff7b" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="24,36" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_51>
+    <e_52>
+      <Key Value="e8959a83-b7f7-40ef-b6c1-d18820420697" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="78,70" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_52>
+    <e_53>
+      <Key Value="6741bfc6-9083-4766-ae37-b1ce74cc42c3" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_53>
+    <e_54>
+      <Key Value="e22b31b7-1b7f-4738-801e-e1b74aec2a1d" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="946.4285,534.4286" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_54>
+    <e_55>
+      <Key Value="52a88145-d370-460b-ad0d-8bff11cc4f89" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_55>
+    <e_56>
+      <Key Value="30c2051b-d9d3-4a73-bc87-1e9bb3947d1d" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_56>
+    <e_57>
+      <Key Value="80fc4152-39f8-46a9-9fa6-7550758a95a7" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_57>
+    <e_58>
+      <Key Value="56f99f2f-a268-4ac2-adf1-2475a9f8799d" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="1119.5707,425.42862" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_58>
+    <e_59>
+      <Key Value="5e6f25f5-ad89-4d09-bbaf-01b7e51c65d2" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_59>
+    <e_60>
+      <Key Value="c6131064-f646-4dad-a716-383a6f2eb15a" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,36" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_60>
+    <e_61>
+      <Key Value="77e723a7-9cac-4285-a9aa-7aa3aaeed3bb" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="42,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_61>
+    <e_62>
+      <Key Value="5e134e92-913a-43e1-91dc-d15c3e7e2695" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,36" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_62>
+    <e_63>
+      <Key Value="80051cad-bf0e-4d6e-81f4-a267821e26f3" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_63>
+    <e_64>
+      <Key Value="de991a5a-34e1-4c73-874f-efd810f4e40d" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_64>
+    <e_65>
+      <Key Value="1bcffbcf-3a0c-4047-a52e-6e4a09b42908" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="833,581" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_65>
+    <e_66>
+      <Key Value="3c32bbc1-8ad9-4ef5-8418-59a0f928a7fa" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_66>
+    <e_67>
+      <Key Value="cc0fe408-4f01-4c91-b9e8-e3899ad4c816" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_67>
+    <e_68>
+      <Key Value="e1c7301a-b1b2-4a6c-ba39-8370bda9999f" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_68>
+    <e_69>
+      <Key Value="83e13c75-936f-4df1-94dc-1f4503137cbf" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="993,575" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_69>
+    <e_70>
+      <Key Value="3c0e6e06-b035-4d16-bec8-9ecf6b1d2a62" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_70>
+    <e_71>
+      <Key Value="a523b842-3910-4139-8b95-528ad2cc8c21" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_71>
+    <e_72>
+      <Key Value="cd7ad907-ecaa-4f42-826c-d3e082aab071" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_72>
+    <e_73>
+      <Key Value="21be5eb4-17dd-42ff-b5d8-b0089ccb8e72" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_73>
+  </GraphElementStyles>
+</Root>

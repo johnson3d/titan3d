@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
+  <AssetId Type="System.Guid@Unknown" Value="f521dafa-7787-4959-99e9-b06292a27374" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,project_dts/3drole/female/c_woman_cloth001.ums,f521dafa-7787-4959-99e9-b06292a27374" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMaterialMesh&#xA;Hahah" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="4">
+    <e_0 Value="Game,project_dts/3drole/female/c_woman_clothes_001.vms,b8a32285-42e0-4677-be9d-6f6d158212b7" />
+    <e_1 Value="Game,project_dts/3drole/female/c_woman_cloth001_m.uminst,44e6c336-dd31-40de-acf8-454f04c1d0c1" />
+    <e_2 Value="Game,project_dts/3drole/female/c_woman_hair_001.vms,da32000a-86fe-4bd4-881f-95e0661f2932" />
+    <e_3 Value="Game,project_dts/3drole/female/hair01_m.uminst,8d1627d9-fcb9-4424-b983-78d29c96d838" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
+</Root>

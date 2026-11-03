@@ -1,0 +1,2 @@
+GameProject
+NS_project_factory.belica.animdmc_belica@GameProject

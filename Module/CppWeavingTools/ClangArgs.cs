@@ -15,6 +15,8 @@ namespace CppWeaving
         public TargetPlatform Platform = TargetPlatform.Windows;
         public string SysRoot;
         public string ResourceDir;
+        // Android 的 --target API 级别；跟随 android-toolchain.json 的 apiLevel，缺省 28（仓库最低支持版本）。
+        public int ApiLevel = 28;
     }
 
     public static class ClangArgs
@@ -45,8 +47,8 @@ namespace CppWeaving
             }
             else if (profile.Platform == TargetPlatform.Android)
             {
-                // 与 NDK r27 的 clang 一致：arm64-v8a + API 28，sysroot 与内建头由工具链提供
-                args.Add("--target=aarch64-linux-android28");
+                // 与 NDK clang 一致：arm64-v8a + 可配 API 级别（ApiLevel= 参数），sysroot 与内建头由工具链提供
+                args.Add($"--target=aarch64-linux-android{profile.ApiLevel}");
                 if (!string.IsNullOrEmpty(profile.SysRoot))
                 {
                     args.Add("--sysroot=" + profile.SysRoot);

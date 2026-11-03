@@ -37,6 +37,9 @@ namespace CppWeaving
             settings.Profile.Platform = selection.Platform;
             settings.Profile.SysRoot = FindArgument(args, "SysRoot=");
             settings.Profile.ResourceDir = FindArgument(args, "ResourceDir=");
+            var apiLevelText = FindArgument(args, "ApiLevel=");
+            if (!string.IsNullOrEmpty(apiLevelText) && int.TryParse(apiLevelText, out var apiLevel))
+                settings.Profile.ApiLevel = apiLevel;
             var defines = FindArgument(args, "Defines=");
             var allowParseErrors = FindArgument(args, "AllowParseErrors=") == "1";
             Cpp2CS.USysClassManager.Init(settings.Profile.Platform);

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_2404387825710928535 Type="NS_tutorials.statemachine.DMC_Down_294180657@GameProject">
+  <Script Type="NS_tutorials.statemachine.DMC_Script_3879801902@GameProject" Order="0" />
+  <Transition_From_Down_To_Up Type="NS_tutorials.statemachine.DMC_Transition_From_Down_To_Up_2059917023@GameProject" Order="0" />
+</Hash_2404387825710928535>

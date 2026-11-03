@@ -350,7 +350,7 @@ foreach ($hostName in $hostProjects.Keys) {
     $platformImport = ''
     $engineReference = @"
     <Reference Include="$engineName">
-      <HintPath>`$(TtTitanRoot)binaries\net8.0\$engineName.dll</HintPath>
+      <HintPath>`$(TtTitanRoot)binaries\`$(_TitanTargetFramework)\$engineName.dll</HintPath>
       <Private>false</Private>
     </Reference>
 "@
@@ -359,7 +359,7 @@ foreach ($hostName in $hostProjects.Keys) {
         $platformSuffix = 'Android'
         $defineConstants = "`r`n    <DefineConstants>`$(DefineConstants);PAndroid</DefineConstants>"
         # Android 引擎输出与桌面隔离（TitanManagedProject.props 的 TitanEngineAssemblyPath 同源）。
-        $engineReference = $engineReference.Replace('binaries\net8.0\Engine.Window.dll', 'binaries\android\net8.0\Engine.Android.dll').Replace('Engine.Window', $engineName)
+        $engineReference = $engineReference.Replace('binaries\$(_TitanTargetFramework)\Engine.Window.dll', 'binaries\android\$(_TitanTargetFramework)\Engine.Android.dll').Replace('Engine.Window', $engineName)
     }
     if ($hostName -eq 'All') {
         $parentPath = '../' * (3 + $categorySegments.Count)
@@ -373,7 +373,8 @@ foreach ($hostName in $hostProjects.Keys) {
 $platformImport
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <!-- TFM 跟随 dependencies.json（Directory.Build.props 注入 _TitanTargetFramework）。 -->
+    <TargetFramework>`$(_TitanTargetFramework)</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>$defineConstants
@@ -413,8 +414,12 @@ if ($LeanClr) {
     & (Join-Path $PSScriptRoot 'New-LeanClrStub.ps1') -HostProject $leanClrHost -SolutionPath $solutionFilePath
 }
 
-if ($hostNames -contains 'Android' -and -not (Test-Path -LiteralPath (Join-Path $repoRoot 'binaries\android\net8.0\Engine.Android.dll') -PathType Leaf)) {
-    Write-Warning 'binaries\android\net8.0\Engine.Android.dll was not found; build Module\Engine.Android before building the Android project.'
+$depsJsonPath = Join-Path $repoRoot 'BuildScript\common\dependencies.json'
+if ($hostNames -contains 'Android' -and (Test-Path -LiteralPath $depsJsonPath)) {
+    $manifestTfm = ((Get-Content -Raw -LiteralPath $depsJsonPath | ConvertFrom-Json).dotnetSdk.targetFramework)
+    if (-not (Test-Path -LiteralPath (Join-Path $repoRoot ('binaries\android\' + $manifestTfm + '\Engine.Android.dll')) -PathType Leaf)) {
+        Write-Warning ('binaries\android\' + $manifestTfm + '\Engine.Android.dll was not found; build Module\Engine.Android before building the Android project.')
+    }
 }
 
 if ($Build) {

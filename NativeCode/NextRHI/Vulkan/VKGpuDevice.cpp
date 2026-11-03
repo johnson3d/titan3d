@@ -1042,7 +1042,7 @@ namespace NxRHI
 	ICbView* VKGpuDevice::CreateCBV(IBuffer* pBuffer, const FCbvDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<VKCbView>(file ? file : __FILE__, line);
-		if (result->Init(this, pBuffer, *desc) == false)
+		if (result->Init(this, pBuffer, *desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;
@@ -1052,7 +1052,7 @@ namespace NxRHI
 	IVbView* VKGpuDevice::CreateVBV(IBuffer* pBuffer, const FVbvDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<VKVbView>(file ? file : __FILE__, line);
-		if (result->Init(this, pBuffer, desc) == false)
+		if (result->Init(this, pBuffer, desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;
@@ -1062,7 +1062,7 @@ namespace NxRHI
 	IIbView* VKGpuDevice::CreateIBV(IBuffer* pBuffer, const FIbvDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<VKIbView>(file ? file : __FILE__, line);
-		if (result->Init(this, pBuffer, desc) == false)
+		if (result->Init(this, pBuffer, desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;
@@ -1072,7 +1072,7 @@ namespace NxRHI
 	ISrView* VKGpuDevice::CreateSRV(IGpuBufferData* pBuffer, const FSrvDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<VKSrView>(file ? file : __FILE__, line);
-		if (result->Init(this, pBuffer, *desc) == false)
+		if (result->Init(this, pBuffer, *desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;
@@ -1082,7 +1082,7 @@ namespace NxRHI
 	IUaView* VKGpuDevice::CreateUAV(IGpuBufferData* pBuffer, const FUavDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<VKUaView>(file ? file : __FILE__, line);
-		if (result->Init(this, pBuffer, *desc) == false)
+		if (result->Init(this, pBuffer, *desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;
@@ -1122,7 +1122,7 @@ namespace NxRHI
 	ISwapChain* VKGpuDevice::CreateSwapChain(const FSwapChainDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<VKSwapChain>(file ? file : __FILE__, line);
-		if (result->Init(this, *desc) == false)
+		if (result->Init(this, *desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;
@@ -1151,7 +1151,7 @@ namespace NxRHI
 		if (mVulkanExt.IsRayQuery == false)
 			return nullptr;
 		auto result = NewObjectWithInfo<VKAccelerationStructure>(file ? file : __FILE__, line);
-		if (result->Init(this, rpass) == false)
+		if (result->Init(this, rpass, file, line) == false)
 		{
 			result->Release();
 			return nullptr;
@@ -1175,7 +1175,7 @@ namespace NxRHI
 		if (mVulkanExt.IsRayQuery == false)
 			return nullptr;
 		auto result = NewObjectWithInfo<VKTopAccelerationStructure>(file ? file : __FILE__, line);
-		if (result->Init(this, desc) == false)
+		if (result->Init(this, desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;

@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.UI.TtUIAssetAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="3">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="3c743ea56bcc749228a52f62398aa1c3430798c12c2630cf64217cbc70a41fe4" />
+      <Path Type="System.String@Unknown" Value="ui_menu_button.ui/class_graph.dat" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="d92e3a62d80653050bc8720f7630ba5d362010f3b6f0dcb8695a8fa1a21a2744" />
+      <Path Type="System.String@Unknown" Value="ui_menu_button.ui/on_deviceenter_14062278734384193017_fe_db_c1_be_cb_9b_da_ed_6f_99_fa_e2_c4_16_47_d8_e6_06_cf_5c.fn" />
+    </e_1>
+    <e_2 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="4dcd5301afdc8e29f6e6be3be83814a4654437405728357f4fca33681c83b7d7" />
+      <Path Type="System.String@Unknown" Value="ui_menu_button.ui/on_deviceleave_14062278734384193017_db_ef_b6_69_60_bd_e5_1e_b9_b7_f0_17_c0_5b_b3_57_84_36_86_a0.fn" />
+    </e_2>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="852c3b65-fbfc-4341-b8eb-4395cad2ec5a" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,survivor/ui/ui_menu_button.ui,852c3b65-fbfc-4341-b8eb-4395cad2ec5a" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.UI.TtUIAsset&#xA;" />
+  <DesignResolution Type="EngineNS.Vector2i@EngineCore" Value="256,100" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <IsDisable Type="System.Boolean@Unknown" Value="False" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Value="Game,survivor/ui/ui_menu_button.ui,852c3b65-fbfc-4341-b8eb-4395cad2ec5a" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.UI.TtUIAsset@EngineCore" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+</Root>

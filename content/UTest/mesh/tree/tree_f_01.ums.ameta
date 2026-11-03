@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
+  <AssetId Type="System.Guid@Unknown" Value="91abc3ad-11a8-487c-a62e-1341449b13b5" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/mesh/tree/tree_f_01.ums,91abc3ad-11a8-487c-a62e-1341449b13b5" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMaterialMesh&#xA;Hahah" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
+    <e_0 Value="Game,utest/mesh/tree/sm_tree_f_01_wip.vms,ad70b486-685e-4e90-9f59-b190cffbbb8b" />
+    <e_1 Value="Game,utest/material/tree/m_tree_leave.material,313d091a-60b7-4d05-9053-2b5382b5260e" />
+    <e_2 Value="Game,utest/material/tree/m_tree_branch2.material,f4efdc32-de06-405b-b309-28da9d421a4a" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
+</Root>

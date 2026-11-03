@@ -807,9 +807,10 @@ function(test_setup_entry_contract)
   endforeach()
   file(READ "${mac_setup}" content)
   # 顺序契约: 依赖校验 -> codegen -> configure -> build，缺一不可
+  # build 锚点用 4/4 段落标记而非裸 --build：libc++ 自举段（build_libcxx）也含 cmake --build，会误判顺序
   string(FIND "${content}" "GenerateCodegen.cmake" p_codegen)
   string(FIND "${content}" "-S Core.Mac -B" p_configure)
-  string(FIND "${content}" "--build" p_build)
+  string(FIND "${content}" "=== 4/4 build" p_build)
   string(FIND "${content}" "install-mac" p_libcxx)
   if(p_codegen EQUAL -1 OR p_configure EQUAL -1 OR p_build EQUAL -1 OR p_libcxx EQUAL -1)
     message(FATAL_ERROR "test_setup_entry_contract: setup.sh 缺少必要步骤 (codegen=${p_codegen} configure=${p_configure} build=${p_build} libcxx=${p_libcxx})")

@@ -69,7 +69,7 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return mSwapChain;
 		}
-		bool Init(VKGpuDevice* device, const FSwapChainDesc& desc);
+		bool Init(VKGpuDevice* device, const FSwapChainDesc& desc, const char* file = nullptr, int line = 0);
 		virtual UINT GetBackBufferCount() const override
 		{
 			return (UINT)BackBuffers.size();
@@ -81,7 +81,7 @@ namespace NxRHI
 		virtual void Present(IGpuDevice* device, UINT SyncInterval, UINT Flags) override;
 		virtual bool Resize(IGpuDevice* device, UINT w, UINT h) override;
 
-		bool Create(IGpuDevice* device, UINT w, UINT h);
+		bool Create(IGpuDevice* device, UINT w, UINT h, const char* file = nullptr, int line = 0);
 	public:
 		TWeakRefHandle<VKGpuDevice>		mDeviceRef;
 		VkSurfaceKHR					mSurface = nullptr;
@@ -92,9 +92,12 @@ namespace NxRHI
 			AutoRef<VKTexture>	Texture;
 			AutoRef<VKRenderTargetView>	Rtv;
 			UINT64				FenceValue = 0;
-			void CreateRtvAndSrv(IGpuDevice* device, UINT index);
+			void CreateRtvAndSrv(IGpuDevice* device, UINT index, const char* file = nullptr, int line = 0);
 		};
 		std::vector<FBackBuffer>		BackBuffers;
+		// 创建归属：重建 backbuffer RTV 时继续沿用。
+		const char*						mCreateFile = nullptr;
+		int								mCreateLine = 0;
 		VkFence							AcquireFence = VK_NULL_HANDLE;
 		UINT							CurrentBackBuffer = 0;
 		UINT							CurrentFrame = 0;

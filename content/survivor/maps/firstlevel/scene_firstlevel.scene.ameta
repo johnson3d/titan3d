@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="b43a357c7f6ec0e3a21d545ec9dd3a7c246b82d5ad4ceaa01e5a337ea438e033" />
+      <Path Type="System.String@Unknown" Value="scene_firstlevel.scene/scene_firstlevel.scene" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="17a8411550283792f4c2a2f0a18e9013bc9f14a6586f3b221aeb7944ab6ec40f" />
+      <Path Type="System.String@Unknown" Value="scene_firstlevel.scene/class_graph.dat" />
+    </e_1>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="026bb84c-e29f-45bc-9403-3707321fb9f5" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,survivor/maps/firstlevel/scene_firstlevel.scene,026bb84c-e29f-45bc-9403-3707321fb9f5" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtScene&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
+    <e_0 Value="Engine,mesh/base/arrow.ums,bde20485-8731-4e02-8385-64a59160da62" />
+    <e_1 Value="Engine,mesh/base/box_1.ums,b91bb4f4-7d54-4ba5-8342-a0767ec2e0ac" />
+    <e_2 Value="Game,tutorials/pivotpainter/hilltree/hilltree.ums,356957c7-469b-4538-afd2-f04f3492775e" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
+</Root>

@@ -368,9 +368,12 @@ namespace NxRHI
 		}
 	}
 
-	bool VKSwapChain::Init(VKGpuDevice* device, const FSwapChainDesc& desc)
+	bool VKSwapChain::Init(VKGpuDevice* device, const FSwapChainDesc& desc, const char* file, int line)
 	{
 		Desc = desc;
+		// 记录创建归属：重建 backbuffer 时继续沿用，避免退化成 RHI 内部位置。
+		mCreateFile = file ? file : __FILE__;
+		mCreateLine = line ? line : __LINE__;
 		//Desc.BufferCount = 3;
 		mDeviceRef.FromObject(device);
 
@@ -403,8 +406,8 @@ namespace NxRHI
 
 		FFenceDesc fcdesc{};
 		fcdesc.InitValue = 0;
-		FramePresentFence = MakeWeakRef(device->CreateFence(&fcdesc, VStringA_FormatV("SwapChain Frame Fence").c_str(), __FILE__, __LINE__));
-		return Create(device, Desc.Width, Desc.Height);
+		FramePresentFence = MakeWeakRef(device->CreateFence(&fcdesc, VStringA_FormatV("SwapChain Frame Fence").c_str(), mCreateFile, mCreateLine));
+		return Create(device, Desc.Width, Desc.Height, mCreateFile, mCreateLine);
 	}
 	bool CheckSwapSurfaceFormat(const VkSurfaceFormatKHR& format, const std::vector<VkSurfaceFormatKHR>& availableFormats)
 	{
@@ -507,7 +510,7 @@ namespace NxRHI
 			BackBuffers.resize(Desc.BufferCount);
 			for (auto& i : BackBuffers)
 			{
-				i.Texture = MakeWeakRef(new VKTexture());
+				i.Texture = MakeWeakRef(NewObjectWithInfo<VKTexture>(mCreateFile ? mCreateFile : __FILE__, mCreateLine ? mCreateLine : __LINE__));
 				i.Texture->mImage = nullptr;
 			}
 		}
@@ -636,15 +639,20 @@ namespace NxRHI
 			pDx12Texture->GpuState = EGpuResourceState::GRS_Undefine;
 			FTransitionScope::TryAutoTransition(cmd, pDx12Texture, EGpuResourceState::GRS_Present, false);
 
-			BackBuffers[i].CreateRtvAndSrv(device, i);
+			BackBuffers[i].CreateRtvAndSrv(device, i, mCreateFile, mCreateLine);
 		}
 
 		//CurrentBackBuffer = 0;
 
 		return true;
 	}
-	bool VKSwapChain::Create(IGpuDevice* device1, UINT w, UINT h)
+	bool VKSwapChain::Create(IGpuDevice* device1, UINT w, UINT h, const char* file, int line)
 	{
+		if (file != nullptr)
+		{
+			mCreateFile = file;
+			mCreateLine = line;
+		}
 		VkFenceCreateInfo fenceCreateInfo = {
 			.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
 			.pNext = nullptr,
@@ -802,7 +810,7 @@ namespace NxRHI
 		
 		CurrentFrame = (CurrentFrame + 1) % (UINT)BackBuffers.size();
 	}
-	void VKSwapChain::FBackBuffer::CreateRtvAndSrv(IGpuDevice* device, UINT index)
+	void VKSwapChain::FBackBuffer::CreateRtvAndSrv(IGpuDevice* device, UINT index, const char* file, int line)
 	{
 		FRtvDesc rtvDesc{};
 		rtvDesc.SetTexture2D();
@@ -810,7 +818,7 @@ namespace NxRHI
 		rtvDesc.Height = Texture->Desc.Height;
 		rtvDesc.Format = Texture->Desc.Format;
 		rtvDesc.Texture2D.MipSlice = 0;
-		Rtv = MakeWeakRef((VKRenderTargetView*)device->CreateRTV(Texture, &rtvDesc, __FILE__, __LINE__));
+		Rtv = MakeWeakRef((VKRenderTargetView*)device->CreateRTV(Texture, &rtvDesc, file ? file : __FILE__, line ? line : __LINE__));
 	}
 }
 

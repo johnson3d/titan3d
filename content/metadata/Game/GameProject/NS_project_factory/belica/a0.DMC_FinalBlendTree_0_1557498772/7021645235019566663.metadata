@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_7021645235019566663 Type="NS_project_factory.belica.DMC_FinalBlendTree_0_1557498772@GameProject">
+  <BlendTree_StateMachine Type="NS_project_factory.belica.DMC_BlendTree_StateMachine_1318257668@GameProject" Order="0" />
+  <PoseOutput Type="NS_project_factory.belica.DMC_PoseOutput_3069185515@GameProject" Order="0" />
+</Hash_7021645235019566663>

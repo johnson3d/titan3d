@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
+  <AssetId Type="System.Guid@Unknown" Value="4911e189-794f-4652-9629-c2434d9a9ada" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,project_factory/belica/materials/new/m_belica_gun.material,4911e189-794f-4652-9629-c2434d9a9ada" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.TtMaterial&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
+    <e_0 Value="Game,project_factory/belica/textures_new/belica_gun01_m_belica_guns_basecolor.srv,04831ae2-5428-4cf4-9952-45f671cc55eb" />
+    <e_1 Value="Game,project_factory/belica/textures_new/belica_gun01_m_belica_guns_normal.srv,be8fc9ac-2125-407b-86ef-19c9b85de268" />
+    <e_2 Value="Game,project_factory/belica/textures_new/belica_gun01_m_belica_guns_occlusionroughnessmetallic.srv,bffabcfb-f0d7-4ca8-84e5-f530776a0dff" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
+</Root>

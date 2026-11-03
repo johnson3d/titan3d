@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.DesignMacross.UDesignMacross@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/dmctest.designmacross,9ba5bf07-d74a-4ee9-9e93-34ee6bbc0054" />
+  <DesignedClassDescription Type="EngineNS.DesignMacross.Design.TtClassDescription@EngineCore">
+    <DesignableVariables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IDesignableVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+    <Id Type="System.Guid@Unknown" Value="ef41fefc-787c-4d85-90da-c10e759db55c" />
+    <IsStruct Type="System.Boolean@Unknown" Value="False" />
+    <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+    <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Count="0" />
+    <Name Type="System.String@Unknown" Value="dmctest" />
+    <Namespace Type="EngineNS.Bricks.CodeBuilder.UNamespaceDeclaration@EngineCore">
+      <Classes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UClassDeclaration@EngineCore,&gt;@Unknown" Count="0" />
+      <Namespace Type="System.String@Unknown" Value="NS_utest" />
+    </Namespace>
+    <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
+      <e_0 Value="EngineNS.DesignMacross.TtDesignMacrossBase" />
+    </SupperClassNames>
+    <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+    <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+  </DesignedClassDescription>
+  <DesignMacrossBaseClass Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.DesignMacross.TtDesignMacrossBase@EngineCore" />
+</Root>

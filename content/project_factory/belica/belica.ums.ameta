@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
+  <AssetId Type="System.Guid@Unknown" Value="9835cb5f-f384-48c3-8a9c-f2e6f86ff3d5" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,project_factory/belica/belica.ums,9835cb5f-f384-48c3-8a9c-f2e6f86ff3d5" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.TtMaterialMesh&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="9">
+    <e_0 Value="Game,project_factory/belica/belica.vms,526cf6a1-18f2-4e37-bbe5-f06033e4e551" />
+    <e_1 Value="Game,project_factory/belica/materials/new/m_belica_upperbody.material,1002903f-4374-4b39-bc80-8f2e9346b0e3" />
+    <e_2 Value="Game,project_factory/belica/materials/new/m_belica_lowerbody.material,f7c32557-eaf1-49ac-acff-392a1dc7a9a0" />
+    <e_3 Value="Game,project_factory/belica/materials/new/m_belica_armcomputer.material,3b87d8e1-2c73-4368-a72d-b536afb63718" />
+    <e_4 Value="Game,project_factory/belica/materials/new/m_belica_newhead.material,7c7a3e41-4784-4536-9566-1f1209ce0623" />
+    <e_5 Value="Game,project_factory/belica/materials/new/m_belica_gun.material,4911e189-794f-4652-9629-c2434d9a9ada" />
+    <e_6 Value="Game,project_factory/belica/materials/new/m_belica_hairbrown.material,6967037e-0566-4aab-ad6f-578a57f4735c" />
+    <e_7 Value="Game,project_factory/belica/materials/new/m_belica_eyes.material,19b722d1-b2fe-433a-8f18-b7e338edaa9e" />
+    <e_8 Value="Engine,material/sysdft.material,8c2e9c64-ae7a-4172-9e64-114a3d36cc40" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
+</Root>

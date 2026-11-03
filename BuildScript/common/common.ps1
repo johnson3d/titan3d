@@ -25,10 +25,32 @@ function Assert-WindowsHost {
 function Find-DotNet {
     $dotnet = Get-Command dotnet -ErrorAction SilentlyContinue
     if ($null -eq $dotnet) {
-        throw 'dotnet was not found on PATH. Install the .NET 8 SDK.'
+        throw 'dotnet was not found on PATH. Install the .NET SDK pinned in global.json.'
     }
 
     return $dotnet.Source
+}
+
+function Get-TitanTargetFramework {
+    $depsJson = Join-Path (Get-RepoRoot) 'BuildScript\common\dependencies.json'
+    $manifest = Get-Content -LiteralPath $depsJson -Raw | ConvertFrom-Json
+    $tfm = $manifest.dotnetSdk.targetFramework
+    if ([string]::IsNullOrWhiteSpace($tfm)) {
+        throw "dotnetSdk.targetFramework is missing or empty in '$depsJson'."
+    }
+
+    return $tfm
+}
+
+function Get-TitanTargetFramework {
+    $depsJson = Join-Path (Get-RepoRoot) 'BuildScript\common\dependencies.json'
+    $manifest = Get-Content -LiteralPath $depsJson -Raw | ConvertFrom-Json
+    $tfm = $manifest.dotnetSdk.targetFramework
+    if ([string]::IsNullOrWhiteSpace($tfm)) {
+        throw "dotnetSdk.targetFramework is missing or empty in '$depsJson'."
+    }
+
+    return $tfm
 }
 
 function Find-CMake {

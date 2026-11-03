@@ -192,12 +192,43 @@ namespace EngineNS.Thread
                     Smph.Clear();
                 }
             }
+            /// <summary>
+            /// 断开会话：唤醒所有等待者并清掉结果引用。
+            /// 关闭阶段使用，避免未完成会话里的 Result（例如 TtSrView → TtTexture）一直持有 native 资源。
+            /// </summary>
+            internal void Cancel()
+            {
+                Result = default(T);
+                lock (Smph)
+                {
+                    foreach (var i in Smph)
+                    {
+                        i.Release();
+                    }
+                    Smph.Clear();
+                }
+            }
             public void FinishSession(K key, T value)
             {
                 Manager.FinishSession(key, this, value);
             }
         }
         public Dictionary<K, TtAwaitSession> mSessions = new Dictionary<K, TtAwaitSession>();
+        /// <summary>
+        /// 清空所有未完成的会话，只应在引擎关闭阶段调用。
+        /// 未完成的加载会把结果一直挂在会话表里，表本身又会随宿主对象活到进程退出。
+        /// </summary>
+        public void Clear()
+        {
+            lock (mSessions)
+            {
+                foreach (var i in mSessions.Values)
+                {
+                    i.Cancel();
+                }
+                mSessions.Clear();
+            }
+        }
         public TtAwaitSession GetOrNewSession(K key, out TtSemaphore smp)
         {
             lock (mSessions)

@@ -1,0 +1,2 @@
+GameProject
+NS_survivor.monsters.barghest.DMC_AnimCompoundState_0_3447725427@GameProject

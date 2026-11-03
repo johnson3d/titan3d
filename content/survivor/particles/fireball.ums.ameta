@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
+  <AssetId Type="System.Guid@Unknown" Value="5ac39401-385a-4af5-bf28-745caf1aabb2" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,survivor/particles/fireball.ums,5ac39401-385a-4af5-bf28-745caf1aabb2" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.TtMaterialMesh&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Game,survivor/particles/plane.vms,1d47677b-8d10-4c47-84e7-c82aecaa3ffe" />
+    <e_1 Value="Game,survivor/particles/m_fireball.material,f7f3b5c8-7321-45ed-ba79-f3a832d4df84" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
+</Root>

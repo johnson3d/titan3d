@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.EGui.TtUVAnimAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
+  <AssetId Type="System.Guid@Unknown" Value="859f737d-b12f-44fe-9a7c-6cdc713f5b64" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,survivor/ui/texture/panelglow.uvanim,859f737d-b12f-44fe-9a7c-6cdc713f5b64" />
+  <Description Type="System.String@Unknown" Value="This is a Asset" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Value="Game,survivor/ui/texture/panelglow.srv,dc7f9516-6890-4fe6-9238-a0a3a47102e6" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <SnapUVEnd Type="EngineNS.Vector2@EngineCore" Value="1,1" />
+  <SnapUVStart Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+  <TextureName Type="EngineNS.RName@EngineCore" Value="Game,survivor/ui/texture/panelglow.srv,dc7f9516-6890-4fe6-9238-a0a3a47102e6" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.EGui.TtUVAnim@EngineCore" />
+</Root>

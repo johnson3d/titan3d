@@ -779,6 +779,13 @@ namespace EngineNS
         }
         public void FinalCleanup()
         {
+            // native 内存 profiler 的 alloc/free/leak 回调会在【持有内存锁】时从任意 native 线程反向进托管，
+            // 退出阶段这些线程的托管线程状态可能已销毁，回调会触发 coreclr 断言 ceemain.cpp:1721，
+            // 以 FailFast(0xC0000602 / -1073740286) 结束进程（表现为 PIE 一次后关编辑器崩溃）。
+            // 必须在任何大规模 native 释放（StopSystemThreads / Gfx 销毁 / 后续 GC 终结器）之前摘掉，
+            // 只靠 ~TtNativeMemory() 里的 EndProfiler 已经太晚。
+            NativeMemory?.EndProfiler();
+
             this.PluginModuleManager.Dispose();
 
             Tracer.Dispose();

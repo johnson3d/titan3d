@@ -1,0 +1,83 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "MainEditor: Debug (native C++, lldb)",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/binaries/net10.0/MainEditor",
+      "args": [
+        "NativeDLL=debug",
+        "config=${workspaceFolder}/content/config/engineconfig_mac_vk.jscfg"
+      ],
+      "cwd": "${workspaceFolder}/binaries/net10.0",
+      "terminal": "integrated",
+      "preLaunchTask": "Titan: MainEditor Build All (Debug)"
+    },
+    {
+      "name": "MainEditor: Debug (managed C#, coreclr)",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/binaries/net10.0/MainEditor",
+      "args": [
+        "NativeDLL=debug",
+        "config=${workspaceFolder}/content/config/engineconfig_mac_vk.jscfg"
+      ],
+      "cwd": "${workspaceFolder}/binaries/net10.0",
+      "console": "integratedTerminal",
+      "preLaunchTask": "Titan: MainEditor Build All (Debug)"
+    },
+    {
+      "name": "MainEditor: Attach (native C++, lldb)",
+      "type": "lldb",
+      "request": "attach",
+      "program": "${workspaceFolder}/binaries/net10.0/MainEditor",
+      "pid": "${command:pickProcess}"
+    },
+    {
+      "name": "MainEditor: Attach (managed C#, dotnet)",
+      "type": "dotnet",
+      "request": "attach",
+      "processId": "${command:pickProcess}"
+    },
+    {
+      "name": "MainEditor: Attach (managed C#, coreclr)",
+      "type": "coreclr",
+      "request": "attach",
+      "processId": "${command:pickProcess}"
+    },
+    {
+      "name": "TitanCMD: Debug (native C++, lldb)",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/Core.Mac/dotnet.sh",
+      "args": [
+        "net10.0/TitanCMD.dll",
+        "ExeCmd=MakeSln",
+        "CookCfg=${workspaceFolder}/content/config/engineconfig_mac_cmd.jscfg",
+        "NativeDLL=debug"
+      ],
+      "cwd": "${workspaceFolder}/binaries",
+      "terminal": "integrated",
+      "preLaunchTask": "Titan: Build All (Debug)"
+    },
+    {
+      "name": "TitanCMD: Attach (native C++, lldb)",
+      "type": "lldb",
+      "request": "attach",
+      "pid": "${command:pickProcess}"
+    },
+    {
+      "name": "TitanCMD: Attach (managed C#, dotnet)",
+      "type": "dotnet",
+      "request": "attach",
+      "processId": "${command:pickProcess}"
+    },
+    {
+      "name": "TitanCMD: Attach (managed C#, coreclr)",
+      "type": "coreclr",
+      "request": "attach",
+      "processId": "${command:pickProcess}"
+    }
+  ]
+}

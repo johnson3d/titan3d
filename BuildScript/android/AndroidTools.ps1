@@ -8,6 +8,8 @@ Set-StrictMode -Version Latest
 
 $script:AndroidToolchainConfigRelativePath = 'cache\config\android-toolchain.json'
 $script:AndroidToolchainExampleRelativePath = 'BuildScript\android\AndroidToolchain.example.json'
+# Invoke-AndroidProcess 子进程的默认 CWD：宿主脚本设为仓库根（见 Invoke-AndroidProcess 内注释）。
+$script:AndroidProcessWorkingDirectory = ''
 
 # ELF 门禁的静态契约：真机只保证这些系统库可用，16 KB 页对齐是 Android 15 的加载前提。
 $script:AndroidAllowedNeededLibraries = @('libc.so', 'libm.so', 'libdl.so', 'liblog.so', 'libandroid.so', 'libvulkan.so')
@@ -204,6 +206,10 @@ function Invoke-AndroidProcess {
     New-Item -ItemType Directory -Force -Path $directory | Out-Null
 
     $wrapper = Join-Path $directory 'run.cmd'
+    # 输出文件必须用绝对路径：子进程 CWD 锚定到仓库根后，相对重定向会写到仓库根去。
+    $stdoutPath = Join-Path $directory 'stdout.txt'
+    $stderrPath = Join-Path $directory 'stderr.txt'
+    $exitPath = Join-Path $directory 'exit.txt'
     $line = (ConvertTo-AndroidBatchArgument $File) + ' '
     foreach ($argument in $Arguments) {
         $line += (ConvertTo-AndroidBatchArgument $argument) + ' '
@@ -211,17 +217,25 @@ function Invoke-AndroidProcess {
     # 括号不能省：PowerShell 里逗号优先级高于 '+'，否则这行会被拆成两个数组元素。
     $lines = @(
         '@echo off',
-        ($line + '1>stdout.txt 2>stderr.txt'),
+        ($line + '1>' + (ConvertTo-AndroidBatchArgument $stdoutPath) + ' 2>' + (ConvertTo-AndroidBatchArgument $stderrPath)),
         # '%ERRORLEVEL%' 与 '>' 之间必须有空格，否则写出的是空文件。
-        'echo %ERRORLEVEL% > exit.txt'
+        ('echo %ERRORLEVEL% > ' + (ConvertTo-AndroidBatchArgument $exitPath))
     )
     # 必须是 Default（ANSI）编码：ASCII 会把中文用户名写成 '??'，路径就废了。
     Set-Content -LiteralPath $wrapper -Value ($lines -join "`r`n") -Encoding Default
 
+    # 子进程默认工作目录：由宿主脚本（如 build-android.ps1）设为仓库根。
+    # 不能留在 TEMP：dotnet 选 SDK 是按进程 CWD 向上找 global.json，TEMP 下找不到
+    # 会静默选最新 SDK（如 rc 预览版），导致版本漂移与 SDK 内 MSBuild.exe 缺失类报错。
+    $cwd = $script:AndroidProcessWorkingDirectory
+    if ([string]::IsNullOrWhiteSpace($cwd) -or -not (Test-Path -LiteralPath $cwd -PathType Container)) {
+        $cwd = (Get-Location).ProviderPath
+    }
+
     $process = $null
     try {
         try {
-            $process = Start-Process -FilePath $wrapper -WorkingDirectory $directory -NoNewWindow -PassThru
+            $process = Start-Process -FilePath $wrapper -WorkingDirectory $cwd -NoNewWindow -PassThru
         }
         catch {
             throw "Failed to start '$File': $($_.Exception.Message)"
@@ -241,7 +255,7 @@ function Invoke-AndroidProcess {
         }
 
         $codeText = ''
-        $codePath = Join-Path $directory 'exit.txt'
+        $codePath = $exitPath
         if (Test-Path -LiteralPath $codePath -PathType Leaf) {
             $raw = Get-Content -Raw -LiteralPath $codePath -Encoding Oem
             if ($null -ne $raw) { $codeText = $raw.Trim() }
@@ -252,8 +266,8 @@ function Invoke-AndroidProcess {
 
         # 控制台程序输出按 OEM 代码页解码，否则含中文的报错会变成 '???'。
         $text = ''
-        foreach ($name in @('stdout.txt', 'stderr.txt')) {
-            $path = Join-Path $directory $name
+        foreach ($name in @($stdoutPath, $stderrPath)) {
+            $path = $name
             if (Test-Path -LiteralPath $path -PathType Leaf) {
                 $part = Get-Content -Raw -LiteralPath $path -Encoding Oem
                 if ($null -ne $part) { $text += $part }
@@ -267,6 +281,37 @@ function Invoke-AndroidProcess {
             Remove-Item -LiteralPath $directory -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
+}
+
+# TitanCodegenGen.cmake 用 'bash progress-run.sh' 包裹 NuGet 还原/工具编译等长任务。
+# Windows 上 Git Bash 装了但不一定在 PATH（编辑器启动的进程尤其常见）；
+# 这里按 PATH → 常见 Git 安装位置找到 bash 后把其目录前置到 PATH，找不到则报错并给安装提示。
+function Enable-AndroidBashOnPath {
+    param([string]$Stage = 'Native')
+
+    $resolved = Get-Command bash -ErrorAction SilentlyContinue
+    if ($null -ne $resolved) {
+        Write-Host "[TITAN-CHECK] OK bash - $($resolved.Source)"
+        return
+    }
+    $candidates = @(
+        (Join-Path $env:ProgramFiles 'Git\bin'),
+        (Join-Path $env:ProgramFiles 'Git\usr\bin')
+    )
+    if (-not [string]::IsNullOrWhiteSpace(${env:ProgramFiles(x86)})) {
+        $candidates += (Join-Path ${env:ProgramFiles(x86)} 'Git\bin')
+    }
+    if (-not [string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) {
+        $candidates += (Join-Path $env:LOCALAPPDATA 'Programs\Git\bin')
+    }
+    foreach ($dir in $candidates) {
+        if (Test-Path -LiteralPath (Join-Path $dir 'bash.exe') -PathType Leaf) {
+            $env:PATH = "$dir;$env:PATH"
+            Write-Host "[TITAN-CHECK] OK bash - $dir\bash.exe (不在原 PATH，已前置)"
+            return
+        }
+    }
+    throw "[$Stage] 找不到 bash：TitanCodegen 需要 bash 运行进度包裹脚本。安装 Git for Windows（https://git-scm.com/download/win）或把 Git\bin 加入 PATH 后重试。"
 }
 
 # 调用外部命令的默认入口：失败时把阶段、退出码和输出尾巴一起抛出去，
@@ -547,6 +592,11 @@ function Find-AndroidTools {
         throw "[$Stage] Android toolchain entry 'apiLevel' must be a positive integer such as 28, got '$apiRaw'. $hint"
     }
     $apiLevel = [int]$apiText
+    # apiLevel 可配但不能低于引擎运行时下限（与 Core.Android/CMakeLists 的 TITAN_ANDROID_MIN_API_LEVEL 同一契约）。
+    $minApiLevel = 28
+    if ($apiLevel -lt $minApiLevel) {
+        throw "[$Stage] Android toolchain entry 'apiLevel' is $apiLevel, but the engine requires >= $minApiLevel. Raise it in $resolvedConfig."
+    }
 
     & $checkStep 'config' $resolvedConfig
     & $checkStep 'settings' ("abi=$abi apiLevel=$apiLevel stl=$stl generator=$generator")

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>$(_TitanTargetFramework)</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
@@ -31,6 +31,7 @@
     <Compile Include="../../CSharpCode/Editor/AndroidBuild/TtAndroidBuildLogParser.cs" Link="Editor/AndroidBuild/TtAndroidBuildLogParser.cs" />
     <Compile Include="../../CSharpCode/Editor/AndroidBuild/TtAndroidBuildSession.cs" Link="Editor/AndroidBuild/TtAndroidBuildSession.cs" />
     <Compile Include="../../CSharpCode/Editor/AndroidBuild/TtAndroidSdkInventory.cs" Link="Editor/AndroidBuild/TtAndroidSdkInventory.cs" />
+    <Compile Include="../../CSharpCode/Editor/AndroidBuild/TtAndroidToolchainLocator.cs" Link="Editor/AndroidBuild/TtAndroidToolchainLocator.cs" />
     <Compile Include="../../CSharpCode/Editor/AndroidBuild/TtAndroidDeployCommand.cs" Link="Editor/AndroidBuild/TtAndroidDeployCommand.cs" />
   </ItemGroup>
 </Project>

@@ -579,7 +579,7 @@ namespace EngineNS.EGui
                 return;
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
             var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
-            myWindow.SetWindowTitle(System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)title));
+            myWindow.SetWindowTitle(System.Runtime.InteropServices.Marshal.PtrToStringUTF8((IntPtr)title));
         }
         unsafe static ImGuiPlatformIO.FDelegate_Platform_RenderWindow ImGui_ImplSDL2_RenderWindow = ImGui_ImplSDL2_RenderWindow_Impl;
         unsafe static void ImGui_ImplSDL2_RenderWindow_Impl(ImGuiViewport* viewport, void* dummy)

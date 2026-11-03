@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_8100898252916504741 Type="NS_tutorials.animation.dmc_grayanim@GameProject">
+  <AnimStateMachine_0 Type="NS_tutorials.animation.DMC_AnimStateMachine_0_4117440125@GameProject" Order="0" />
+  <FinalBlendTree_0 Type="NS_tutorials.animation.DMC_FinalBlendTree_0_1827970541@GameProject" Order="0" />
+  <New_Var_0 Type="System.Boolean@Unknown" Order="0" />
+</Hash_8100898252916504741>

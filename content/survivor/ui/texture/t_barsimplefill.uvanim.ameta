@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.EGui.TtUVAnimAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="accff167-c155-4429-b7fd-aa6dc22e5053" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,survivor/ui/texture/t_barsimplefill.uvanim,accff167-c155-4429-b7fd-aa6dc22e5053" />
+  <Description Type="System.String@Unknown" Value="This is a Asset" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Value="Game,survivor/ui/texture/t_barsimplefill.srv,8fca8e3b-be44-47bc-9c9a-32b788f2d227" />
+  </RefAssetRNames>
+  <SnapUVEnd Type="EngineNS.Vector2@EngineCore" Value="1,1" />
+  <SnapUVStart Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+  <TextureName Type="EngineNS.RName@EngineCore" Value="Game,survivor/ui/texture/t_barsimplefill.srv,8fca8e3b-be44-47bc-9c9a-32b788f2d227" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.EGui.TtUVAnim@EngineCore" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+</Root>

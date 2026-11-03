@@ -1009,7 +1009,7 @@ namespace NxRHI
 		device->DelayDestroy(mView);
 		mView = nullptr;*/
 	}
-	bool VKCbView::Init(VKGpuDevice* device, IBuffer* pBuffer, const FCbvDesc& desc)
+	bool VKCbView::Init(VKGpuDevice* device, IBuffer* pBuffer, const FCbvDesc& desc, const char* file, int line)
 	{
 		mDeviceRef.FromObject(device);
 		ShaderBinder = desc.ShaderBinder;
@@ -1037,7 +1037,7 @@ namespace NxRHI
 			bfDesc.Usage = EGpuUsage::USAGE_DYNAMIC;
 			bfDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, file ? file : __FILE__, line ? line : __LINE__));
 			ASSERT(Buffer != nullptr);
 		}
 		else
@@ -1065,7 +1065,7 @@ namespace NxRHI
 	{
 
 	}
-	bool VKVbView::Init(VKGpuDevice* device, IBuffer* pBuffer, const FVbvDesc* desc)
+	bool VKVbView::Init(VKGpuDevice* device, IBuffer* pBuffer, const FVbvDesc* desc, const char* file, int line)
 	{
 		Desc = *desc;
 		Desc.InitData = nullptr;
@@ -1087,7 +1087,7 @@ namespace NxRHI
 			bfDesc.Type = EBufferType::BFT_Vertex;
 			bfDesc.Usage = desc->Usage;
 			bfDesc.CpuAccess = desc->CpuAccess;
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, file ? file : __FILE__, line ? line : __LINE__));
 			ASSERT(Buffer != nullptr);
 		}
 		else
@@ -1115,7 +1115,7 @@ namespace NxRHI
 	{
 
 	}
-	bool VKIbView::Init(VKGpuDevice* device, IBuffer* pBuffer, const FIbvDesc* desc)
+	bool VKIbView::Init(VKGpuDevice* device, IBuffer* pBuffer, const FIbvDesc* desc, const char* file, int line)
 	{
 		Desc = *desc;
 		Desc.InitData = nullptr;
@@ -1137,7 +1137,7 @@ namespace NxRHI
 			bfDesc.Type = EBufferType::BFT_Index;
 			bfDesc.Usage = desc->Usage;
 			bfDesc.CpuAccess = desc->CpuAccess;
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, file ? file : __FILE__, line ? line : __LINE__));
 			ASSERT(Buffer != nullptr);
 		}
 		else
@@ -1207,7 +1207,7 @@ namespace NxRHI
 			VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_OBJECT_TYPE_IMAGE_VIEW, mView->mImageView, name);
 	}
 
-	bool VKSrView::Init(VKGpuDevice* device, IGpuBufferData* pBuffer, const FSrvDesc& desc)
+	bool VKSrView::Init(VKGpuDevice* device, IGpuBufferData* pBuffer, const FSrvDesc& desc, const char* file, int line)
 	{
 		Desc = desc;
 		Buffer = pBuffer;
@@ -1479,7 +1479,7 @@ namespace NxRHI
 	{
 		mView->SetDebugName(name);
 	}
-	bool VKUaView::Init(VKGpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc)
+	bool VKUaView::Init(VKGpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc, const char* file, int line)
 	{
 		Desc = desc;
 		Buffer = pBuffer;
@@ -1689,7 +1689,7 @@ namespace NxRHI
 			mAccelerationStructure = VK_NULL_HANDLE;
 		}
 	}
-	bool VKAccelerationStructure::Init(VKGpuDevice* device, const FAccelerationStructureDesc* desc)
+	bool VKAccelerationStructure::Init(VKGpuDevice* device, const FAccelerationStructureDesc* desc, const char* file, int line)
 	{
 		mDeviceRef.FromObject(device);
 		if (device->mVulkanExt.IsRayQuery == false)
@@ -1750,7 +1750,7 @@ namespace NxRHI
 		bfDesc.Size = (UINT)sizeInfo.accelerationStructureSize;
 		bfDesc.RowPitch = bfDesc.Size;
 		bfDesc.DepthPitch = bfDesc.Size;
-		mGpuBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+		mGpuBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, file ? file : __FILE__, line ? line : __LINE__));
 		if (mGpuBuffer == nullptr)
 			return false;
 
@@ -1768,7 +1768,7 @@ namespace NxRHI
 		bfDesc.Size = mScratchSize;
 		bfDesc.RowPitch = bfDesc.Size;
 		bfDesc.DepthPitch = bfDesc.Size;
-		auto pScratchBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+		auto pScratchBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, file ? file : __FILE__, line ? line : __LINE__));
 
 		buildInfo.dstAccelerationStructure = mAccelerationStructure;
 		buildInfo.scratchData.deviceAddress = pScratchBuffer.UnsafeConvertTo<VKBuffer>()->GetGPUVirtualAddress();
@@ -1818,7 +1818,7 @@ namespace NxRHI
 			mAccelerationStructure = VK_NULL_HANDLE;
 		}
 	}
-	bool VKTopAccelerationStructure::Init(VKGpuDevice* device, const FTopAccelerationStructureDesc* desc)
+	bool VKTopAccelerationStructure::Init(VKGpuDevice* device, const FTopAccelerationStructureDesc* desc, const char* file, int line)
 	{
 		mDeviceRef.FromObject(device);
 		if (device->mVulkanExt.IsRayQuery == false)
@@ -1851,7 +1851,7 @@ namespace NxRHI
 		bfDesc.Size = ((bfDesc.Size + (sizeof(UINT) - 1)) / sizeof(UINT)) * sizeof(UINT);
 		bfDesc.RowPitch = bfDesc.Size;
 		bfDesc.DepthPitch = bfDesc.Size;
-		mGpuBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+		mGpuBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, file ? file : __FILE__, line ? line : __LINE__));
 		if (mGpuBuffer == nullptr)
 			return false;
 
@@ -1867,18 +1867,18 @@ namespace NxRHI
 
 		FSrvDesc srvDesc{};
 		srvDesc.SetRTAS();
-		mGpuBufferSRV = MakeWeakRef(device->CreateSRV(mGpuBuffer, &srvDesc, __FILE__, __LINE__));
+		mGpuBufferSRV = MakeWeakRef(device->CreateSRV(mGpuBuffer, &srvDesc, file ? file : __FILE__, line ? line : __LINE__));
 
 		FUavDesc uavDesc{};
 		uavDesc.SetBuffer(true);
 		uavDesc.Buffer.NumElements = bfDesc.Size / sizeof(UINT);
-		mGpuBufferUAV = MakeWeakRef(device->CreateUAV(mGpuBuffer, &uavDesc, __FILE__, __LINE__));
+		mGpuBufferUAV = MakeWeakRef(device->CreateUAV(mGpuBuffer, &uavDesc, file ? file : __FILE__, line ? line : __LINE__));
 
 		bfDesc.SetDefault(false, (EBufferType)(EBufferType::BFT_UAV));
 		bfDesc.Size = mScratchSize;
 		bfDesc.RowPitch = bfDesc.Size;
 		bfDesc.DepthPitch = bfDesc.Size;
-		mGpuScratchBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+		mGpuScratchBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, file ? file : __FILE__, line ? line : __LINE__));
 
 		return true;
 	}

@@ -40,6 +40,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidBuildSession.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidProcessLauncher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidSdkInventory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidToolchainLocator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidDeployCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\FileDialog.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\Inspector.cs" />

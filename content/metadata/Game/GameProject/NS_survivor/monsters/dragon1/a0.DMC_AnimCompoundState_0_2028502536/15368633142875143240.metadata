@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_15368633142875143240 Type="NS_survivor.monsters.dragon1.DMC_AnimCompoundState_0_2028502536@GameProject">
+  <Dead Type="NS_survivor.monsters.dragon1.DMC_Dead_3360116841@GameProject" Order="0" />
+  <Idle Type="NS_survivor.monsters.dragon1.DMC_Idle_2510730741@GameProject" Order="0" />
+  <Transition_From_AnimCompoundState_0_To_Idle Type="NS_survivor.monsters.dragon1.DMC_Transition_From_AnimCompoundState_0_To_Idle_3200381843@GameProject" Order="0" />
+</Hash_15368633142875143240>

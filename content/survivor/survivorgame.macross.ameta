@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.CodeBuilder.TtMacrossAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="5">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="2b692dd1ddd758f4936b6d9380853b37ac863736d7a03d4081680a10611a346d" />
+      <Path Type="System.String@Unknown" Value="survivorgame.macross/class_graph.dat" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="037844d18fca689dc943b6729cbd776bdcee74a79bccb7cfabe895c5797e2f37" />
+      <Path Type="System.String@Unknown" Value="survivorgame.macross/onloadscene_88_32_54_cb_cd_8b_26_50_fe_23_6b_1e_49_c1_04_22_30_c6_1e_21.fn" />
+    </e_1>
+    <e_2 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="7214e7d798c6b2ca45900451aa5c4068214f53cf2f848ce3027fd0b393d3e3bf" />
+      <Path Type="System.String@Unknown" Value="survivorgame.macross/[o]begindestroy_26_9e_37_56_f0_f9_04_bd_9e_7f_65_fb_89_e7_6e_2d_98_dc_28_c1.fn" />
+    </e_2>
+    <e_3 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="a4c68dab59eca6913aeb82859e1814054be3c3182168eb9c5d319fa6311e0b20" />
+      <Path Type="System.String@Unknown" Value="survivorgame.macross/[o]beginplay_8c_68_8d_2a_7a_af_41_a2_f2_cc_1c_57_fc_57_72_2a_94_46_30_ed.fn" />
+    </e_3>
+    <e_4 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="33b32c4a91d745bbc8e0b71229f2303d80aa920631e9e0093085714789797dd3" />
+      <Path Type="System.String@Unknown" Value="survivorgame.macross/[o]onplayerdead_88_25_78_33_67_7a_ba_2d_97_83_fb_22_06_47_c7_85_a0_c2_b9_96.fn" />
+    </e_4>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="a00a9f95-1be2-4899-a745-80d2fa28e48a" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,survivor/survivorgame.macross,a00a9f95-1be2-4899-a745-80d2fa28e48a" />
+  <BaseTypeStr Type="System.String@Unknown" Value="Survivor.TtMacrossSurvivorGame@Survivor" />
+  <Description Type="System.String@Unknown" Value="MacrossType:Survivor.TtMacrossSurvivorGame@Survivor&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <IsDisable Type="System.Boolean@Unknown" Value="False" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="10">
+    <e_0 Value="Game,survivor/maps/firstlevel/scene_firstlevel.scene,026bb84c-e29f-45bc-9403-3707321fb9f5" />
+    <e_1 Value="Game,survivor/player/prefab_hero.prefab,3b6deec1-5c38-4acd-831a-39380906f978" />
+    <e_2 Value="Game,survivor/skills/weapon.dataset,00000000-0000-0000-0000-000000000000" />
+    <e_3 Value="Game,survivor/ui/splash_screen.ui,4027783c-0b24-4d01-9c05-56fb864e82e8" />
+    <e_4 Value="Engine,graphics/deferred_simple.rpolicy,d7035653-b8cb-456d-86f8-c230b33bbe96" />
+    <e_5 Value="Game,survivor/datatable/ttroledata.dataset,f3747ae3-5271-4e36-b3aa-dc1091a46b56" />
+    <e_6 Value="Game,survivor/datatable/ttweapondata.dataset,2fd58ef3-e6c6-43f6-b89a-ab2a9232c862" />
+    <e_7 Value="Game,survivor/datatable/ttmonsterdata.dataset,ce959ef9-c1ac-4a3b-bdbf-e6d138f28505" />
+    <e_8 Value="Game,survivor/ui/ui_statics.ui,5c2fa082-e11b-4b8b-a090-4f7af6b8f639" />
+    <e_9 Value="Game,survivor/ui/ui_death.ui,2ff5d4d3-0313-42ec-aa10-d3713f77df08" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.CodeBuilder.TtMacross@EngineCore" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+</Root>

@@ -300,12 +300,15 @@ namespace NxRHI
 		return result;
 	}
 	DX12HeapCreator::PagedObjectType* DX12HeapCreator::CreatePagedObject(
-		DX12HeapCreator::PageType* page, UINT index)
+		DX12HeapCreator::PageType* page, UINT index, const char* file, int line)
 	{
 		//auto device = mDeviceRef.GetPtr();
 		auto pAllocator = page->Allocator.GetCastPtr<DX12HeapAllocator>();
 
-		auto result = new DX12PagedHeap();
+#pragma push_macro("new")
+#undef new
+		auto result = new(file, line) DX12PagedHeap();
+#pragma pop_macro("new")
 		result->OffsetInPage = pAllocator->mDescriptorStride * mDesc.NumDescriptors * index;
 		result->RealObject = page->mGpuHeap;
 		//result->RefResources.resize(this->mDesc.NumDescriptors);
@@ -386,7 +389,7 @@ namespace NxRHI
 		auto pPage = (DX12DescriptorSetPage*)page;
 	}
 	DX12HeapHolder* DX12HeapAllocatorManager::AllocDX12Heap(DX12GpuDevice* pDevice,
-		UINT numOfDescriptor, D3D12_DESCRIPTOR_HEAP_TYPE type)
+		UINT numOfDescriptor, D3D12_DESCRIPTOR_HEAP_TYPE type, const char* file, int line)
 	{
 		//todo:Alloc Like Vulkan DescriptorPool!
 		//AUTO_SAMP("DX12HeapAllocatorManager.AllocDX12Heap");
@@ -419,7 +422,7 @@ namespace NxRHI
 			allocator = iter->second;
 		}
 
-		auto result = allocator->AllocDX12Heap();
+		auto result = allocator->AllocDX12Heap(file, line);
 		result->NumOfDescriptor = numOfDescriptor;
 		return result;
 

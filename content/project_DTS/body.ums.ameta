@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="31f436a423b5ec3977d76766333a819dce95262441bd96b6f35b4693cfee3d2e" />
+      <Path Type="System.String@Unknown" Value="body.ums" />
+    </e_0>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="b180a51b-0386-406e-a440-b84abb636e76" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,project_dts/body.ums,b180a51b-0386-406e-a440-b84abb636e76" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMaterialMesh&#xA;Hahah" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="5">
+    <e_0 Value="Game,project_dts/clothes1.vms,8f232cf5-c564-42b4-b8b3-e4e6a79f8940" />
+    <e_1 Value="Engine,material/sysdft_color.material,baf3aa75-f9a3-4fbc-a413-4465f746a90b" />
+    <e_2 Value="Game,project_dts/face.vms,5e7a8aa3-6e93-4713-91a8-0e3d002db861" />
+    <e_3 Value="Game,project_dts/hair.vms,aa9c5b7b-d90e-4e11-a03f-44614faf3c15" />
+    <e_4 Value="Game,project_dts/equ005.vms,b72f31f6-ef5b-4eb2-b080-127fc83da67f" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
+</Root>

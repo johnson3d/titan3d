@@ -1,8 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>$(_TitanTargetFramework)</TargetFramework>
+    <!-- 编辑器 CompileGameProject 求值时以 -p:TitanMacrossCsDir 传入 ERootDir.Game 根；缺省仅保底。 -->
+    <TitanMacrossCsDir Condition="'$(TitanMacrossCsDir)' == ''">$(MSBuildThisFileDirectory)..\..\content\</TitanMacrossCsDir>
   </PropertyGroup>
+
+  <!-- 平台化引擎程序集：TitanManagedProject.props 按 TitanPlatform 映射 Engine.Window/Engine.Mac/Engine.Android。 -->
+  <Import Project="$(MSBuildThisFileDirectory)..\..\BuildScript\msbuild\TitanManagedProject.props" Condition="'$(TitanEngineAssemblyName)' == ''" />
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>..\..\binaries\</OutputPath>
@@ -13,9 +18,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="Engine.Window">
-      <HintPath>..\..\binaries\net8.0\Engine.Window.dll</HintPath>
+    <Reference Include="TitanEngine">
+      <HintPath>$(TitanEngineAssemblyPath)</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Macross 保存时落盘的游戏逻辑源码（git 内），经 MSBuild glob 自动纳入编译清单。 -->
+    <Compile Include="$(TitanMacrossCsDir)**\*.cs" />
+    <!-- CompileGameProject 运行时生成的 CreateInstance 开关（obj 内，不进 git）；SDK 默认排除 obj，显式 include 不会重复。 -->
+    <Compile Include="$(MSBuildThisFileDirectory)obj\_gencode.cs" Condition="Exists('$(MSBuildThisFileDirectory)obj\_gencode.cs')" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,7 +44,15 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
-  
+
+  <!-- 编辑器求值工程输入用：把最终 Compile 清单 dump 到 $(TitanCompileInputsFile)（调用方以 -p 传入）。 -->
+  <Target Name="TitanDumpCompileInputs">
+    <PropertyGroup>
+      <TitanCompileInputsFile Condition="'$(TitanCompileInputsFile)' == ''">$(BaseIntermediateOutputPath)titan-compile-inputs.txt</TitanCompileInputsFile>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(TitanCompileInputsFile)" Lines="@(Compile->'%(Identity)')" Overwrite="true" />
+  </Target>
+
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="Build">
     <Exec Command="$(SolutionDir)BuildGame.bat $(SolutionDir)" ConsoleToMsBuild="true" />

@@ -1,5 +1,6 @@
 # Android 本地生成 C++/C# 胶水（等价于 Windows 的 BuildScript/msbuild/TitanCodeGen.targets）
-# 用法（仓库根）: cmake "-DTITAN_NDK_ROOT=<r27>" -DTITAN_CONFIGURATION=Debug -P Core.Android/GenerateCodegen.cmake
+# 用法（仓库根）: cmake "-DTITAN_NDK_ROOT=<r27>" -DTITAN_CONFIGURATION=Debug
+#               "-DTITAN_ANDROID_API_LEVEL=28" -P Core.Android/GenerateCodegen.cmake
 # Release 改用 TITAN_CONFIGURATION=Release；解析失败不能放行生成有效 stamp。
 # 自举与执行段在 BuildScript/cmake/TitanCodegenGen.cmake，各平台共用；此处只提供主机工具链。
 cmake_minimum_required(VERSION 3.24)
@@ -29,5 +30,10 @@ include("${CMAKE_CURRENT_LIST_DIR}/cmake/TitanAndroidFlags.cmake")
 
 message(STATUS "[TitanCodeGen] SysRoot=${_sysroot}")
 message(STATUS "[TitanCodeGen] ResourceDir=${_resource_dir}")
+# 与 android-toolchain.json 的 apiLevel 同源（build-android.ps1 传入）；缺省 28 = 仓库最低支持版本。
+if(NOT TITAN_ANDROID_API_LEVEL)
+  set(TITAN_ANDROID_API_LEVEL 28)
+endif()
+message(STATUS "[TitanCodeGen] ApiLevel=${TITAN_ANDROID_API_LEVEL}")
 titan_run_platform_codegen("${_sysroot}" "${_resource_dir}")
 message(STATUS "[TitanCodeGen] Code generation completed.")

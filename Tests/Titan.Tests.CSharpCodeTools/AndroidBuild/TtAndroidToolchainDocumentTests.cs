@@ -74,6 +74,30 @@ public class TtAndroidToolchainDocumentTests
     }
 
     [Test]
+    public void RequirementInt_RoundTrips_AndFallsBackWhenMissing()
+    {
+        var doc = TtAndroidToolchainDocument.Parse(@"{ ""requirements"": { ""ndkMajor"": 27 } }");
+        Assert.That(doc.GetRequirementInt("ndkMajor", 27), Is.EqualTo(27));
+
+        doc.SetRequirementInt("ndkMajor", 30);
+        doc.SetRequirementInt("dotnetSdkMajor", 10);
+        var reloaded = TtAndroidToolchainDocument.Parse(doc.Serialize());
+        Assert.Multiple(() =>
+        {
+            Assert.That(reloaded.GetRequirementInt("ndkMajor", 27), Is.EqualTo(30));
+            Assert.That(reloaded.GetRequirementInt("dotnetSdkMajor", 9), Is.EqualTo(10));
+            // 保留未知字段：requirements 里的其他键不能被覆写丢失。
+            Assert.That(reloaded.Get("schemaVersion"), Is.EqualTo(string.Empty));
+        });
+
+        var empty = TtAndroidToolchainDocument.CreateEmpty();
+        Assert.That(empty.GetRequirementInt("ndkMajor", 27), Is.EqualTo(27), "缺 requirements 时应回落到调用方建议值");
+        empty.SetRequirementInt("ndkMajor", 28);
+        Assert.That(TtAndroidToolchainDocument.Parse(empty.Serialize()).GetRequirementInt("ndkMajor", 27), Is.EqualTo(28),
+            "无 requirements 对象时 Set 应新建节点");
+    }
+
+    [Test]
     public void MissingRequiredEntries_ListsMissingInFixedOrder()
     {
         var doc = TtAndroidToolchainDocument.Parse(@"{ ""ndk"": ""C:\\ndk\\27"", ""abi"": ""arm64-v8a"" }");

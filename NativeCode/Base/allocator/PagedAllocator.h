@@ -43,12 +43,12 @@ namespace MemAlloc
 		typedef FPagedObject<_Type>		FPagedObjectType;
 
 		template<typename _FPagedObjectType = FPagedObjectType>
-		AutoRef<_FPagedObjectType> Alloc() {
-			auto ptr = dynamic_cast<_FPagedObjectType*>(AllocObject());
+		AutoRef<_FPagedObjectType> Alloc(const char* file = nullptr, int line = 0) {
+			auto ptr = dynamic_cast<_FPagedObjectType*>(AllocObject(file, line));
 			return MakeWeakRef(ptr);
 		}
 
-		virtual FPagedObjectType* AllocObject() = 0;
+		virtual FPagedObjectType* AllocObject(const char* file, int line) = 0;
 		virtual void Free(FPagedObjectType* ptr) = 0;
 		virtual void OnFree(FPagedObjectType* ptr) = 0;
 	};
@@ -72,18 +72,18 @@ namespace MemAlloc
 		FPagedObjectType*				FreePoint = nullptr;
 		std::vector<AutoRef<FPageType>>	Pages;
 		
-		virtual FPagedObjectType* AllocObject() override
+		virtual FPagedObjectType* AllocObject(const char* file, int line) override
 		{
 			if constexpr (MultThread)
 			{
 				VAutoVSLLock al(Locker);
-				auto result = AllocImpl();
+				auto result = AllocImpl(file, line);
 				Creator.OnAlloc(this, result);
 				return result;
 			}
 			else
 			{
-				auto result = AllocImpl();
+				auto result = AllocImpl(file, line);
 				Creator.OnAlloc(this, result);
 				return result;
 			}
@@ -121,7 +121,7 @@ namespace MemAlloc
 			FinalCleanup();
 		}
 	protected:
-		FPagedObjectType* AllocImpl()
+		FPagedObjectType* AllocImpl(const char* file, int line)
 		{
 			BaseType::GetTotalCount();
 			if (FreePoint == nullptr)
@@ -138,7 +138,7 @@ namespace MemAlloc
 				FPagedObject<_Type>* first = nullptr;
 				for (UINT i = 0; i < PageSize; i++)
 				{
-					auto obj = Creator.CreatePagedObject(page, i);
+					auto obj = Creator.CreatePagedObject(page, i, file, line);
 					obj->HostPage.FromObject(page);
 					obj->Next = nullptr;
 					if (first == nullptr)

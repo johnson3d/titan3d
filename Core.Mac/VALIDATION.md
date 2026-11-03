@@ -34,7 +34,7 @@
 | macOS | 26.6.2 (25G83) |
 | Xcode CLT（`clang --version`） | Apple clang 21.0.0 (clang-2100.3.34.2)，Xcode 26.x 默认工具链 |
 | cmake / ninja | cmake 4.4.4（Homebrew）/ ninja 1.13.2 |
-| dotnet（`dotnet --info` 的 SDK 与 RID） | SDK 10.0.402，RID osx-arm64；.NET 8 runtime 在列（门禁通过） |
+| dotnet（`dotnet --info` 的 SDK 与 RID） | SDK 10.0.402，RID osx-arm64；.NET 8 与 10 runtime 均在列（门禁通过；跑 net8.0 apphost 需 8.0 runtime） |
 | 仓库 commit | bfd5d0bbf81657b6b6a510e113dbbd15bdc10f55（2026-10-24）+ 未提交修复集（错误台账 15–20，待用户提交） |
 | codegen 解析失败头数（`cache/mac_codegen.log`，应为 0） | 0 |
 
@@ -64,7 +64,9 @@
 
 使用原生 Apple Silicon 终端（不经 Rosetta）。缺 Xcode CLT 时运行 `xcode-select --install`，完成安装后再继续；若没有 Homebrew，先按 https://brew.sh 的官方说明安装，再执行 `brew install cmake ninja`。
 
-从 https://dotnet.microsoft.com/download/dotnet/8.0 安装最新 .NET 8 SDK 的 macOS Arm64 安装包（SDK ≥ 8.0.300，包含 .NET 8 runtime）。只有最新 major SDK 不保证有 8.0 runtime；已有其他 major SDK 时仍须安装 8.0 runtime，并确保同一个 `dotnet` 能列出它。不得用跨 major 的 RollForward 绕过要求。
+`./setup.sh` 的依赖校验会自行准备 .NET SDK（版本取自 global.json）：优先复用 PATH 上满足「global.json 主版本 SDK + `osx-arm64` RID」的 `dotnet`；缺失或不合格时，用官方 `dotnet-install.sh` 把 `global.json` 锁定的版本（当前 10.0.100）安装到仓库内 `3rd/tools/dotnet-sdk`（无需 sudo、不改 shell 配置，首次约 200MB），并在本次 setup 的后续步骤中注入 `DOTNET_ROOT`/`PATH`。`--check-only` 保持只读，只校验不下载；单独校验或补装入口为 `Core.Mac/ensure_dotnet.sh [--check|--force]`。使用仓库内 SDK 时，手工执行 `dotnet` 命令（含下面的版本门禁）前先 `export DOTNET_ROOT="$PWD/3rd/tools/dotnet-sdk" && export PATH="$DOTNET_ROOT:$PATH"`。VS Code 任务与 `Core.Mac/smoke_titancmd.sh` 已统一通过 `Core.Mac/dotnet.sh` 走同一套解析（不再依赖 `/usr/local/bin/dotnet`）；手动命令也可用 `Core.Mac/dotnet.sh` 代替 `dotnet`。
+
+也可从 https://dotnet.microsoft.com/download/dotnet/10.0 手动安装最新 .NET 10 SDK 的 macOS Arm64 安装包（SDK ≥ 10.0.100，包含 .NET 10 runtime）。只有最新 major SDK 不保证有 8.0 runtime；当前托管 TFM 仍为 net8.0，已有其他 major SDK 时须另装 .NET 8 runtime（Task 4 迁移到 net10.0 后改为 10.0 runtime），并确保同一个 `dotnet` 能列出它。不得用跨 major 的 RollForward 绕过要求。
 
 在仓库根进入 `/bin/bash`，依次执行以下独立代码块；每块的子 shell 失败后先处理错误，不能直接跳到下一块。版本门禁：
 
@@ -75,12 +77,13 @@
   test "$(uname -m)" = arm64 || { echo '[TitanMac] 环境要求原生 arm64 终端'; exit 1; }
   xcode-select -p
   xcrun --find clang
-  for tool in cmake ninja dotnet perl git shasum file otool; do
+  for tool in cmake ninja dotnet python3 perl git shasum file otool; do
     command -v "$tool" >/dev/null || { echo "[TitanMac] 缺少工具: $tool"; exit 1; }
   done
   cmake --version | awk 'NR==1 { split($3,v,"."); if (v[1]<3 || (v[1]==3 && v[2]<24)) exit 1 }'
-  dotnet --version | awk -F. '{ if ($1<8 || ($1==8 && ($2!=0 || $3<300))) exit 1 }'
-  dotnet --list-runtimes | grep -Eq '^Microsoft\.NETCore\.App 8\.' || { echo '[TitanMac] 缺少 .NET 8 runtime'; exit 1; }
+  dotnet --version | awk -F. '{ if ($1!=10 || $2!=0 || $3<100) exit 1 }'   # 构建 SDK 门禁：10.0.100+（latestFeature 内前滚）
+  # 当前托管 TFM 仍为 net8.0（Task4 迁移到 net10.0 后把下行改为 10.）：
+  dotnet --list-runtimes | grep -Eq '^Microsoft\.NETCore\.App 8\.' || { echo '[TitanMac] 缺少 .NET 8 runtime（运行 net8.0 apphost 用）'; exit 1; }
   dotnet --info | grep -Eq 'RID:[[:space:]]+osx-arm64' || { echo '[TitanMac] dotnet 必须使用 osx-arm64'; exit 1; }
   clang --version
   cmake --version
@@ -104,7 +107,17 @@
 ./setup.sh --skip-codegen        # 跳过胶水生成（stamp 缺失时仍会强制执行）
 ```
 
-依赖校验覆盖：Xcode CLT、cmake ≥3.24、ninja、.NET 8 SDK、静态 libc++（`3rd/native/llvm-project/install-mac`，缺失时自动 sparse clone `llvmorg-22.1.8` 并源码构建），并按 `Core.Mac/generated/TitanSources.cmake` 的模块清单条件校验 PhysX5 / Vulkan(MoltenVK) 静态库与 dylib（metis 为可选链接，缺失仅警告）。构建目录 `intermediate/cpp/Core.Mac/<Cfg>` 缺 `build.ninja` 时自动补 configure，根治「直接构建 native 报目录不存在」。
+依赖校验覆盖：Xcode CLT、cmake ≥3.24、ninja、.NET SDK（global.json 锁定 10.0.100）、静态 libc++（`3rd/native/llvm-project/install-mac`，缺失时自动 sparse clone `llvmorg-22.1.8` 并源码构建），并按 `Core.Mac/generated/TitanSources.cmake` 的模块清单条件校验 PhysX5 / Vulkan(MoltenVK) 静态库与 dylib（metis 为可选链接，缺失仅警告）。llvm-project 是 partial clone，sparse 检出会按需拉 blob：GitHub 断流（`curl 18` / `invalid index-pack` / early EOF）时 setup 会清理半成品克隆、改用 HTTP/1.1 并退避重试（默认 5 次，`TITAN_GIT_NET_RETRIES` 可调），仍失败时重跑 `./setup.sh` 可续传；静态 libc++ 构建另外需要 `python3`（打补丁 + 生成安装用的 `libcxx.imp`）。构建目录 `intermediate/cpp/Core.Mac/<Cfg>` 缺 `build.ninja` 时自动补 configure，根治「直接构建 native 报目录不存在」。
+
+托管工程（`Engine.Mac` / `TitanCMD` / `MainEditor`）用 `dotnet build` 构建时会隐式 restore：NuGet 缓存齐全时是秒级 no-op（输出“所有项目均为最新的”），只有首次或缓存失效才真下载（例如 `assimpnetter` 约 25MB）。经 `Core.Mac/dotnet.sh` 运行的任务在 restore/build 期间每 10 秒输出 `[TitanProgress]` 心跳，检测到 NuGet 实际下载时改为输出 `[NuGetProgress] 下载 <包名>: X MB` 与最近 10 秒增量/速度。网络慢导致还原卡住时，可一次性把用户级源切到镜像：`dotnet nuget add source https://repo.huaweicloud.com/repository/nuget/v3/index.json -n huawei && dotnet nuget disable source nuget.org`；回滚用 `dotnet nuget enable source nuget.org`。设置 `RestoreSources` 环境变量则只影响当次进程。
+
+VS Code 的 C# / C# Dev Kit 扩展不经过仓库脚本找 dotnet：它按扩展宿主的 PATH（或 `.NET Install Tool` 的已有路径设置）执行 `dotnet --info`，而本机只有仓库内 SDK。修法二选一（或都做）：`ln -sfn "$PWD/3rd/tools/dotnet-sdk/dotnet" /opt/homebrew/bin/dotnet`（Homebrew 目录本身在登录 shell PATH 里，无需 sudo），或在用户设置里配 `"dotnetAcquisitionExtension.sharedExistingDotnetPath": "<repo>/3rd/tools/dotnet-sdk/dotnet"`；改完 `Developer: Reload Window`（必要时完全退出重开 VS Code）。`/opt/homebrew/bin/dotnet --version` 应输出 `10.0.100` 或更高的 10.x feature band。
+
+注意 `sharedExistingDotnetPath` 只决定**扩展内部组件**用哪个 dotnet，不影响项目构建：它的优先级高于 PATH（per-extension 的 `dotnetAcquisitionExtension.existingDotnetPath` 又高于 shared），所以本机后来装了系统 SDK 也仍会走这里；若该路径失效或不满足扩展版本要求，扩展会警告并忽略设置，回退 PATH/自动安装。装了系统 SDK 并希望扩展改用它时，删掉该设置和 `/opt/homebrew/bin/dotnet` 软链即可。项目 SDK 版本由仓库 `global.json` 决定，与这个设置无关。
+
+`MainEditor` / `TitanCMD` 是 **apphost**（可执行宿主）：启动时只按 `DOTNET_ROOT` → 全局安装位置（macOS `/usr/local/share/dotnet`，由官方安装包注册 `/etc/dotnet/install_location`）找运行时，**不看 PATH**。仓库内 SDK 不注册全局位置，所以直接运行 `binaries/net8.0/MainEditor` 会报 `You must install .NET to run this application`（`dotnet net8.0/TitanCMD.dll` 不受影响）。临时办法：在 GUI 环境执行 `launchctl setenv DOTNET_ROOT "<repo>/3rd/tools/dotnet-sdk"` 后**完全退出重开 VS Code**（撤销用 `launchctl unsetenv DOTNET_ROOT`）。构建须装官方 .NET 10 SDK（global.json 主版本）：`curl -L -o /tmp/dotnet-sdk.pkg https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.100/dotnet-sdk-10.0.100-osx-arm64.pkg && sudo installer -pkg /tmp/dotnet-sdk.pkg -target /`；当前托管 TFM 仍为 net8.0，直接运行 apphost 另需 8.0 runtime（TFM 迁移到 net10.0 后此要求消失），可再装一次 .NET 8 SDK 补齐运行时：`curl -L -o /tmp/dotnet8.pkg https://builds.dotnet.microsoft.com/dotnet/Sdk/8.0.427/dotnet-sdk-8.0.427-osx-arm64.pkg && sudo installer -pkg /tmp/dotnet8.pkg -target /`，装完 `dotnet --list-runtimes` 含 `Microsoft.NETCore.App 8.x`（迁移后为 10.x）；此后 `Core.Mac/dotnet.sh`、VS Code 任务与扩展都会自动优先系统 dotnet，仓库内 SDK 只作为无系统 SDK 时的 fallback。
+
+codegen 阶段现在会打印 `1/4 ~ 4/4` 阶段（刷新源码清单 → NuGet 还原并编译两个胶水工具 → 生成 C++ 绑定 → 生成托管源码），还原/编译/工具执行期间每 10 秒输出一行 `[TitanProgress] … 已运行 Ns` 心跳，检测到 NuGet 正在下载时改为 `[NuGetProgress] 下载 <包名>: X MB`（含最近 10 秒增量与速度），不会再出现“有开头没后文”的假死观感。首次 NuGet 还原约 150MB，网络慢时可先 `export RestoreSources=<镜像源 v3 index>`（例：`https://repo.huaweicloud.com/repository/nuget/v3/index.json`）再重跑。
 
 VS Code 中对应任务为 `Titan: Setup & Build Native (Debug)`（默认构建任务）与 `Titan: Setup Deps Check (Mac)`。
 

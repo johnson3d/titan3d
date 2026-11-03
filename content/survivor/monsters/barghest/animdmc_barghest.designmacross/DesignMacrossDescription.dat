@@ -1,0 +1,717 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.DesignMacross.UDesignMacross@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,survivor/monsters/barghest/animdmc_barghest.designmacross,11390ccf-d58e-423a-9b47-2f7dafe9ea4a" />
+  <DesignedClassDescription Type="EngineNS.DesignMacross.Design.TtClassDescription@EngineCore">
+    <DesignableVariables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IDesignableVariableDescription@EngineCore,&gt;@Unknown" Count="2">
+      <e_0 Type="EngineNS.Bricks.Animation.Macross.StateMachine.TtAnimStateMachineClassDescription@EngineCore">
+        <CompoundStates Type="System.Collections.Generic.List&lt;EngineNS.Bricks.StateMachine.Macross.CompoundState.TtTimedCompoundStateClassDescription@EngineCore,&gt;@Unknown" Count="1">
+          <e_0 Type="EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState.TtAnimCompoundStateClassDescription@EngineCore">
+            <Entry Type="EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState.TtAnimCompoundStateEntryClassDescription@EngineCore">
+              <Id Type="System.Guid@Unknown" Value="8ea28e6a-4ca1-4c7b-b0c7-140f541c6c18" />
+              <Transitions Type="System.Collections.Generic.List&lt;EngineNS.Bricks.StateMachine.Macross.StateTransition.TtTimedStateTransitionClassDescription@EngineCore,&gt;@Unknown" Count="1">
+                <e_0 Type="EngineNS.Bricks.StateMachine.Macross.StateTransition.TtAnimStateTransitionClassDescription@EngineCore">
+                  <CheckConditionMethodDescription Type="EngineNS.Bricks.StateMachine.Macross.StateTransition.TtTransitionCheckConditionMethodDescription@EngineCore">
+                    <Arguments Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.TtMethodArgumentDescription@EngineCore,&gt;@Unknown" Count="1">
+                      <e_0 Type="EngineNS.DesignMacross.Design.TtMethodArgumentDescription@EngineCore">
+                        <Name Type="System.String@Unknown" Value="context" />
+                        <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="In" />
+                        <VariableType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Animation.StateMachine.TtAnimStateMachineContext@EngineCore" />
+                      </e_0>
+                    </Arguments>
+                    <AsyncType Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration.EAsyncType@EngineCore" Value="None" />
+                    <DataLines Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataLineDescription@EngineCore,&gt;@Unknown" Count="0" />
+                    <ExecutionLines Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionLineDescription@EngineCore,&gt;@Unknown" Count="1">
+                      <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionLineDescription@EngineCore">
+                        <FromId Type="System.Guid@Unknown" Value="46fa98d5-5067-4be4-af45-8a9754ca5522" />
+                        <Id Type="System.Guid@Unknown" Value="aa0ba9e5-0e0c-4e1e-a94d-f8d5ff81ac54" />
+                        <Name Type="System.String@Unknown" Value="ExecutionLine" />
+                        <ToId Type="System.Guid@Unknown" Value="8766d3cc-8a36-417d-9da4-c25530b629fe" />
+                      </e_0>
+                    </ExecutionLines>
+                    <Expressions Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.Expressions.TtExpressionDescription@EngineCore,&gt;@Unknown" Count="0" />
+                    <Id Type="System.Guid@Unknown" Value="3b543a61-fd1e-4eff-b1c8-3ab5d6ca20c8" />
+                    <IsOverride Type="System.Boolean@Unknown" Value="True" />
+                    <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.TtVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+                    <Name Type="System.String@Unknown" Value="CheckCondition" />
+                    <ReturnValueType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
+                    <Start Type="EngineNS.DesignMacross.Design.TtMethodStartDescription@EngineCore">
+                      <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+                      <DataOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore,&gt;@Unknown" Count="1">
+                        <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore">
+                          <Id Type="System.Guid@Unknown" Value="2352c42e-d3d1-4f63-a60e-511efb3b70d5" />
+                          <Name Type="System.String@Unknown" Value="context" />
+                          <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Animation.StateMachine.TtAnimStateMachineContext@EngineCore" />
+                        </e_0>
+                      </DataOutPins>
+                      <ExecutionInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+                      <ExecutionOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore,&gt;@Unknown" Count="1">
+                        <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore">
+                          <Id Type="System.Guid@Unknown" Value="46fa98d5-5067-4be4-af45-8a9754ca5522" />
+                          <Name Type="System.String@Unknown" Value="" />
+                        </e_0>
+                      </ExecutionOutPins>
+                      <Id Type="System.Guid@Unknown" Value="e95d3600-4def-4ade-8963-88eacb6bba2b" />
+                    </Start>
+                    <Statements Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.Statement.TtStatementDescription@EngineCore,&gt;@Unknown" Count="1">
+                      <e_0 Type="EngineNS.DesignMacross.Design.Statement.TtReturnStatementDescription@EngineCore">
+                        <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="3">
+                          <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore">
+                            <Id Type="System.Guid@Unknown" Value="6d98e066-eed2-4f5e-89e3-c5e52659ad50" />
+                            <Name Type="System.String@Unknown" Value="" />
+                            <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
+                          </e_0>
+                          <e_1 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore">
+                            <Id Type="System.Guid@Unknown" Value="521a5bca-a277-4e42-aac4-9a021bd8d1e5" />
+                            <Name Type="System.String@Unknown" Value="" />
+                            <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
+                          </e_1>
+                          <e_2 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore">
+                            <Id Type="System.Guid@Unknown" Value="f0e9831e-3d59-4d96-9006-4bfa0c07815b" />
+                            <Name Type="System.String@Unknown" Value="" />
+                            <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
+                          </e_2>
+                        </DataInPins>
+                        <DataOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+                        <ExecutionInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore,&gt;@Unknown" Count="1">
+                          <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore">
+                            <Id Type="System.Guid@Unknown" Value="8766d3cc-8a36-417d-9da4-c25530b629fe" />
+                            <Name Type="System.String@Unknown" Value="" />
+                          </e_0>
+                        </ExecutionInPins>
+                        <ExecutionOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+                        <Id Type="System.Guid@Unknown" Value="e2e8e772-4438-4ba9-82ba-37a178de13cb" />
+                        <Name Type="System.String@Unknown" Value="Return" />
+                        <ReturnType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
+                      </e_0>
+                    </Statements>
+                    <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+                  </CheckConditionMethodDescription>
+                  <FromId Type="System.Guid@Unknown" Value="8ea28e6a-4ca1-4c7b-b0c7-140f541c6c18" />
+                  <Id Type="System.Guid@Unknown" Value="7e843fcf-5cd1-4bd1-8fb1-e01845533582" />
+                  <IsStruct Type="System.Boolean@Unknown" Value="False" />
+                  <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Count="0" />
+                  <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
+                    <e_0 Value="EngineNS.Animation.StateMachine.TtAnimStateTransition&lt;animdmc_barghest&gt;" />
+                  </SupperClassNames>
+                  <ToId Type="System.Guid@Unknown" Value="9aaab83c-ca0e-4c17-a86b-a4f1cc472c80" />
+                  <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+                  <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+                    <IsEnum Type="System.Boolean@Unknown" Value="False" />
+                    <TypeFullName Type="System.String@Unknown" Value="DMC_Transition_From_AnimCompoundState_0_To_AnimSubState_2944434644" />
+                  </VariableType>
+                  <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+                </e_0>
+              </Transitions>
+            </Entry>
+            <Hubs Type="System.Collections.Generic.List&lt;EngineNS.Bricks.StateMachine.Macross.CompoundState.TtTimedCompoundStateHubClassDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <Id Type="System.Guid@Unknown" Value="75e78382-9472-4e21-bee7-04093ded42ff" />
+            <IsStruct Type="System.Boolean@Unknown" Value="False" />
+            <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <Name Type="System.String@Unknown" Value="AnimCompoundState_0" />
+            <States Type="System.Collections.Generic.List&lt;EngineNS.Bricks.StateMachine.Macross.SubState.TtTimedSubStateClassDescription@EngineCore,&gt;@Unknown" Count="2">
+              <e_0 Type="EngineNS.Bricks.Animation.Macross.StateMachine.SubState.TtAnimSubStateClassDescription@EngineCore">
+                <Attachments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.StateMachine.Macross.StateAttachment.TtTimedStateAttachmentClassDescription@EngineCore,&gt;@Unknown" Count="1">
+                  <e_0 Type="EngineNS.Bricks.StateMachine.Macross.StateAttachment.TtClipPlayAttachmentClassDescription@EngineCore">
+                    <AnimationClip Type="EngineNS.RName@EngineCore" Value="Game,survivor/monsters/barghest/anims/barghest_run.animclip,bd948e27-980a-4ba6-abba-015042308fc8" />
+                    <Id Type="System.Guid@Unknown" Value="ce04438b-ffe2-4665-9363-64176f3341d4" />
+                    <IsLoop Type="System.Boolean@Unknown" Value="True" />
+                    <IsStruct Type="System.Boolean@Unknown" Value="False" />
+                    <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Count="0" />
+                    <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
+                      <e_0 Value="EngineNS.Animation.StateMachine.TtClipPlayStateAttachment&lt;animdmc_barghest&gt;" />
+                    </SupperClassNames>
+                    <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+                    <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+                      <IsEnum Type="System.Boolean@Unknown" Value="False" />
+                      <TypeFullName Type="System.String@Unknown" Value="DMC_ClipPlay_1262808213" />
+                    </VariableType>
+                    <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+                  </e_0>
+                </Attachments>
+                <bInitialActive Type="System.Boolean@Unknown" Value="True" />
+                <Duration Type="System.Single@Unknown" Value="1" />
+                <Id Type="System.Guid@Unknown" Value="9aaab83c-ca0e-4c17-a86b-a4f1cc472c80" />
+                <IsStruct Type="System.Boolean@Unknown" Value="False" />
+                <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Count="0" />
+                <Name Type="System.String@Unknown" Value="AnimSubState" />
+                <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
+                  <e_0 Value="EngineNS.Animation.StateMachine.TtAnimState&lt;animdmc_barghest&gt;" />
+                </SupperClassNames>
+                <Transitions Type="System.Collections.Generic.List&lt;EngineNS.Bricks.StateMachine.Macross.StateTransition.TtTimedStateTransitionClassDescription@EngineCore,&gt;@Unknown" Count="1">
+                  <e_0 Type="EngineNS.Bricks.StateMachine.Macross.StateTransition.TtAnimStateTransitionClassDescription@EngineCore">
+                    <CheckConditionMethodDescription Type="EngineNS.Bricks.StateMachine.Macross.StateTransition.TtTransitionCheckConditionMethodDescription@EngineCore">
+                      <Arguments Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.TtMethodArgumentDescription@EngineCore,&gt;@Unknown" Count="1">
+                        <e_0 Type="EngineNS.DesignMacross.Design.TtMethodArgumentDescription@EngineCore">
+                          <Name Type="System.String@Unknown" Value="context" />
+                          <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="In" />
+                          <VariableType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Animation.StateMachine.TtAnimStateMachineContext@EngineCore" />
+                        </e_0>
+                      </Arguments>
+                      <AsyncType Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration.EAsyncType@EngineCore" Value="None" />
+                      <DataLines Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataLineDescription@EngineCore,&gt;@Unknown" Count="1">
+                        <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataLineDescription@EngineCore">
+                          <FromId Type="System.Guid@Unknown" Value="612b3c59-4a39-4c0d-9fa1-db0ea0c497a9" />
+                          <Id Type="System.Guid@Unknown" Value="0cba7884-4e58-4628-9844-dd35b85d4bd8" />
+                          <Name Type="System.String@Unknown" Value="Data_VarIsDead_To_Return" />
+                          <ToId Type="System.Guid@Unknown" Value="662b503d-4ec1-4f12-be5b-5a7d1f6e512e" />
+                        </e_0>
+                      </DataLines>
+                      <ExecutionLines Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionLineDescription@EngineCore,&gt;@Unknown" Count="1">
+                        <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionLineDescription@EngineCore">
+                          <FromId Type="System.Guid@Unknown" Value="d654e96f-db79-43bd-bfdd-819cfb2013ee" />
+                          <Id Type="System.Guid@Unknown" Value="f6461eb2-dd51-4c65-b68b-d00b727300ba" />
+                          <Name Type="System.String@Unknown" Value="ExecutionLine" />
+                          <ToId Type="System.Guid@Unknown" Value="0e05c2a2-66ba-402d-a279-b47bcdbe8693" />
+                        </e_0>
+                      </ExecutionLines>
+                      <Expressions Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.Expressions.TtExpressionDescription@EngineCore,&gt;@Unknown" Count="1">
+                        <e_0 Type="EngineNS.DesignMacross.Design.Expressions.TtVarGetDescription@EngineCore">
+                          <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+                          <DataOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore,&gt;@Unknown" Count="1">
+                            <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore">
+                              <Id Type="System.Guid@Unknown" Value="612b3c59-4a39-4c0d-9fa1-db0ea0c497a9" />
+                              <Name Type="System.String@Unknown" Value="Get" />
+                              <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
+                            </e_0>
+                          </DataOutPins>
+                          <ExecutionInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+                          <ExecutionOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+                          <Id Type="System.Guid@Unknown" Value="792a1075-de60-4c08-8af5-550c3c99b13c" />
+                          <VariableId Type="System.Guid@Unknown" Value="62ed8fe5-4e25-4da1-830a-150ac1523900" />
+                        </e_0>
+                      </Expressions>
+                      <Id Type="System.Guid@Unknown" Value="00e683e2-b950-4439-a292-26d99821397b" />
+                      <IsOverride Type="System.Boolean@Unknown" Value="True" />
+                      <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.TtVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+                      <Name Type="System.String@Unknown" Value="CheckCondition" />
+                      <ReturnValueType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
+                      <Start Type="EngineNS.DesignMacross.Design.TtMethodStartDescription@EngineCore">
+                        <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+                        <DataOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore,&gt;@Unknown" Count="1">
+                          <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore">
+                            <Id Type="System.Guid@Unknown" Value="950c0979-24b8-4ee7-8673-995a534cc302" />
+                            <Name Type="System.String@Unknown" Value="context" />
+                            <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Animation.StateMachine.TtAnimStateMachineContext@EngineCore" />
+                          </e_0>
+                        </DataOutPins>
+                        <ExecutionInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+                        <ExecutionOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore,&gt;@Unknown" Count="1">
+                          <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore">
+                            <Id Type="System.Guid@Unknown" Value="d654e96f-db79-43bd-bfdd-819cfb2013ee" />
+                            <Name Type="System.String@Unknown" Value="" />
+                          </e_0>
+                        </ExecutionOutPins>
+                        <Id Type="System.Guid@Unknown" Value="6f48d9a0-e981-47fd-af64-1a71e7b761ac" />
+                      </Start>
+                      <Statements Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.Statement.TtStatementDescription@EngineCore,&gt;@Unknown" Count="1">
+                        <e_0 Type="EngineNS.DesignMacross.Design.Statement.TtReturnStatementDescription@EngineCore">
+                          <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="1">
+                            <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore">
+                              <Id Type="System.Guid@Unknown" Value="662b503d-4ec1-4f12-be5b-5a7d1f6e512e" />
+                              <Name Type="System.String@Unknown" Value="" />
+                              <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
+                            </e_0>
+                          </DataInPins>
+                          <DataOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+                          <ExecutionInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore,&gt;@Unknown" Count="1">
+                            <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore">
+                              <Id Type="System.Guid@Unknown" Value="0e05c2a2-66ba-402d-a279-b47bcdbe8693" />
+                              <Name Type="System.String@Unknown" Value="" />
+                            </e_0>
+                          </ExecutionInPins>
+                          <ExecutionOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+                          <Id Type="System.Guid@Unknown" Value="349661a2-9b27-4623-8510-2b993d0f2506" />
+                          <Name Type="System.String@Unknown" Value="Return" />
+                          <ReturnType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
+                        </e_0>
+                      </Statements>
+                      <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+                    </CheckConditionMethodDescription>
+                    <FromId Type="System.Guid@Unknown" Value="9aaab83c-ca0e-4c17-a86b-a4f1cc472c80" />
+                    <Id Type="System.Guid@Unknown" Value="7bdbcd14-8d7b-4a05-8a2f-b26f1cacf6ab" />
+                    <IsStruct Type="System.Boolean@Unknown" Value="False" />
+                    <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Count="0" />
+                    <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
+                      <e_0 Value="EngineNS.Animation.StateMachine.TtAnimStateTransition&lt;animdmc_barghest&gt;" />
+                    </SupperClassNames>
+                    <ToId Type="System.Guid@Unknown" Value="0f03f3c3-690a-456d-804a-d1d2a305b05b" />
+                    <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+                    <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+                      <IsEnum Type="System.Boolean@Unknown" Value="False" />
+                      <TypeFullName Type="System.String@Unknown" Value="DMC_Transition_From_AnimSubState_To_Dead_4120560633" />
+                    </VariableType>
+                    <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+                  </e_0>
+                </Transitions>
+                <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+                <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+                  <IsEnum Type="System.Boolean@Unknown" Value="False" />
+                  <TypeFullName Type="System.String@Unknown" Value="DMC_AnimSubState_2805292630" />
+                </VariableType>
+                <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+              </e_0>
+              <e_1 Type="EngineNS.Bricks.Animation.Macross.StateMachine.SubState.TtAnimSubStateClassDescription@EngineCore">
+                <Attachments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.StateMachine.Macross.StateAttachment.TtTimedStateAttachmentClassDescription@EngineCore,&gt;@Unknown" Count="1">
+                  <e_0 Type="EngineNS.Bricks.StateMachine.Macross.StateAttachment.TtClipPlayAttachmentClassDescription@EngineCore">
+                    <AnimationClip Type="EngineNS.RName@EngineCore" Value="Game,survivor/monsters/barghest/anims/barghest_deathnormal.animclip,4f631995-ee56-4faa-a74a-9481c73b88fd" />
+                    <Id Type="System.Guid@Unknown" Value="44e5ec98-6cd9-4c9e-968a-ee748ef25b39" />
+                    <IsLoop Type="System.Boolean@Unknown" Value="False" />
+                    <IsStruct Type="System.Boolean@Unknown" Value="False" />
+                    <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Count="0" />
+                    <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
+                      <e_0 Value="EngineNS.Animation.StateMachine.TtClipPlayStateAttachment&lt;animdmc_barghest&gt;" />
+                    </SupperClassNames>
+                    <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+                    <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+                      <IsEnum Type="System.Boolean@Unknown" Value="False" />
+                      <TypeFullName Type="System.String@Unknown" Value="DMC_ClipPlay_1171191897" />
+                    </VariableType>
+                    <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+                  </e_0>
+                </Attachments>
+                <bInitialActive Type="System.Boolean@Unknown" Value="False" />
+                <Duration Type="System.Single@Unknown" Value="1" />
+                <Id Type="System.Guid@Unknown" Value="0f03f3c3-690a-456d-804a-d1d2a305b05b" />
+                <IsStruct Type="System.Boolean@Unknown" Value="False" />
+                <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Count="0" />
+                <Name Type="System.String@Unknown" Value="Dead" />
+                <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
+                  <e_0 Value="EngineNS.Animation.StateMachine.TtAnimState&lt;animdmc_barghest&gt;" />
+                </SupperClassNames>
+                <Transitions Type="System.Collections.Generic.List&lt;EngineNS.Bricks.StateMachine.Macross.StateTransition.TtTimedStateTransitionClassDescription@EngineCore,&gt;@Unknown" Count="0" />
+                <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+                <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+                  <IsEnum Type="System.Boolean@Unknown" Value="False" />
+                  <TypeFullName Type="System.String@Unknown" Value="DMC_Dead_3272594922" />
+                </VariableType>
+                <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+              </e_1>
+            </States>
+            <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
+              <e_0 Value="EngineNS.Animation.StateMachine.TtAnimCompoundState&lt;animdmc_barghest&gt;" />
+            </SupperClassNames>
+            <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+              <IsEnum Type="System.Boolean@Unknown" Value="False" />
+              <TypeFullName Type="System.String@Unknown" Value="DMC_AnimCompoundState_0_3447725427" />
+            </VariableType>
+            <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+          </e_0>
+        </CompoundStates>
+        <Id Type="System.Guid@Unknown" Value="a994a7b5-0fbf-4536-9942-3f36cc237a87" />
+        <IsStruct Type="System.Boolean@Unknown" Value="False" />
+        <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Count="0" />
+        <Name Type="System.String@Unknown" Value="AnimStateMachine_0" />
+        <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
+          <e_0 Value="EngineNS.Animation.StateMachine.TtAnimStateMachine&lt;animdmc_barghest&gt;" />
+        </SupperClassNames>
+        <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+        <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+          <IsEnum Type="System.Boolean@Unknown" Value="False" />
+          <TypeFullName Type="System.String@Unknown" Value="DMC_AnimStateMachine_0_1575471455" />
+        </VariableType>
+        <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+      </e_0>
+      <e_1 Type="EngineNS.Animation.Macross.Postprocessing.TtAnimFinalBlendTreeClassDescription@EngineCore">
+        <Id Type="System.Guid@Unknown" Value="d2512a64-0c3d-40f9-8e5d-0ebbc906207e" />
+        <IsStruct Type="System.Boolean@Unknown" Value="False" />
+        <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Count="0" />
+        <Name Type="System.String@Unknown" Value="FinalBlendTree_0" />
+        <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Animation.Macross.BlendTree.Node.TtBlendTreeNodeClassDescription@EngineCore,&gt;@Unknown" Count="1">
+          <e_0 Type="EngineNS.Animation.Macross.BlendTree.TtBlendTree_AnimStateMachineClassDescription@EngineCore">
+            <AnimStateMachineId Type="System.Guid@Unknown" Value="a994a7b5-0fbf-4536-9942-3f36cc237a87" />
+            <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <Id Type="System.Guid@Unknown" Value="85d83d8f-f8e2-4ab4-96a1-c69e1d204e44" />
+            <IsStruct Type="System.Boolean@Unknown" Value="False" />
+            <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <PoseInPins Type="System.Collections.Generic.List&lt;EngineNS.Animation.Macross.BlendTree.TtPoseInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <PoseOutPins Type="System.Collections.Generic.List&lt;EngineNS.Animation.Macross.BlendTree.TtPoseOutPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.Animation.Macross.BlendTree.TtPoseOutPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="2eb58dfb-d352-4e1e-b6eb-5d01c547066b" />
+                <Name Type="System.String@Unknown" Value="" />
+              </e_0>
+            </PoseOutPins>
+            <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
+              <e_0 Value="EngineNS.Animation.BlendTree.Node.TtLocalSpaceBlendTree_AnimStateMachine&lt;animdmc_barghest&gt;" />
+            </SupperClassNames>
+            <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+              <IsEnum Type="System.Boolean@Unknown" Value="False" />
+              <TypeFullName Type="System.String@Unknown" Value="DMC_BlendTree_StateMachine_367281382" />
+            </VariableType>
+            <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+          </e_0>
+        </Nodes>
+        <PoseLines Type="System.Collections.Generic.List&lt;EngineNS.Animation.Macross.BlendTree.TtPoseLineDescription@EngineCore,&gt;@Unknown" Count="1">
+          <e_0 Type="EngineNS.Animation.Macross.BlendTree.TtPoseLineDescription@EngineCore">
+            <FromId Type="System.Guid@Unknown" Value="2eb58dfb-d352-4e1e-b6eb-5d01c547066b" />
+            <Id Type="System.Guid@Unknown" Value="d9c2ed2e-139c-44cd-aa6b-20e367286ac4" />
+            <Name Type="System.String@Unknown" Value="Data_BlendTree_StateMachine_To_PoseOutput" />
+            <ToId Type="System.Guid@Unknown" Value="7e6894de-5fab-495a-92e5-570a01d3f3a3" />
+          </e_0>
+        </PoseLines>
+        <PoseOutput Type="EngineNS.Animation.Macross.BlendTree.TtBlendTree_PoseOutputClassDescription@EngineCore">
+          <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+          <Id Type="System.Guid@Unknown" Value="70d81108-95c7-4719-9fd6-433a8e8650d0" />
+          <IsStruct Type="System.Boolean@Unknown" Value="False" />
+          <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Count="0" />
+          <PoseInPins Type="System.Collections.Generic.List&lt;EngineNS.Animation.Macross.BlendTree.TtPoseInPinDescription@EngineCore,&gt;@Unknown" Count="1">
+            <e_0 Type="EngineNS.Animation.Macross.BlendTree.TtPoseInPinDescription@EngineCore">
+              <Id Type="System.Guid@Unknown" Value="7e6894de-5fab-495a-92e5-570a01d3f3a3" />
+              <Name Type="System.String@Unknown" Value="" />
+            </e_0>
+          </PoseInPins>
+          <PoseOutPins Type="System.Collections.Generic.List&lt;EngineNS.Animation.Macross.BlendTree.TtPoseOutPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+          <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
+            <e_0 Value="EngineNS.Animation.BlendTree.Node.TtLocalSpaceBlendTree_PoseOutput&lt;animdmc_barghest&gt;" />
+          </SupperClassNames>
+          <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+          <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+            <IsEnum Type="System.Boolean@Unknown" Value="False" />
+            <TypeFullName Type="System.String@Unknown" Value="DMC_PoseOutput_3721581790" />
+          </VariableType>
+          <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+        </PoseOutput>
+        <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
+          <e_0 Value="EngineNS.Animation.BlendTree.TtLocalSpacePoseFinalBlendTree&lt;animdmc_barghest&gt;" />
+        </SupperClassNames>
+        <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+        <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+          <IsEnum Type="System.Boolean@Unknown" Value="False" />
+          <TypeFullName Type="System.String@Unknown" Value="DMC_FinalBlendTree_0_1468431646" />
+        </VariableType>
+        <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+      </e_1>
+    </DesignableVariables>
+    <Id Type="System.Guid@Unknown" Value="9fad9528-d41d-4fe0-8544-209e86891436" />
+    <IsStruct Type="System.Boolean@Unknown" Value="False" />
+    <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+    <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Type="EngineNS.DesignMacross.Design.TtMethodDescription@EngineCore">
+        <Arguments Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.TtMethodArgumentDescription@EngineCore,&gt;@Unknown" Count="1">
+          <e_0 Type="EngineNS.DesignMacross.Design.TtMethodArgumentDescription@EngineCore">
+            <Name Type="System.String@Unknown" Value="elapseSecond" />
+            <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="Default" />
+            <VariableType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Single@Unknown" />
+          </e_0>
+        </Arguments>
+        <AsyncType Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration.EAsyncType@EngineCore" Value="None" />
+        <DataLines Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataLineDescription@EngineCore,&gt;@Unknown" Count="8">
+          <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataLineDescription@EngineCore">
+            <FromId Type="System.Guid@Unknown" Value="26dfb9a6-e6e5-48c2-b314-a9d75e2402f9" />
+            <Id Type="System.Guid@Unknown" Value="184b87ce-20c1-4103-bc0a-d648192dc694" />
+            <ToId Type="System.Guid@Unknown" Value="5e5565a1-2f49-4f4e-8f47-8ccc51a2a74d" />
+          </e_0>
+          <e_1 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataLineDescription@EngineCore">
+            <FromId Type="System.Guid@Unknown" Value="2fa42e99-4c33-4087-aa9a-d5f4e3cbee88" />
+            <Id Type="System.Guid@Unknown" Value="8f2b8be2-13ea-465a-aa7d-a847451ec2b9" />
+            <ToId Type="System.Guid@Unknown" Value="2c0b3203-5229-4fd8-bed9-467489d21133" />
+          </e_1>
+          <e_2 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataLineDescription@EngineCore">
+            <FromId Type="System.Guid@Unknown" Value="f6d777f8-251e-44d2-aef1-0e9f0b487212" />
+            <Id Type="System.Guid@Unknown" Value="71532143-2689-43b4-a837-3cfcecc45b59" />
+            <Name Type="System.String@Unknown" Value="Data_IsDead_To_VarIsDead" />
+            <ToId Type="System.Guid@Unknown" Value="fe5d435c-67cd-45fb-8413-9e9886422c25" />
+          </e_2>
+          <e_3 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataLineDescription@EngineCore">
+            <FromId Type="System.Guid@Unknown" Value="90cf1b74-2741-4a68-a28c-ba09aac1cb3c" />
+            <Id Type="System.Guid@Unknown" Value="ac3c016a-28c8-4aa3-a42b-024aa52de2e7" />
+            <Name Type="System.String@Unknown" Value="Data_Self_To_MacrossNode" />
+            <ToId Type="System.Guid@Unknown" Value="af64814b-3783-4c0f-90dc-24258537cd72" />
+          </e_3>
+          <e_4 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataLineDescription@EngineCore">
+            <FromId Type="System.Guid@Unknown" Value="d80de96b-d24e-4d79-a703-a055cc6115d3" />
+            <Id Type="System.Guid@Unknown" Value="29eb3b8a-9953-4d47-b331-dbf6233d1094" />
+            <Name Type="System.String@Unknown" Value="Data_MacrossNode_To_Parent" />
+            <ToId Type="System.Guid@Unknown" Value="c873e64d-1d0c-49ee-a9f1-696933a60192" />
+          </e_4>
+          <e_5 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataLineDescription@EngineCore">
+            <FromId Type="System.Guid@Unknown" Value="517a46be-3ab1-4c20-9bed-1b8e9d525cdb" />
+            <Id Type="System.Guid@Unknown" Value="f1625a84-f7ac-41ec-ad76-ce8a46a6fda2" />
+            <ToId Type="System.Guid@Unknown" Value="5e1fdcd5-38a2-4323-be19-69e18aaeb4c8" />
+          </e_5>
+          <e_6 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataLineDescription@EngineCore">
+            <FromId Type="System.Guid@Unknown" Value="70b2b58c-9ebf-425c-a152-65a53c8e977d" />
+            <Id Type="System.Guid@Unknown" Value="5523b1df-9165-407e-9a70-b9c97b89db86" />
+            <ToId Type="System.Guid@Unknown" Value="3efbf561-e88e-40fc-a596-c59843dfd9a3" />
+          </e_6>
+          <e_7 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataLineDescription@EngineCore">
+            <FromId Type="System.Guid@Unknown" Value="55d5013c-2c00-42b1-a294-5b3ef9769bb9" />
+            <Id Type="System.Guid@Unknown" Value="beb4c3f1-0441-4fec-85be-f1f1c594d0fb" />
+            <Name Type="System.String@Unknown" Value="Data_Parent_To_Cast" />
+            <ToId Type="System.Guid@Unknown" Value="3137076d-3ca3-4695-befa-94b4b268d297" />
+          </e_7>
+        </DataLines>
+        <ExecutionLines Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionLineDescription@EngineCore,&gt;@Unknown" Count="2">
+          <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionLineDescription@EngineCore">
+            <FromId Type="System.Guid@Unknown" Value="c137f6b3-cdee-4eed-bca5-e4b2e5df4405" />
+            <Id Type="System.Guid@Unknown" Value="e6d3e1d9-fccb-4707-89dc-aa6305e6cebd" />
+            <Name Type="System.String@Unknown" Value="Exec_Tick_To_Cast" />
+            <ToId Type="System.Guid@Unknown" Value="04ecb2ef-552a-49a1-8887-36f640509830" />
+          </e_0>
+          <e_1 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionLineDescription@EngineCore">
+            <FromId Type="System.Guid@Unknown" Value="b7242b17-741e-4127-9287-c26cb7573ae4" />
+            <Id Type="System.Guid@Unknown" Value="e729ff0a-bfe9-4282-9ee0-f1ec278e4f58" />
+            <Name Type="System.String@Unknown" Value="Exec_Cast_To_VarIsDead" />
+            <ToId Type="System.Guid@Unknown" Value="abe5d391-9889-4982-8ffa-88a05a62d7c4" />
+          </e_1>
+        </ExecutionLines>
+        <Expressions Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.Expressions.TtExpressionDescription@EngineCore,&gt;@Unknown" Count="7">
+          <e_0 Type="EngineNS.DesignMacross.Design.Expressions.TtPropertyGetDescription@EngineCore">
+            <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="5e5565a1-2f49-4f4e-8f47-8ccc51a2a74d" />
+                <Name Type="System.String@Unknown" Value="Host" />
+                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="Survivor.TtMonsterNode@Survivor" />
+              </e_0>
+            </DataInPins>
+            <DataOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="2fa42e99-4c33-4087-aa9a-d5f4e3cbee88" />
+                <Name Type="System.String@Unknown" Value="Get" />
+                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="Survivor.TtMonsterStateNode@Survivor" />
+              </e_0>
+            </DataOutPins>
+            <ExecutionInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <ExecutionOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <Id Type="System.Guid@Unknown" Value="f687ba0e-90f4-4788-85b3-1abf4ac81b40" />
+            <Name Type="System.String@Unknown" Value="StateNode" />
+          </e_0>
+          <e_1 Type="EngineNS.DesignMacross.Design.Expressions.TtPropertyGetDescription@EngineCore">
+            <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="c873e64d-1d0c-49ee-a9f1-696933a60192" />
+                <Name Type="System.String@Unknown" Value="Host" />
+                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.TtNode@EngineCore" />
+              </e_0>
+            </DataInPins>
+            <DataOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="517a46be-3ab1-4c20-9bed-1b8e9d525cdb" />
+                <Name Type="System.String@Unknown" Value="Get" />
+                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.TtNode@EngineCore" />
+              </e_0>
+            </DataOutPins>
+            <ExecutionInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <ExecutionOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <Id Type="System.Guid@Unknown" Value="a857e8ee-4e94-4a9d-83b0-79bc6ac2b28b" />
+            <Name Type="System.String@Unknown" Value="Parent" />
+          </e_1>
+          <e_2 Type="EngineNS.DesignMacross.Design.Expressions.TtPropertyGetDescription@EngineCore">
+            <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="2c0b3203-5229-4fd8-bed9-467489d21133" />
+                <Name Type="System.String@Unknown" Value="Host" />
+                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="Survivor.TtMonsterStateNode@Survivor" />
+              </e_0>
+            </DataInPins>
+            <DataOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="f6d777f8-251e-44d2-aef1-0e9f0b487212" />
+                <Name Type="System.String@Unknown" Value="Get" />
+                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
+              </e_0>
+            </DataOutPins>
+            <ExecutionInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <ExecutionOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <Id Type="System.Guid@Unknown" Value="9a1ae0b4-0f86-45d3-bc07-b56cc03823fc" />
+            <Name Type="System.String@Unknown" Value="IsDead" />
+          </e_2>
+          <e_3 Type="EngineNS.DesignMacross.Design.Expressions.TtSelfReferenceDescription@EngineCore">
+            <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <DataOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.Expressions.TtSelfReferenceDataPin@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="90cf1b74-2741-4a68-a28c-ba09aac1cb3c" />
+                <Name Type="System.String@Unknown" Value="Get" />
+                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.DesignMacross.TtDesignMacrossBase@EngineCore" />
+              </e_0>
+            </DataOutPins>
+            <ExecutionInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <ExecutionOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <Id Type="System.Guid@Unknown" Value="da9bf7aa-c4db-424c-b5b7-e7ad96820cfa" />
+          </e_3>
+          <e_4 Type="EngineNS.DesignMacross.Design.Expressions.TtPropertyGetDescription@EngineCore">
+            <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="af64814b-3783-4c0f-90dc-24258537cd72" />
+                <Name Type="System.String@Unknown" Value="Host" />
+                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.DesignMacross.TtDesignMacrossBase@EngineCore" />
+              </e_0>
+            </DataInPins>
+            <DataOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="d80de96b-d24e-4d79-a703-a055cc6115d3" />
+                <Name Type="System.String@Unknown" Value="Get" />
+                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.TtNode@EngineCore" />
+              </e_0>
+            </DataOutPins>
+            <ExecutionInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <ExecutionOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <Id Type="System.Guid@Unknown" Value="1d4c2562-a248-4566-9bb0-312b2d0dc00e" />
+            <Name Type="System.String@Unknown" Value="MacrossNode" />
+          </e_4>
+          <e_5 Type="EngineNS.DesignMacross.Design.Expressions.TtPropertyGetDescription@EngineCore">
+            <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="5e1fdcd5-38a2-4323-be19-69e18aaeb4c8" />
+                <Name Type="System.String@Unknown" Value="Host" />
+                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.TtNode@EngineCore" />
+              </e_0>
+            </DataInPins>
+            <DataOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="70b2b58c-9ebf-425c-a152-65a53c8e977d" />
+                <Name Type="System.String@Unknown" Value="Get" />
+                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.TtNode@EngineCore" />
+              </e_0>
+            </DataOutPins>
+            <ExecutionInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <ExecutionOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <Id Type="System.Guid@Unknown" Value="f68e9bb1-6676-4c1c-903f-3d82518e7197" />
+            <Name Type="System.String@Unknown" Value="Parent" />
+          </e_5>
+          <e_6 Type="EngineNS.DesignMacross.Design.Expressions.TtPropertyGetDescription@EngineCore">
+            <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="3efbf561-e88e-40fc-a596-c59843dfd9a3" />
+                <Name Type="System.String@Unknown" Value="Host" />
+                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.TtNode@EngineCore" />
+              </e_0>
+            </DataInPins>
+            <DataOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="55d5013c-2c00-42b1-a294-5b3ef9769bb9" />
+                <Name Type="System.String@Unknown" Value="Get" />
+                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.TtNode@EngineCore" />
+              </e_0>
+            </DataOutPins>
+            <ExecutionInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <ExecutionOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+            <Id Type="System.Guid@Unknown" Value="4f20d20b-ca84-4f44-bd70-e80227a3f2bd" />
+            <Name Type="System.String@Unknown" Value="Parent" />
+          </e_6>
+        </Expressions>
+        <Id Type="System.Guid@Unknown" Value="1af8f061-2314-46ae-bfd5-a5d7baab4ad8" />
+        <IsOverride Type="System.Boolean@Unknown" Value="True" />
+        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.TtVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+        <Name Type="System.String@Unknown" Value="Tick" />
+        <Start Type="EngineNS.DesignMacross.Design.TtMethodStartDescription@EngineCore">
+          <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+          <DataOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore,&gt;@Unknown" Count="1">
+            <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore">
+              <Id Type="System.Guid@Unknown" Value="33d338eb-e3e6-4b93-9471-33934aece1b4" />
+              <Name Type="System.String@Unknown" Value="elapseSecond" />
+              <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Single@Unknown" />
+            </e_0>
+          </DataOutPins>
+          <ExecutionInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+          <ExecutionOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore,&gt;@Unknown" Count="1">
+            <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore">
+              <Id Type="System.Guid@Unknown" Value="c137f6b3-cdee-4eed-bca5-e4b2e5df4405" />
+              <Name Type="System.String@Unknown" Value="" />
+            </e_0>
+          </ExecutionOutPins>
+          <Id Type="System.Guid@Unknown" Value="49d5d66e-bc6c-4c6d-a820-6f8120e53ecd" />
+        </Start>
+        <Statements Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.Statement.TtStatementDescription@EngineCore,&gt;@Unknown" Count="2">
+          <e_0 Type="EngineNS.DesignMacross.Design.Expressions.TtCastStatementDescription@EngineCore">
+            <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="3137076d-3ca3-4695-befa-94b4b268d297" />
+                <Name Type="System.String@Unknown" Value="" />
+                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.TtNode@EngineCore" />
+              </e_0>
+            </DataInPins>
+            <DataOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="26dfb9a6-e6e5-48c2-b314-a9d75e2402f9" />
+                <Name Type="System.String@Unknown" Value="" />
+                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="Survivor.TtMonsterNode@Survivor" />
+              </e_0>
+            </DataOutPins>
+            <ExecutionInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="04ecb2ef-552a-49a1-8887-36f640509830" />
+                <Name Type="System.String@Unknown" Value="" />
+              </e_0>
+            </ExecutionInPins>
+            <ExecutionOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore,&gt;@Unknown" Count="2">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="b7242b17-741e-4127-9287-c26cb7573ae4" />
+                <Name Type="System.String@Unknown" Value="Succeed" />
+              </e_0>
+              <e_1 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="dc0c4036-b194-4ffe-8872-f3f1fa1de08a" />
+                <Name Type="System.String@Unknown" Value="Failed" />
+              </e_1>
+            </ExecutionOutPins>
+            <Id Type="System.Guid@Unknown" Value="c999b7be-f070-4fb3-bb23-0fcb8aae7db7" />
+            <Name Type="System.String@Unknown" Value="Cast" />
+          </e_0>
+          <e_1 Type="EngineNS.DesignMacross.Design.Expressions.TtVarSetDescription@EngineCore">
+            <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="fe5d435c-67cd-45fb-8413-9e9886422c25" />
+                <Name Type="System.String@Unknown" Value="Set" />
+                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
+              </e_0>
+            </DataInPins>
+            <DataOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataOutPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="54fd4254-a1df-4d3d-867c-e1361e4b4094" />
+                <Name Type="System.String@Unknown" Value="Get" />
+                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
+              </e_0>
+            </DataOutPins>
+            <ExecutionInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionInPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="abe5d391-9889-4982-8ffa-88a05a62d7c4" />
+                <Name Type="System.String@Unknown" Value="" />
+              </e_0>
+            </ExecutionInPins>
+            <ExecutionOutPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore,&gt;@Unknown" Count="1">
+              <e_0 Type="EngineNS.DesignMacross.Design.ConnectingLine.TtExecutionOutPinDescription@EngineCore">
+                <Id Type="System.Guid@Unknown" Value="3ad945b3-febb-4dd0-8e3a-8e30947bdc67" />
+                <Name Type="System.String@Unknown" Value="" />
+              </e_0>
+            </ExecutionOutPins>
+            <Id Type="System.Guid@Unknown" Value="de7a9e34-2e81-40fb-9354-22ebf93141c0" />
+            <VariableId Type="System.Guid@Unknown" Value="62ed8fe5-4e25-4da1-830a-150ac1523900" />
+          </e_1>
+        </Statements>
+        <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+      </e_0>
+    </Methods>
+    <Name Type="System.String@Unknown" Value="animdmc_barghest" />
+    <Namespace Type="EngineNS.Bricks.CodeBuilder.TtNamespaceDeclaration@EngineCore">
+      <Classes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtClassDeclaration@EngineCore,&gt;@Unknown" Count="0" />
+      <Namespace Type="System.String@Unknown" Value="NS_survivor.monsters.barghest" />
+    </Namespace>
+    <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
+      <e_0 Value="EngineNS.DesignMacross.TtDesignMacrossBase" />
+    </SupperClassNames>
+    <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Type="EngineNS.DesignMacross.Design.TtVariableDescription@EngineCore">
+        <Comment Type="EngineNS.Bricks.CodeBuilder.TtCommentStatement@EngineCore">
+          <CommentString Type="System.String@Unknown" Value="This is a Variable" />
+        </Comment>
+        <Id Type="System.Guid@Unknown" Value="62ed8fe5-4e25-4da1-830a-150ac1523900" />
+        <InitValue Type="EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore">
+          <ObjectStr Type="System.String@Unknown" Value="False" />
+          <Type Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
+          <TypeIsTypeof Type="System.Boolean@Unknown" Value="True" />
+          <ValueStr Type="System.String@Unknown" Value="false" />
+        </InitValue>
+        <Name Type="System.String@Unknown" Value="IsDead" />
+        <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+          <IsEnum Type="System.Boolean@Unknown" Value="False" />
+          <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
+          <TypeFullName Type="System.String@Unknown" Value="System.Boolean" />
+        </VariableType>
+        <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+      </e_0>
+    </Variables>
+    <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+  </DesignedClassDescription>
+  <DesignMacrossBaseClass Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.DesignMacross.TtDesignMacrossBase@EngineCore" />
+</Root>

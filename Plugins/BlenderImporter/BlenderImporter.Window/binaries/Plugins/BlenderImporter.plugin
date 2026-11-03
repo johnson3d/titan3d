@@ -1,9 +1,0 @@
-{
-  "Enable": true,
-  "LoadOnInit": true,
-  "Platforms": [
-    "PLTF_Windows"
-  ],
-  "Dependencies": [
-  ]
-}

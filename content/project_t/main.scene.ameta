@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="08d112e925d67122483985d07ebbfc2e7c24e404abd9e444e6d1bb59b80e5288" />
+      <Path Type="System.String@Unknown" Value="main.scene/main.scene" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="a5f6dd3baf8b7d01ab0f04b8c1f097325da153e84cf589834f2be2d96d903908" />
+      <Path Type="System.String@Unknown" Value="main.scene/class_graph.dat" />
+    </e_1>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="b7dbdf2c-5554-41f2-8d81-832d6fb66025" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,project_t/main.scene,b7dbdf2c-5554-41f2-8d81-832d6fb66025" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.UScene&#xA;Hahah" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Game,project_dts/body.ums,b180a51b-0386-406e-a440-b84abb636e76" />
+    <e_1 Value="Game,project_factory/belica/belica.ums,9835cb5f-f384-48c3-8a9c-f2e6f86ff3d5" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
+</Root>

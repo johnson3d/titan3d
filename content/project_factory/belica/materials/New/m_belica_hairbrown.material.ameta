@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
+  <AssetId Type="System.Guid@Unknown" Value="6967037e-0566-4aab-ad6f-578a57f4735c" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,project_factory/belica/materials/new/m_belica_hairbrown.material,6967037e-0566-4aab-ad6f-578a57f4735c" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.TtMaterial&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
+    <e_0 Value="Game,project_factory/belica/textures_new/belica_gun01_m_belica-hair_brown_01_basecolor.srv,b845efb8-aec4-424d-9d2c-760c52c11699" />
+    <e_1 Value="Game,project_factory/belica/textures_new/belica_gun01_m_belica-hair_brown_01_normal.srv,d2402165-f78c-415c-8d52-54b3be87a493" />
+    <e_2 Value="Game,project_factory/belica/textures_new/belica_gun01_m_belica-hair_brown_01_occlusionroughnessmetallic.srv,b899c136-904b-4c07-8a63-da22a53a32a0" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
+</Root>

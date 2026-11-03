@@ -1171,7 +1171,7 @@ namespace NxRHI
 			return 0;
 		return pBuffer->mGpuMemory->GetGPUVirtualAddress();
 	}
-	bool DX12CbView::Init(DX12GpuDevice* device, IBuffer* pBuffer, const FCbvDesc& desc)
+	bool DX12CbView::Init(DX12GpuDevice* device, IBuffer* pBuffer, const FCbvDesc& desc, const char* file, int line)
 	{
 		mDeviceRef.FromObject(device);
 		ShaderBinder = desc.ShaderBinder;
@@ -1199,7 +1199,7 @@ namespace NxRHI
 			bfDesc.Usage = EGpuUsage::USAGE_DYNAMIC;
 			bfDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, file ? file : __FILE__, line ? line : __LINE__));
 			ASSERT(Buffer != nullptr);
 			Buffer->SetDebugName("CBV");
 		}
@@ -1208,7 +1208,7 @@ namespace NxRHI
 			Buffer = pBuffer;
 		}
 		
-		mView = MakeWeakRef(device->mCbvSrvUavAllocator->AllocDX12Heap());
+		mView = MakeWeakRef(device->mCbvSrvUavAllocator->AllocDX12Heap(file, line));
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC d3dDesc{};
 		d3dDesc.BufferLocation = Buffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
@@ -1230,7 +1230,7 @@ namespace NxRHI
 	{
 		mDevice->DelayDestroy(this);
 	}
-	bool DX12VbView::Init(DX12GpuDevice* device, IBuffer* pBuffer, const FVbvDesc* desc)
+	bool DX12VbView::Init(DX12GpuDevice* device, IBuffer* pBuffer, const FVbvDesc* desc, const char* file, int line)
 	{
 		Desc = *desc;
 		Desc.InitData = nullptr;
@@ -1247,7 +1247,7 @@ namespace NxRHI
 			bfDesc.CpuAccess = desc->CpuAccess;
 			bfDesc.RowPitch = desc->Size;
 			bfDesc.DepthPitch = desc->Size;
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, file ? file : __FILE__, line ? line : __LINE__));
 			ASSERT(Buffer != nullptr);
 			Buffer->SetDebugName("VBV");
 		}
@@ -1273,7 +1273,7 @@ namespace NxRHI
 	{
 		mDevice->DelayDestroy(this);
 	}
-	bool DX12IbView::Init(DX12GpuDevice* device, IBuffer* pBuffer, const FIbvDesc* desc)
+	bool DX12IbView::Init(DX12GpuDevice* device, IBuffer* pBuffer, const FIbvDesc* desc, const char* file, int line)
 	{
 		Desc = *desc;
 		Desc.InitData = nullptr;
@@ -1290,7 +1290,7 @@ namespace NxRHI
 			bfDesc.CpuAccess = desc->CpuAccess;
 			bfDesc.RowPitch = desc->Size;
 			bfDesc.DepthPitch = desc->Size;
-			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, file ? file : __FILE__, line ? line : __LINE__));
 			ASSERT(Buffer != nullptr);
 			Buffer->SetDebugName("IBV");
 		}
@@ -1445,12 +1445,12 @@ namespace NxRHI
 		}
 	}
 
-	bool DX12SrView::Init(DX12GpuDevice* device, IGpuBufferData* pBuffer, const FSrvDesc& desc)
+	bool DX12SrView::Init(DX12GpuDevice* device, IGpuBufferData* pBuffer, const FSrvDesc& desc, const char* file, int line)
 	{
 		mDeviceRef.FromObject(device);
 		Desc = desc;
 		Buffer = pBuffer;
-		mView = MakeWeakRef(device->mCbvSrvUavAllocator->AllocDX12Heap());
+		mView = MakeWeakRef(device->mCbvSrvUavAllocator->AllocDX12Heap(file, line));
 		//
 		D3D12_SHADER_RESOURCE_VIEW_DESC d3dDesc{};
 		SrvDesc2DX(&d3dDesc, &desc);
@@ -1519,7 +1519,7 @@ namespace NxRHI
 
 		if (mView == nullptr)
 		{
-			mView = MakeWeakRef(((DX12GpuDevice*)device)->mCbvSrvUavAllocator->AllocDX12Heap());
+			mView = MakeWeakRef(((DX12GpuDevice*)device)->mCbvSrvUavAllocator->AllocDX12Heap(__FILE__, __LINE__));
 		}
 
 		auto pD3DRes = (ID3D12Resource*)pBuffer->GetHWBuffer();
@@ -1607,12 +1607,12 @@ namespace NxRHI
 				break;
 		}
 	}
-	bool DX12UaView::Init(DX12GpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc)
+	bool DX12UaView::Init(DX12GpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc, const char* file, int line)
 	{
 		mDeviceRef.FromObject(device);
 		Desc = desc;
 		Buffer = pBuffer;
-		mView = MakeWeakRef(device->mCbvSrvUavAllocator->AllocDX12Heap());
+		mView = MakeWeakRef(device->mCbvSrvUavAllocator->AllocDX12Heap(file, line));
 
 		D3D12_UNORDERED_ACCESS_VIEW_DESC tmp{};
 		UavDesc2DX(pBuffer, &tmp, &desc);
@@ -1716,13 +1716,13 @@ namespace NxRHI
 			break;
 		}
 	}
-	bool DX12RenderTargetView::Init(DX12GpuDevice* device, ITexture* pBuffer, const FRtvDesc* desc)
+	bool DX12RenderTargetView::Init(DX12GpuDevice* device, ITexture* pBuffer, const FRtvDesc* desc, const char* file, int line)
 	{
 		mDeviceRef.FromObject(device);
 		if (desc != nullptr)
 			Desc = *desc;
 		GpuResource = pBuffer;
-		mView = MakeWeakRef(device->mRtvAllocator->AllocDX12Heap());
+		mView = MakeWeakRef(device->mRtvAllocator->AllocDX12Heap(file, line));
 
 		if (desc == nullptr)
 		{
@@ -1751,13 +1751,13 @@ namespace NxRHI
 		mView = nullptr;
 	}
 
-	bool DX12DepthStencilView::Init(DX12GpuDevice* device, ITexture* pBuffer, const FDsvDesc& desc)
+	bool DX12DepthStencilView::Init(DX12GpuDevice* device, ITexture* pBuffer, const FDsvDesc& desc, const char* file, int line)
 	{
 		mDeviceRef.FromObject(device);
 		Desc = desc;
 		auto dxPixelFormat = FormatToDX12Format(desc.Format);
 		GpuResource = pBuffer;
-		mView = MakeWeakRef(device->mDsvAllocator->AllocDX12Heap());
+		mView = MakeWeakRef(device->mDsvAllocator->AllocDX12Heap(file, line));
 		
 		D3D12_DEPTH_STENCIL_VIEW_DESC	DSVDesc;
 		memset(&DSVDesc, 0, sizeof(DSVDesc));
@@ -1801,8 +1801,11 @@ namespace NxRHI
 		return true;
 	}
 
-	bool DX12AccelerationStructure::Init(DX12GpuDevice* device, const FAccelerationStructureDesc* desc)
+	bool DX12AccelerationStructure::Init(DX12GpuDevice* device, const FAccelerationStructureDesc* desc, const char* file, int line)
 	{
+		// 内部 buffer 都是替调用者创建的，台账归到 CreateAccelerationStructure 的调用点。
+		mCreateFile = file ? file : __FILE__;
+		mCreateLine = line ? line : __LINE__;
 		mMeshes.resize(desc->GeometryCount);
 		mGeometryDesc.resize(desc->GeometryCount);
 		for (UINT i = 0; i < desc->GeometryCount; i++)
@@ -1849,13 +1852,13 @@ namespace NxRHI
 		bfDesc.Size = (UINT)bottomLevelPrebuildInfo.ResultDataMaxSizeInBytes;
 		bfDesc.RowPitch = bfDesc.Size;
 		bfDesc.DepthPitch = bfDesc.Size;
-		mGpuBuffer = MakeWeakRef(device->CreateBuffer(& bfDesc, __FILE__, __LINE__));
+		mGpuBuffer = MakeWeakRef(device->CreateBuffer(& bfDesc, mCreateFile, mCreateLine));
 
 		bfDesc.SetDefault(false, EBufferType::BFT_UAV);
 		bfDesc.Size = mScratchSize;
 		bfDesc.RowPitch = bfDesc.Size;
 		bfDesc.DepthPitch = bfDesc.Size;
-		auto pScratchBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+		auto pScratchBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, mCreateFile, mCreateLine));
 		
 		mBuildDesc.ScratchAccelerationStructureData = pScratchBuffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
 		mBuildDesc.DestAccelerationStructureData = mGpuBuffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
@@ -1877,9 +1880,12 @@ namespace NxRHI
 
 		return true;
 	}
-	bool DX12TopAccelerationStructure::Init(DX12GpuDevice* device, const FTopAccelerationStructureDesc* desc)
+	bool DX12TopAccelerationStructure::Init(DX12GpuDevice* device, const FTopAccelerationStructureDesc* desc, const char* file, int line)
 	{
 		mDeviceRef.FromObject(device);
+		// 内部 buffer/SRV/UAV 都是替调用者创建的，台账归到 CreateTopAccelerationStructure 的调用点。
+		mCreateFile = file ? file : __FILE__;
+		mCreateLine = line ? line : __LINE__;
 		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS buildFlags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE;
 		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS& topLevelInputs = mBuildDesc.Inputs;
 		topLevelInputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
@@ -1897,22 +1903,22 @@ namespace NxRHI
 		bfDesc.Size = ((bfDesc.Size + (sizeof(UINT) - 1)) / sizeof(UINT)) * sizeof(UINT);
 		bfDesc.RowPitch = bfDesc.Size;
 		bfDesc.DepthPitch = bfDesc.Size;
-		mGpuBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+		mGpuBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, mCreateFile, mCreateLine));
 
 		FSrvDesc srvDesc{};
 		srvDesc.SetRTAS();
-		mGpuBufferSRV = MakeWeakRef(device->CreateSRV(mGpuBuffer, &srvDesc, __FILE__, __LINE__));
+		mGpuBufferSRV = MakeWeakRef(device->CreateSRV(mGpuBuffer, &srvDesc, mCreateFile, mCreateLine));
 
 		FUavDesc uavDesc{};
 		uavDesc.SetBuffer(true);
 		uavDesc.Buffer.NumElements = bfDesc.Size / sizeof(UINT);
-		mGpuBufferUAV = MakeWeakRef(device->CreateUAV(mGpuBuffer, &uavDesc, __FILE__, __LINE__));
+		mGpuBufferUAV = MakeWeakRef(device->CreateUAV(mGpuBuffer, &uavDesc, mCreateFile, mCreateLine));
 
 		bfDesc.SetDefault(false, (EBufferType)(EBufferType::BFT_UAV));
 		bfDesc.Size = mScratchSize;
 		bfDesc.RowPitch = bfDesc.Size;
 		bfDesc.DepthPitch = bfDesc.Size;
-		mGpuScratchBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+		mGpuScratchBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc, mCreateFile, mCreateLine));
 
 		return true;
 	}
@@ -1949,7 +1955,7 @@ namespace NxRHI
 			initData.pData = mInstDescs.data();
 			initData.RowPitch = bfDesc.Size;
 			bfDesc.InitData = &initData;
-			auto buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
+			auto buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, mCreateFile, mCreateLine));
 			mInstanceGpuBuffer = MakeWeakRef(new FUploadBuffer(buffer));
 			return true;
 		}
@@ -2015,7 +2021,7 @@ namespace NxRHI
 
 			if (mSourceGpuBuffer == nullptr)
 			{
-				mSourceGpuBuffer = MakeWeakRef(device->CreateBuffer(&mGpuBuffer->Desc, __FILE__, __LINE__));
+				mSourceGpuBuffer = MakeWeakRef(device->CreateBuffer(&mGpuBuffer->Desc, mCreateFile, mCreateLine));
 			}
 			cmdlist->mLastContext->CopyRaytracingAccelerationStructure(mSourceGpuBuffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress(), 
 				mBuildDesc.DestAccelerationStructureData,

@@ -47,9 +47,9 @@
   </ItemGroup>
 
   <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
-    <!-- 引擎由 build-android.ps1 -Stage Managed 预先构建到 binaries/android/net8.0；
+    <!-- 引擎由 build-android.ps1 -Stage Managed 预先构建到 binaries/android/net10.0；
          Apk 阶段用 BuildProjectReferences=false 直接消费 S1 已经验证过的产物。
-         移除 MAUI/RID 全局属性，避免把 net8.0 引擎改成 MAUI 工程或写进 android-arm64 子目录。 -->
+         移除 MAUI/RID 全局属性，避免把 net10.0 引擎改成 MAUI 工程或写进 android-arm64 子目录。 -->
     <ProjectReference Include="../Engine.Android/Engine.Android.csproj"
       AdditionalProperties="TitanPlatform=Android;SkipTitanCodeGen=true;SkipTitanDataCopyerGen=true"
       GlobalPropertiesToRemove="RuntimeIdentifier;RuntimeIdentifiers;UseMaui;SingleProject" />

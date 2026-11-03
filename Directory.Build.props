@@ -1,0 +1,4 @@
+<Project>
+  <!-- 仓库根默认 TFM 注入；Plugins/ 与 Module/AloneGame.Maui/ 子树有各自的 Directory.Build.props，须由它们自行 Import 同一份文件。 -->
+  <Import Project="$(MSBuildThisFileDirectory)BuildScript\msbuild\TitanFramework.props" />
+</Project>

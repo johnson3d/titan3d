@@ -1,0 +1,128 @@
+name: Quality
+
+on:
+  pull_request:
+    branches: [main, master]
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Test suite
+        default: L1
+        type: choice
+        options: [L0, L1, L2, All]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.100
+
+      - name: Build
+        shell: pwsh
+        run: |
+          $requiresNative = '${{ github.event_name }}' -eq 'workflow_dispatch' -and '${{ inputs.suite }}' -in @('L2', 'All')
+          if ($requiresNative) {
+            ./BuildScript/build.ps1 -Configuration Debug -SkipManaged -SkipPlugins -SkipDependencyCheck
+          }
+          else {
+            ./BuildScript/build.ps1 -Configuration Debug -SkipNative -SkipPlugins -SkipDependencyCheck
+          }
+
+      - name: Native LP64 Guard
+        shell: pwsh
+        run: |
+          ./BuildScript/tests/NativeLongTypes.Tests.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./BuildScript/check/Check-NativeLongTypes.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: BuildScript Layout Guard
+        shell: pwsh
+        run: |
+          ./BuildScript/tests/BuildScriptLayout.Tests.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Engine Config Layout Guard
+        shell: pwsh
+        run: |
+          ./BuildScript/tests/EngineConfigLayout.Tests.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Mac Source List Up To Date
+        shell: pwsh
+        run: |
+          cmake -P BuildScript/cmake/tests/titan_cmake_tests.cmake
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cmake -DTITAN_CHECK=ON -P Core.Mac/RefreshSources.cmake
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Test
+        if: github.event_name != 'workflow_dispatch' || inputs.suite != 'L0'
+        shell: pwsh
+        run: |
+          $suite = if ('${{ github.event_name }}' -eq 'workflow_dispatch') { '${{ inputs.suite }}' } else { 'L1' }
+          ./BuildScript/test.ps1 -Suite $suite -Configuration Debug -ResultsDirectory TestResults
+
+      - name: LeanCLR Stub Scaffold Test
+        if: github.event_name != 'workflow_dispatch' || inputs.suite != 'L0'
+        shell: pwsh
+        run: ./BuildScript/tests/LeanClrStubScaffold.Tests.ps1
+
+      - name: Titan Plugin Scaffold Test
+        if: github.event_name != 'workflow_dispatch' || inputs.suite != 'L0'
+        shell: pwsh
+        run: ./BuildScript/tests/TitanPluginScaffold.Tests.ps1
+
+      - name: Upload Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults/
+          if-no-files-found: warn
+
+  nightly-l2:
+    if: github.event_name == 'schedule'
+    needs: build-and-test
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.100
+
+      - name: Build native engine runtime
+        shell: pwsh
+        run: ./BuildScript/build.ps1 -Configuration Debug -SkipManaged -SkipPlugins -SkipDependencyCheck
+
+      - name: Run L2 engine tests
+        shell: pwsh
+        run: ./BuildScript/test.ps1 -Suite L2 -Configuration Debug -ResultsDirectory TestResults
+
+      - name: Upload L2 Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: l2-test-results
+          path: TestResults/
+          if-no-files-found: warn

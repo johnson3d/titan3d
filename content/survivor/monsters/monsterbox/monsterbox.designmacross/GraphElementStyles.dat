@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyleCollection@EngineCore">
+  <GraphElementStyles Type="System.Collections.Generic.Dictionary&lt;System.Guid@Unknown,EngineNS.DesignMacross.Base.Graph.IGraphElementStyle@EngineCore,&gt;@Unknown" Count="2">
+    <e_0>
+      <Key Value="7919fd4d-13d3-47dd-8db8-fd79797d8ac1" />
+      <Value Type="EngineNS.DesignMacross.Base.Graph.TtGraphElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_0>
+    <e_1>
+      <Key Value="c87fdefa-609a-42b2-becd-351e2417fbd8" />
+      <Value Type="EngineNS.DesignMacross.Design.ConnectingLine.TtDataPinDescriptionElementStyle@EngineCore">
+        <Location Type="EngineNS.Vector2@EngineCore" Value="2,2" />
+        <Size Type="EngineNS.SizeF@EngineCore" Value="EngineNS.SizeF" />
+      </Value>
+    </e_1>
+  </GraphElementStyles>
+</Root>

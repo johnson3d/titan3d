@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_16171165987093699057 Type="NS_survivor.monsters.dragon1.animdmc_dragonthesouleater@GameProject">
+  <AnimStateMachine_0 Type="NS_survivor.monsters.dragon1.DMC_AnimStateMachine_0_3144312222@GameProject" Order="0" />
+  <FinalBlendTree_0 Type="NS_survivor.monsters.dragon1.DMC_FinalBlendTree_0_2686687017@GameProject" Order="0" />
+</Hash_16171165987093699057>

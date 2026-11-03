@@ -114,7 +114,7 @@ namespace NxRHI
 			//return mView;
 			return Buffer->GetHWBuffer();
 		}
-		bool Init(VKGpuDevice* device, IBuffer* pBuffer, const FCbvDesc& desc);
+		bool Init(VKGpuDevice* device, IBuffer* pBuffer, const FCbvDesc& desc, const char* file = nullptr, int line = 0);
 	public:
 		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
 		//VkBufferView				mView = nullptr;
@@ -125,7 +125,7 @@ namespace NxRHI
 	public:
 		VKVbView();
 		~VKVbView();
-		bool Init(VKGpuDevice* device, IBuffer* pBuffer, const FVbvDesc* desc);
+		bool Init(VKGpuDevice* device, IBuffer* pBuffer, const FVbvDesc* desc, const char* file = nullptr, int line = 0);
 	public:
 		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
 		//VkBufferView				mView = nullptr;
@@ -136,7 +136,7 @@ namespace NxRHI
 	public:
 		VKIbView();
 		~VKIbView();
-		bool Init(VKGpuDevice* device, IBuffer* pBuffer, const FIbvDesc* desc);
+		bool Init(VKGpuDevice* device, IBuffer* pBuffer, const FIbvDesc* desc, const char* file = nullptr, int line = 0);
 	public:
 		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
 		//VkBufferView				mView = nullptr;
@@ -150,7 +150,7 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return mView->GetHWBuffer();
 		}
-		bool Init(VKGpuDevice* device, IGpuBufferData* pBffer, const FSrvDesc& desc);
+		bool Init(VKGpuDevice* device, IGpuBufferData* pBffer, const FSrvDesc& desc, const char* file = nullptr, int line = 0);
 		virtual bool UpdateBuffer(IGpuDevice* device, IGpuBufferData* buffer) override;
 		virtual UINT GetFingerPrint() const override {
 			return 0;
@@ -170,7 +170,7 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return mView->GetHWBuffer();
 		}
-		bool Init(VKGpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc);
+		bool Init(VKGpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc, const char* file = nullptr, int line = 0);
 		virtual void SetDebugName(const char* name) override;
 	public:
 		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
@@ -211,7 +211,7 @@ namespace NxRHI
 	{
 	public:
 		~VKAccelerationStructure();
-		bool Init(VKGpuDevice* device, const FAccelerationStructureDesc* desc);
+		bool Init(VKGpuDevice* device, const FAccelerationStructureDesc* desc, const char* file = nullptr, int line = 0);
 
 		TWeakRefHandle<VKGpuDevice>					mDeviceRef;
 		std::vector<AutoRef<FMeshPrimitives>>		mMeshes;
@@ -229,7 +229,7 @@ namespace NxRHI
 	{
 	public:
 		~VKTopAccelerationStructure();
-		bool Init(VKGpuDevice* device, const FTopAccelerationStructureDesc* desc);
+		bool Init(VKGpuDevice* device, const FTopAccelerationStructureDesc* desc, const char* file = nullptr, int line = 0);
 		virtual bool BuildAcclerationStruture() override;
 
 		TWeakRefHandle<VKGpuDevice>					mDeviceRef;

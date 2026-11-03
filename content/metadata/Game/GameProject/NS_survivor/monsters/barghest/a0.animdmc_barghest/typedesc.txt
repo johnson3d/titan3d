@@ -1,0 +1,2 @@
+GameProject
+NS_survivor.monsters.barghest.animdmc_barghest@GameProject

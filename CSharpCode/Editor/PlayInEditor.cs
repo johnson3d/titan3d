@@ -440,18 +440,8 @@ namespace EngineNS
     {
         static TtEngine()
         {
-            switch (Version.Major)
-            {
-                case 6:
-                    DotNetVersion = "net6.0";
-                    break;
-                case 7:
-                    DotNetVersion = "net7.0";
-                    break;
-                case 8:
-                    DotNetVersion = "net8.0";
-                    break;
-            }
+            // 跟随宿主运行时派生（net{Major}.0），避免硬编码 switch 在升级 TFM 后失效
+            DotNetVersion = $"net{Version.Major}.0";
         }
 
         public Editor.TtPIEModule PIEModule { get; } = new Editor.TtPIEModule();

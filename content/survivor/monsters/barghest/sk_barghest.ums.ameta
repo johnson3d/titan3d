@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="5443f05d6af1bddf97aacb943e27a12b788b2fe3f67b94c47caee489c294f32f" />
+      <Path Type="System.String@Unknown" Value="sk_barghest.ums" />
+    </e_0>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="b2527038-378a-4785-b209-4be4cbd8a4d2" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,survivor/monsters/barghest/sk_barghest.ums,b2527038-378a-4785-b209-4be4cbd8a4d2" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.TtMaterialMesh&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Game,survivor/monsters/barghest/sk_barghest.vms,113a3595-ac78-4f32-aa39-88b753082c1a" />
+    <e_1 Value="Game,survivor/monsters/barghest/m_barghest.material,b8d764a3-47e7-4622-a1c1-749b7435f6f3" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
+</Root>

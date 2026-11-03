@@ -60,6 +60,7 @@
   "UIDefaultTexture": "texture/white.srv:Engine",
   "IsWriteShaderDebugFile": false,
   "Plugins": [
-    "DataCopyer"
+    "DataCopyer",
+    "MCPServer"
   ]
 }

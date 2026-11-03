@@ -569,7 +569,7 @@ namespace Canvas
 
 		return result;
 	}
-	FTPagedWordCreator::PagedObjectType* FTPagedWordCreator::CreatePagedObject(PageType* page, UINT index)
+	FTPagedWordCreator::PagedObjectType* FTPagedWordCreator::CreatePagedObject(PageType* page, UINT index, const char*, int)
 	{
 		auto pAllocator = page->Allocator.GetCastPtr<FTPagedWordAllocator>();
 

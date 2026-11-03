@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.UI.TtUIAssetAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="747cc6a73d0a12eb5c0fbfed296f5b346e682856a02dde3ca88235b4df7fa000" />
+      <Path Type="System.String@Unknown" Value="ui_battle.ui/class_graph.dat" />
+    </e_0>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="327b07a9-4fc1-4de8-9946-32e512334646" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,survivor/ui/ui_battle.ui,327b07a9-4fc1-4de8-9946-32e512334646" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.UI.TtUIAsset&#xA;" />
+  <DesignResolution Type="EngineNS.Vector2i@EngineCore" Value="0,0" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <IsDisable Type="System.Boolean@Unknown" Value="False" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.UI.TtUIAsset@EngineCore" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+</Root>

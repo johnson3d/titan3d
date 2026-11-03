@@ -665,7 +665,7 @@ namespace NxRHI
 	ICbView* DX12GpuDevice::CreateCBV(IBuffer* pBuffer, const FCbvDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<DX12CbView>(file ? file : __FILE__, line);
-		if (result->Init(this, pBuffer, *desc) == false)
+		if (result->Init(this, pBuffer, *desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;
@@ -675,7 +675,7 @@ namespace NxRHI
 	IVbView* DX12GpuDevice::CreateVBV(IBuffer* pBuffer, const FVbvDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<DX12VbView>(file ? file : __FILE__, line);
-		if (result->Init(this, pBuffer, desc) == false)
+		if (result->Init(this, pBuffer, desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;
@@ -685,7 +685,7 @@ namespace NxRHI
 	IIbView* DX12GpuDevice::CreateIBV(IBuffer* pBuffer, const FIbvDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<DX12IbView>(file ? file : __FILE__, line);
-		if (result->Init(this, pBuffer, desc) == false)
+		if (result->Init(this, pBuffer, desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;
@@ -695,7 +695,7 @@ namespace NxRHI
 	ISrView* DX12GpuDevice::CreateSRV(IGpuBufferData* pBuffer, const FSrvDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<DX12SrView>(file ? file : __FILE__, line);
-		if (result->Init(this, pBuffer, *desc) == false)
+		if (result->Init(this, pBuffer, *desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;
@@ -705,7 +705,7 @@ namespace NxRHI
 	IUaView* DX12GpuDevice::CreateUAV(IGpuBufferData* pBuffer, const FUavDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<DX12UaView>(file ? file : __FILE__, line);
-		if (result->Init(this, pBuffer, *desc) == false)
+		if (result->Init(this, pBuffer, *desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;
@@ -715,7 +715,7 @@ namespace NxRHI
 	IRenderTargetView* DX12GpuDevice::CreateRTV(ITexture* pBuffer, const FRtvDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<DX12RenderTargetView>(file ? file : __FILE__, line);
-		if (result->Init(this, pBuffer, desc) == false)
+		if (result->Init(this, pBuffer, desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;
@@ -725,7 +725,7 @@ namespace NxRHI
 	IDepthStencilView* DX12GpuDevice::CreateDSV(ITexture* pBuffer, const FDsvDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<DX12DepthStencilView>(file ? file : __FILE__, line);
-		if (result->Init(this, pBuffer, *desc) == false)
+		if (result->Init(this, pBuffer, *desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;
@@ -735,7 +735,7 @@ namespace NxRHI
 	ISampler* DX12GpuDevice::CreateSampler(const FSamplerDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<DX12Sampler>(file ? file : __FILE__, line);
-		if (result->Init(this, *desc) == false)
+		if (result->Init(this, *desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;
@@ -745,7 +745,7 @@ namespace NxRHI
 	ISwapChain* DX12GpuDevice::CreateSwapChain(const FSwapChainDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<DX12SwapChain>(file ? file : __FILE__, line);
-		if (result->Init(this, *desc) == false)
+		if (result->Init(this, *desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;
@@ -768,7 +768,7 @@ namespace NxRHI
 	IAccelerationStructure* DX12GpuDevice::CreateAccelerationStructure(const FAccelerationStructureDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<DX12AccelerationStructure>(file ? file : __FILE__, line);
-		if (result->Init(this, desc) == false)
+		if (result->Init(this, desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;
@@ -788,7 +788,7 @@ namespace NxRHI
 	ITopAccelerationStructure* DX12GpuDevice::CreateTopAccelerationStructure(const FTopAccelerationStructureDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<DX12TopAccelerationStructure>(file ? file : __FILE__, line);
-		if (result->Init(this, desc) == false)
+		if (result->Init(this, desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;

@@ -309,11 +309,11 @@ function Assert-PluginFiles {
         [xml]$xml = $text
         Assert-True ($null -ne $xml.Project) "$Name.$hostName.csproj must be valid XML."
         Assert-True ($text -like '*<AllowUnsafeBlocks>true</AllowUnsafeBlocks>*') "$Name.$hostName.csproj must allow unsafe blocks."
-        Assert-True ($text -like '*<TargetFramework>net8.0</TargetFramework>*') "$Name.$hostName.csproj must target net8.0."
+        Assert-True ($text -like '*<TargetFramework>$(_TitanTargetFramework)</TargetFramework>*') "$Name.$hostName.csproj must target the dependencies.json TFM."
         Assert-True ($text -like "*<Import Project=`"..\$Name\$Name.projitems`" Label=`"Shared`" />*") "$Name.$hostName.csproj must import the shared project."
         Assert-True ($text -like "*Exclude=`"`$(TtTitanRoot)binaries\Plugins\$Name\*.dll*") "$Name.$hostName.csproj must not reference its own output."
         if ($hostName -eq 'Android') {
-            Assert-True ($text -like '*binaries\android\net8.0\Engine.Android.dll*') 'Android project must reference the isolated Android engine output.'
+            Assert-True ($text -like '*binaries\android\$(_TitanTargetFramework)\Engine.Android.dll*') 'Android project must reference the isolated Android engine output.'
             Assert-True ($text -like '*binaries\Plugins\*\*.Android.dll*') 'Android project must reference other Android plugins.'
             Assert-True ($text -like '*<DefineConstants>$(DefineConstants);PAndroid</DefineConstants>*') 'Android project must define PAndroid.'
             Assert-True ($text -notlike '*Engine.Window.dll</HintPath>*') 'Android project must not reference Engine.Window.dll.'
@@ -325,7 +325,7 @@ function Assert-PluginFiles {
             Assert-True ($text -like '*binaries\Plugins\*\*.All.dll*') 'All project must reference other All plugins.'
         }
         else {
-            Assert-True ($text -like '*binaries\net8.0\Engine.Window.dll*') "$hostName project must reference Engine.Window.dll."
+            Assert-True ($text -like '*binaries\$(_TitanTargetFramework)\Engine.Window.dll*') "$hostName project must reference Engine.Window.dll."
             Assert-True ($text -like '*binaries\Plugins\*\*.Window.dll*') "$hostName project must reference Window plugins."
         }
     }

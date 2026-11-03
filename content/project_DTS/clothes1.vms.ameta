@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Mesh.TtMeshPrimitivesAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="49fcf58a1244b8cd91bb5360740a4d88d9b26afbd86a6497cda5b33d810c6b58" />
+      <Path Type="System.String@Unknown" Value="clothes1.vms" />
+    </e_0>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="8f232cf5-c564-42b4-b8b3-e4e6a79f8940" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,project_dts/clothes1.vms,8f232cf5-c564-42b4-b8b3-e4e6a79f8940" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMeshPrimitives&#xA;" />
+  <HasBLAS Type="System.Boolean@Unknown" Value="False" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <IsClustered Type="System.Boolean@Unknown" Value="False" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <StreamingTexelFactor Type="System.Single@Unknown" Value="0.9512994" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMeshPrimitives@EngineCore" />
+</Root>

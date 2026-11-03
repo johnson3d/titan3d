@@ -1,4 +1,6 @@
 <Project>
+  <!-- TFM 单一事实源注入（dependencies.json → TitanTargetFramework），与仓库根同一份文件。 -->
+  <Import Project="$(MSBuildThisFileDirectory)..\..\BuildScript\msbuild\TitanFramework.props" />
 
   <!--
     Android 宿主的中间产物统一落在仓库 intermediate 下：

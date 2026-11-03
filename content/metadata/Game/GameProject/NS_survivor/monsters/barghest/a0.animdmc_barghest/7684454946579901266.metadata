@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_7684454946579901266 Type="NS_survivor.monsters.barghest.animdmc_barghest@GameProject">
+  <AnimStateMachine_0 Type="NS_survivor.monsters.barghest.DMC_AnimStateMachine_0_1575471455@GameProject" Order="0" />
+  <FinalBlendTree_0 Type="NS_survivor.monsters.barghest.DMC_FinalBlendTree_0_1468431646@GameProject" Order="0" />
+  <IsDead Type="System.Boolean@Unknown" Order="0" />
+</Hash_7684454946579901266>

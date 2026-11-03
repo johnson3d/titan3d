@@ -1,4 +1,4 @@
-# Android 运行期内容：相对仓库根的路径；binaries/* 一律映射到 binaries/android 下的产物。
+# Android 运行期内容：每行一条相对仓库根的匹配式，# 为注释，** 递归。必须纯 ASCII。
 content/config/engineconfig_android_smoke.jscfg
 enginecontent/metadata/**
 content/metadata/**

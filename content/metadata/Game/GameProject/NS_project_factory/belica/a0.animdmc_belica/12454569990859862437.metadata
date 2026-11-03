@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_12454569990859862437 Type="NS_project_factory.belica.animdmc_belica@GameProject">
+  <AnimStateMachine_0 Type="NS_project_factory.belica.DMC_AnimStateMachine_0_228312668@GameProject" Order="0" />
+  <FinalBlendTree_0 Type="NS_project_factory.belica.DMC_FinalBlendTree_0_1557498772@GameProject" Order="0" />
+  <IsDead Type="System.Boolean@Unknown" Order="0" />
+  <MoveSpeed Type="System.Single@Unknown" Order="0" />
+</Hash_12454569990859862437>

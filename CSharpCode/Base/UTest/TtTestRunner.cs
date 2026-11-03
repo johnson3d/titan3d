@@ -77,6 +77,10 @@ namespace EngineNS.UnitTest
         {
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
+                // 只扫描引擎内定义了 AssemblyDesc 的程序集, 避免遍历所有类型的开销和异常
+                if (FindAssemblyDesc(assembly) == null)
+                    continue;
+
                 Type[] types;
                 try
                 {
@@ -109,6 +113,24 @@ namespace EngineNS.UnitTest
                     if (isTest)
                         yield return type;
                 }
+            }
+        }
+
+        static Rtti.TtAssemblyDesc FindAssemblyDesc(Assembly assembly)
+        {
+            var entryType = assembly.GetType("EngineNS.Rtti.AssemblyEntry", false);
+            if (entryType == null)
+                return null;
+            var mtd = entryType.GetMethod("GetAssemblyDesc", BindingFlags.Public | BindingFlags.Static);
+            if (mtd == null)
+                return null;
+            try
+            {
+                return mtd.Invoke(null, null) as Rtti.TtAssemblyDesc;
+            }
+            catch
+            {
+                return null;
             }
         }
 

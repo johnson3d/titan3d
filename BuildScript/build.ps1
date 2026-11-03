@@ -29,6 +29,7 @@ Import-VsDevEnvironment $msbuild
 #$llvmBin = Find-VsLlvmBin $msbuild
 #Add-PathEntry $llvmBin
 
+# 清单已按 owner+configuration 子目录隔离，All 双轮的顺序不再影响清单有效性。
 $configs = if ($Configuration -eq 'All') { @('Debug', 'Release') } else { @($Configuration) }
 $toolConfig = if ($Configuration -eq 'Release') { 'Release' } else { 'Debug' }
 
@@ -111,7 +112,7 @@ function Invoke-DotNetBuild {
 function Get-GeneratorTool {
     param([Parameter(Mandatory = $true)][string]$Name)
 
-    $tool = Join-Path $repoRoot ('binaries\Tools\net8.0\' + $Name + '.exe')
+    $tool = Join-Path $repoRoot ('binaries\Tools\' + (Get-TitanTargetFramework) + '\' + $Name + '.exe')
     if (-not (Test-Path -LiteralPath $tool)) {
         throw "$Name was not built at '$tool'."
     }

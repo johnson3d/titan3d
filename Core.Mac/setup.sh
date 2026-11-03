@@ -31,6 +31,11 @@ case "$CFG" in
   *) echo "[TitanSetup] --config 只支持 Debug|Release，得到: $CFG"; exit 2 ;;
 esac
 
+# .NET SDK 引导（版本取自 global.json）：系统 dotnet 优先，缺失时安装到 3rd/tools/dotnet-sdk（无需 sudo）。
+# source 后 titan_ensure_dotnet 会在当前进程注入 PATH/DOTNET_ROOT，供后续 codegen 使用。
+# shellcheck source=Core.Mac/ensure_dotnet.sh
+. "$ROOT/Core.Mac/ensure_dotnet.sh"
+
 errors=0
 fail() { echo "[TitanSetup][缺失] $1"; errors=$((errors+1)); }
 have() { command -v "$1" >/dev/null 2>&1; }
@@ -40,22 +45,100 @@ have() { command -v "$1" >/dev/null 2>&1; }
 # 构建参数与 libcxx 22.1.8 standalone 的已验证配置一致，源码保持 sparse + blobless。
 LLVM_TAG="llvmorg-22.1.8"
 LLVM_DIR="$ROOT/3rd/native/llvm-project"
+LLVM_REMOTE="https://github.com/llvm/llvm-project.git"
 LIBCXX_PREFIX="$LLVM_DIR/install-mac"
+# llvm-project 用 partial clone，sparse 检出时按需拉 blob；GitHub 偶发 HTTP/2 断流
+# （curl 18 / invalid index-pack），因此所有网络类 git 操作统一重试。
+GIT_NET_RETRIES="${TITAN_GIT_NET_RETRIES:-5}"
+
+# 网络类 git：HTTP/1.1 规避 HTTP/2 sideband 断流，且禁止交互式凭据提示
+git_net() {
+  GIT_TERMINAL_PROMPT=0 git -c http.version=HTTP/1.1 "$@"
+}
+
+clone_llvm_project() {
+  local attempt=1 staging="$LLVM_DIR.clone"
+  while [ "$attempt" -le "$GIT_NET_RETRIES" ]; do
+    # 先克隆到 staging，成功后再换名，避免失败留下半成品目录
+    rm -rf "$staging"
+    mkdir -p "$(dirname "$LLVM_DIR")"
+    echo "[TitanSetup] 克隆 llvm-project ${LLVM_TAG}（sparse + blobless，第 ${attempt}/${GIT_NET_RETRIES} 次）"
+    if git_net clone --depth 1 --branch "$LLVM_TAG" --filter=blob:none --sparse \
+      "$LLVM_REMOTE" "$staging"; then
+      rm -rf "$LLVM_DIR"
+      mv "$staging" "$LLVM_DIR"
+      return 0
+    fi
+    if [ "$attempt" -lt "$GIT_NET_RETRIES" ]; then
+      echo "[TitanSetup][警告] 克隆中断（网络），$((attempt * 5)) 秒后重试"
+      sleep $((attempt * 5))
+    fi
+    attempt=$((attempt + 1))
+  done
+  rm -rf "$staging"
+  echo "[TitanSetup][错误] 克隆 llvm-project 连续失败 ${GIT_NET_RETRIES} 次，请检查网络后重跑 ./setup.sh"
+  return 1
+}
+
+# libc++ 22.x 的 shared 头与 LLVM-libc 共享源码在 libc/ 下，必须一并 checkout。
+# sparse 检出失败可用同一命令续跑（已拉到的 blob 会复用），所以整步重试并校验关键文件。
+llvm_sparse_checkout() {
+  local attempt=1
+  while [ "$attempt" -le "$GIT_NET_RETRIES" ]; do
+    if git_net -C "$LLVM_DIR" sparse-checkout set \
+        cmake libc/hdr libc/include libc/shared libc/src/__support \
+        libcxx libcxxabi libunwind llvm/cmake llvm/include llvm/runtimes runtimes third-party \
+      && [ -f "$LLVM_DIR/libcxx/CMakeLists.txt" ] \
+      && [ -f "$LLVM_DIR/libcxx/src/include/refstring.h" ] \
+      && [ -f "$LLVM_DIR/libcxxabi/include/cxxabi.h" ]; then
+      ln -sfn ../../../libc/shared "$LLVM_DIR/libcxx/src/include/shared"
+      return 0
+    fi
+    if [ "$attempt" -lt "$GIT_NET_RETRIES" ]; then
+      echo "[TitanSetup][警告] sparse 检出中断/不完整（第 ${attempt}/${GIT_NET_RETRIES} 次），$((attempt * 5)) 秒后重试"
+      sleep $((attempt * 5))
+    fi
+    attempt=$((attempt + 1))
+  done
+  echo "[TitanSetup][错误] llvm-project sparse 检出连续失败 ${GIT_NET_RETRIES} 次；网络恢复后重跑 ./setup.sh 会续传"
+  return 1
+}
+
+llvm_prepare_source() {
+  # 只自动清理本脚本管理的克隆；其他内容一律不碰，避免误删
+  if [ -e "$LLVM_DIR" ] && [ ! -d "$LLVM_DIR/.git" ]; then
+    if [ -z "$(ls -A "$LLVM_DIR" 2>/dev/null)" ]; then
+      rmdir "$LLVM_DIR"
+    else
+      echo "[TitanSetup][错误] ${LLVM_DIR} 已存在但不是 git 克隆，请手动处理后重跑"
+      return 1
+    fi
+  fi
+  if [ -d "$LLVM_DIR/.git" ] \
+    && [ "$(git -C "$LLVM_DIR" describe --tags 2>/dev/null)" != "$LLVM_TAG" ]; then
+    if [ "$(git -C "$LLVM_DIR" remote get-url origin 2>/dev/null || true)" != "$LLVM_REMOTE" ]; then
+      echo "[TitanSetup][错误] ${LLVM_DIR} 不是 ${LLVM_TAG} 且不是本脚本管理的克隆，请手动处理后重跑"
+      return 1
+    fi
+    echo "[TitanSetup][警告] ${LLVM_DIR} 不是 ${LLVM_TAG}（上次中断或手动改动），删除后重新克隆"
+    rm -rf "$LLVM_DIR"
+  fi
+  if [ ! -d "$LLVM_DIR/.git" ]; then
+    clone_llvm_project || return 1
+  fi
+  llvm_sparse_checkout
+}
+
 build_libcxx() {
   local bdir="$LLVM_DIR/build-mac/cxx"
-  if [ ! -d "$LLVM_DIR/.git" ]; then
-    echo "[TitanSetup] 克隆 llvm-project ${LLVM_TAG}（sparse + blobless）"
-    git clone --depth 1 --branch "$LLVM_TAG" --filter=blob:none --sparse \
-      https://github.com/llvm/llvm-project.git "$LLVM_DIR" || return 1
-  elif [ "$(git -C "$LLVM_DIR" describe --tags 2>/dev/null)" != "$LLVM_TAG" ]; then
-    echo "[TitanSetup][错误] ${LLVM_DIR} 不是 ${LLVM_TAG}，请手动处理后重跑"
+  llvm_prepare_source || return 1
+
+  local python3
+  python3="$(command -v python3 || true)"
+  if [ -z "$python3" ]; then
+    echo "[TitanSetup][错误] 缺少 python3，无法打补丁/生成 libc++ 头，请先安装（brew install python@3）"
     return 1
   fi
-  # libc++ 22.x 的 shared 头与 LLVM-libc 共享源码在 libc/ 下，必须一并 checkout
-  git -C "$LLVM_DIR" sparse-checkout set \
-    cmake libc/hdr libc/include libc/shared libc/src/__support \
-    libcxx libcxxabi libunwind llvm/cmake llvm/include llvm/runtimes runtimes third-party || return 1
-  ln -sfn ../../../libc/shared "$LLVM_DIR/libcxx/src/include/shared"
 
   # 两处构建补丁（幂等）：
   # 1) shared 头按 ../libc 解析；2) refstring 的 rep 块用 malloc/free——系统 libc++abi 的
@@ -98,10 +181,13 @@ if "_LIBCPP_REFSTRING_ALLOC" not in s:
 PY
 
   echo "[TitanSetup] 构建 libc++.a（${LLVM_TAG}，Release/arm64）"
+  # standalone libcxx 不会自己 find_package(Python3)，而安装规则引用了生成的 libcxx.imp；
+  # 不显式传入时该生成命令为空，cmake --install 会因缺 libcxx.imp 失败（22.1.8 实测）。
   cmake -S "$LLVM_DIR/libcxx" -B "$bdir" -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX="$LIBCXX_PREFIX" \
     -DCMAKE_OSX_ARCHITECTURES=arm64 \
+    -DPython3_EXECUTABLE="$python3" \
     -DLIBCXX_CXX_ABI=system-libcxxabi \
     -DLIBCXX_CXX_ABI_INCLUDE_PATHS="$LLVM_DIR/libcxxabi/include" \
     -DLIBCXX_ENABLE_NEW_DELETE_DEFINITIONS=OFF \
@@ -133,10 +219,14 @@ fi
 if ! have ninja; then
   fail "缺少 ninja: brew install ninja"
 fi
-if ! have dotnet; then
-  fail "缺少 dotnet SDK: global.json 要求 8.0.x（https://dotnet.microsoft.com/download/dotnet/8.0）"
-elif ! dotnet --list-sdks 2>/dev/null | grep -q '^8\.'; then
-  fail "未找到 .NET 8 SDK（global.json 锁定 8.0.x）: dotnet --list-sdks 输出无 8.x"
+# .NET SDK：优先用系统 dotnet；缺失或版本/RID 不合格时自动安装到 3rd/tools/dotnet-sdk
+# （见 Core.Mac/ensure_dotnet.sh）。--check-only 保持只读语义，只校验不下载。
+if [ "$CHECK_ONLY" -eq 1 ]; then
+  if ! titan_ensure_dotnet --check; then
+    fail "缺少可用的 .NET SDK（global.json $(titan_dotnet_version)，RID $(titan_dotnet_rid)）: 去掉 --check-only 重跑会自动安装到 3rd/tools/dotnet-sdk"
+  fi
+elif ! titan_ensure_dotnet; then
+  fail "无法准备 .NET SDK（自动安装失败，见上方日志；也可手动安装 https://dotnet.microsoft.com/download/dotnet/$(titan_dotnet_major).0）"
 fi
 
 # --- vendored 原生依赖（与 Core.Mac/CMakeLists.txt 的要求一一对应）---
@@ -150,7 +240,7 @@ if [ ! -f "$LIBCXX_PREFIX/lib/libc++.a" ]; then
   else
     echo "[TitanSetup] 未找到静态 libc++，自动从 GitHub 构建（首次约 10 分钟）"
     if ! build_libcxx; then
-      fail "静态 libc++ 构建失败，见上方 cmake 输出"
+      fail "静态 libc++ 构建失败：克隆/检出的网络中断已自动重试；网络恢复后重跑 ./setup.sh 会续传，构建失败请看上方输出"
     fi
   fi
 fi

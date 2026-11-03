@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.GamePlay.Scene.TtPrefabAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="44d1edd3619bfa53bb4536aa464a9c7af09a50b57dab9475fe1eb375feb8b34a" />
+      <Path Type="System.String@Unknown" Value="prefab_singlebullet.prefab" />
+    </e_0>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="2fdf292a-2e8f-4c1c-85d2-4cf9ed856051" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,survivor/skills/singlebullet/prefab_singlebullet.prefab,2fdf292a-2e8f-4c1c-85d2-4cf9ed856051" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtPrefab&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Game,survivor/particles/firecore1.ums,1ebfaf9a-3d69-4408-aca4-8849fe4610f4" />
+    <e_1 Value="Game,survivor/particles/firecore2.ums,a973378c-f9d2-4097-8206-4b2764133e7e" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtPrefab@EngineCore" />
+</Root>

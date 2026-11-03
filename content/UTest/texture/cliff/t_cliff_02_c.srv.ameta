@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
+  <AssetId Type="System.Guid@Unknown" Value="d94a595e-a28b-4d15-a7ac-a6655acc41ae" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/texture/cliff/t_cliff_02_c.srv,d94a595e-a28b-4d15-a7ac-a6655acc41ae" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <OriginImageAddress Type="System.String@Unknown" Value="utest/texture/cliff/t_cliff_02_c.srv:Game" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.NxRHI.TtSrView@EngineCore" />
+</Root>

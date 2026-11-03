@@ -44,7 +44,7 @@
   <!-- Tool paths                                                    -->
   <!-- ============================================================ -->
   <PropertyGroup>
-    <_TitanToolsDir>$([MSBuild]::NormalizeDirectory('$(_TitanRoot)', 'binaries', 'Tools', 'net8.0'))</_TitanToolsDir>
+    <_TitanToolsDir>$([MSBuild]::NormalizeDirectory('$(_TitanRoot)', 'binaries', 'Tools', '$(_TitanTargetFramework)'))</_TitanToolsDir>
     <_CppWeavingExe>$(_TitanToolsDir)CppWeavingTools.exe</_CppWeavingExe>
     <_CppWeavingDll>$(_TitanToolsDir)CppWeavingTools.dll</_CppWeavingDll>
     <_CppWeavingBuildStamp>$(_TitanToolsDir).CppWeavingTools.build.stamp</_CppWeavingBuildStamp>

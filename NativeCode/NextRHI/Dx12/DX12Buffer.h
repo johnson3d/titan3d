@@ -65,7 +65,7 @@ namespace NxRHI
 			return mView->Heap;
 		}
 		D3D12_GPU_VIRTUAL_ADDRESS GetBufferVirtualAddress();
-		bool Init(DX12GpuDevice* device, IBuffer* pBuffer, const FCbvDesc& desc);
+		bool Init(DX12GpuDevice* device, IBuffer* pBuffer, const FCbvDesc& desc, const char* file = nullptr, int line = 0);
 	public:
 		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
 		AutoRef<DX12HeapHolder>		mView;
@@ -76,7 +76,7 @@ namespace NxRHI
 		DX12GpuDevice* mDevice = nullptr;
 	public:
 		virtual void DeleteThis() override;
-		bool Init(DX12GpuDevice* device, IBuffer* pBuffer, const FVbvDesc* desc);
+		bool Init(DX12GpuDevice* device, IBuffer* pBuffer, const FVbvDesc* desc, const char* file = nullptr, int line = 0);
 		virtual void SetDebugName(const char* name) override;
 	};
 
@@ -85,7 +85,7 @@ namespace NxRHI
 		DX12GpuDevice* mDevice = nullptr;
 	public:
 		virtual void DeleteThis() override;
-		bool Init(DX12GpuDevice* device, IBuffer* pBuffer, const FIbvDesc* desc);
+		bool Init(DX12GpuDevice* device, IBuffer* pBuffer, const FIbvDesc* desc, const char* file = nullptr, int line = 0);
 		virtual void SetDebugName(const char* name) override;
 	};
 
@@ -97,7 +97,7 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return mView->Heap;
 		}
-		bool Init(DX12GpuDevice* device, IGpuBufferData* pBffer, const FSrvDesc& desc);
+		bool Init(DX12GpuDevice* device, IGpuBufferData* pBffer, const FSrvDesc& desc, const char* file = nullptr, int line = 0);
 		virtual bool UpdateBuffer(IGpuDevice* device, IGpuBufferData* buffer) override;
 		virtual UINT GetFingerPrint() const override {
 			return mFingerPrint;
@@ -130,7 +130,7 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return mView->Heap;
 		}
-		bool Init(DX12GpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc);
+		bool Init(DX12GpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc, const char* file = nullptr, int line = 0);
 	public:
 		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
 		AutoRef<DX12HeapHolder>		mView;
@@ -144,7 +144,7 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return mView->Heap;
 		}
-		bool Init(DX12GpuDevice* device, ITexture* pBuffer, const FRtvDesc* desc);
+		bool Init(DX12GpuDevice* device, ITexture* pBuffer, const FRtvDesc* desc, const char* file = nullptr, int line = 0);
 	public:
 		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
 		AutoRef<DX12HeapHolder>		mView;
@@ -158,7 +158,7 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return mView->Heap;
 		}
-		bool Init(DX12GpuDevice* device, ITexture* pBuffer, const FDsvDesc& desc);
+		bool Init(DX12GpuDevice* device, ITexture* pBuffer, const FDsvDesc& desc, const char* file = nullptr, int line = 0);
 	public:
 		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
 		AutoRef<DX12HeapHolder>		mView;
@@ -167,12 +167,15 @@ namespace NxRHI
 	class DX12AccelerationStructure : public IAccelerationStructure
 	{
 	public:
-		bool Init(DX12GpuDevice* device, const FAccelerationStructureDesc* desc);
+		bool Init(DX12GpuDevice* device, const FAccelerationStructureDesc* desc, const char* file = nullptr, int line = 0);
 
 		std::vector<AutoRef<FMeshPrimitives>>		mMeshes;
 		std::vector<D3D12_RAYTRACING_GEOMETRY_DESC>	mGeometryDesc;
 
 		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC mBuildDesc{};
+		// 创建归属：内部 buffer 都是替调用者创建的，台账要归到 CreateAccelerationStructure 的调用点。
+		const char*						mCreateFile = nullptr;
+		int								mCreateLine = 0;
 	};
 
 	class DX12AStructureInstance : public IAStructureInstance
@@ -184,10 +187,13 @@ namespace NxRHI
 	class DX12TopAccelerationStructure : public ITopAccelerationStructure
 	{
 	public:
-		bool Init(DX12GpuDevice* device, const FTopAccelerationStructureDesc* desc);
+		bool Init(DX12GpuDevice* device, const FTopAccelerationStructureDesc* desc, const char* file = nullptr, int line = 0);
 		virtual bool BuildAcclerationStruture() override;
 
 		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
+		// 创建归属：IsBuild/BuildAcclerationStruture 里的惰性分配沿用该位置。
+		const char*						mCreateFile = nullptr;
+		int								mCreateLine = 0;
 		Hash128							mInstanceHash;
 		std::vector<D3D12_RAYTRACING_INSTANCE_DESC>		mInstDescs;
 		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC mBuildDesc{};

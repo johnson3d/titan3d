@@ -237,7 +237,7 @@ namespace NxRHI
 		UINT PageSize = 128;
 
 		PageType* CreatePage(UINT pageSize);
-		PagedObjectType* CreatePagedObject(PageType* page, UINT index);
+		PagedObjectType* CreatePagedObject(PageType* page, UINT index, const char* file, int line);
 		void OnAlloc(AllocatorType* pAllocator, PagedObjectType* obj);
 		void OnFree(AllocatorType* pAllocator, PagedObjectType* obj);
 		void FinalCleanup(MemAlloc::FPage<ObjectType>* page);
@@ -247,10 +247,12 @@ namespace NxRHI
 		DX12HeapAllocator : public MemAlloc::FPagedObjectAllocator<DX12HeapCreator::ObjectType, DX12HeapCreator>
 	{
 		UINT			mDescriptorStride = 0;
-		DX12HeapHolder* AllocDX12Heap()
+		DX12HeapHolder* AllocDX12Heap(const char* file = nullptr, int line = 0)
 		{
 			auto result = new DX12HeapHolder();
-			result->Heap = this->Alloc<DX12PagedHeap>();
+			// descriptor heap 的泄漏归属：file/line 由上层 CreateXXXView(..., file, line) 一路下传，
+			// 没有归属的调用点回落到本文件的编译期位置，避免 dump 里出现 Unkown position。
+			result->Heap = this->Alloc<DX12PagedHeap>(file ? file : __FILE__, line ? line : __LINE__);
 			return result;
 		}
 		int GetPageCount() {
@@ -272,7 +274,7 @@ namespace NxRHI
 	{
 		std::map<UINT64, AutoRef<DX12HeapAllocator>>		mAllocators;
 	public:
-		DX12HeapHolder* AllocDX12Heap(DX12GpuDevice* pDevice, UINT numOfDescriptor, D3D12_DESCRIPTOR_HEAP_TYPE type);
+		DX12HeapHolder* AllocDX12Heap(DX12GpuDevice* pDevice, UINT numOfDescriptor, D3D12_DESCRIPTOR_HEAP_TYPE type, const char* file = nullptr, int line = 0);
 		int GetAllocatorCount() {
 			return (int)mAllocators.size();
 		}

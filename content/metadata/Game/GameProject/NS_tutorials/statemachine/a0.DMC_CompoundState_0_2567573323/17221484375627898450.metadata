@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_17221484375627898450 Type="NS_tutorials.statemachine.DMC_CompoundState_0_2567573323@GameProject">
+  <TimedSubState Type="NS_tutorials.statemachine.DMC_TimedSubState_3275865331@GameProject" Order="0" />
+  <Transition_From_CompoundState_0_To_TimedSubState Type="NS_tutorials.statemachine.DMC_Transition_From_CompoundState_0_To_TimedSubState_2649117070@GameProject" Order="0" />
+</Hash_17221484375627898450>

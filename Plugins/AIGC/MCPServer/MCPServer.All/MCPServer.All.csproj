@@ -2,7 +2,7 @@
   <Import Project="../../../../BuildScript/msbuild/TitanManagedProject.props" />
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>$(_TitanTargetFramework)</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <BaseOutputPath>$(TtTitanRoot)binaries/Plugins</BaseOutputPath>

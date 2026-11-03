@@ -381,7 +381,7 @@ namespace NxRHI
 	ISwapChain* DX11GpuDevice::CreateSwapChain(const FSwapChainDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<DX11SwapChain>(file ? file : __FILE__, line);
-		if (result->Init(this, *desc) == false)
+		if (result->Init(this, *desc, file, line) == false)
 		{
 			result->Release();
 			return nullptr;

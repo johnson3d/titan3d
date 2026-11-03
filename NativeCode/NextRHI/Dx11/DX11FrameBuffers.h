@@ -25,7 +25,7 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return mView;
 		}
-		bool Init(DX11GpuDevice* device, const FSwapChainDesc& desc);
+		bool Init(DX11GpuDevice* device, const FSwapChainDesc& desc, const char* file = nullptr, int line = 0);
 		virtual UINT GetBackBufferCount() const override
 		{
 			return (UINT)BackBuffers.size();
@@ -41,9 +41,12 @@ namespace NxRHI
 		{
 			AutoRef<ITexture>	Texture;
 			AutoRef<IRenderTargetView>	Rtv;
-			void CreateRtvAndSrv(IGpuDevice* device);
+			void CreateRtvAndSrv(IGpuDevice* device, const char* file = nullptr, int line = 0);
 		};
 		std::vector<FBackBuffer>		BackBuffers;
+		// 创建归属：Resize 重建 backbuffer RTV 时继续沿用。
+		const char*						mCreateFile = nullptr;
+		int								mCreateLine = 0;
 	};
 }
 

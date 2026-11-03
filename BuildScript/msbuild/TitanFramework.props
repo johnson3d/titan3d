@@ -1,0 +1,24 @@
+<Project InitialTargets="TitanRequireTargetFramework" TreatAsLocalProperty="_TitanTargetFramework">
+  <!--
+    TFM 单一事实源：BuildScript/common/dependencies.json → dotnetSdk.targetFramework。
+    由仓库根及 Plugins、Module/AloneGame.Maui 的 Directory.Build.props 各自 Import（MSBuild 只导入
+    距工程最近的一个 Directory.Build.props，这三处子树互不重叠，必须逐一接入）。
+    路径锚点用本文件自身位置（BuildScript/msbuild → 上两级即仓库根），不复用 TtTitanRoot——
+    它在多处被 -p:TitanRoot 无条件覆盖，外部根场景会与本清单的仓库相对定位分叉。
+    属性一律 _Titan* 私有前缀；_TitanTargetFramework 无条件从清单解析，且经 TreatAsLocalProperty
+    声明后调用方无法用 -p: 劫持（MSBuild 全局属性默认覆盖一切同名赋值，必须显式 TreatAsLocalProperty
+    才能还原本地权威）。清单路径 _TitanDepsJsonPath 是可被 -p:/环境变量覆盖的诊断/测试 seam
+    （测试用空清单触发 fail-fast），但 TFM 值仍只能来自该路径指向清单的正则提取。
+    正则锚定 dotnetSdk 块内部，避免命中文件里其他同名 targetFramework 字段。
+    InitialTargets 的 fail-fast 覆盖 Restore/Publish -p:NoBuild/TitanRunDataCopyerStage 等不经 Build 的入口。
+    未来升级 .NET：改 dependencies.json 的 targetFramework（+ global.json 的 SDK 版本），全库生效。
+  -->
+  <PropertyGroup>
+    <_TitanFrameworkRepoRoot Condition="'$(_TitanFrameworkRepoRoot)' == ''">$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..'))</_TitanFrameworkRepoRoot>
+    <_TitanDepsJsonPath Condition="'$(_TitanDepsJsonPath)' == ''">$(_TitanFrameworkRepoRoot)BuildScript\common\dependencies.json</_TitanDepsJsonPath>
+    <_TitanTargetFramework Condition="Exists('$(_TitanDepsJsonPath)')">$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(_TitanDepsJsonPath)')), '&quot;dotnetSdk&quot;\s*:\s*\{[^{}]*?&quot;targetFramework&quot;\s*:\s*&quot;(net[0-9.]+)&quot;').Groups[1].Value)</_TitanTargetFramework>
+  </PropertyGroup>
+  <Target Name="TitanRequireTargetFramework" Condition="'$(_TitanTargetFramework)' == ''">
+    <Error Text="_TitanTargetFramework 为空：无法从 $(_TitanDepsJsonPath) 解析 dotnetSdk.targetFramework（该字段是全库 TFM 单一事实源，缺失或改名都会在此 fail-fast）" />
+  </Target>
+</Project>

@@ -62,16 +62,19 @@ namespace NxRHI
 
 		return Ret;
 	}
-	bool DX12SwapChain::Init(DX12GpuDevice* device, const FSwapChainDesc& desc)
+	bool DX12SwapChain::Init(DX12GpuDevice* device, const FSwapChainDesc& desc, const char* file, int line)
 	{
 		Desc = desc;
+		// 记录创建归属：Resize 重建 backbuffer 时继续沿用，避免退化成 RHI 内部位置。
+		mCreateFile = file ? file : __FILE__;
+		mCreateLine = line ? line : __LINE__;
 		//Desc.BufferCount = 3;
 	
 		FFenceDesc fcdesc{};
 		fcdesc.InitValue = 0;
-		FramePresentFence = MakeWeakRef(device->CreateFence(&fcdesc, VStringA_FormatV("SwapChain Frame Fence").c_str(), __FILE__, __LINE__));
+		FramePresentFence = MakeWeakRef(device->CreateFence(&fcdesc, VStringA_FormatV("SwapChain Frame Fence").c_str(), mCreateFile, mCreateLine));
 
-		return Create(device, Desc.Width, Desc.Height);
+		return Create(device, Desc.Width, Desc.Height, mCreateFile, mCreateLine);
 	}
 	bool DX12SwapChain::Resize(IGpuDevice* device, UINT w, UINT h)
 	{
@@ -106,7 +109,7 @@ namespace NxRHI
 			{
 				ASSERT(false);
 			}
-			BackBuffers[i].CreateRtvAndSrv(device, i);
+			BackBuffers[i].CreateRtvAndSrv(device, i, mCreateFile, mCreateLine);
 		}
 
 		if (mSwapChain3 != nullptr)
@@ -115,8 +118,13 @@ namespace NxRHI
 			CurrentBackBuffer = 0;
 		return true;
 	}
-	bool DX12SwapChain::Create(IGpuDevice* device1, UINT w, UINT h)
+	bool DX12SwapChain::Create(IGpuDevice* device1, UINT w, UINT h, const char* file, int line)
 	{
+		if (file != nullptr)
+		{
+			mCreateFile = file;
+			mCreateLine = line;
+		}
 		mDeviceRef.FromObject(device1);
 		Desc.Width = w;
 		Desc.Height = h;
@@ -152,7 +160,7 @@ namespace NxRHI
 		{
 			if (BackBuffers[i].Texture == nullptr)
 			{
-				BackBuffers[i].Texture = MakeWeakRef(new DX12Texture());
+				BackBuffers[i].Texture = MakeWeakRef(NewObjectWithInfo<DX12Texture>(mCreateFile ? mCreateFile : __FILE__, mCreateLine ? mCreateLine : __LINE__));
 			}
 			auto pDx12Texture = (DX12Texture*)GetBackBuffer(i);
 			pDx12Texture->mDeviceRef.FromObject(device);
@@ -170,7 +178,7 @@ namespace NxRHI
 			{
 				ASSERT(false);
 			}
-			BackBuffers[i].CreateRtvAndSrv(device, i);
+			BackBuffers[i].CreateRtvAndSrv(device, i, mCreateFile, mCreateLine);
 		}
 		
 		if (mSwapChain3 != nullptr)
@@ -226,7 +234,7 @@ namespace NxRHI
 			((DX12GpuDevice*)device)->OnDeviceRemoved();
 		}
 	}
-	void DX12SwapChain::FBackBuffer::CreateRtvAndSrv(IGpuDevice* device, UINT index)
+	void DX12SwapChain::FBackBuffer::CreateRtvAndSrv(IGpuDevice* device, UINT index, const char* file, int line)
 	{
 		FRtvDesc rtvDesc{};
 		rtvDesc.SetTexture2D();
@@ -234,7 +242,7 @@ namespace NxRHI
 		rtvDesc.Height = Texture->Desc.Height;
 		rtvDesc.Format = Texture->Desc.Format;
 		rtvDesc.Texture2D.MipSlice = 0;
-		Rtv = MakeWeakRef(device->CreateRTV(Texture, &rtvDesc, __FILE__, __LINE__));
+		Rtv = MakeWeakRef(device->CreateRTV(Texture, &rtvDesc, file ? file : __FILE__, line ? line : __LINE__));
 	}
 }
 

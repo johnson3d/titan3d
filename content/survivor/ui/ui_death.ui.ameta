@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.UI.TtUIAssetAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="59351294f37de611150c51bbd01fd4af813f5de157159062b95e70140a26dfc4" />
+      <Path Type="System.String@Unknown" Value="ui_death.ui/class_graph.dat" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="5a6aa7aea71ea2ca90155afb5682717e6e5f616baabe4a958a9da1b8b4198951" />
+      <Path Type="System.String@Unknown" Value="ui_death.ui/on_mouseleftbuttondown_6950276604528878629_63_e9_c8_29_b7_7c_c7_3b_af_1d_3f_48_f1_93_cd_22_6d_b5_c9_d1.fn" />
+    </e_1>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="2ff5d4d3-0313-42ec-aa10-d3713f77df08" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,survivor/ui/ui_death.ui,2ff5d4d3-0313-42ec-aa10-d3713f77df08" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.UI.TtUIAsset&#xA;" />
+  <DesignResolution Type="EngineNS.Vector2i@EngineCore" Value="0,0" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <IsDisable Type="System.Boolean@Unknown" Value="False" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.UI.TtUIAsset@EngineCore" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+</Root>

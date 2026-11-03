@@ -1,0 +1,2 @@
+GameProject
+NS_survivor.monsters.barghest.DMC_PoseOutput_3721581790@GameProject

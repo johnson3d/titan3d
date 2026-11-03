@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1502687234386752237 Type="NS_project_factory.belica.DMC_AnimCompoundState_0_1422827071@GameProject">
+  <AnimSubState Type="NS_project_factory.belica.DMC_AnimSubState_1500684542@GameProject" Order="0" />
+  <Transition_From_AnimCompoundState_0_To_AnimSubState Type="NS_project_factory.belica.DMC_Transition_From_AnimCompoundState_0_To_AnimSubState_216445893@GameProject" Order="0" />
+</Hash_1502687234386752237>

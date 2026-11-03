@@ -1,0 +1,211 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Titan: Configure (Mac, Debug + compile_commands)",
+      "type": "shell",
+      "command": "/opt/homebrew/bin/cmake",
+      "args": [
+        "-S",
+        "Core.Mac",
+        "-B",
+        "intermediate/cpp/Core.Mac/Debug",
+        "-G",
+        "Ninja",
+        "-DCMAKE_BUILD_TYPE=Debug",
+        "-DCMAKE_OSX_ARCHITECTURES=arm64",
+        "-DTITAN_MAC_ALLOW_UNDEFINED=OFF",
+        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Titan: Codegen (Mac, Debug)",
+      "type": "shell",
+      "command": "/opt/homebrew/bin/cmake",
+      "args": [
+        "-DTITAN_CONFIGURATION=Debug",
+        "-P",
+        "Core.Mac/GenerateCodegen.cmake"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Titan: Setup & Build Native (Debug)",
+      "type": "shell",
+      "command": "${workspaceFolder}/setup.sh",
+      "args": [
+        "--config",
+        "Debug"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Titan: Setup Deps Check (Mac)",
+      "type": "shell",
+      "command": "${workspaceFolder}/setup.sh",
+      "args": [
+        "--check-only"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Titan: Native Build (Debug)",
+      "type": "shell",
+      "command": "/opt/homebrew/bin/cmake",
+      "args": [
+        "--build",
+        "intermediate/cpp/Core.Mac/Debug"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": "$gcc"
+    },
+    {
+      "label": "Titan: Engine.Mac Build (Debug)",
+      "type": "shell",
+      "command": "${workspaceFolder}/Core.Mac/dotnet.sh",
+      "args": [
+        "build",
+        "Module/Engine.Mac/Engine.Mac.csproj",
+        "-c",
+        "Debug",
+        "-p:TitanPlatform=Mac",
+        "-p:SkipTitanCodeGen=true",
+        "-p:TitanRoot=${workspaceFolder}/"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Titan: TitanCMD Build (Debug)",
+      "type": "shell",
+      "command": "${workspaceFolder}/Core.Mac/dotnet.sh",
+      "args": [
+        "build",
+        "Module/TitanCMD/TitanCMD.csproj",
+        "-c",
+        "Debug",
+        "-p:TitanPlatform=Mac",
+        "-p:SkipTitanCodeGen=true",
+        "-p:TitanRoot=${workspaceFolder}/"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Titan: DataCopyer Stage (Debug)",
+      "type": "shell",
+      "command": "${workspaceFolder}/Core.Mac/dotnet.sh",
+      "args": [
+        "msbuild",
+        "Module/Engine.Mac/Engine.Mac.csproj",
+        "-nologo",
+        "-t:TitanRunDataCopyerStage",
+        "-p:Configuration=Debug",
+        "-p:TitanPlatform=Mac",
+        "-p:SkipTitanCodeGen=true",
+        "-p:TitanRoot=${workspaceFolder}/"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Titan: Build All (Debug)",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Titan: Native Build (Debug)",
+        "Titan: Engine.Mac Build (Debug)",
+        "Titan: TitanCMD Build (Debug)",
+        "Titan: DataCopyer Stage (Debug)"
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Titan: MainEditor Managed Build (Debug)",
+      "type": "shell",
+      "command": "${workspaceFolder}/Core.Mac/dotnet.sh",
+      "args": [
+        "build",
+        "Module/MainEditor/MainEditor.csproj",
+        "-c",
+        "Debug",
+        "-p:SkipTitanCodeGen=true"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Titan: MainEditor Build All (Debug)",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Titan: Native Build (Debug)",
+        "Titan: MainEditor Managed Build (Debug)"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Titan: Run MainEditor (no debug, for attach)",
+      "type": "shell",
+      "command": "${workspaceFolder}/binaries/net10.0/MainEditor",
+      "args": [
+        "NativeDLL=debug",
+        "config=${workspaceFolder}/content/config/engineconfig_mac_vk.jscfg"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/binaries/net10.0"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Titan: Run TitanCMD (smoke)",
+      "type": "shell",
+      "command": "${workspaceFolder}/Core.Mac/smoke_titancmd.sh",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Titan: Run TitanCMD (no debug, for attach)",
+      "type": "shell",
+      "command": "${workspaceFolder}/Core.Mac/dotnet.sh",
+      "args": [
+        "net10.0/TitanCMD.dll",
+        "ExeCmd=MakeSln",
+        "CookCfg=${workspaceFolder}/content/config/engineconfig_mac_cmd.jscfg",
+        "NativeDLL=debug"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/binaries"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

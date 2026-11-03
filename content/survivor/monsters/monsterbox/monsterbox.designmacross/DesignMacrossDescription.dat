@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.DesignMacross.UDesignMacross@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,survivor/monsters/monsterbox/monsterbox.designmacross,dfdd4b35-703e-493b-b8ce-ee314f29192b" />
+  <DesignedClassDescription Type="EngineNS.DesignMacross.Design.TtClassDescription@EngineCore">
+    <DesignableVariables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IDesignableVariableDescription@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Type="EngineNS.Animation.Macross.Postprocessing.TtAnimFinalBlendTreeClassDescription@EngineCore">
+        <Id Type="System.Guid@Unknown" Value="2d0ba704-5a79-43a6-9862-1cbcf9385deb" />
+        <IsStruct Type="System.Boolean@Unknown" Value="False" />
+        <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Count="0" />
+        <Name Type="System.String@Unknown" Value="FinalBlendTree_0" />
+        <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Animation.Macross.BlendTree.Node.TtBlendTreeNodeClassDescription@EngineCore,&gt;@Unknown" Count="0" />
+        <PoseLines Type="System.Collections.Generic.List&lt;EngineNS.Animation.Macross.BlendTree.TtPoseLineDescription@EngineCore,&gt;@Unknown" Count="0" />
+        <PoseOutput Type="EngineNS.Animation.Macross.BlendTree.TtBlendTree_PoseOutputClassDescription@EngineCore">
+          <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+          <Id Type="System.Guid@Unknown" Value="7919fd4d-13d3-47dd-8db8-fd79797d8ac1" />
+          <IsStruct Type="System.Boolean@Unknown" Value="False" />
+          <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Count="0" />
+          <PoseInPins Type="System.Collections.Generic.List&lt;EngineNS.Animation.Macross.BlendTree.TtPoseInPinDescription@EngineCore,&gt;@Unknown" Count="1">
+            <e_0 Type="EngineNS.Animation.Macross.BlendTree.TtPoseInPinDescription@EngineCore">
+              <Id Type="System.Guid@Unknown" Value="c87fdefa-609a-42b2-becd-351e2417fbd8" />
+              <Name Type="System.String@Unknown" Value="" />
+            </e_0>
+          </PoseInPins>
+          <PoseOutPins Type="System.Collections.Generic.List&lt;EngineNS.Animation.Macross.BlendTree.TtPoseOutPinDescription@EngineCore,&gt;@Unknown" Count="0" />
+          <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
+            <e_0 Value="EngineNS.Animation.BlendTree.Node.TtLocalSpaceBlendTree_PoseOutput&lt;monsterbox&gt;" />
+          </SupperClassNames>
+          <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+          <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+            <IsEnum Type="System.Boolean@Unknown" Value="False" />
+            <TypeFullName Type="System.String@Unknown" Value="DMC_PoseOutput_2259889002" />
+          </VariableType>
+          <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+        </PoseOutput>
+        <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
+          <e_0 Value="EngineNS.Animation.BlendTree.TtLocalSpacePoseFinalBlendTree&lt;monsterbox&gt;" />
+        </SupperClassNames>
+        <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+        <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+          <IsEnum Type="System.Boolean@Unknown" Value="False" />
+          <TypeFullName Type="System.String@Unknown" Value="DMC_FinalBlendTree_0_971810588" />
+        </VariableType>
+        <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+      </e_0>
+    </DesignableVariables>
+    <Id Type="System.Guid@Unknown" Value="ecd2141d-8842-434d-932d-79620f15a898" />
+    <IsStruct Type="System.Boolean@Unknown" Value="False" />
+    <Location Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+    <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Count="0" />
+    <Name Type="System.String@Unknown" Value="monsterbox" />
+    <Namespace Type="EngineNS.Bricks.CodeBuilder.TtNamespaceDeclaration@EngineCore">
+      <Classes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtClassDeclaration@EngineCore,&gt;@Unknown" Count="0" />
+      <Namespace Type="System.String@Unknown" Value="NS_survivor.monsters.monsterbox" />
+    </Namespace>
+    <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
+      <e_0 Value="EngineNS.DesignMacross.TtDesignMacrossBase" />
+    </SupperClassNames>
+    <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Count="0" />
+    <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+  </DesignedClassDescription>
+  <DesignMacrossBaseClass Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.DesignMacross.TtDesignMacrossBase@EngineCore" />
+</Root>

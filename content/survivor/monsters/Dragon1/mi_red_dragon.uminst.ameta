@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="0" />
+  <AssetId Type="System.Guid@Unknown" Value="3b33740d-9dda-4172-b623-fe43014a658d" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,survivor/monsters/dragon1/mi_red_dragon.uminst,3b33740d-9dda-4172-b623-fe43014a658d" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="4">
+    <e_0 Value="Game,survivor/monsters/dragon1/m_dragon1.material,5e9856b6-84b2-4d44-a0dd-52be89c619bb" />
+    <e_1 Value="Game,survivor/monsters/dragon1/textures/red_bctex.srv,46315138-4ab0-4726-a3df-d7051d8139bd" />
+    <e_2 Value="Game,survivor/monsters/dragon1/textures/allcolor_ntex.srv,2801e04e-15b0-471a-9937-72c381b9f95e" />
+    <e_3 Value="Game,survivor/monsters/dragon1/textures/allcolor_r_ao_mttex.srv,342ca2c8-3e44-47e6-81a2-1dbcb25e3dbf" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
+</Root>

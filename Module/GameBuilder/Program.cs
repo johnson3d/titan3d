@@ -48,9 +48,32 @@ try
     System.Console.WriteLine($"config file: {cfgFile}");
     System.Console.WriteLine($"TitanEngine GameBuilder: {assemblyFile}");
 
-    EngineNS.Macross.TtMacrossModule.CompileGameProject(csFilesPath, projectFile, assemblyFile, TtEngine.Instance.CurrentPlatform, enableMirror: true);
+    var compiled = EngineNS.Macross.TtMacrossModule.CompileGameProject(csFilesPath, projectFile, assemblyFile, TtEngine.Instance.CurrentPlatform, enableMirror: true);
+
+    // 引擎 native 后台线程（VParallelTaskManager 任务池 / F2M / 内存流 / 日志）仍持有托管回调。
+    // Main 正常 return 和 Environment.Exit 都会走 CLR 关闭序列，关闭期间 native 线程再反向进入托管代码会触发
+    // "Attempt to execute managed code after the .NET runtime thread state has been destroyed" 断言，
+    // 以 FailFast(0xC0000602) 结束进程：编译其实已成功，MSBuild 却报 MSB3073。
+    // 先按 TtEngine.FinalCleanup 的尾部顺序摘掉这些 native->托管 入口，再硬退出，完全不进 CLR 关闭序列。
+    try
+    {
+        EngineNS.VParallelTaskManager.SetFunction(null);
+        EngineNS.IO.TtMemWriter.FinalNativeCallback();
+        EngineNS.IO.TtMemReader.FinalNativeCallback();
+        EngineNS.CoreSDK.FinalF2MManager();
+    }
+    catch (System.Exception cleanEx)
+    {
+        System.Console.WriteLine($"GameBuilder cleanup: {cleanEx.Message}");
+    }
+
+    if (!compiled)
+        System.Console.WriteLine("GameBuilder: CompileGameProject failed.");
+
+    GameBuilder.NativeExit.Now(compiled ? 0 : 1);
 }
 catch(System.Exception e)
 {
     Console.WriteLine(e.ToString());
+    GameBuilder.NativeExit.Now(1);
 }

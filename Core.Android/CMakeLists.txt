@@ -1,4 +1,4 @@
-# Android 原生库: binaries/android/<config>/libCore.Android.so（arm64-v8a / API 28 / c++_static）
+# Android 原生库: binaries/android/<config>/libCore.Android.so（arm64-v8a / API >= 28 可配 / c++_static）
 # 配置（仓库根）: cmake -S Core.Android -B intermediate/cpp/Core.Android/Debug -G Ninja -DCMAKE_BUILD_TYPE=Debug
 #               -DTITAN_CONFIGURATION=Debug -DCMAKE_TOOLCHAIN_FILE=<ndk>/build/cmake/android.toolchain.cmake ...
 # 中间产物统一落 intermediate/cpp/<Project>/<Config>，源码目录内构建会被拒绝。
@@ -27,10 +27,19 @@ enable_language(C CXX)
 if(NOT CMAKE_SYSTEM_NAME STREQUAL "Android" OR NOT CMAKE_ANDROID_ARCH_ABI STREQUAL "arm64-v8a")
   message(FATAL_ERROR "只支持 Android arm64-v8a (ABI=${CMAKE_ANDROID_ARCH_ABI})")
 endif()
-# project(LANGUAGES NONE) 下 NDK 工具链不会把 API 回填到 CMAKE_SYSTEM_VERSION（恒为 1），
-# 而它已按 ANDROID_PLATFORM 选中 sysroot/usr/lib/<triple>/28；此处直接校验输入契约。
-if(NOT ANDROID_PLATFORM STREQUAL "28" AND NOT ANDROID_PLATFORM STREQUAL "android-28")
-  message(FATAL_ERROR "只支持 API 28 (ANDROID_PLATFORM=${ANDROID_PLATFORM})")
+# API 级别由用户配置（android-toolchain.json 的 apiLevel，经 ANDROID_PLATFORM 传入），
+# sysroot/usr/lib/<triple>/<api> 由 NDK 工具链自动选择，这里只校验运行时下限：
+# 引擎/native 依赖契约从 28 起（低版本缺 libc++/Vulkan 相关保证），低于 28 直接拒绝。
+set(TITAN_ANDROID_MIN_API_LEVEL 28 CACHE STRING "引擎支持的最低 Android API 级别")
+if(ANDROID_PLATFORM MATCHES "^android-([0-9]+)$")
+  set(_titan_api "${CMAKE_MATCH_1}")
+elseif(ANDROID_PLATFORM MATCHES "^([0-9]+)$")
+  set(_titan_api "${CMAKE_MATCH_1}")
+else()
+  set(_titan_api -1)
+endif()
+if(_titan_api LESS TITAN_ANDROID_MIN_API_LEVEL)
+  message(FATAL_ERROR "Android API ${_titan_api} 低于最低要求 ${TITAN_ANDROID_MIN_API_LEVEL} (ANDROID_PLATFORM=${ANDROID_PLATFORM})")
 endif()
 if(NOT ANDROID_STL STREQUAL "c++_static")
   message(FATAL_ERROR "只支持 c++_static (ANDROID_STL=${ANDROID_STL})")

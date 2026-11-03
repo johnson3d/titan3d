@@ -601,6 +601,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{6A1D3E
 	ProjectSection(SolutionItems) = preProject
 		BuildScript\common\common.ps1 = BuildScript\common\common.ps1
 		BuildScript\common\dependencies.json = BuildScript\common\dependencies.json
+		BuildScript\common\progress-run.sh = BuildScript\common\progress-run.sh
 		BuildScript\common\SolutionTools.ps1 = BuildScript\common\SolutionTools.ps1
 	EndProjectSection
 EndProject
@@ -616,6 +617,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "msbuild", "msbuild", "{6A1D
 	ProjectSection(SolutionItems) = preProject
 		BuildScript\msbuild\TitanCodeGen.targets = BuildScript\msbuild\TitanCodeGen.targets
 		BuildScript\msbuild\TitanDataCopyer.targets = BuildScript\msbuild\TitanDataCopyer.targets
+		BuildScript\msbuild\TitanFramework.props = BuildScript\msbuild\TitanFramework.props
 		BuildScript\msbuild\TitanManagedEngine.props = BuildScript\msbuild\TitanManagedEngine.props
 		BuildScript\msbuild\TitanManagedProject.props = BuildScript\msbuild\TitanManagedProject.props
 		BuildScript\msbuild\TitanPlatform.props = BuildScript\msbuild\TitanPlatform.props
@@ -2197,7 +2199,6 @@ Global
 		3rd\native\xatlas\xatlas.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\zlib\zlib.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\zstd\zstd.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
-		codegen\Android\NativeBinder\CodeGen.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Base\Base.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\Animation\Animation.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\Canvas\Canvas.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4

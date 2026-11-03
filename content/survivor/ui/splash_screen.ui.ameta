@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.UI.TtUIAssetAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="3">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="7ea8f1a28d4932219fed48c9284e6cc8d56debc1cf8176d77f1f7ade85d212c7" />
+      <Path Type="System.String@Unknown" Value="splash_screen.ui/class_graph.dat" />
+    </e_0>
+    <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="f30cb716104411e904ebeae9c1d9a812cc46e34ec2771543705f30d9a9115261" />
+      <Path Type="System.String@Unknown" Value="splash_screen.ui/on_mousebuttondown_13566274906715060368_b8_07_da_1b_e3_63_5a_d3_c5_fb_6c_fa_de_b6_8f_d3_9a_48_50_1f.fn" />
+    </e_1>
+    <e_2 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="9fc6e977a593cf6398400e139e1f3bb8334bb1d578d4a948b7674b885198f938" />
+      <Path Type="System.String@Unknown" Value="splash_screen.ui/on_mousebuttonup_7740614240042391714_be_c9_95_66_60_e4_6a_75_f7_24_e6_46_a7_10_af_fc_1d_ed_ab_99.fn" />
+    </e_2>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="4027783c-0b24-4d01-9c05-56fb864e82e8" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,survivor/ui/splash_screen.ui,4027783c-0b24-4d01-9c05-56fb864e82e8" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.UI.TtUIAsset&#xA;" />
+  <DesignResolution Type="EngineNS.Vector2i@EngineCore" Value="0,0" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <IsDisable Type="System.Boolean@Unknown" Value="False" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
+    <e_0 Value="Game,survivor/ui/ui_battle.ui,327b07a9-4fc1-4de8-9946-32e512334646" />
+    <e_1 Value="Game,survivor/maps/firstlevel/scene_firstlevel.scene,026bb84c-e29f-45bc-9403-3707321fb9f5" />
+    <e_2 Value="Game,survivor/survivorgame.macross,a00a9f95-1be2-4899-a745-80d2fa28e48a" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.UI.TtUIAsset@EngineCore" />
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+</Root>

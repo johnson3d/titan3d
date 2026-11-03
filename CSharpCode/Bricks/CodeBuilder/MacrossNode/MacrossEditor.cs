@@ -2044,22 +2044,181 @@ namespace EngineNS.Macross
             var projectFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.ConfigManager.GetConfig<TtEditorConfig>().GameProject;
             success = CompileGameProject(csFilesPath, projectFile, assemblyFile, platformType);
         }
+        /// <summary>
+        /// GameProject 工程输入求值结果（引用与编译文件清单），由 MSBuild CLI 求值：
+        /// 表达式（TFM、平台、import 链）与 Compile glob 均按真实 MSBuild 语义展开。
+        /// </summary>
+        public sealed class TitanProjectInputs
+        {
+            public List<string> References = new List<string>();
+            public List<string> CompileFiles = new List<string>();
+        }
+
+        static string FindRepositoryRoot(string startDir)
+        {
+            var dir = startDir;
+            while (dir != null)
+            {
+                if (File.Exists(Path.Combine(dir, "global.json")))
+                    return dir;
+                dir = Path.GetDirectoryName(dir);
+            }
+            return startDir;
+        }
+
+        /// <summary>
+        /// 用 dotnet msbuild 求值工程输入：-getItem:Reference 取引用（HintPath 已含求值后的
+        /// TFM/平台表达式，如 $(TitanEngineAssemblyPath) 按宿主平台选引擎 dll），
+        /// -t:TitanDumpCompileInputs 把最终 Compile 清单（含 Macross 落盘文件与生成文件 glob）
+        /// dump 到临时文件。生成文件须在调用前落盘，才能被 Exists 条件命中。
+        /// </summary>
+        public static TitanProjectInputs EvaluateProjectCompileInputs(string projectFile,
+            string gameCsRoot = null, string genCodeFile = null)
+        {
+            projectFile = Path.GetFullPath(projectFile);
+            // 指纹缓存：热编译时 csproj/props/文件集合未变则直接复用上次求值结果，不重起 dotnet 进程
+            var fingerprint = ComputeInputsFingerprint(projectFile, gameCsRoot, genCodeFile);
+            lock (TitanInputsCacheLock)
+            {
+                if (TitanInputsCache.TryGetValue(projectFile, out var cached) &&
+                    cached.Fingerprint == fingerprint)
+                    return cached.Inputs;
+            }
+            var projectPath = Path.GetDirectoryName(projectFile);
+            var inputsFile = Path.Combine(Path.GetTempPath(), $"titan-compile-inputs-{Guid.NewGuid():N}.txt");
+
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "dotnet",
+                WorkingDirectory = FindRepositoryRoot(projectPath),
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+            };
+            psi.ArgumentList.Add("msbuild");
+            psi.ArgumentList.Add(projectFile);
+            psi.ArgumentList.Add("-t:TitanDumpCompileInputs");
+            psi.ArgumentList.Add("-getItem:Reference");
+            psi.ArgumentList.Add($"-p:TitanCompileInputsFile={inputsFile}");
+            psi.ArgumentList.Add("-nologo");
+            psi.ArgumentList.Add("-v:q");
+
+            using (var proc = System.Diagnostics.Process.Start(psi))
+            {
+                var stdout = proc.StandardOutput.ReadToEnd();
+                var stderr = proc.StandardError.ReadToEnd();
+                proc.WaitForExit();
+                try
+                {
+                    if (proc.ExitCode != 0)
+                        throw new InvalidOperationException(
+                            $"dotnet msbuild 求值工程输入失败({proc.ExitCode}): {projectFile}\n{stderr}");
+
+                    var inputs = new TitanProjectInputs();
+                    var jsonStart = stdout.IndexOf('{');
+                    if (jsonStart < 0)
+                        throw new InvalidOperationException($"dotnet msbuild 未输出 JSON: {stdout}");
+                    using (var doc = System.Text.Json.JsonDocument.Parse(stdout.Substring(jsonStart)))
+                    {
+                        if (doc.RootElement.TryGetProperty("Items", out var items) &&
+                            items.TryGetProperty("Reference", out var refs))
+                        {
+                            foreach (var item in refs.EnumerateArray())
+                            {
+                                var hintPath = item.TryGetProperty("HintPath", out var hp) ? hp.GetString() : null;
+                                var identity = item.TryGetProperty("Identity", out var id) ? id.GetString() : null;
+                                if (!string.IsNullOrWhiteSpace(hintPath))
+                                    inputs.References.Add(Path.GetFullPath(Path.Combine(projectPath, hintPath)));
+                                else if (!string.IsNullOrWhiteSpace(identity) &&
+                                    (identity.Contains('/') || identity.Contains('\\')))
+                                    inputs.References.Add(Path.GetFullPath(Path.Combine(projectPath, identity)));
+                                // 裸程序集名（无路径）跳过，由 Roslyn 默认引用集提供
+                            }
+                        }
+                    }
+                    if (File.Exists(inputsFile))
+                    {
+                        foreach (var line in File.ReadAllLines(inputsFile))
+                        {
+                            if (string.IsNullOrWhiteSpace(line))
+                                continue;
+                            inputs.CompileFiles.Add(Path.GetFullPath(Path.Combine(projectPath, line)));
+                        }
+                    }
+                    lock (TitanInputsCacheLock)
+                    {
+                        TitanInputsCache[projectFile] = new TitanInputsCacheEntry { Fingerprint = fingerprint, Inputs = inputs };
+                    }
+                    return inputs;
+                }
+                finally
+                {
+                    if (File.Exists(inputsFile))
+                        File.Delete(inputsFile);
+                }
+            }
+        }
+
+        sealed class TitanInputsCacheEntry
+        {
+            public string Fingerprint;
+            public TitanProjectInputs Inputs;
+        }
+        static readonly object TitanInputsCacheLock = new object();
+        static readonly Dictionary<string, TitanInputsCacheEntry> TitanInputsCache =
+            new Dictionary<string, TitanInputsCacheEntry>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// 求值输入指纹：csproj + 工程向上到仓库根的 Directory.Build.*/global.json +
+        /// 已知影响求值的引擎 props；Macross 源码只看文件集合（内容/时间变化不改变清单）；
+        /// 生成文件只看存在性。任一变化即缓存失效。
+        /// </summary>
+        static string ComputeInputsFingerprint(string projectFile, string gameCsRoot, string genCodeFile)
+        {
+            var sb = new StringBuilder();
+            void AppendFile(string path)
+            {
+                if (!File.Exists(path))
+                    return;
+                var fi = new FileInfo(path);
+                sb.Append(path.ToUpperInvariant()).Append('|')
+                  .Append(fi.LastWriteTimeUtc.Ticks).Append('|').Append(fi.Length).Append(';');
+            }
+            AppendFile(projectFile);
+            var repoRoot = FindRepositoryRoot(Path.GetDirectoryName(projectFile));
+            var dir = Path.GetDirectoryName(projectFile);
+            while (dir != null)
+            {
+                AppendFile(Path.Combine(dir, "Directory.Build.props"));
+                AppendFile(Path.Combine(dir, "Directory.Build.targets"));
+                AppendFile(Path.Combine(dir, "Directory.Packages.props"));
+                if (string.Equals(dir, repoRoot, StringComparison.OrdinalIgnoreCase))
+                    break;
+                dir = Path.GetDirectoryName(dir);
+            }
+            AppendFile(Path.Combine(repoRoot, "global.json"));
+            AppendFile(Path.Combine(repoRoot, "BuildScript", "msbuild", "TitanManagedProject.props"));
+            AppendFile(Path.Combine(repoRoot, "BuildScript", "msbuild", "TitanPlatform.props"));
+            AppendFile(Path.Combine(repoRoot, "BuildScript", "msbuild", "TitanFramework.props"));
+            AppendFile(Path.Combine(repoRoot, "BuildScript", "common", "dependencies.json"));
+            if (!string.IsNullOrEmpty(gameCsRoot) && Directory.Exists(gameCsRoot))
+            {
+                var files = Directory.GetFiles(gameCsRoot, "*.cs", SearchOption.AllDirectories)
+                    .Select(f => f.Substring(gameCsRoot.Length).ToUpperInvariant())
+                    .OrderBy(f => f, StringComparer.Ordinal);
+                sb.Append("GameCS:").Append(string.Join(";", files)).Append(';');
+            }
+            sb.Append("GenCode:").Append(genCodeFile != null && File.Exists(genCodeFile)).Append(';');
+            return sb.ToString();
+        }
+
         public static bool CompileGameProject(string csFilesPath, string projectFile, string assemblyFile, EPlatformType platformType, bool enableMirror = false)
         {
             csFilesPath = EngineNS.IO.TtFileManager.GetValidDirectory(csFilesPath);
+            // Game 根下的 Macross 源码仅用于生成 CreateInstance 开关；编译清单由 MSBuild glob 提供
             var csFiles = new List<string>(EngineNS.IO.TtFileManager.GetFiles(csFilesPath, "*.cs"));
-            List<string> arguments = new List<string>();
-            for (int i = 0; i < csFiles.Count; ++i)
-            {
-                arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.CSFile, csFiles[i]));
-                string firstLine = System.IO.File.ReadLines(csFiles[i]).First();
-                if (firstLine.StartsWith(Bricks.CodeBuilder.TtMacrossAMeta.DisablePreDefineKey))
-                {
-                    var predefine = firstLine.Replace(Bricks.CodeBuilder.TtMacrossAMeta.DisablePreDefineKey, "").Replace("\r\n", "");
-                    arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.PreprocessorSymbol, predefine));
-                }
-            }
-
+            
             var createInstanceCode = $@"
 namespace EngineNS.Rtti
 {{
@@ -2106,24 +2265,24 @@ namespace EngineNS.Rtti
             {
                 extCodeWriter.Write(createInstanceCode);
             }
-            arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.CSFile, genCodeFileName));
 
-            var projCSFiles = EngineNS.IO.TtFileManager.GetFiles(projectPath, "*.cs");
-            foreach (var csFile in projCSFiles)
+            // 工程输入（引用 + 编译清单，含 Game 根 Macross 源码与生成的 _gencode.cs）交由 MSBuild 求值
+            var projectInputs = EvaluateProjectCompileInputs(projectFile, csFilesPath, genCodeFileName);
+            List<string> arguments = new List<string>();
+            foreach (var csFile in projectInputs.CompileFiles)
             {
-                if (csFile.Contains(projectPath + "obj"))
-                    continue;
                 arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.CSFile, csFile));
+                string firstLine = System.IO.File.ReadLines(csFile).First();
+                if (firstLine.StartsWith(Bricks.CodeBuilder.TtMacrossAMeta.DisablePreDefineKey))
+                {
+                    var predefine = firstLine.Replace(Bricks.CodeBuilder.TtMacrossAMeta.DisablePreDefineKey, "").Replace("\r\n", "");
+                    arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.PreprocessorSymbol, predefine));
+                }
             }
 
-            var projDef = XDocument.Load(projectFile);
-            if (projDef != null)
+            foreach (var reference in projectInputs.References)
             {
-                var references = projDef.Element("Project").Elements("ItemGroup").Elements("Reference").Select(refElem => refElem.Value);
-                foreach (var reference in references)
-                {
-                    arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.RefAssemblyFile, projectPath + reference));
-                }
+                arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.RefAssemblyFile, reference));
             }
 
             var pluginDir = TtEngine.Instance.FileManager.BinariesDir + "/plugins/";

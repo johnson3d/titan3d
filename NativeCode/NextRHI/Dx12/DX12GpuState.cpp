@@ -63,10 +63,10 @@ namespace NxRHI
 	{
 		mView = nullptr;
 	}
-	bool DX12Sampler::Init(DX12GpuDevice* device, const FSamplerDesc& desc)
+	bool DX12Sampler::Init(DX12GpuDevice* device, const FSamplerDesc& desc, const char* file, int line)
 	{
 		Desc = desc;
-		mView = device->mSamplerAllocator->Alloc<DX12PagedHeap>();
+		mView = device->mSamplerAllocator->Alloc<DX12PagedHeap>(file ? file : __FILE__, line ? line : __LINE__);
 		mDeviceRef.FromObject(device);
 
 		D3D12_SAMPLER_DESC				mDxDesc;

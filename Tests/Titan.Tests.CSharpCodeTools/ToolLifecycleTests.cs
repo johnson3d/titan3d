@@ -417,12 +417,12 @@ public class ToolLifecycleTests
         var scripts = Path.Combine(directory, "BuildScript");
         Directory.CreateDirectory(Path.Combine(scripts, "common"));
         Directory.CreateDirectory(Path.Combine(directory, "Plugins"));
-        var tools = Path.Combine(directory, "binaries", "Tools", "net8.0");
+        var tools = Path.Combine(directory, "binaries", "Tools", ManagedProjectTests.ExpectedTfm());
         Directory.CreateDirectory(tools);
         File.Copy(Path.Combine(ManagedProjectTests.Root(), "BuildScript", "build.ps1"), Path.Combine(scripts, "build.ps1"));
         foreach (var name in new[] { "CppWeavingTools", "CSharpCodeTools" })
             File.WriteAllText(Path.Combine(tools, name + ".exe"), "外部编译在此编排测试中仅记录参数");
-        File.WriteAllText(Path.Combine(scripts, "common", "common.ps1"), """
+        var buildCommonStub = """
             function Assert-WindowsHost { }
             function Get-RepoRoot { Split-Path (Split-Path $PSScriptRoot -Parent) -Parent }
             function Find-DotNet { 'dotnet' }
@@ -430,12 +430,14 @@ public class ToolLifecycleTests
             function Find-Vs2022MsBuild { 'msbuild' }
             function Import-VsDevEnvironment { param($Path) }
             function Test-RepoFile { param($Project) Join-Path (Get-RepoRoot) $Project }
+            function Get-TitanTargetFramework { 'TMPTFM' }
             function Invoke-External {
                 param([string]$File, [string[]]$Arguments, [string]$WorkingDirectory)
                 @{ File=$File; Arguments=@($Arguments) } | ConvertTo-Json -Compress |
                     Add-Content -LiteralPath (Join-Path (Get-RepoRoot) 'trace.jsonl') -Encoding UTF8
             }
-            """, Encoding.UTF8);
+            """;
+        File.WriteAllText(Path.Combine(scripts, "common", "common.ps1"), buildCommonStub.Replace("TMPTFM", ManagedProjectTests.ExpectedTfm()), Encoding.UTF8);
         var start = new ProcessStartInfo("powershell.exe")
         {
             WorkingDirectory = directory, UseShellExecute = false,
@@ -553,9 +555,13 @@ public class ToolLifecycleTests
             File.Copy(Path.Combine(ManagedProjectTests.Root(), "Directory.Packages.props"), Path.Combine(directory, "Directory.Packages.props"));
             Directory.CreateDirectory(Path.Combine(directory, "BuildScript", "msbuild"));
             File.Copy(Path.Combine(ManagedProjectTests.Root(), "BuildScript", "msbuild", "TitanPlatform.props"), Path.Combine(directory, "BuildScript", "msbuild", "TitanPlatform.props"));
+            File.Copy(Path.Combine(ManagedProjectTests.Root(), "BuildScript", "msbuild", "TitanFramework.props"), Path.Combine(directory, "BuildScript", "msbuild", "TitanFramework.props"));
+            Directory.CreateDirectory(Path.Combine(directory, "BuildScript", "common"));
+            File.Copy(Path.Combine(ManagedProjectTests.Root(), "BuildScript", "common", "dependencies.json"), Path.Combine(directory, "BuildScript", "common", "dependencies.json"));
+            File.WriteAllText(Path.Combine(directory, "Directory.Build.props"), "<Project>\n  <Import Project=\"$(MSBuildThisFileDirectory)BuildScript\\msbuild\\TitanFramework.props\" />\n</Project>");
             var result = Run(directory, "build", Path.Combine(projectDirectory, "CSharpCodeTools.csproj"), "--nologo", "-v:quiet", "-p:TitanPlatform=Windows", "-p:NuGetAudit=false");
             Assert.That(result.Code, Is.Zero, result.Log);
-            var dll = Path.Combine(directory, "binaries", "Tools", "net8.0", "CSharpCodeTools.dll");
+            var dll = Path.Combine(directory, "binaries", "Tools", ManagedProjectTests.ExpectedTfm(), "CSharpCodeTools.dll");
             Assert.That(File.Exists(dll), Is.True, "源码工具必须能从无引擎和无生成物的 checkout 自举");
             Assert.That(File.ReadAllText(Path.Combine(Path.GetDirectoryName(dll)!, "Templates", "Empty_CodeGenCSharp.projitems")), Is.EqualTo("<Project />"));
             var forwarding = Run(directory, dll, "mode=DataCopyer", "TitanRoot=" + directory, "Platform=Windows", "Configuration=Debug");

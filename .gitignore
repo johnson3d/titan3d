@@ -1,4 +1,59 @@
 # ==============================================================================
+# 根目录白名单：顶层默认全忽略，只豁免有意入库的条目。
+# 任何新冒出的顶层目录/文件（构建缓存、临时脚本、工具产物）都不会再污染
+# git status；确实需要入库的新顶层目录必须在此显式加 "!/<name>/" 豁免。
+# ==============================================================================
+/*
+!/.aone_copilot/
+!/.github/
+!/.qoder/
+!/.vscode/
+!/.gitattributes
+!/.gitignore
+!/.mcp.json
+!/3rd/
+!/BuildScript/
+!/CSharpCode/
+!/Core.Android/
+!/Core.iOS/
+!/Core.Mac/
+!/Core.Window/
+!/Documents/
+!/Module/
+!/NativeCode/
+!/Plugins/
+!/Tests/
+!/binaries/
+!/codegen/
+!/content/
+!/enginecontent/
+!/BuildEngine.bat
+!/BuildGame.bat
+!/CS_Rpc_AutoSync.bat
+!/CS_Rpc_Engine.bat
+!/Directory.Build.props
+!/Directory.Packages.props
+!/EngineAll.sln
+!/GenGlueCode.bat
+!/LICENSE.md
+!/README.md
+!/README-Eng.md
+!/Rpc_Engine.txt
+!/Setup.bat
+!/setup.sh
+!/global.json
+!/mapper.txt
+!/pre-commit.hook
+
+# ==============================================================================
+# Binaries 白名单（拒绝式）：默认全部忽略。
+# 已跟踪的 vendored 运行库（binaries/debug、release、Tools/net[5-8].0 下的
+# libclang/PhysX/SDL 等 77 个文件）不受 ignore 影响，仍在版本控制内。
+# 将来新增 vendored 运行库时，必须在此显式加一行 "!/binaries/<路径>" 豁免。
+# ==============================================================================
+/binaries/*
+
+# ==============================================================================
 # .NET 工程通用构建输出（覆盖所有 Module / Plugins 下的工程）
 # ==============================================================================
 **/bin/
@@ -35,34 +90,16 @@
 **/NuGet/Migrations/
 
 # ==============================================================================
-# Binaries 构建输出
+# 产物 / 缓存 / 生成代码
+# binaries 产物目录已由上方 /binaries/* 白名单统一挡住；
+# 此处仅保留 binaries 之外的规则。
 # ==============================================================================
-/binaries/debug/
-/binaries/release/
-/binaries/temp/
-/binaries/net5.0
-/binaries/net7.0
-/binaries/net8.0
-/binaries/Tools/
-/binaries/Plugins
-/binaries/BrickManager/
-/binaries/Tracer/
-/binaries/AloneGame/
-/binaries/LocalizationTool/
-/binaries/cache/
-/binaries/aftermath-shaders/
-/binaries/LeanClrStub/
-# Android 原生库产物由 CMake 直接写入（与 Core.Window 的 binaries/debug|release 并列）
-/binaries/android/
 # LeanCLR VM 程序集由构建部署（BuildScript/LeanClrDeploy.targets），只有 BCL 入库
 /content/LeanCLR/*
 !/content/LeanCLR/mscorlib.dll
 !/content/LeanCLR/System.dll
 !/content/LeanCLR/System.Core.dll
 !/content/LeanCLR/netstandard.dll
-/binaries/Core.Window.lib
-/binaries/Core.Window.dll
-/binaries/Core.Window.exp
 imgui.ini
 
 # ==============================================================================
@@ -144,3 +181,13 @@ TestResults/
 
 # macOS 原生构建目录
 /Core.Mac/build*/
+
+# Local .NET SDK installed by Core.Mac/ensure_dotnet.sh (never commit it)
+/3rd/tools/dotnet-sdk/
+
+# llvm-project sources + build tree cloned/built by Core.Mac/setup.sh for static libc++.a
+/3rd/native/llvm-project/
+/3rd/native/llvm-project.clone/
+
+# Qoder 会话临时文件（提交消息模板、批量改写脚本等）
+/session-state/

@@ -217,11 +217,11 @@ namespace EngineNS.Rtti
                 if (mDirectSize==0)
                 {
                     var fields = SystemType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-                    foreach (var field in fields)
+                    foreach (var fi in fields)
                     {
-                        if (field.FieldType.IsValueType)
+                        if (fi.FieldType.IsValueType)
                         {
-                            mDirectSize += Marshal.SizeOf(field.FieldType);
+                            mDirectSize += Marshal.SizeOf(fi.FieldType);
                         }
                         else
                         {

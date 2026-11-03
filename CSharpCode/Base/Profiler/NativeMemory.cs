@@ -6,12 +6,16 @@ namespace EngineNS.Profiler
 {
     public class TtNativeMemory
     {
+        bool mProfilerStarted = false;
         ~TtNativeMemory()
         {
             EndProfiler();
         }
         public unsafe void BeginProfiler()
         {
+            if (mProfilerStarted)
+                return;
+            mProfilerStarted = true;
             OnNativeMemAlloc = this.OnNativeMemAllocImpl;
             CoreSDK.SetMemAllocCallBack(OnNativeMemAlloc);
             OnNativeMemFree = this.OnNativeMemFreeImpl;
@@ -19,8 +23,17 @@ namespace EngineNS.Profiler
             OnNativeMemLeak = this.OnNativeMemLeakImpl;
             CoreSDK.SetMemLeakCallBack(OnNativeMemLeak);
         }
+        // 这三个回调都是 native 在【持有内存锁】时从任意线程反向调用托管代码的入口。
+        // 进程退出阶段这些线程的托管线程状态可能已被销毁，native 仍然会调，coreclr 会断言
+        // "Attempt to execute managed code after the .NET runtime thread state has been destroyed"
+        // (ceemain.cpp:1721) 并 FailFast(0xC0000602)。所以必须在退出流程一开始就摘掉，等终结器太晚。
+        // 摘掉不影响到 native 侧的 leak dump 输出：native 每处调用都做了判空，文本输出与回调无关，
+        // 托管侧 OnNativeMemLeakImpl 本身也是空实现。
         public void EndProfiler()
         {
+            if (mProfilerStarted == false)
+                return;
+            mProfilerStarted = false;
             CoreSDK.SetMemAllocCallBack(null);
             CoreSDK.SetMemFreeCallBack(null);
             CoreSDK.SetMemLeakCallBack(null);

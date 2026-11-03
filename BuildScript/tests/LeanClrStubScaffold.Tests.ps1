@@ -56,7 +56,7 @@ function New-FakeRepository {
         [Parameter(Mandatory = $true)]
         [string]$PluginName,
 
-        [string]$TargetFramework = 'net8.0'
+        [string]$TargetFramework = '$(_TitanTargetFramework)'
     )
 
     $pluginRoot = Join-Path $Root "Plugins\Game\$PluginName"
@@ -185,7 +185,7 @@ try {
     Assert-ContainsOnce $hostContent 'LeanClrPlugin.targets' 'Force run duplicated the host import.'
     Assert-ContainsOnce $solutionContent 'SampleGame.LeanClrStub.csproj' 'Force run duplicated the solution project.'
 
-    # 错误输入：非 net8 宿主必须被拒绝。
+    # 错误输入：不跟随 dependencies.json TFM 的宿主必须被拒绝。
     $invalidRoot = Join-Path $tempRoot 'invalid-framework'
     $invalid = New-FakeRepository $invalidRoot 'LegacyGame' 'net7.0'
     $rejected = $false
@@ -193,9 +193,9 @@ try {
         & $scriptPath -HostProject $invalid.HostProject -SolutionPath $invalid.Solution
     }
     catch {
-        $rejected = $_.Exception.Message -match 'net8\.0'
+        $rejected = $_.Exception.Message -match 'manifest TFM'
     }
-    Assert-True $rejected 'A host project that does not target net8.0 must be rejected.'
+    Assert-True $rejected 'A host project that does not follow the dependencies.json TFM must be rejected.'
 
     Write-Host 'LeanCLR stub scaffold tests passed.'
 }

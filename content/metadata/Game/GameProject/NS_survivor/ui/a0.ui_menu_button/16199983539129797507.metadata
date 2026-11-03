@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_16199983539129797507 Type="NS_survivor.ui.ui_menu_button@GameProject">
+  <BindingDatas Type="System.Collections.Generic.Dictionary&lt;System.String@Unknown,EngineNS.UI.Controls.TtUIElement.BindingDataBase@EngineCore,&gt;@Unknown" Order="0" />
+  <Id Type="System.UInt64@Unknown" Order="0" />
+  <MacrossMethods Type="System.Collections.Generic.Dictionary&lt;System.String@Unknown,EngineNS.UI.Controls.TtUIElement.MacrossMethodData@EngineCore,&gt;@Unknown" Order="0" />
+  <ShowText Type="System.String@Unknown" Order="0" />
+</Hash_16199983539129797507>

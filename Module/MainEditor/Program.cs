@@ -305,7 +305,22 @@ namespace MainEditor
                     break;
                 }
             }
-            
+
+            // 上面的循环只保证 TtEngine 自己被回收：和它同一批变成垃圾的下层对象
+            // （TtGfxDevice / TtTextureManager / TtSrView / ImageProxy -> StreamingTexture 等）
+            // 还要再经过几轮 Collect + WaitForPendingFinalizers 才会被终结，而 native 资源正是在这些终结器
+            // （AuxPtrType.Dispose -> IUnknown_Release）里归还的。循环以 wr.IsAlive 为条件，引擎一死就退出，
+            // 剩余终结器会在 CLR 关闭时被丢弃，表现为 Finalizer__memory_init 的 native 泄漏 dump 里残留对象。
+            // 这里无条件再排空几轮，直到这条对象链的终结器都跑完。
+            for (int i = 0; i < 4; i++)
+            {
+                System.GC.Collect();
+                System.GC.WaitForPendingFinalizers();
+            }
+
+            // 设备销毁前后的对照 dump：销毁设备会释放大量原生资源，用它把"托管侧没排干净"
+            // 和"GPU 资源本身没释放"两类残留分开。
+            CoreSDK.DumpNativeMemoryState("BeforeDestroyRenderSystem:", 0);
             TtGfxDevice.DestroyRenderSystem(renderSys, gpuDevice);
             
             if (consoleWriter != null)

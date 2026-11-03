@@ -1441,6 +1441,14 @@ namespace EngineNS.NxRHI
             }
             FreeTextureHandle();
             base.Dispose();
+
+            // StreamingTexture 是本对象用强引用独占的底层纹理（由 LoadSrvMipmap/LoadLOD 创建），
+            // 它的 native 引用只能由托管 wrapper 的 Dispose/终结器归还（AuxPtrType.Dispose → IUnknown_Release）。
+            // 这里必须级联释放：否则 TtTextureManager.Cleanup() 只释放了 SRV，native TtTexture 会一直
+            // 活到进程退出，在 Finalizer__memory_init 的 native 泄漏 dump 里表现为 allocated but not deleted。
+            var streamingTexture = StreamingTexture;
+            StreamingTexture = null;
+            streamingTexture?.Dispose();
         }
         #endregion
 
@@ -1523,7 +1531,7 @@ namespace EngineNS.NxRHI
             if (level < 0 || level > MaxLOD)
                 return false;
             var oldTexture = StreamingTexture;
-            StreamingTexture = await TtEngine.Instance.EventPoster.Post((state) =>
+            var newTexture = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(AssetName.Address))
                 {
@@ -1542,32 +1550,38 @@ namespace EngineNS.NxRHI
                 }
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
+            if (newTexture == null)
+            {
+                // 加载失败时保留原纹理：SRV 还绑定着旧 GPUBuffer，若把 StreamingTexture 置空，
+                // 旧纹理会随托管 wrapper 被回收而释放，留下失效的 GPU 资源引用。
+                return false;
+            }
+
+            StreamingTexture = newTexture;
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             LevelOfDetail = level;
-            {
-                if (StreamingTexture == null)
-                {
-                    //return this.mCoreObject.UpdateBuffer(rc.mCoreObject, new IGpuBufferData());
-                    return false;
-                }
-                else
-                {
-                    if (AssetName != null)
-                    {
-                        StreamingTexture.SetDebugName("Texture:" + AssetName.ToString());
-                    }
 
-                    //var desc = this.mCoreObject.Desc;
-                    //desc.Texture2D.MipLevels = tex2d.mCoreObject.Desc.MipLevels;
-                    //var srv = rc.mCoreObject.CreateSRV(tex2d.mCoreObject.NativeSuper, in desc);
-                    //var fp = this.mCoreObject.NativeSuper.GetFingerPrint();
-                    //this.Core_Release();
-                    //this.mCoreObject = srv;
-                    //this.mCoreObject.NativeSuper.SetFingerPrint(fp + 1);
-                    //return true;
-                    return this.mCoreObject.UpdateBuffer(rc.mCoreObject, StreamingTexture.mCoreObject.NativeSuper);
-                }
+            // 旧纹理已不再被 StreamingTexture 引用，必须显式释放：
+            // 替换字段本身不会归还 native 引用，只能等 GC 终结器，退出期等不到就会漏。
+            if (oldTexture != null && ReferenceEquals(oldTexture, newTexture) == false)
+            {
+                oldTexture.Dispose();
             }
+
+            if (AssetName != null)
+            {
+                StreamingTexture.SetDebugName("Texture:" + AssetName.ToString());
+            }
+
+            //var desc = this.mCoreObject.Desc;
+            //desc.Texture2D.MipLevels = tex2d.mCoreObject.Desc.MipLevels;
+            //var srv = rc.mCoreObject.CreateSRV(tex2d.mCoreObject.NativeSuper, in desc);
+            //var fp = this.mCoreObject.NativeSuper.GetFingerPrint();
+            //this.Core_Release();
+            //this.mCoreObject = srv;
+            //this.mCoreObject.NativeSuper.SetFingerPrint(fp + 1);
+            //return true;
+            return this.mCoreObject.UpdateBuffer(rc.mCoreObject, StreamingTexture.mCoreObject.NativeSuper);
         }
         #endregion
 
@@ -3800,9 +3814,14 @@ namespace EngineNS.NxRHI
                 var srv = i.Value as TtSrView;
                 if (srv == null)
                     continue;
+                // TtSrView.Dispose 会级联释放它独占的 StreamingTexture（native TtTexture），
+                // 只清字典是不够的：字段被 Clear 后 native 资源只能等 GC 终结器归还。
                 srv.Dispose();
             }
             StreamingAssets.Clear();
+            // 未完成的加载会话同样持有结果对象，关闭阶段必须断开，否则会活到进程退出。
+            mCreatingSession.Clear();
+            CoreSDK.DisposeObject(ref DefaultTexture);
             CoreSDK.DisposeObject(ref BlackTextureSRV);
             CoreSDK.DisposeObject(ref BlackTexture);
 

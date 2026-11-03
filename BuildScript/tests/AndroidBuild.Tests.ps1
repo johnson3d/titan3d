@@ -446,7 +446,7 @@ try {
         & $stageScript -RepositoryRoot $traversalRepo -OutputDirectory (Join-Path $traversalRepo 'intermediate\android\content\Debug') -Configuration Debug
     } @('outside|content') 'A pattern escaping its content root must be rejected'
 
-    # 9. MAUI 引用求值：引擎 TargetPath 精确落在 binaries/android/net8.0，且 MAUI 引用的
+    # 9. MAUI 引用求值：引擎 TargetPath 精确落在 binaries/android/<dependencies.json TFM>，且 MAUI 引用的
     #    GlobalPropertiesToRemove 确实挡住 RuntimeIdentifier/UseMaui/SingleProject 的传播。
     if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
         $script:skips += 'MAUI reference evaluation: dotnet was not found.'
@@ -454,7 +454,8 @@ try {
     else {
         $engineProject = Join-Path $repoRoot 'Module\Engine.Android\Engine.Android.csproj'
         $mauiProject = Join-Path $repoRoot 'Module\AloneGame.Maui\AloneGame.Maui.csproj'
-        $expectedTargetPath = Join-Path $repoRoot 'binaries\android\net8.0\Engine.Android.dll'
+        $titanTfm = ((Get-Content (Join-Path $repoRoot 'BuildScript\common\dependencies.json') -Raw | ConvertFrom-Json).dotnetSdk.targetFramework)
+        $expectedTargetPath = Join-Path $repoRoot ('binaries\android\' + $titanTfm + '\Engine.Android.dll')
         $engineProperties = @('-nologo', $engineProject, '-p:TitanPlatform=Android', '-p:Configuration=Debug',
             '-p:SkipTitanCodeGen=true', '-p:SkipTitanDataCopyerGen=true', '-getProperty:TargetPath')
         $targetPath = (& dotnet msbuild @engineProperties 2>&1 | Select-Object -Last 1)
@@ -462,7 +463,7 @@ try {
         Assert-True ($targetPath -ieq $expectedTargetPath) `
             "Engine.Android TargetPath must be '$expectedTargetPath', got '$targetPath'"
 
-        # RID 泄漏会把引擎改写成 net8.0/android-arm64；MAUI 引用必须显式去掉这些全局属性。
+        # RID 泄漏会把引擎改写成 <TFM>/android-arm64 子目录；MAUI 引用必须显式去掉这些全局属性。
         $leaked = ([string]((& dotnet msbuild @engineProperties '-p:RuntimeIdentifier=android-arm64' 2>&1) | Select-Object -Last 1)).Trim()
         Assert-True ($leaked -ne $targetPath) `
             'A leaked RuntimeIdentifier must change the engine TargetPath; otherwise GlobalPropertiesToRemove is untested'

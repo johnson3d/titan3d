@@ -33,6 +33,8 @@ if ($env:OS -ne 'Windows_NT') {
 }
 
 $root = Get-TitanRoot $RepositoryRoot
+# 子步骤进程的 CWD 锚定仓库根：否则 dotnet 在 TEMP 下找不到 global.json 会静默选最新 SDK（含 rc 预览版）。
+$script:AndroidProcessWorkingDirectory = $root
 $config = $Configuration.ToLowerInvariant()
 $nativeLibrary = Join-Path $root "binaries\android\$config\libCore.Android.so"
 # 原生中间产物统一落在 intermediate/cpp/<Project>/<Config>（源码内构建会被 CMakeLists 守卫拒绝）。
@@ -54,10 +56,12 @@ try {
     if ($Stage -in @('All', 'Native')) {
         # [TITAN-STAGE] 机器可读阶段标记：编辑器面板依此画步骤进度条。
         Write-Host '[TITAN-STAGE] Native'
+        Enable-AndroidBashOnPath -Stage 'Native'
         Invoke-AndroidCommand 'RefreshSources' $tools.CMake @(
             '-DTITAN_CHECK=ON', '-P', (Join-Path $root 'Core.Android\RefreshSources.cmake'))
         Invoke-AndroidCommand 'GenerateCodegen' $tools.CMake @(
             "-DTITAN_NDK_ROOT=$($tools.Ndk)", "-DTITAN_CONFIGURATION=$Configuration",
+            "-DTITAN_ANDROID_API_LEVEL=$($tools.ApiLevel)",
             '-P', (Join-Path $root 'Core.Android\GenerateCodegen.cmake'))
         Invoke-AndroidCommand 'Configure' $tools.CMake @(
             '-S', (Join-Path $root 'Core.Android'), '-B', $nativeBuildDirectory,
@@ -109,7 +113,8 @@ try {
             'build', $mauiProject, '-f', 'net10.0-android', '-c', $Configuration,
             '-p:AndroidPackageFormats=apk', '-p:AndroidKeyStore=false', '-p:BuildProjectReferences=false',
             '-p:EmbedAssembliesIntoApk=true',
-            "-p:AndroidSdkDirectory=$($tools.Sdk)", "-p:AndroidNdkDirectory=$($tools.Ndk)")
+            "-p:AndroidSdkDirectory=$($tools.Sdk)", "-p:AndroidNdkDirectory=$($tools.Ndk)",
+            "-p:JavaSdkDirectory=$($tools.JavaHome)")
 
         $apkDirectory = Join-Path $mauiDirectory "bin\$Configuration\net10.0-android"
         $signed = @()

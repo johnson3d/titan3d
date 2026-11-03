@@ -52,8 +52,19 @@ foreach ($propertyGroup in @($hostXml.Project.PropertyGroup)) {
         $targetFrameworks += ([string]$propertyGroup.TargetFrameworks -split ';')
     }
 }
-if (-not ($targetFrameworks -contains 'net8.0')) {
-    throw "LeanCLR host project must target net8.0: $hostProjectPath"
+# 宿主 TFM 必须跟随 dependencies.json：接受 dotnetSdk.targetFramework 的值或 $(_TitanTargetFramework) 表达式。
+$depsJsonPath = Join-Path $repoRoot 'BuildScript\common\dependencies.json'
+$manifestTfm = $null
+if (Test-Path -LiteralPath $depsJsonPath) {
+    $manifestTfm = ((Get-Content -Raw -LiteralPath $depsJsonPath | ConvertFrom-Json).dotnetSdk.targetFramework)
+}
+$tfmAccepted = $false
+foreach ($tfm in $targetFrameworks) {
+    if ($tfm -ieq '$(_TitanTargetFramework)') { $tfmAccepted = $true; break }
+    if ($manifestTfm -and $tfm -ieq $manifestTfm) { $tfmAccepted = $true; break }
+}
+if (-not $tfmAccepted) {
+    throw "LeanCLR host project must target the manifest TFM (dotnetSdk.targetFramework in dependencies.json, got '$manifestTfm'): $hostProjectPath"
 }
 
 $allowUnsafe = $false

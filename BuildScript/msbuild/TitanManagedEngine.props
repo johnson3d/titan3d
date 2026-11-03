@@ -4,7 +4,7 @@
     <TitanManagedRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..'))</TitanManagedRoot>
     <TtTitanRoot Condition="'$(TitanRoot)' == ''">$(TitanManagedRoot)</TtTitanRoot>
     <TtTitanRoot Condition="'$(TitanRoot)' != ''">$([MSBuild]::NormalizeDirectory('$(TitanRoot)'))</TtTitanRoot>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>$(_TitanTargetFramework)</TargetFramework>
     <OutputType>Library</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <OutputPath>$(TitanManagedRoot)binaries/</OutputPath>

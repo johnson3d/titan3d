@@ -108,7 +108,9 @@ namespace Canvas
 			return mNumCellX * mNumCellY;
 		}
 		PageType* CreatePage(UINT pageSize);
-		PagedObjectType* CreatePagedObject(PageType* page, UINT index);
+		// 与 MemAlloc::FPagedObjectAllocator 的 Creator 接口保持一致：file/line 由分配者一路下传，
+		// 自定义（非内存追踪型）对象忽略即可。
+		PagedObjectType* CreatePagedObject(PageType* page, UINT index, const char*, int);
 		void OnAlloc(AllocatorType* pAllocator, PagedObjectType* obj);
 		void OnFree(AllocatorType* pAllocator, PagedObjectType* obj);
 		void FinalCleanup(MemAlloc::FPage<ObjectType>* page);

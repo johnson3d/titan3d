@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_10229074975065484415 Type="NS_tutorials.particles.testemitter@GameProject">
+  <HLSLDoUpdateSystem Type="System.String@Unknown" Order="0" />
+  <HLSLOnDeadParticle Type="System.String@Unknown" Order="0" />
+  <HLSLOnInitParticle Type="System.String@Unknown" Order="0" />
+</Hash_10229074975065484415>

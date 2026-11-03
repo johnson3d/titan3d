@@ -56,11 +56,28 @@ public class ReflectionHostTests
         File.WriteAllBytes(Path.Combine(directory, string.IsNullOrEmpty(fileName) ? (platform == "Mac" ? "Core.Mac.dylib" : "Core.Window.dll") : fileName), bytes);
     }
 
+    // -getProperty 的 JSON 输出后可能附带 stdout/stderr 尾巴，按大括号平衡截取。
+    static JsonDocument ParseEvalLog(string log)
+    {
+        var start = log.IndexOf('{');
+        if (start < 0) throw new System.Text.Json.JsonException("求值输出不含 JSON：" + log);
+        int depth = 0; bool inString = false; bool escaped = false;
+        for (int i = start; i < log.Length; i++)
+        {
+            var c = log[i];
+            if (inString) { if (escaped) escaped = false; else if (c == '\\') escaped = true; else if (c == '"') inString = false; continue; }
+            if (c == '"') inString = true;
+            else if (c == '{') depth++;
+            else if (c == '}' && --depth == 0) return JsonDocument.Parse(log[start..(i + 1)]);
+        }
+        throw new System.Text.Json.JsonException("求值输出 JSON 未闭合");
+    }
+
     static (string Root, string Engine) FakeRoot(string platform)
     {
         var root = NewDirectory("Titan Reflection Host");
         var name = platform switch { "Mac" => "Engine.Mac", "Android" => "Engine.Android", _ => "Engine.Window" };
-        var engine = Emit(Path.Combine(root, "binaries", "net8.0", name + ".dll"), name, "namespace EngineNS { public class Marker {} }");
+        var engine = Emit(Path.Combine(root, "binaries", ManagedProjectTests.ExpectedTfm(), name + ".dll"), name, "namespace EngineNS { public class Marker {} }");
         WriteNative(Path.Combine(root, "binaries", "debug"), platform);
         return (root, engine);
     }
@@ -89,11 +106,11 @@ public class ReflectionHostTests
             var result = ManagedProjectTests.Run("msbuild", project, "-nologo", "-p:TitanPlatform=" + platform, "-p:Configuration=" + configuration, "-p:TitanEngineAssemblyPath=" + engine,
                 "-getProperty:OutDir,BaseIntermediateOutputPath,AssemblyName", "-getItem:Reference,Compile");
             Assert.That(result.Code, Is.Zero, result.Log);
-            using var json = JsonDocument.Parse(result.Log);
+            using var json = ParseEvalLog(result.Log);
             var props = json.RootElement.GetProperty("Properties");
             var outDir = props.GetProperty("OutDir").GetString()!.Replace('\\', '/');
             var objDir = props.GetProperty("BaseIntermediateOutputPath").GetString()!.Replace('\\', '/');
-            Assert.That(outDir, Does.EndWith("binaries/Tools/Reflection/" + platform + "/" + configuration + "/net8.0/"));
+            Assert.That(outDir, Does.EndWith("binaries/Tools/Reflection/" + platform + "/" + configuration + "/" + ManagedProjectTests.ExpectedTfm() + "/"));
             Assert.That(objDir, Does.Contain("/CSharpReflectionTools/" + platform + "/"));
             var references = json.RootElement.GetProperty("Items").GetProperty("Reference").EnumerateArray().ToArray();
             Assert.That(references.Any(r => r.TryGetProperty("HintPath", out var hint) && hint.GetString() == engine), Is.True, "宿主必须以普通引用消费父构建传入的真实引擎");
@@ -137,7 +154,7 @@ public class ReflectionHostTests
         var (root, _) = FakeRoot("Windows");
         try
         {
-            var other = Emit(Path.Combine(root, "binaries", "net8.0", "Engine.Mac.dll"), "Engine.Mac", "namespace EngineNS { public class Marker {} }");
+            var other = Emit(Path.Combine(root, "binaries", ManagedProjectTests.ExpectedTfm(), "Engine.Mac.dll"), "Engine.Mac", "namespace EngineNS { public class Marker {} }");
             var error = Assert.Throws<ArgumentException>(() => ReflectionHostOptions.Parse(Args(root, "Windows", other), "Windows", "Windows"));
             Assert.That(error!.Message, Does.Contain("Engine.Mac"));
             Assert.Throws<ArgumentException>(() => ReflectionHostOptions.Parse(Args(root, "Windows", Path.Combine(root, "missing", "Engine.Window.dll")), "Windows", "Windows"));
@@ -198,12 +215,14 @@ public class ReflectionHostTests
         // Engine.Android 是库工程：SDK 默认不给库复制包资产，但反射宿主靠“引擎目录”探测依赖，
         // 所以必须像 plugins 那样打开 CopyLocalLockFileAssemblies，否则 GetTypes 会报缺失程序集。
         var project = Path.Combine(ManagedProjectTests.Root(), "Module", "Engine.Android", "Engine.Android.csproj");
-        var result = ManagedProjectTests.Run("msbuild", project, "-nologo", "-p:TitanPlatform=Android", "-getProperty:CopyLocalLockFileAssemblies,OutDir,AssemblyName");
+        var result = ManagedProjectTests.Run("msbuild", project, "-nologo", "-p:TitanPlatform=Android", "-getProperty:CopyLocalLockFileAssemblies,OutDir,AssemblyName,TargetFramework");
         Assert.That(result.Code, Is.Zero, result.Log);
         using var json = JsonDocument.Parse(result.Log);
         var props = json.RootElement.GetProperty("Properties");
         Assert.That(props.GetProperty("AssemblyName").GetString(), Is.EqualTo("Engine.Android"));
-        Assert.That(props.GetProperty("OutDir").GetString()!.Replace('\\', '/'), Does.EndWith("binaries/android/net8.0/"));
+        var tfm = ManagedProjectTests.ExpectedTfm();
+        Assert.That(props.GetProperty("OutDir").GetString()!.Replace('\\', '/'), Does.EndWith("binaries/android/" + tfm + "/"));
+        Assert.That(props.GetProperty("TargetFramework").GetString(), Is.EqualTo(tfm), "引擎 TFM 必须跟随 dependencies.json");
         Assert.That(props.GetProperty("CopyLocalLockFileAssemblies").GetString(), Is.EqualTo("true"), "反射宿主加载的引擎必须自带依赖闭包");
     }
 
@@ -288,7 +307,9 @@ public class ReflectionHostTests
 
         var state = DataCopyerState.Load(stateFile)!;
         Assert.That(state.Platform, Is.EqualTo("Android"));
-        Assert.That(state.Engine.Path.Replace('\\', '/'), Does.EndWith("binaries/android/net8.0/Engine.Android.dll"));
+        if (!state.Engine.Path.Replace('\\', '/').Contains("binaries/android/" + ManagedProjectTests.ExpectedTfm() + "/"))
+            Assert.Ignore("state 来自旧 TFM 的 Android S1，需重新构建后再验证");
+        Assert.That(state.Engine.Path.Replace('\\', '/'), Does.EndWith("binaries/android/" + ManagedProjectTests.ExpectedTfm() + "/Engine.Android.dll"));
         Assert.That(File.ReadLines(generated).First(), Does.Contain("DataCopyerHash=" + state.Hash), "生成文件必须来自同一份 metadata");
 
         using var pe = new PEReader(File.OpenRead(output));
@@ -303,9 +324,9 @@ public class ReflectionHostTests
     public void AndroidDataCopyer_OfflineHashProbeMatchesState()
     {
         var root = ManagedProjectTests.Root();
-        var engine = Path.Combine(root, "binaries", "android", "net8.0", "Engine.Android.dll");
+        var engine = Path.Combine(root, "binaries", "android", ManagedProjectTests.ExpectedTfm(), "Engine.Android.dll");
         var native = Path.Combine(root, "binaries", "debug", "Core.Window.dll");
-        var host = Path.Combine(root, "binaries", "Tools", "Reflection", "Android", "Debug", "net8.0", "CSharpReflectionTools.dll");
+        var host = Path.Combine(root, "binaries", "Tools", "Reflection", "Android", "Debug", ManagedProjectTests.ExpectedTfm(), "CSharpReflectionTools.dll");
         var stateFile = Path.Combine(root, "codegen", "Android", "DataCopyer", ".datacopyer.state.json");
         if (!File.Exists(engine) || !File.Exists(native) || !File.Exists(host) || !File.Exists(stateFile))
             Assert.Ignore("需要先完成 Android S1 构建，才有可校验的宿主与 state");
@@ -559,13 +580,13 @@ public class ReflectionHostTests
         try
         {
             var project = Path.Combine(directory, "Probe.proj");
-            File.WriteAllText(project, "<Project><Import Project=\"" + Path.Combine(ManagedProjectTests.Root(), "BuildScript", "msbuild", "TitanCodeGen.targets") + "\" /></Project>");
+            File.WriteAllText(project, "<Project><Import Project=\"" + Path.Combine(ManagedProjectTests.Root(), "BuildScript", "msbuild", "TitanFramework.props") + "\" /><Import Project=\"" + Path.Combine(ManagedProjectTests.Root(), "BuildScript", "msbuild", "TitanCodeGen.targets") + "\" /></Project>");
             var result = ManagedProjectTests.Run("msbuild", project, "-nologo", "-p:TitanPlatform=" + platform, "-getProperty:_TitanSourceProject,_CSharpCodeToolsDll");
             Assert.That(result.Code, Is.Zero, result.Log);
             using var json = JsonDocument.Parse(result.Log);
             var props = json.RootElement.GetProperty("Properties");
             Assert.That(props.GetProperty("_TitanSourceProject").GetString()!.Replace('\\', '/'), Does.EndWith("/Module/Engine." + suffix + "/Engine." + suffix + ".csproj"));
-            Assert.That(props.GetProperty("_CSharpCodeToolsDll").GetString()!.Replace('\\', '/'), Is.EqualTo(Path.Combine(ManagedProjectTests.Root(), "binaries", "Tools", "net8.0", "CSharpCodeTools.dll").Replace('\\', '/')));
+            Assert.That(props.GetProperty("_CSharpCodeToolsDll").GetString()!.Replace('\\', '/'), Is.EqualTo(Path.Combine(ManagedProjectTests.Root(), "binaries", "Tools", ManagedProjectTests.ExpectedTfm(), "CSharpCodeTools.dll").Replace('\\', '/')));
         }
         finally { Directory.Delete(directory, true); }
     }

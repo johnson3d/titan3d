@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.GamePlay.Scene.TtPrefabAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="e4823ea109d5076cbe9b188b8308e2c05197fb7223545a957e27f68f6cbdcc78" />
+      <Path Type="System.String@Unknown" Value="prefab_dragonthesouleater.prefab" />
+    </e_0>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="d5c7d84a-7c5d-4970-93b8-e843125d6083" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,survivor/monsters/dragon1/prefab_dragonthesouleater.prefab,d5c7d84a-7c5d-4970-93b8-e843125d6083" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtPrefab&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Value="Game,survivor/monsters/dragon1/dragonthesouleatersk.ums,f9409293-fbcd-4a0e-a2d1-cc55cc54526b" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtPrefab@EngineCore" />
+</Root>

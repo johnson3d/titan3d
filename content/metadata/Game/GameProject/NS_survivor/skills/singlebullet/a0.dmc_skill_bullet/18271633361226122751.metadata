@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_18271633361226122751 Type="NS_survivor.skills.singlebullet.dmc_skill_bullet@GameProject">
+  <accumulateTime Type="System.Single@Unknown" Order="0" />
+  <bulletCooldown Type="System.Single@Unknown" Order="0" />
+  <TimedStateMachine_0 Type="NS_survivor.skills.singlebullet.DMC_TimedStateMachine_0_1731219335@GameProject" Order="0" />
+</Hash_18271633361226122751>

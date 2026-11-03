@@ -1,0 +1,64 @@
+Skeleton = Skeleton'Belica_Drone/Meshes/Belica_Drone_Skeleton.Belica_Drone_Skeleton'
+bHasVertexColors = false
+LODInfo[5] =
+{
+    LODInfo[0] =
+    {
+        DisplayFactor = 0
+        LODHysteresis = 0.0118519
+        LODMaterialMap[0] = {}
+        bEnableShadowCasting[0] = {}
+        BonesToRemove[0] = {}
+        BonesToPrioritize[0] = {}
+        SourceImportFilename = ""
+    }
+    LODInfo[1] =
+    {
+        DisplayFactor = 0
+        LODHysteresis = 0.0118519
+        LODMaterialMap[1] = { 0 }
+        bEnableShadowCasting[0] = {}
+        BonesToRemove[0] = {}
+        BonesToPrioritize[0] = {}
+        SourceImportFilename = ""
+    }
+    LODInfo[2] =
+    {
+        DisplayFactor = 0
+        LODHysteresis = 0.0118519
+        LODMaterialMap[1] = { 0 }
+        bEnableShadowCasting[0] = {}
+        BonesToRemove[0] = {}
+        BonesToPrioritize[0] = {}
+        SourceImportFilename = ""
+    }
+    LODInfo[3] =
+    {
+        DisplayFactor = 0
+        LODHysteresis = 0.0118519
+        LODMaterialMap[1] = { 0 }
+        bEnableShadowCasting[0] = {}
+        BonesToRemove[0] = {}
+        BonesToPrioritize[0] = {}
+        SourceImportFilename = ""
+    }
+    LODInfo[4] =
+    {
+        DisplayFactor = 0
+        LODHysteresis = 0.0118519
+        LODMaterialMap[1] = { 0 }
+        bEnableShadowCasting[0] = {}
+        BonesToRemove[0] = {}
+        BonesToPrioritize[0] = {}
+        SourceImportFilename = ""
+    }
+}
+MorphTargets[0] = {}
+Sockets[0] = {}
+SamplingInfo =
+{
+    Regions[0] = {}
+    BuiltData = { WholeMeshBuiltData[0]={}, RegionBuiltData[0]={} }
+}
+SkinWeightProfiles[0] = {}
+NumVertexColorChannels = 0

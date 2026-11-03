@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.GamePlay.Scene.TtPrefabAMeta@EngineCore">
+  <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
+      <Hash Type="System.String@Unknown" Value="341e4bdadfeab7bea384d87f1bd4dd9c8a7e8766625c3ce899098ed7f134837b" />
+      <Path Type="System.String@Unknown" Value="prefab_belica.prefab" />
+    </e_0>
+  </AssetFiles>
+  <AssetId Type="System.Guid@Unknown" Value="fc1594fc-eaf9-4f45-99c5-a88b2aa0b893" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,project_factory/belica/prefab_belica.prefab,fc1594fc-eaf9-4f45-99c5-a88b2aa0b893" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtPrefab&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Value="Game,project_factory/belica/belica.ums,9835cb5f-f384-48c3-8a9c-f2e6f86ff3d5" />
+  </RefAssetRNames>
+  <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtPrefab@EngineCore" />
+</Root>

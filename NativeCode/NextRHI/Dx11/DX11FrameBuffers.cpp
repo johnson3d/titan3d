@@ -69,10 +69,13 @@ namespace NxRHI
 
 		return Ret;
 	}
-	bool DX11SwapChain::Init(DX11GpuDevice* device, const FSwapChainDesc& desc)
+	bool DX11SwapChain::Init(DX11GpuDevice* device, const FSwapChainDesc& desc, const char* file, int line)
 	{
 		Desc = desc;
 		Desc.BufferCount = 1;
+		// 记录创建归属：Resize 重建 backbuffer 时继续沿用，避免退化成 RHI 内部位置。
+		mCreateFile = file ? file : __FILE__;
+		mCreateLine = line ? line : __LINE__;
 
 		return Resize(device, Desc.Width, Desc.Height);
 	}
@@ -111,7 +114,7 @@ namespace NxRHI
 		{
 			if (BackBuffers[i].Texture == nullptr)
 			{
-				auto pTex = new DX11Texture();
+				auto pTex = NewObjectWithInfo<DX11Texture>(mCreateFile ? mCreateFile : __FILE__, mCreateLine ? mCreateLine : __LINE__);
 				pTex->mDeviceRef.FromObject(device);
 				BackBuffers[i].Texture = MakeWeakRef(pTex);
 			}
@@ -132,7 +135,7 @@ namespace NxRHI
 			{
 				ASSERT(false);
 			}
-			BackBuffers[i].CreateRtvAndSrv(device);
+			BackBuffers[i].CreateRtvAndSrv(device, mCreateFile, mCreateLine);
 		}
 		return true;
 	}
@@ -153,7 +156,7 @@ namespace NxRHI
 		auto hr = mView->Present(SyncInterval, Flags);
 		ASSERT(hr == S_OK);
 	}
-	void DX11SwapChain::FBackBuffer::CreateRtvAndSrv(IGpuDevice* device)
+	void DX11SwapChain::FBackBuffer::CreateRtvAndSrv(IGpuDevice* device, const char* file, int line)
 	{
 		FRtvDesc rtvDesc{};
 		rtvDesc.SetTexture2D();
@@ -161,7 +164,7 @@ namespace NxRHI
 		rtvDesc.Height = Texture->Desc.Height;
 		rtvDesc.Format = Texture->Desc.Format;
 		rtvDesc.Texture2D.MipSlice = 0;
-		Rtv = MakeWeakRef(device->CreateRTV(Texture, &rtvDesc, __FILE__, __LINE__));
+		Rtv = MakeWeakRef(device->CreateRTV(Texture, &rtvDesc, file ? file : __FILE__, line ? line : __LINE__));
 	}
 }
 

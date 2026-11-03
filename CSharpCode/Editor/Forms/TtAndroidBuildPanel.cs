@@ -28,6 +28,8 @@ namespace EngineNS.Editor.Forms
         private readonly string[] mToolchainKeys = { "ndk", "androidSdk", "cmake", "ninja", "dotnet", "javaHome" };
         private readonly Dictionary<string, string> mToolchainValues = new Dictionary<string, string>();
         private int mApiLevel;
+        private string? mWorkloadCommand;
+        private int mNdkMajor = AndroidBuild.TtAndroidToolchainLocator.DefaultNdkMajor;
         private string mNewPattern = string.Empty;
         private bool mCookFirst = false;
         private string mCookConfig = "content/config/engineconfig_windows_cook.jscfg";
@@ -161,6 +163,8 @@ namespace EngineNS.Editor.Forms
             foreach (var key in mToolchainKeys)
                 mToolchainValues[key] = mToolchain.Get(key);
             mApiLevel = mToolchain.GetApiLevel();
+            // NDK 版本要求以配置为准，配置缺失时回落到引擎建议值。
+            mNdkMajor = mToolchain.GetRequirementInt("ndkMajor", AndroidBuild.TtAndroidToolchainLocator.DefaultNdkMajor);
 
             var specPath = AndroidBuild.TtAndroidRepository.ToFullPath(mRepositoryRoot, AndroidBuild.TtAndroidRepository.ContentSpecRelativePath);
             mContentSpec = AndroidBuild.TtAndroidContentSpec.Load(specPath);
@@ -172,6 +176,7 @@ namespace EngineNS.Editor.Forms
             foreach (var pair in mToolchainValues)
                 mToolchain.Set(pair.Key, pair.Value);
             mToolchain.SetApiLevel(mApiLevel);
+            mToolchain.SetRequirementInt("ndkMajor", mNdkMajor);
             mToolchain.Save(toolchainPath);
 
             var specPath = AndroidBuild.TtAndroidRepository.ToFullPath(mRepositoryRoot, AndroidBuild.TtAndroidRepository.ContentSpecRelativePath);
@@ -192,6 +197,20 @@ namespace EngineNS.Editor.Forms
             };
         }
 
+        // 用系统默认浏览器打开下载页；失败只写状态与引擎日志，不阻断面板。
+        private void OpenUrl(string url)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                mStatus = TtLocalization.Format("Failed to open {0}: {1}", url, ex.Message);
+                Profiler.Log.WriteLine<Profiler.TtEditorGategory>(Profiler.ELogTag.Error, "AndroidBuild", mStatus);
+            }
+        }
+
         private unsafe void OnDrawPickDialog()
         {
             if (string.IsNullOrEmpty(mPendingPickKey))
@@ -200,7 +219,14 @@ namespace EngineNS.Editor.Forms
             if (fileDlg.DisplayDialog("AndroidBuildPickDir"))
             {
                 if (fileDlg.IsOk())
-                    mToolchainValues[mPendingPickKey] = fileDlg.GetFilePathName();
+                {
+                    // 目录模式下 IGFD 的 GetFilePathName 返回空串，选中项（含未选中直接确认=当前浏览目录）
+                    // 走 selection 表，用 GetSelectedCount/GetFilePathByIndex 取完整路径。
+                    if (fileDlg.GetSelectedCount() > 0)
+                        mToolchainValues[mPendingPickKey] = fileDlg.GetFilePathByIndex(0);
+                    else
+                        mToolchainValues[mPendingPickKey] = fileDlg.GetCurrentPath();
+                }
                 fileDlg.CloseDialog();
                 mPendingPickKey = null;
             }
@@ -233,14 +259,70 @@ namespace EngineNS.Editor.Forms
                         {
                             var fileDlg = TtEngine.Instance.EditorInstance.FileDialog.mFileDialog;
                             mPendingPickKey = key;
-                            fileDlg.OpenModal("AndroidBuildPickDir", TtLocalization.Format("Pick {0} directory", key), "", mRepositoryRoot);
+                            // 标题按 §10.5 规则翻译可见部分并附 ### 稳定 ID；filters 必须传 null 才进入目录选择模式。
+                            fileDlg.OpenModal("AndroidBuildPickDir",
+                                TtLocalization.Format("Select {0} Directory", key) + "###AndroidBuildPickDir",
+                                null, mRepositoryRoot);
                         }
                         ImGuiAPI.PopID();
+                        // 未找到的本机组件给一个下载入口：androidSdk/ndk/javaHome 有推荐页。
+                        if (string.IsNullOrWhiteSpace(value) &&
+                            AndroidBuild.TtAndroidToolchainLocator.TryGetDownloadUrl(key, out var downloadUrl))
+                        {
+                            ImGuiAPI.SameLine(0, 6);
+                            ImGuiAPI.PushID(key);
+                            if (EGui.UIProxy.CustomButton.ToolButton(TtLocalization.Tr("Download"), in Vector2.Zero))
+                            {
+                                OpenUrl(downloadUrl);
+                                mStatus = TtLocalization.Format("Opened download page for {0}: {1}", key, downloadUrl);
+                            }
+                            ImGuiAPI.PopID();
+                        }
                     }
                     // 重载见 UvAnimEditor.cs:126：(string, ref int, int, int, ImGuiInputTextFlags_)。
                     var apiLevel = mApiLevel;
                     if (ImGuiAPI.InputInt("apiLevel", ref apiLevel, 1, 0, ImGuiInputTextFlags_.ImGuiInputTextFlags_None))
                         mApiLevel = apiLevel;
+                    // NDK 主版本要求写入 requirements.ndkMajor（AndroidTools.ps1 与探测共用同一契约）。
+                    var ndkMajor = mNdkMajor;
+                    if (ImGuiAPI.InputInt("ndkMajor", ref ndkMajor, 1, 0, ImGuiInputTextFlags_.ImGuiInputTextFlags_None))
+                        mNdkMajor = ndkMajor;
+
+                    if (EGui.UIProxy.CustomButton.ToolButton(TtLocalization.Tr("Auto Detect Toolchain"), in Vector2.Zero))
+                    {
+                        var detected = AndroidBuild.TtAndroidToolchainLocator.Locate(mNdkMajor);
+                        var filled = new List<string>();
+                        foreach (var key in mToolchainKeys)
+                        {
+                            if (detected.Values.TryGetValue(key, out var path) && mToolchainValues[key] != path)
+                            {
+                                mToolchainValues[key] = path;
+                                filled.Add(key);
+                            }
+                        }
+                        // apiLevel 可配（>= 28，CMakeLists 只校验下限）；Auto Detect 只在字段为 0/未设时回填建议值，不覆盖用户选择。
+                        if (mApiLevel <= 0)
+                            mApiLevel = AndroidBuild.TtAndroidToolchainLocator.RepoApiLevel;
+                        if (detected.Missing.Count > 0)
+                            mStatus = TtLocalization.Format("Auto detect filled: {0}. Missing (install first): {1}.",
+                                filled.Count > 0 ? string.Join(", ", filled) : TtLocalization.Tr("none"),
+                                string.Join(", ", detected.Missing.ToArray()));
+                        else
+                            mStatus = TtLocalization.Format("Auto detect filled: {0}.", filled.Count > 0 ? string.Join(", ", filled) : TtLocalization.Tr("none"));
+                    }
+
+                    // MAUI 工程需要 android 工作负载；本机 dotnet CLI 可能没装，给一条可复制的修复命令。
+                    // 命令按仓库 global.json 锁定的 SDK 版本带生成（附 --sdk-version），避免装到最新 SDK（如 rc 预览版）名下；
+                    // 进程调用开销大，只在首次使用时计算一次。
+                    mWorkloadCommand ??= AndroidBuild.TtAndroidToolchainLocator.GetWorkloadInstallCommand(mRepositoryRoot);
+                    if (EGui.UIProxy.CustomButton.ToolButton(TtLocalization.Tr("Copy Workload Install Command"), in Vector2.Zero))
+                    {
+                        ImGuiAPI.SetClipboardText(mWorkloadCommand);
+                        mStatus = TtLocalization.Format("Copied: {0} — paste it into PowerShell and run.",
+                            mWorkloadCommand);
+                    }
+                    ImGuiAPI.SameLine(0, 6);
+                    ImGuiAPI.TextDisabled(mWorkloadCommand);
 
                     if (ImGuiAPI.TreeNode(TtLocalization.Tr("Installed SDK")))
                     {

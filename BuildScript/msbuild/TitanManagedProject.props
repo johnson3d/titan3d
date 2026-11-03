@@ -1,4 +1,6 @@
 <Project>
+  <!-- 脚手架 fixture 等无根 Directory.Build.props 的场景自行引入 TFM 单一事实源。 -->
+  <Import Condition="Exists('$(MSBuildThisFileDirectory)TitanFramework.props') and '$(_TitanTargetFramework)' == ''" Project="$(MSBuildThisFileDirectory)TitanFramework.props" />
   <Import Project="$(MSBuildThisFileDirectory)TitanPlatform.props" />
   <PropertyGroup>
     <TitanEngineProject Condition="'$(TitanPlatform)' == 'Windows'">$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', '../../Module/Engine.Window/Engine.Window.csproj'))</TitanEngineProject>
@@ -14,7 +16,7 @@
     <TtTitanRoot Condition="'$(TitanRoot)' == ''">$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..'))</TtTitanRoot>
     <TtTitanRoot Condition="'$(TitanRoot)' != ''">$([MSBuild]::NormalizeDirectory('$(TitanRoot)'))</TtTitanRoot>
     <!-- Android 引擎与桌面输出隔离；显式传入的 TitanEngineAssemblyPath 优先。 -->
-    <TitanEngineAssemblyPath Condition="'$(TitanEngineAssemblyPath)' == '' and '$(TitanPlatform)' == 'Android'">$(TtTitanRoot)binaries/android/net8.0/Engine.Android.dll</TitanEngineAssemblyPath>
-    <TitanEngineAssemblyPath Condition="'$(TitanEngineAssemblyPath)' == ''">$(TtTitanRoot)binaries/net8.0/$(TitanEngineAssemblyName).dll</TitanEngineAssemblyPath>
+    <TitanEngineAssemblyPath Condition="'$(TitanEngineAssemblyPath)' == '' and '$(TitanPlatform)' == 'Android'">$(TtTitanRoot)binaries/android/$(_TitanTargetFramework)/Engine.Android.dll</TitanEngineAssemblyPath>
+    <TitanEngineAssemblyPath Condition="'$(TitanEngineAssemblyPath)' == ''">$(TtTitanRoot)binaries/$(_TitanTargetFramework)/$(TitanEngineAssemblyName).dll</TitanEngineAssemblyPath>
   </PropertyGroup>
 </Project>

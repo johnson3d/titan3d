@@ -1,0 +1,2 @@
+GameProject
+NS_survivor.skills.singlebullet.dmc_skill_bullet@GameProject

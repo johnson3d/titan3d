@@ -1,0 +1,27 @@
+{
+  // clangd：编译数据库来自 intermediate/cpp/Core.Mac/Debug（配置时需 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON，tasks.json 的 configure 任务已带）
+  "clangd.path": "/usr/bin/clangd",
+  "clangd.arguments": [
+    "--compile-commands-dir=${workspaceFolder}/intermediate/cpp/Core.Mac/Debug",
+    "--background-index",
+    "--header-insertion=never",
+    "-j=8"
+  ],
+  // 不装 MS C/C++ 扩展，避免与 clangd 双智能感知打架
+  "C_Cpp.intelliSenseEngine": "disabled",
+  // 本机无 Windows 解决方案构建链，不让 C# Dev Kit 自动加载 EngineAll.sln 产生噪音；托管调试走 attach
+  "dotnet.defaultSolution": "disable",
+  "search.exclude": {
+    "**/intermediate": true,
+    "**/binaries": true,
+    "**/codegen": true,
+    "**/cache": true
+  },
+  "files.watcherExclude": {
+    "**/intermediate/**": true,
+    "**/binaries/**": true,
+    "**/codegen/**": true,
+    "**/cache/**": true
+  },
+  "cmake.sourceDirectory": "${workspaceFolder}/Core.Mac"
+}

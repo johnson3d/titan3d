@@ -32,7 +32,7 @@
       <TitanReflectionPluginDirectory Condition="'$(TitanReflectionPluginDirectory)' == '' AND '$(TitanPlatform)' == 'Android'">$([MSBuild]::NormalizePath('$(_TitanDataCopyerRoot)', 'binaries', 'android', 'Plugins'))</TitanReflectionPluginDirectory>
       <TitanReflectionPluginDirectory Condition="'$(TitanReflectionPluginDirectory)' == ''">$([MSBuild]::NormalizePath('$(_TitanDataCopyerRoot)', 'binaries', 'Plugins'))</TitanReflectionPluginDirectory>
       <_TitanReflectionProject>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', '..', '..', 'Module', 'CSharpReflectionTools', 'CSharpReflectionTools.csproj'))</_TitanReflectionProject>
-      <_TitanReflectionHost>$([MSBuild]::NormalizePath('$(_TitanDataCopyerRoot)', 'binaries', 'Tools', 'Reflection', '$(TitanPlatform)', '$(Configuration)', 'net8.0', 'CSharpReflectionTools.dll'))</_TitanReflectionHost>
+      <_TitanReflectionHost>$([MSBuild]::NormalizePath('$(_TitanDataCopyerRoot)', 'binaries', 'Tools', 'Reflection', '$(TitanPlatform)', '$(Configuration)', '$(_TitanTargetFramework)', 'CSharpReflectionTools.dll'))</_TitanReflectionHost>
     </PropertyGroup>
     <Error Condition="'$(TitanPlatform)' != 'Windows' AND '$(TitanPlatform)' != 'Mac' AND '$(TitanPlatform)' != 'Android'" Text="反射阶段只支持 TitanPlatform=Windows|Mac|Android，当前为 '$(TitanPlatform)'。" />
     <Error Condition="'$(TargetPath)' == '' OR !Exists('$(TargetPath)')" Text="反射阶段需要已构建的引擎程序集：$(TargetPath)" />

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_15512339499569720742 Type="NS_tutorials.animation.DMC_FinalBlendTree_0_1827970541@GameProject">
+  <BlendTree_StateMachine Type="NS_tutorials.animation.DMC_BlendTree_StateMachine_829722290@GameProject" Order="0" />
+  <PoseOutput Type="NS_tutorials.animation.DMC_PoseOutput_2965600974@GameProject" Order="0" />
+</Hash_15512339499569720742>

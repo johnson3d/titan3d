@@ -1,10 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TitanEnginePlatform>Android</TitanEnginePlatform>
     <TitanPlatform Condition="'$(TitanPlatform)' == ''">Android</TitanPlatform>
   </PropertyGroup>
   <Import Project="../../BuildScript/msbuild/TitanManagedEngine.props" />
-  <!-- 与桌面 binaries/net8.0 隔离；OutputPath 由 SDK 追加 net8.0 子目录。 -->
+  <!-- 与桌面 binaries/net10.0 隔离；OutputPath 由 SDK 追加 net10.0 子目录。 -->
   <PropertyGroup>
     <OutputPath>$(TitanManagedRoot)binaries/android/</OutputPath>
     <!-- 库工程默认不复制包资产，但 S1 反射宿主靠引擎目录探测依赖闭包（与 binaries/Plugins 的插件工程同理）。 -->

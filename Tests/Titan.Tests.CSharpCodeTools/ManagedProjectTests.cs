@@ -99,6 +99,84 @@ public class ManagedProjectTests
         }
     }
 
+    // TFM 单一事实源：BuildScript/common/dependencies.json → dotnetSdk.targetFramework，
+    // 经 BuildScript/msbuild/TitanFramework.props 注入所有托管工程（含 Plugins/MAUI 自有 Directory.Build.props 的子树）。
+    // _Titan* 私有属性无条件从清单解析，调用方无法用 -p: 劫持。
+    [TestCase("Tests/Titan.Tests.CSharpCodeTools/Titan.Tests.CSharpCodeTools.csproj")]
+    [TestCase("Plugins/DataCopyer/DataCopyer.All/DataCopyer.All.csproj")]
+    [TestCase("Module/Engine.Window/Engine.Window.csproj")]
+    [TestCase("Module/AloneGame.Maui/AloneGame.Maui.csproj")]
+    public void TitanTargetFramework_SingleSourceInDependenciesJson(string relativeProject)
+    {
+        var depsPath = Path.Combine(Root(), "BuildScript", "common", "dependencies.json");
+        string expected;
+        using (var doc = JsonDocument.Parse(File.ReadAllText(depsPath)))
+            expected = doc.RootElement.GetProperty("dotnetSdk").GetProperty("targetFramework").GetString();
+        Assert.That(expected, Does.Match("^net\\d+\\.\\d$").And.Not.Null,
+            "dependencies.json 缺少合法的 dotnetSdk.targetFramework（这是全库 TFM 单一事实源）");
+
+        var result = Run("msbuild", Path.Combine(Root(), relativeProject), "-nologo", "-getProperty:_TitanTargetFramework,_TitanDepsJsonPath");
+        Assert.That(result.Code, Is.Zero, result.Log);
+        using var json = JsonDocument.Parse(result.Log);
+        var actual = json.RootElement.GetProperty("Properties").GetProperty("_TitanTargetFramework").GetString();
+        Assert.That(actual, Is.EqualTo(expected), $"{relativeProject} 的 _TitanTargetFramework 未从 dependencies.json 解析（空说明其子树未导入 TitanFramework.props）");
+    }
+
+    [Test]
+    public void TitanTargetFramework_GlobalPropertyInjectionCannotOverrideManifest()
+    {
+        var result = Run("msbuild", Path.Combine(Root(), "Tests/Titan.Tests.CSharpCodeTools/Titan.Tests.CSharpCodeTools.csproj"),
+            "-nologo", "-p:_TitanTargetFramework=net6.0", "-getProperty:_TitanTargetFramework");
+        Assert.That(result.Code, Is.Zero, result.Log);
+        using (var doc = JsonDocument.Parse(File.ReadAllText(Path.Combine(Root(), "BuildScript", "common", "dependencies.json"))))
+            Assert.That(result.Log.Trim(), Is.EqualTo(doc.RootElement.GetProperty("dotnetSdk").GetProperty("targetFramework").GetString()),
+                "TFM 只能来自 dependencies.json，-p: 注入必须被无条件解析覆盖");
+    }
+
+    [Test]
+    public void TitanTargetFramework_MissingManifestFieldFailsFast()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "TitanTFM_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        try
+        {
+            // 清单缺 targetFramework 字段：InitialTargets 的 fail-fast 必须在任何 target（含与 Build 无依赖的
+            // BeforeBuild）之前拦下，覆盖 Restore/Publish 等不经 Build 的入口。
+            var emptyJson = Path.Combine(dir, "empty.json");
+            File.WriteAllText(emptyJson, "{ \"dotnetSdk\": { \"version\": \"8.0.300\" } }");
+            var result = Run("msbuild", Path.Combine(Root(), "Tests/Titan.Tests.CSharpCodeTools/Titan.Tests.CSharpCodeTools.csproj"),
+                "-nologo", "-t:BeforeBuild", "-p:_TitanDepsJsonPath=" + emptyJson);
+            Assert.That(result.Code, Is.Not.Zero, "清单缺 targetFramework 字段必须 fail-fast");
+            Assert.That(result.Log, Does.Contain(emptyJson));
+
+            // 正控制：真实清单下同一入口不得误伤。
+            var pass = Run("msbuild", Path.Combine(Root(), "Tests/Titan.Tests.CSharpCodeTools/Titan.Tests.CSharpCodeTools.csproj"),
+                "-nologo", "-t:BeforeBuild");
+            Assert.That(pass.Code, Is.Zero, pass.Log);
+        }
+        finally { Directory.Delete(dir, true); }
+    }
+
+    // SDK 门禁也收敛到 dependencies.json：global.json 只允许镜像同一版本并收紧 rollForward，
+    // 否则升级 .NET 时两处版本会漂移（global.json latestMajor 会放任 SDK 11 RC 顶上来污染验证）。
+    [Test]
+    public void DotNetSdk_GlobalJsonMirrorsDependenciesJson()
+    {
+        using var deps = JsonDocument.Parse(File.ReadAllText(Path.Combine(Root(), "BuildScript", "common", "dependencies.json")));
+        var expectedVersion = deps.RootElement.GetProperty("dotnetSdk").GetProperty("version").GetString();
+        Assert.That(expectedVersion, Does.Match("^\\d+\\.\\d+\\.\\d+$").And.Not.Null, "dependencies.json 的 dotnetSdk.version 非法");
+
+        using var global = JsonDocument.Parse(File.ReadAllText(Path.Combine(Root(), "global.json")));
+        var sdk = global.RootElement.GetProperty("sdk");
+        Assert.That(sdk.GetProperty("version").GetString(), Is.EqualTo(expectedVersion),
+            "global.json 的 sdk.version 必须镜像 dependencies.json 的 dotnetSdk.version");
+        var depsRollForward = deps.RootElement.GetProperty("dotnetSdk").GetProperty("rollForward").GetString();
+        Assert.That(depsRollForward, Is.EqualTo("latestFeature"),
+            "dependencies.json 的 rollForward 必须 latestFeature：跨 major（如 SDK 11 RC）不得顶上来");
+        Assert.That(sdk.GetProperty("rollForward").GetString(), Is.EqualTo(depsRollForward),
+            "global.json 的 rollForward 必须镜像 dependencies.json（SDK 单一事实源含 rollForward 维度）");
+    }
+
     [TestCase("BuildScript/msbuild/TitanManagedEngine.props")]
     [TestCase("Core.Window/Core.Window.vcxproj")]
     public void PlatformConsumers_DoNotImportGeneratedProjectsDuringEvaluation(string file)
@@ -275,6 +353,37 @@ public class ManagedProjectTests
         Assert.That(refs.Count(p => p.Contains("/Engine.")), Is.EqualTo(1));
     }
 
+    internal static string ExpectedTfm()
+    {
+        using var doc = JsonDocument.Parse(File.ReadAllText(Path.Combine(Root(), "BuildScript", "common", "dependencies.json")));
+        return doc.RootElement.GetProperty("dotnetSdk").GetProperty("targetFramework").GetString()!;
+    }
+
+    // 产物目录表达式化：桌面/Android 引擎与工具目录一律跟随 dependencies.json 的 TFM，不得写死 netX.Y。
+    [Test]
+    public void OutputDirectories_FollowDependenciesJsonTfm()
+    {
+        var tfm = ExpectedTfm();
+        // 桌面引擎路径来自 OutputPath=binaries/ + TFM 追加，用 TargetPath 验证；TitanEngineAssemblyPath 只由 TitanManagedProject.props（插件宿主）定义。
+        var desktop = Run("msbuild", Path.Combine(Root(), "Module/Engine.Window/Engine.Window.csproj"),
+            "-nologo", "-getProperty:TargetPath,_TitanToolsDir");
+        Assert.That(desktop.Code, Is.Zero, desktop.Log);
+        using (var json = JsonDocument.Parse(desktop.Log))
+        {
+            var props = json.RootElement.GetProperty("Properties");
+            Assert.That(props.GetProperty("TargetPath").GetString()!.Replace('\\', '/'),
+                Does.Contain("binaries/" + tfm + "/Engine.Window.dll"), "桌面引擎产物目录未跟随 dependencies.json TFM");
+            Assert.That(props.GetProperty("_TitanToolsDir").GetString()!.Replace('\\', '/'),
+                Does.EndWith("binaries/Tools/" + tfm + "/"), "工具目录未跟随 dependencies.json TFM");
+        }
+        // -getProperty 单属性输出裸文本（非 JSON）；Engine.Android 与桌面同用 TargetPath（TitanManagedEngine.props 不定义 TitanEngineAssemblyPath）。
+        var android = Run("msbuild", Path.Combine(Root(), "Module/Engine.Android/Engine.Android.csproj"),
+            "-nologo", "-p:TitanPlatform=Android", "-p:SkipTitanCodeGen=true", "-getProperty:TargetPath");
+        Assert.That(android.Code, Is.Zero, android.Log);
+        Assert.That(android.Log.Trim().Replace('\\', '/'),
+            Does.Contain("binaries/android/" + tfm + "/Engine.Android.dll"), "Android 产物目录未跟随 dependencies.json TFM");
+    }
+
     [Test]
     public void AndroidEngine_EvaluatesExplicitPlatformAndIsolatedOutput()
     {
@@ -282,13 +391,14 @@ public class ManagedProjectTests
         var result = Run("msbuild", project, "-nologo", "-p:TitanPlatform=Android", "-p:SkipTitanCodeGen=true",
             "-getProperty:TitanPlatform,TargetFramework,TitanPlatformDefine,TitanCodeGenRoot,OutputPath,AssemblyName");
         Assert.That(result.Code, Is.Zero, result.Log);
+        var tfm = ExpectedTfm();
         using var json = JsonDocument.Parse(result.Log);
         var p = json.RootElement.GetProperty("Properties");
         Assert.That(p.GetProperty("TitanPlatform").GetString(), Is.EqualTo("Android"));
-        Assert.That(p.GetProperty("TargetFramework").GetString(), Is.EqualTo("net8.0"));
+        Assert.That(p.GetProperty("TargetFramework").GetString(), Is.EqualTo(tfm));
         Assert.That(p.GetProperty("TitanPlatformDefine").GetString(), Is.EqualTo("PAndroid"));
         Assert.That(p.GetProperty("AssemblyName").GetString(), Is.EqualTo("Engine.Android"));
-        Assert.That(p.GetProperty("OutputPath").GetString()!.Replace('\\', '/'), Does.EndWith("binaries/android/net8.0/"));
+        Assert.That(p.GetProperty("OutputPath").GetString()!.Replace('\\', '/'), Does.EndWith("binaries/android/" + tfm + "/"));
         Assert.That(p.GetProperty("TitanCodeGenRoot").GetString()!.Replace('\\', '/'), Does.EndWith("codegen/Android"));
     }
 
