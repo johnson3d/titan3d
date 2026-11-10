@@ -209,7 +209,21 @@ namespace EngineNS.Graphics.Pipeline
         {
             using (new Profiler.TimeScopeHelper(ScopeWhichContainTypeFast))
             {
-                var frustum = mCoreObject.GetFrustum();
+                // 用 GPU 状态镜像的视锥 (与最近一次 cbPerCamera 写入逐字段一致) ——
+                // "渲染用什么状态的 camera cbv, 就用什么状态裁剪"。实时 mFrustum 被逻辑线程
+                // 在帧内持续修改, 剔影读它会与渲染错位, 大幅快转时屏幕边缘错误裁剪。
+                // 相机从未上传过 cb (如手动冻结相机) 时退回实时视锥。
+                v3dxFrustum gpuFrustum;
+                v3dxFrustum* frustum;
+                if (mCoreObject.mHasGpuState)
+                {
+                    gpuFrustum = mCoreObject.mGpuFrustum;
+                    frustum = &gpuFrustum;
+                }
+                else
+                {
+                    frustum = mCoreObject.GetFrustum();
+                }
 
                 BoundingBox aabb;
                 DBoundingBox.OffsetToSingleBox(in world.mCameraOffset, in dAabb, out aabb);
@@ -436,6 +450,21 @@ namespace EngineNS.Graphics.Pipeline
         public EngineNS.Matrix GetViewProjection()
         {
             return mCoreObject.GetViewProjection();
+        }
+        /// <summary>
+        /// GPU 状态镜像里的 ViewProjection (与最近一次 cbPerCamera 写入逐字段一致)。
+        /// GPU-driven 剔影构建剔影常量一律用这个, 不读实时相机 —— 否则与渲染 cbuffer 错位,
+        /// 大幅快转时屏幕边缘错误裁剪。相机从未上传过 cb 时返回 false。
+        /// </summary>
+        public bool TryGetGpuViewProjection(out EngineNS.Matrix vp)
+        {
+            if (mCoreObject.mHasGpuState)
+            {
+                vp = mCoreObject.GetGpuViewProjection();
+                return true;
+            }
+            vp = EngineNS.Matrix.Identity;
+            return false;
         }
         public EngineNS.Matrix GetViewProjectionInverse()
         {

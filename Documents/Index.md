@@ -22,6 +22,8 @@
 - - **[MemProfiler](editor/MemProfiler.md)**
 - - **[ClrProfiler](editor/ClrProfiler.md)**
 - - **[PIEController](editor/PIEController.md)**
+- - **[TitanCMD 命令行工具](editor/TitanCMD.md)**
+- - **[CookManager 批次化异步 cook](editor/CookManager.md)**
 - MainMenu
 这里可以打开和关闭一些编辑器的窗口
 

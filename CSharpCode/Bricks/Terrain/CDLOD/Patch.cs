@@ -73,7 +73,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
         public TtPatchLayers Layers = new TtPatchLayers();
 
-        public UTerrainLevelData Level;
+        public TtTerrainLevelData Level;
         public TtTerrainNode TerrainNode
         {
             get => Level.Level.Node;
@@ -81,6 +81,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public Graphics.Mesh.TtRenderMesh[] TerrainMesh;
         public Graphics.Mesh.TtRenderMesh[] WaterMesh;
         public Graphics.Mesh.TtRenderMesh[] WireFrameTerrainMesh;
+        // TtTerrainNode.ShowLODGrid 调试用: patch 边界线 (白) 与 level 边界线 (品红) 的
+        // LineList 网格, 在首次可见且开关打开时懒构建, 高度从 Level.SourceHeightMap 采样
+        public Graphics.Mesh.TtRenderMesh DebugBorderMesh;
+        public Graphics.Mesh.TtRenderMesh DebugLevelBorderMesh;
+        float mDebugBuiltOffset = float.NaN;
+        int mDebugBuiltHeightVersion = -1;
         //public Graphics.Pipeline.Shader.UMaterialInstance Material;
         //public Graphics.Pipeline.Shader.UMaterialInstance WaterMaterial;
         public NxRHI.TtCbView PatchCBuffer;
@@ -96,7 +102,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 // read as uninitialized garbage by the GPU (real values get written by the caller
                 // before BindCBV in TerrainMdfQueue, but we guard against any reordering issue).
                 cbuffer.SetValue(coreBinder.StartPosition, in StartPosition);
-                cbuffer.SetValue(coreBinder.CurrentLOD, mCurrentLOD);
+                cbuffer.SetValue(coreBinder.CurrentLOD, mCurrentLOD >= TerrainMesh.Length ? TerrainMesh.Length - 1 : mCurrentLOD);
                 cbuffer.SetValue(coreBinder.TexUVOffset, in TexUVOffset);
                 // 0 = "参数不在本 cbuffer 里", 是两条路径里更保守的默认值:
                 // 它让 shader 去读 instance data 而不是相信一份还没填好的 patch 参数。
@@ -176,9 +182,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 }
                 WireFrameTerrainMesh = null;
             }
+            DisposeDebugBorderMeshes();
             CoreSDK.DisposeObject(ref GrassManager);
         }
-        public void Initialize(UTerrainLevelData level, int x, int z, Bricks.Procedure.TtBufferComponent HeightMap)
+        public void Initialize(TtTerrainLevelData level, int x, int z, Bricks.Procedure.TtBufferComponent HeightMap)
         {
             Level = level;
 
@@ -206,7 +213,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             //    //srv.Value = RName.GetRName("");
             //}
 
-            var mdfType = Rtti.TtTypeDesc.TypeOf(typeof(UTerrainMdfQueue));
+            var mdfType = Rtti.TtTypeDesc.TypeOf(typeof(TtTerrainMdfQueue));
             var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
             tMaterials[0] = terrain.Material;
 
@@ -224,21 +231,21 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 TerrainMesh[i] = new Graphics.Mesh.TtRenderMesh();
                 TerrainMesh[i].Initialize(terrain.GridMipLevels[i], tMaterials, mdfType);
-                var trMdfQueue = TerrainMesh[i].MdfQueue as UTerrainMdfQueue;
+                var trMdfQueue = TerrainMesh[i].MdfQueue as TtTerrainMdfQueue;
                 trMdfQueue.TerrainModifier.TerrainNode = this.TerrainNode;
                 trMdfQueue.TerrainModifier.Patch = this;
                 trMdfQueue.TerrainModifier.Dimension = (int)Math.Pow(2, terrain.GridMipLevels.Length - i - 1);
 
                 WireFrameTerrainMesh[i] = new Graphics.Mesh.TtRenderMesh();
                 WireFrameTerrainMesh[i].Initialize(terrain.GridMipLevels[i], tWireFrameMaterials, mdfType);
-                trMdfQueue = WireFrameTerrainMesh[i].MdfQueue as UTerrainMdfQueue;
+                trMdfQueue = WireFrameTerrainMesh[i].MdfQueue as TtTerrainMdfQueue;
                 trMdfQueue.TerrainModifier.TerrainNode = this.TerrainNode;
                 trMdfQueue.TerrainModifier.Patch = this;
                 trMdfQueue.TerrainModifier.Dimension = (int)Math.Pow(2, terrain.GridMipLevels.Length - i - 1);
 
                 WaterMesh[i] = new Graphics.Mesh.TtRenderMesh();
                 WaterMesh[i].Initialize(terrain.GridMipLevels[i], twMaterials, mdfType);
-                trMdfQueue = WaterMesh[i].MdfQueue as UTerrainMdfQueue;
+                trMdfQueue = WaterMesh[i].MdfQueue as TtTerrainMdfQueue;
                 trMdfQueue.TerrainModifier.TerrainNode = this.TerrainNode;
                 trMdfQueue.TerrainModifier.Patch = this;
                 trMdfQueue.TerrainModifier.Dimension = (int)Math.Pow(2, terrain.GridMipLevels.Length - i - 1);
@@ -291,6 +298,124 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     }
                 }
             }
+        }
+
+        void DisposeDebugBorderMeshes()
+        {
+            DebugBorderMesh?.Dispose();
+            DebugBorderMesh = null;
+            DebugLevelBorderMesh?.Dispose();
+            DebugLevelBorderMesh = null;
+            mDebugBuiltOffset = float.NaN;
+            mDebugBuiltHeightVersion = -1;
+        }
+
+        /// <summary>
+        /// TtTerrainNode.ShowLODGrid 打开时构建/刷新 patch 与 level 的边界调试线。
+        /// 顶点直接烘焙节点局部坐标 + LODGridHeightOffset 抬升, 高度从 Level.SourceHeightMap
+        /// 采样; 抬升值变化或笔刷编辑了高度 (Level.HeightMapEditVersion 变化) 时自动重建,
+        /// 保证线条始终贴着当前地形。重建只发生在调试线可见时, 且每 patch 只有 32 段线, 开销可忽略。
+        /// patch 边界用白色 (NavMeshDebugMaterial), level 外框用品红 (NavMeshDebugWireMaterial)。
+        /// </summary>
+        public unsafe void EnsureDebugBorderMeshes()
+        {
+            var node = TerrainNode;
+            float offset = node.LODGridHeightOffset;
+            if (DebugBorderMesh != null && mDebugBuiltOffset == offset &&
+                mDebugBuiltHeightVersion == Level.HeightMapEditVersion)
+                return;
+            var hMap = Level.SourceHeightMap;
+            if (hMap == null || hMap.SuperPixels == null)
+                return;
+
+            int texPerPatch = node.TexSizePerPatch;
+            int patchSide = node.PatchSide;
+            const int Steps = 8;
+            int texStep = texPerPatch / Steps;
+            float segLen = node.PatchSize / Steps;
+            int u0 = XInLevel * texPerPatch;
+            int v0 = ZInLevel * texPerPatch;
+            float x0 = IndexX * node.PatchSize;
+            float z0 = IndexZ * node.PatchSize;
+
+            float SampleAlt(int tu, int tv)
+            {
+                tu = Math.Clamp(tu, 0, hMap.Width - 1);
+                tv = Math.Clamp(tv, 0, hMap.Height - 1);
+                return hMap.GetPixel<float>(tu, tv);
+            }
+
+            var patchLines = new List<(Vector3 A, Vector3 B)>();
+            var levelLines = new List<(Vector3 A, Vector3 B)>();
+            void EmitEdge(List<(Vector3 A, Vector3 B)> lines, Vector3 start, Vector3 dir,
+                int tuStart, int tvStart, int tuDir, int tvDir)
+            {
+                var prev = new Vector3(start.X, SampleAlt(tuStart, tvStart) + offset, start.Z);
+                for (int i = 1; i <= Steps; i++)
+                {
+                    var cur = new Vector3(start.X + dir.X * i * segLen,
+                        SampleAlt(tuStart + tuDir * i, tvStart + tvDir * i) + offset,
+                        start.Z + dir.Z * i * segLen);
+                    lines.Add((prev, cur));
+                    prev = cur;
+                }
+            }
+
+            // 落在 level 外框上的边归入 levelLines (品红), 其余是 patch 间边界 (白)
+            bool onSouth = ZInLevel == 0;
+            bool onNorth = ZInLevel == patchSide - 1;
+            bool onWest = XInLevel == 0;
+            bool onEast = XInLevel == patchSide - 1;
+            EmitEdge(onSouth ? levelLines : patchLines, new Vector3(x0, 0, z0), new Vector3(1, 0, 0), u0, v0, texStep, 0);
+            EmitEdge(onNorth ? levelLines : patchLines, new Vector3(x0, 0, z0 + node.PatchSize), new Vector3(1, 0, 0), u0, v0 + texPerPatch, texStep, 0);
+            EmitEdge(onWest ? levelLines : patchLines, new Vector3(x0, 0, z0), new Vector3(0, 0, 1), u0, v0, 0, texStep);
+            EmitEdge(onEast ? levelLines : patchLines, new Vector3(x0 + node.PatchSize, 0, z0), new Vector3(0, 0, 1), u0 + texPerPatch, v0, 0, texStep);
+
+            Graphics.Mesh.TtRenderMesh BuildLineMesh(List<(Vector3 A, Vector3 B)> lines,
+                Graphics.Pipeline.Shader.TtMaterial mat, string name)
+            {
+                if (lines.Count == 0)
+                    return null;
+                var mesh = new Graphics.Mesh.TtMeshDataProvider();
+                mesh.AssetName = RName.GetRName("@" + name, RName.ERNameType.Transient);
+                var builder = mesh.mCoreObject;
+                uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
+                    (1 << (int)NxRHI.EVertexStreamType.VST_Color));
+                builder.Init(streams, false, 1);
+                var aabb = new BoundingBox(x0, 0, z0, x0 + node.PatchSize, offset + 1, z0 + node.PatchSize);
+                builder.SetAABB(ref aabb);
+                var dpDesc = new NxRHI.FMeshAtomDesc();
+                dpDesc.SetDefault();
+                dpDesc.PrimitiveType = NxRHI.EPrimitiveType.EPT_LineList;
+                dpDesc.NumPrimitives = (uint)lines.Count;
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    var v = lines[i];
+                    builder.AddVertex(in v.A, in Vector3.UnitY, in Vector2.One, 0xFFFFFFFF);
+                    builder.AddVertex(in v.B, in Vector3.UnitY, in Vector2.One, 0xFFFFFFFF);
+                    builder.AddLine((ushort)(i * 2), (ushort)(i * 2 + 1));
+                }
+                builder.PushAtomLOD(0, &dpDesc);
+                return mesh.ToDrawMesh(mat);
+            }
+
+            DisposeDebugBorderMeshes();
+            var mats = TtEngine.Instance.GfxDevice.MaterialManager;
+            DebugBorderMesh = BuildLineMesh(patchLines, mats.NavMeshDebugMaterial, "TerrainPatchBorder");
+            DebugLevelBorderMesh = BuildLineMesh(levelLines, mats.NavMeshDebugWireMaterial, "TerrainLevelBorder");
+
+            // 新建的网格必须立刻吃上节点变换 (含 world.CameraOffset), 否则会带着单位矩阵
+            // 渲染, 与地形错开一段相机偏移量, 改 LODGridHeightOffset 触发重建时看起来
+            // 就像"修改没生效"。OnAbsTransformChanged 只在节点移动时才刷, 救不了这里。
+            var world = node.GetWorld();
+            ref var nodeTransform = ref node.Placement.AbsTransform;
+            if (DebugBorderMesh != null)
+                DebugBorderMesh.SetWorldTransform(in nodeTransform, world, false);
+            if (DebugLevelBorderMesh != null)
+                DebugLevelBorderMesh.SetWorldTransform(in nodeTransform, world, false);
+
+            mDebugBuiltOffset = offset;
+            mDebugBuiltHeightVersion = Level.HeightMapEditVersion;
         }
         public void SetAcceptShadow(bool value)
         {
@@ -347,6 +472,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 i.SetWorldTransform(in transform, world, false);
             }
+            if (DebugBorderMesh != null)
+                DebugBorderMesh.SetWorldTransform(in transform, world, false);
+            if (DebugLevelBorderMesh != null)
+                DebugLevelBorderMesh.SetWorldTransform(in transform, world, false);
             foreach (var i in WaterMesh)
             {
                 i.SetWorldTransform(in transform, world, false);
@@ -366,6 +495,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     continue;
                 i.UpdateCameraOffset(world);
             }
+            if (DebugBorderMesh != null)
+                DebugBorderMesh.UpdateCameraOffset(world);
+            if (DebugLevelBorderMesh != null)
+                DebugLevelBorderMesh.UpdateCameraOffset(world);
             foreach (var i in WaterMesh)
             {
                 if (i==null)
@@ -375,27 +508,37 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         public void OnGatherVisibleMeshes(GamePlay.TtWorld.TtVisParameter rp)
         {
-            if (CurrentLOD >= TerrainMesh.Length)
-                return;
+            // CurrentLOD 未分配 (int.MaxValue 哨兵残留) 或越界时钳到最粗糙网格,
+            // 而不是跳过绘制: 最远圈之外的 patch 不会被任何 LOD 圈命中, 但仍需可见
+            int lod = CurrentLOD;
+            if (lod >= TerrainMesh.Length)
+                lod = TerrainMesh.Length - 1;
 
             switch (Level.GetTerrainNode().Terrain.ShowMode)
             {
                 case TtTerrainSystem.EShowMode.Normal:
-                    rp.AddVisibleMesh(TerrainMesh[CurrentLOD]);
+                    rp.AddVisibleMesh(TerrainMesh[lod]);
                     break;
                 case TtTerrainSystem.EShowMode.WireFrame:
-                    rp.AddVisibleMesh(WireFrameTerrainMesh[CurrentLOD]);
+                    rp.AddVisibleMesh(WireFrameTerrainMesh[lod]);
                     break;
                 case TtTerrainSystem.EShowMode.Both:
                     {
-                        rp.AddVisibleMesh(TerrainMesh[CurrentLOD]);
-                        rp.AddVisibleMesh(WireFrameTerrainMesh[CurrentLOD]);
+                        rp.AddVisibleMesh(TerrainMesh[lod]);
+                        rp.AddVisibleMesh(WireFrameTerrainMesh[lod]);
                     }
                     break;
             }
 
             if (Level.GetTerrainNode().Terrain.IsShowWater)
-                rp.AddVisibleMesh(WaterMesh[CurrentLOD]);
+                rp.AddVisibleMesh(WaterMesh[lod]);
+
+            if (Level.GetTerrainNode().ShowLODGrid)
+                EnsureDebugBorderMeshes();
+            if (DebugBorderMesh != null)
+                rp.AddVisibleMesh(DebugBorderMesh);
+            if (DebugLevelBorderMesh != null)
+                rp.AddVisibleMesh(DebugLevelBorderMesh);
 
             GrassManager?.OnGatherVisibleMeshes(rp);
         }

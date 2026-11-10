@@ -1,5 +1,5 @@
-﻿# EngineAll.sln 文本操作的公共函数，由 New-LeanClrStub.ps1 / New-TitanPlugin.ps1 dot-source 使用。
-# 只用 PowerShell 原生命令与字符串方法，保证在 ConstrainedLanguage 下可用。
+﻿# Common functions for text manipulation of EngineAll.sln, dot-sourced by New-LeanClrStub.ps1 / New-TitanPlugin.ps1.
+# Uses only native PowerShell commands and string methods, guaranteeing availability under ConstrainedLanguage.
 
 $script:SolutionFolderTypeGuid = '{2150E333-8FDC-42A3-9474-1A3956D46DE8}'
 $script:SharedProjectTypeGuid = '{D954291E-2A0B-460D-934E-DC6B0785DB48}'
@@ -44,7 +44,7 @@ function Read-SolutionLines {
 }
 
 function Write-SolutionLines {
-    # 内容未变时不写盘；写盘时保留 UTF-8 BOM（VS 生成的 sln 带 BOM，pwsh 的 UTF8 默认不带）。
+    # Do not write when content is unchanged; when writing, keep the UTF-8 BOM (VS-generated sln files carry a BOM; pwsh's UTF8 default does not).
     param(
         [Parameter(Mandatory = $true)]
         [string]$SolutionPath,
@@ -119,7 +119,7 @@ function Get-SolutionProjectGuid {
 }
 
 function Get-ProjectSolutionFolderGuid {
-    # 只在 NestedProjects 段内查找：同一 GUID 也会出现在 ProjectDependencies 里。
+    # Search only within the NestedProjects section: the same GUID also appears in ProjectDependencies.
     param(
         [Parameter(Mandatory = $true)]
         [string]$SolutionContent,
@@ -147,7 +147,7 @@ function Get-ProjectSolutionFolderGuid {
 }
 
 function Get-SolutionFolderGuid {
-    # 按名称和父文件夹查找解决方案文件夹；ParentGuid 为空表示查找顶层文件夹。
+    # Find a solution folder by name and parent folder; an empty ParentGuid means a top-level folder.
     param(
         [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
@@ -173,7 +173,7 @@ function Get-SolutionFolderGuid {
 }
 
 function Add-SolutionProjectEntry {
-    # 在 Global 之前插入一个 Project 条目，可带 SolutionItems。
+    # Insert a Project entry before Global, optionally with SolutionItems.
     param(
         [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
@@ -219,7 +219,7 @@ function Add-SolutionProjectEntry {
 }
 
 function Set-SolutionSectionLines {
-    # 在指定 GlobalSection 末尾追加行；段不存在时在 EndGlobal 之前新建。
+    # Append lines at the end of the given GlobalSection; create it before EndGlobal if absent.
     param(
         [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
@@ -280,7 +280,7 @@ function Set-SolutionSectionLines {
 }
 
 function Set-SolutionNestedProjects {
-    # 批量设置 NestedProjects 映射：已存在的就地改父级，新的追加在段尾。
+    # Bulk-set NestedProjects mappings: reparent existing ones in place, append new ones at the section tail.
     param(
         [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
@@ -356,7 +356,7 @@ function Set-ProjectSolutionFolder {
 }
 
 function Get-SolutionProjectConfigurationLines {
-    # 按 SolutionConfigurationPlatforms 生成 SDK 工程的配置映射：Release* -> Release|Any CPU，其余 -> Debug|Any CPU。
+    # Generate the SDK project's configuration mapping from SolutionConfigurationPlatforms: Release* -> Release|Any CPU, everything else -> Debug|Any CPU.
     param(
         [Parameter(Mandatory = $true)]
         [AllowEmptyString()]

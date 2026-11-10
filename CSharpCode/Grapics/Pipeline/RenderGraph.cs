@@ -336,7 +336,7 @@ namespace EngineNS.Graphics.Pipeline
             using (new Profiler.TimeScopeHelper(ScopeBeginTick))
             {
                 FrameBuild(this as TtRenderPolicy);
-
+                
                 if (NodeLayers != null)
                 {
                     foreach (var i in NodeLayers)

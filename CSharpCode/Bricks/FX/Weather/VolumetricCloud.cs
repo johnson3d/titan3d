@@ -383,7 +383,28 @@ namespace EngineNS.Bricks.FX.Weather
         public TtVolumetricCloudShading()
         {
             CodeName = RName.GetRName("shaders/bricks/fx/volumetriccloud.cginc", RName.ERNameType.Engine);
+
+            // ENV_CLOUD_CAST_SHADOW: 配置型开关 (场景节点 CastShadow 属性转发), 不应每帧切换.
+            // false -> shader 端云只绘制在天空像素上, 不再叠加到场景几何 (远景地形会看到云本体的暗色圆盘).
+            this.BeginPermutaion();
+            CastShadowPermutation = this.PushPermutation<Graphics.Pipeline.Shader.EPermutation_Bool>("ENV_CLOUD_CAST_SHADOW", (int)Graphics.Pipeline.Shader.EPermutation_Bool.BitWidth);
+            CastShadowPermutation.SetValue((int)Graphics.Pipeline.Shader.EPermutation_Bool.TrueValue);
+
             this.UpdatePermutation().AddWaitTask();
+        }
+
+        public TtPermutationItem CastShadowPermutation { get; private set; }
+        [System.ComponentModel.Category("Option")]
+        public bool IsCastShadowToScene
+        {
+            get { return CastShadowPermutation.GetValue() == (int)Graphics.Pipeline.Shader.EPermutation_Bool.TrueValue; }
+            set
+            {
+                if (IsCastShadowToScene == value)
+                    return;
+                CastShadowPermutation.SetValue(value);
+                this.UpdatePermutation().AddWaitTask();
+            }
         }
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
@@ -543,6 +564,11 @@ namespace EngineNS.Bricks.FX.Weather
             [Rtti.Meta("")]
             public bool CloudEnable { get; set; } = true;
 
+            // 投射阴影开关: false 时体积云只绘制在天空像素上, 不再叠加到场景几何像素
+            // (远景地形上会看到云本体投影下来的半圆暗盘, 用户感知为"云影"). 默认 true 保持历史行为.
+            [Rtti.Meta("")]
+            public bool CastShadow { get; set; } = true;
+
             [Rtti.Meta("")]
             [System.ComponentModel.Category("Option")]
             public TtCloudNoiseGenerator NoiseGen { get; set; } = new TtCloudNoiseGenerator();
@@ -561,6 +587,13 @@ namespace EngineNS.Bricks.FX.Weather
         {
             get => GetNodeData<TtThisNodeData>().CloudEnable;
             set => GetNodeData<TtThisNodeData>().CloudEnable = value;
+        }
+
+        [System.ComponentModel.Category("Option")]
+        public bool CastShadow
+        {
+            get => GetNodeData<TtThisNodeData>().CastShadow;
+            set => GetNodeData<TtThisNodeData>().CastShadow = value;
         }
 
         [Rtti.Meta("")]
@@ -843,6 +876,11 @@ namespace EngineNS.Bricks.FX.Weather
                     if (sun != null)
                         LightDir = sun.DirectionLight.Direction;
                 }
+
+                // CastShadow 是 shading permutation (配置型), setter 链路自带守卫, 这里再守一层避免每帧触发 UpdatePermutation
+                var cloudShading = RenderNode.mBasePassShading;
+                if (cloudShading != null && cloudShading.IsCastShadowToScene != CastShadow)
+                    cloudShading.IsCastShadowToScene = CastShadow;
             }
             return base.OnTickLogic(args);
         }

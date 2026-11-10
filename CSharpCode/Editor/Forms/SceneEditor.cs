@@ -516,8 +516,10 @@ namespace EngineNS.Editor.Forms
             mSplineAxisProxyNode.Placement.Quat = Quaternion.Identity;
             mSplineAxisProxyNode.Placement.Scale = Vector3.One;
             PreviewViewport.Axis.EnableTransformHistory = false;
-            PreviewViewport.Axis.SetAxisOperationType(TtAxis.enAxisOperationType.Move);
+            // 先把选择集换成代理节点再切 Move: 上一个选中的可能是"位置无意义"的节点(平行光),
+            // 那种状态下 SetAxisOperationType 会把 Move 拦住, 代理节点选上后锁定才解除
             PreviewViewport.Axis.SetSelectedNodes(new List<TtNode> { mSplineAxisProxyNode });
+            PreviewViewport.Axis.SetAxisOperationType(TtAxis.enAxisOperationType.Move);
         }
 
         internal void ClearSplineElementSelection(bool restoreNodeAxis)

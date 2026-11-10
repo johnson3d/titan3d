@@ -112,7 +112,8 @@ namespace EngineNS.Thread
             {
                 if (TtEngine.Instance.EventPoster.IsInParallelFor)
                     return true;
-                if (PrivateTasks.Count > 0 || TtEngine.Instance.EventPoster.GlobalTasks.Count > 0)
+                if (PrivateTasks.Count > 0 || TtEngine.Instance.EventPoster.GlobalTasks.Count > 0
+                    || PriorityNum > 0 || AsyncNum > 0)
                     return true;
                 return System.Threading.Interlocked.CompareExchange(ref mHasWork, 1, 1) == 1;
             }
@@ -125,6 +126,16 @@ namespace EngineNS.Thread
         public override void EnqueueContinue(Async.TtAsyncTaskStateBase evt)
         {
             base.EnqueueContinue(evt);
+            HasWork = true;
+        }
+        public override void EnqueueAsync(Async.TtAsyncTaskStateBase evt)
+        {
+            base.EnqueueAsync(evt);
+            HasWork = true;
+        }
+        public override void EnqueuePriority(Async.TtAsyncTaskStateBase evt)
+        {
+            base.EnqueuePriority(evt);
             HasWork = true;
         }
         public enum EPoolThreadState
@@ -143,6 +154,21 @@ namespace EngineNS.Thread
         {
             ref var alive = ref Async.TtContextThreadManager.mAliveThread;
             System.Threading.Interlocked.Increment(ref alive);
+
+            //驱动经EnqueuePriority/EnqueueAsync投递到本线程的事件（如EventPoster.Post到TPools的异步任务），
+            //否则这些事件永远不会被执行
+            Async.TtAsyncTaskStateBase cur;
+            var pendingNum = PriorityNum;
+            while (pendingNum-- > 0 && DoOnePriorityEvent(out cur))
+            {
+
+            }
+            pendingNum = AsyncNum;
+            while (pendingNum-- > 0 && DoOneAsyncEvent(out cur))
+            {
+
+            }
+
             mPoolThreadState = EPoolThreadState.DoPrivate;
             Async.TtAsyncTaskStateBase e = PopTask();
             while (e != null)
@@ -174,7 +200,6 @@ namespace EngineNS.Thread
             }
             Suspended.Clear();
 
-            Async.TtAsyncTaskStateBase cur;
             while (DoOneContinueEvent(out cur))
             {
 

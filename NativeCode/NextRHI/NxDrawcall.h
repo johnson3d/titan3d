@@ -92,7 +92,7 @@ namespace NxRHI
 			BindResources.clear();
 		}
 		const FEffectBinder* FindBinder(const char* name) const;
-		
+		const FEffectBinder* FindBinder(EShaderBindType type, const char* name) const;
 		bool BindResource(VNameString name, IGpuResource* resource);
 		void BindResource(const FEffectBinder* binder, IGpuResource * resource);
 		IGpuResource* FindGpuResource(VNameString name);

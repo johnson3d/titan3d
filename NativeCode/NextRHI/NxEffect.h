@@ -132,6 +132,15 @@ namespace NxRHI
 			}
 			return iter->second;
 		}
+		const FEffectBinder* FindBinder(EShaderBindType type, const char* name) const{
+			return FindBinder(type, VNameString(name));
+		}
+		const FEffectBinder* FindBinder(EShaderBindType type, VNameString name) const{
+			auto pBinder = FindBinder(name);
+			if (pBinder != nullptr && pBinder->BindType == type)
+				return pBinder;
+			return nullptr;
+		}
 		void BindCBV(ICommandList* cmdlist, const FEffectBinder* binder, ICbView* buffer);
 		void BindSrv(ICommandList* cmdlist, const FEffectBinder* binder, ISrView* srv);
 		void BindUav(ICommandList* cmdlist, const FEffectBinder* binder, IUaView* uav);

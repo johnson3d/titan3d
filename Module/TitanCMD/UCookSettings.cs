@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +20,8 @@ namespace ProjectCooker
                 case "StartLoginServer":
                 case "StartLevelServer":
                 case "StartGateServer":
+                // cook worker: 常驻等 stdin 指令, 不能 one-shot 跑完就 PostQuitMessage
+                case "CookServer":
                     return true;
                 default:
                     return false;
@@ -53,7 +56,19 @@ namespace ProjectCooker
         //public const string Type_Macross = "Macross";
 
         public const string Param_Blacklist = "Blacklist=";
+        /// <summary>单资源 cook: 指定资产相对路径 (可带扩展名), 优先于 AssetType 批量扫描</summary>
+        public const string Param_Asset = "Asset=";
+        public const string Param_CookCfg = "CookCfg=";
         public const string DS_Port = "DS_Port=";
+
+        /// <summary>CookServer: 空闲多久后优雅退出 (秒), <=0 禁用</summary>
+        public const string Param_WorkerIdleSec = "WorkerIdleSec=";
+        /// <summary>CookServer: 单进程跑多少个 job 后在批次边界主动退出</summary>
+        public const string Param_WorkerMaxJobs = "WorkerMaxJobs=";
+        /// <summary>CookServer: 单 job 超时秒数, <=0 不限</summary>
+        public const string Param_WorkerJobTimeout = "WorkerJobTimeout=";
+        /// <summary>CookServer: 心跳间隔秒数</summary>
+        public const string Param_WorkerBeatSec = "WorkerBeatSec=";
 
         public virtual async EngineNS.Thread.Async.TtTask<int> ExecuteCommand(string[] args)
         {
@@ -79,6 +94,16 @@ namespace ProjectCooker
                 return types.Split(split);
             }
             return null;
+        }
+        /// <summary>取整数参数 (如 WorkerIdleSec=60), 缺失或非法时用 fallback</summary>
+        public static int FindIntArgument(string[] args, string startWith, int fallback)
+        {
+            var value = FindArgument(args, startWith);
+            if (string.IsNullOrEmpty(value))
+                return fallback;
+            if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
+                return result;
+            return fallback;
         }
     }
 }

@@ -39,6 +39,15 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// </summary>
         const int AllocAlign = 64;
 
+        /// <summary>
+        /// 保护 mRect / mDeltas / mSaveHash。
+        /// 主线程编辑 (Accumulate) 与 AsyncIO 线程的 level 异步加载 (BuildLevelDataFromPGC → ApplyTo)
+        /// 会同时访问这两份数据: 无锁时 IO 线程可能在 SureCapacity 换数组的间隙读到旧数组/空数组,
+        /// 叠出来的地形缺手绘数据, 表现为"跳转几次后编辑没了"。
+        /// 锁顺序固定为 manager 锁 → 本锁 (manager 只在持锁状态下调进来), 不要反向嵌套。
+        /// </summary>
+        readonly object mLocker = new object();
+
         public int LevelX { get; private set; }
         public int LevelZ { get; private set; }
 
@@ -57,15 +66,15 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
         public FTerrainDirtyRect Rect
         {
-            get { return mRect; }
+            get { lock (mLocker) { return mRect; } }
         }
         public bool IsEmpty
         {
-            get { return mDeltas == null || mRect.IsValid == false; }
+            get { lock (mLocker) { return mDeltas == null || mRect.IsValid == false; } }
         }
         public string SaveHash
         {
-            get { return mSaveHash; }
+            get { lock (mLocker) { return mSaveHash; } }
         }
 
         static int AlignDown(int v)
@@ -109,17 +118,23 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             if (delta == 0.0f)
                 return;
 
-            SureCapacity(x, y);
-            mDeltas[(y - mRect.MinY) * mRect.Width + (x - mRect.MinX)] += delta;
-            mSaveHash = null;
+            lock (mLocker)
+            {
+                SureCapacity(x, y);
+                mDeltas[(y - mRect.MinY) * mRect.Width + (x - mRect.MinX)] += delta;
+                mSaveHash = null;
+            }
         }
         public float GetDelta(int x, int y)
         {
-            if (IsEmpty)
-                return 0.0f;
-            if (x < mRect.MinX || x > mRect.MaxX || y < mRect.MinY || y > mRect.MaxY)
-                return 0.0f;
-            return mDeltas[(y - mRect.MinY) * mRect.Width + (x - mRect.MinX)];
+            lock (mLocker)
+            {
+                if (IsEmpty)
+                    return 0.0f;
+                if (x < mRect.MinX || x > mRect.MaxX || y < mRect.MinY || y > mRect.MaxY)
+                    return 0.0f;
+                return mDeltas[(y - mRect.MinY) * mRect.Width + (x - mRect.MinX)];
+            }
         }
 
         /// <summary>
@@ -128,6 +143,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// 烤进基底, 下次加载再叠一次。
         /// </summary>
         public FTerrainDirtyRect ApplyTo(Procedure.TtBufferComponent hMap)
+        {
+            lock (mLocker)
+            {
+                return ApplyToInternal(hMap);
+            }
+        }
+        FTerrainDirtyRect ApplyToInternal(Procedure.TtBufferComponent hMap)
         {
             var applied = FTerrainDirtyRect.Empty;
             if (hMap == null || IsEmpty)
@@ -170,6 +192,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// </summary>
         public unsafe string SaveToFile(string file)
         {
+            lock (mLocker)
+            {
+                return SaveToFileInternal(file);
+            }
+        }
+        unsafe string SaveToFileInternal(string file)
+        {
             if (IsEmpty)
                 return null;
 
@@ -211,6 +240,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             return hash;
         }
         public unsafe bool LoadFromFile(string file)
+        {
+            lock (mLocker)
+            {
+                return LoadFromFileInternal(file);
+            }
+        }
+        unsafe bool LoadFromFileInternal(string file)
         {
             if (IO.TtFileManager.FileExists(file) == false)
                 return false;
@@ -285,6 +321,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public const string LevelListName = "levellist.txt";
 
         protected TtTerrainNode mNode;
+        /// <summary>
+        /// 保护 mLevels / mDiskHashes / mDiskListLoaded。
+        /// 这些字典会被两条线程碰到: 主线程编辑累积 (GetOrCreateLevel/Accumulate)、
+        /// AsyncIO 线程的异步 level 加载 (BuildLevelDataFromPGC → TryLoadLevel)。
+        /// 不加锁时异步加载可能读到空结果 → 重载出来的地形没有手绘数据, 看起来像"跳转后编辑丢了"。
+        /// </summary>
+        protected readonly object mLocker = new object();
         Dictionary<long, TLevel> mLevels = new Dictionary<long, TLevel>();
         /// <summary>
         /// 磁盘上已有的 level → hash。未加载进内存的 level 也在这里, 保存时要原样带上,
@@ -373,26 +416,32 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
         public TLevel FindLevel(int levelX, int levelZ)
         {
-            mLevels.TryGetValue(MakeKey(levelX, levelZ), out var result);
-            return result;
+            lock (mLocker)
+            {
+                mLevels.TryGetValue(MakeKey(levelX, levelZ), out var result);
+                return result;
+            }
         }
         /// <summary>
         /// 取出 (必要时创建) 某个 level 的覆盖层, 供编辑累积。
         /// </summary>
         public TLevel GetOrCreateLevel(int levelX, int levelZ)
         {
-            var key = MakeKey(levelX, levelZ);
-            if (mLevels.TryGetValue(key, out var result))
-                return result;
-
-            // 先看盘上有没有已存的记录, 有就接着它累积, 不然一次编辑会把旧数据冲掉。
-            result = TryLoadLevel(levelX, levelZ);
-            if (result == null)
+            lock (mLocker)
             {
-                result = CreateLevel(levelX, levelZ);
-                mLevels.Add(key, result);
+                var key = MakeKey(levelX, levelZ);
+                if (mLevels.TryGetValue(key, out var result))
+                    return result;
+
+                // 先看盘上有没有已存的记录, 有就接着它累积, 不然一次编辑会把旧数据冲掉。
+                result = TryLoadLevel(levelX, levelZ);
+                if (result == null)
+                {
+                    result = CreateLevel(levelX, levelZ);
+                    mLevels.Add(key, result);
+                }
+                return result;
             }
-            return result;
         }
         /// <summary>
         /// 供 level 构建时使用: 已在内存里就直接返回, 否则按 levellist 判断有没有盘上数据再惰加载。
@@ -400,29 +449,32 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// </summary>
         public TLevel TryLoadLevel(int levelX, int levelZ)
         {
-            var key = MakeKey(levelX, levelZ);
-            if (mLevels.TryGetValue(key, out var cached))
-                return cached;
-
-            SureDiskList();
-            if (mDiskHashes.ContainsKey(key) == false)
-                return null;
-
-            var dir = GetOverlayDirForLoad();
-            if (dir == null)
-                return null;
-
-            var file = IO.TtFileManager.CombinePath(dir, MakeLevelKeyString(levelX, levelZ) + OverlayExt);
-            var overlay = CreateLevel(levelX, levelZ);
-            if (overlay.LoadFromFile(file) == false)
+            lock (mLocker)
             {
-                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, "TerrainOverlay",
-                    $"level overlay listed but unreadable: {file}");
-                return null;
-            }
+                var key = MakeKey(levelX, levelZ);
+                if (mLevels.TryGetValue(key, out var cached))
+                    return cached;
 
-            mLevels.Add(key, overlay);
-            return overlay;
+                SureDiskList();
+                if (mDiskHashes.ContainsKey(key) == false)
+                    return null;
+
+                var dir = GetOverlayDirForLoad();
+                if (dir == null)
+                    return null;
+
+                var file = IO.TtFileManager.CombinePath(dir, MakeLevelKeyString(levelX, levelZ) + OverlayExt);
+                var overlay = CreateLevel(levelX, levelZ);
+                if (overlay.LoadFromFile(file) == false)
+                {
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, "TerrainOverlay",
+                        $"level overlay listed but unreadable: {file}");
+                    return null;
+                }
+
+                mLevels.Add(key, overlay);
+                return overlay;
+            }
         }
 
         /// <summary>
@@ -430,44 +482,47 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// </summary>
         public void Save(GamePlay.Scene.TtScene scene)
         {
-            if (mLevels.Count == 0)
-                return;
-
-            var dir = GetOverlayDir(scene);
-            if (dir == null)
-                return;
-
-            SureDiskList();
-            IO.TtFileManager.SureDirectory(dir);
-
-            // 从盘上已有的条目起底, 只覆盖本次内存里有的 level。
-            var finalHashes = new Dictionary<long, string>(mDiskHashes);
-            foreach (var kv in mLevels)
+            lock (mLocker)
             {
-                var overlay = kv.Value;
-                if (overlay.IsEmpty)
-                    continue;
+                if (mLevels.Count == 0)
+                    return;
 
-                var file = IO.TtFileManager.CombinePath(dir, MakeLevelKeyString(overlay.LevelX, overlay.LevelZ) + OverlayExt);
-                var hash = overlay.SaveToFile(file);
-                if (hash == null)
-                    continue;
-                TtEngine.Instance.SourceControlModule.AddFile(file, true);
-                finalHashes[kv.Key] = hash;
+                var dir = GetOverlayDir(scene);
+                if (dir == null)
+                    return;
+
+                SureDiskList();
+                IO.TtFileManager.SureDirectory(dir);
+
+                // 从盘上已有的条目起底, 只覆盖本次内存里有的 level。
+                var finalHashes = new Dictionary<long, string>(mDiskHashes);
+                foreach (var kv in mLevels)
+                {
+                    var overlay = kv.Value;
+                    if (overlay.IsEmpty)
+                        continue;
+
+                    var file = IO.TtFileManager.CombinePath(dir, MakeLevelKeyString(overlay.LevelX, overlay.LevelZ) + OverlayExt);
+                    var hash = overlay.SaveToFile(file);
+                    if (hash == null)
+                        continue;
+                    TtEngine.Instance.SourceControlModule.AddFile(file, true);
+                    finalHashes[kv.Key] = hash;
+                }
+
+                string list = "";
+                foreach (var kv in finalHashes)
+                {
+                    int levelX = (int)(uint)(kv.Key & 0xFFFFFFFF);
+                    int levelZ = (int)(kv.Key >> 32);
+                    list += MakeLevelKeyString(levelX, levelZ) + '#' + kv.Value + '\n';
+                }
+                var listFile = IO.TtFileManager.CombinePath(dir, LevelListName);
+                IO.TtFileManager.WriteAllText(listFile, list);
+                TtEngine.Instance.SourceControlModule.AddFile(listFile, true);
+
+                mDiskHashes = finalHashes;
             }
-
-            string list = "";
-            foreach (var kv in finalHashes)
-            {
-                int levelX = (int)(uint)(kv.Key & 0xFFFFFFFF);
-                int levelZ = (int)(kv.Key >> 32);
-                list += MakeLevelKeyString(levelX, levelZ) + '#' + kv.Value + '\n';
-            }
-            var listFile = IO.TtFileManager.CombinePath(dir, LevelListName);
-            IO.TtFileManager.WriteAllText(listFile, list);
-            TtEngine.Instance.SourceControlModule.AddFile(listFile, true);
-
-            mDiskHashes = finalHashes;
         }
     }
 

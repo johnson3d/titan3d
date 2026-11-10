@@ -1,7 +1,7 @@
 ﻿#requires -Version 5.1
-# 新建 Titan 插件工程：生成 .plugin / shproj / projitems / Plugin.cs 与各平台 csproj，并登记到 EngineAll.sln。
-# 目录形态为 Plugins\[Category]\<Folder>\<Name>.plugin；Category 可多级（'A/B' 或 'A\B'），Folder 缺省等于 Name。
-# 用 -File 启动时数组参数会以 "A,B" 单个字符串传入，脚本内统一按逗号拆分。
+# Create a new Titan plugin project: generates .plugin / shproj / projitems / Plugin.cs and per-platform csproj, and registers them in EngineAll.sln.
+# Directory layout is Plugins\[Category]\<Folder>\<Name>.plugin; Category may be nested ('A/B' or 'A\B'); Folder defaults to Name.
+# When launched with -File, array parameters arrive as a single "A,B" string; the script splits on commas uniformly.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
@@ -96,7 +96,7 @@ if ($Category) {
     }
 }
 
-# 平台：All 与具体平台互斥；输出顺序固定为 All / Windows / Android。
+# Platform: All is mutually exclusive with specific platforms; output order is fixed to All / Windows / Android.
 $platformTable = [ordered]@{
     All = @{ Descriptor = 'PLTF_ALL'; Host = 'All' }
     Windows = @{ Descriptor = 'PLTF_Windows'; Host = 'Window' }
@@ -135,7 +135,7 @@ if (-not (Test-Path -LiteralPath $pluginsRoot -PathType Container)) {
 }
 $pluginsRoot = Get-NormalizedFullPath $pluginsRoot
 
-# 已有插件：插件名取 .plugin 文件名；编译输出目录里的拷贝不算。
+# Existing plugin: the plugin name comes from the .plugin file name; copies in build output directories do not count.
 $existingPlugins = @{}
 foreach ($file in @(Get-ChildItem -LiteralPath $pluginsRoot -Recurse -File -Filter '*.plugin')) {
     $relative = $file.FullName.Substring($pluginsRoot.Length)
@@ -169,7 +169,7 @@ foreach ($dependency in @(Split-ListArgument $Dependencies)) {
     }
 }
 
-# 先在内存里算好 sln 改动，任何失败都发生在写文件之前。
+# Compute all sln changes in memory first, so any failure happens before writing files.
 $lines = Read-SolutionLines $solutionFilePath
 $pluginsFolderGuid = Get-SolutionFolderGuid $lines 'Plugins'
 if (-not $pluginsFolderGuid) {
@@ -179,7 +179,7 @@ if (-not $pluginsFolderGuid) {
 $nested = @{}
 $nestedOrder = @()
 $parentGuid = $pluginsFolderGuid
-# Category 逐级复用同名 solution folder，缺失的层级新建并挂到上一级。
+# Reuse same-named solution folders per Category level; create missing levels and attach them to the parent.
 foreach ($segment in $categorySegments) {
     $categoryGuid = Get-SolutionFolderGuid $lines $segment $parentGuid
     if (-not $categoryGuid) {
@@ -190,7 +190,7 @@ foreach ($segment in $categorySegments) {
     }
     $parentGuid = $categoryGuid
 }
-# 同级已有同名 solution folder 时 VS 无法区分，必须拒绝。
+# VS cannot distinguish same-named solution folders in the same level, so this must be rejected.
 if (Get-SolutionFolderGuid $lines $Folder $parentGuid) {
     throw "Solution folder '$Folder' already exists under '$(@('Plugins') + $categorySegments -join '/')' in $solutionFilePath."
 }
@@ -226,14 +226,14 @@ if ($configLines.Count -gt 0) {
     $lines = Set-SolutionSectionLines $lines 'GlobalSection(ProjectConfigurationPlatforms) = postSolution' $configLines
 }
 $lines = Set-SolutionNestedProjects $lines $nested $nestedOrder
-# VS 按 GUID 升序维护 SharedMSBuildProjectFiles，新行插到第一个 GUID 更大的行之前。
+# VS keeps SharedMSBuildProjectFiles sorted by GUID ascending; insert the new line before the first line with a larger GUID.
 $sortedImports = @($sharedImports | Sort-Object { Get-SharedImportGuid $_ })
 $lines = Set-SolutionSectionLines $lines 'GlobalSection(SharedMSBuildProjectFiles) = preSolution' $sortedImports {
     param($NewLine, $ExistingLine)
     (Get-SharedImportGuid $NewLine) -lt (Get-SharedImportGuid $ExistingLine)
 }
 
-# 生成文件。
+# Generate files.
 $loadOnInit = 'true'
 if ($NoLoadOnInit) {
     $loadOnInit = 'false'
@@ -358,7 +358,7 @@ foreach ($hostName in $hostProjects.Keys) {
         $engineName = 'Engine.Android'
         $platformSuffix = 'Android'
         $defineConstants = "`r`n    <DefineConstants>`$(DefineConstants);PAndroid</DefineConstants>"
-        # Android 引擎输出与桌面隔离（TitanManagedProject.props 的 TitanEngineAssemblyPath 同源）。
+        # Android engine output is isolated from desktop (same source as TitanEngineAssemblyPath in TitanManagedProject.props).
         $engineReference = $engineReference.Replace('binaries\$(_TitanTargetFramework)\Engine.Window.dll', 'binaries\android\$(_TitanTargetFramework)\Engine.Android.dll').Replace('Engine.Window', $engineName)
     }
     if ($hostName -eq 'All') {
@@ -373,7 +373,7 @@ foreach ($hostName in $hostProjects.Keys) {
 $platformImport
 
   <PropertyGroup>
-    <!-- TFM 跟随 dependencies.json（Directory.Build.props 注入 _TitanTargetFramework）。 -->
+    <!-- TFM follows dependencies.json (Directory.Build.props injects _TitanTargetFramework). -->
     <TargetFramework>`$(_TitanTargetFramework)</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>

@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainEditorInteractiveMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainHeightCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainHeightOverlay.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainLevelGridEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainLevel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainMaterial.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainMaterialEdit.cs" />
@@ -27,6 +28,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Grass\TtGrassModifier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Grass\MdfGrassStaticMesh.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QTree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\VGDag\TtVgDagAsset.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\VGDag\TtVgClusterBaker.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\VGDag\UTest_VgDag.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\VGDag\VgDagVisualizeNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\VGDag\VgDagDrawNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\VGDag\VgDagFarTerrain.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\TerrainGrass.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TerrainModule.cs" />
   </ItemGroup>

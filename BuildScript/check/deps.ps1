@@ -23,10 +23,10 @@ function Resolve-DependencyPath {
         [string]$BasePath = $repoRoot
     )
 
-    # 简单替换正斜杠
+    # Simple forward-slash replacement
     $expanded = $Path -replace '/', '\'
     
-    # 手动判断是否是绝对路径（Windows: 以盘符或 \\ 开头）
+    # Manually decide whether it is an absolute path (Windows: starts with a drive letter or \\)
     $isAbsolute = ($expanded.Length -ge 2 -and $expanded[1] -eq ':') -or 
                   ($expanded.Length -ge 2 -and $expanded[0] -eq '\' -and $expanded[1] -eq '\')
     
@@ -34,7 +34,7 @@ function Resolve-DependencyPath {
         return $expanded
     }
     
-    # 手动组合路径
+    # Manually combine the path
     $BasePath = $BasePath.TrimEnd('\')
     $expanded = $expanded.TrimStart('\')
     return "$BasePath\$expanded"

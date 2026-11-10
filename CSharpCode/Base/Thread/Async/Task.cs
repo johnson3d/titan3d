@@ -166,6 +166,11 @@ namespace EngineNS.Thread.Async
     {
         NotInit = 0,
         Pending,
+        /// <summary>
+        /// 已被 CancelTask 请求取消: 任务对等待方/回调立即表现为完成 (DirectResult 为 default),
+        /// 但后台线程可能仍在跑, 由任务体轮询取消标志自行提前退出 (协作式取消)。
+        /// </summary>
+        Cancelling,
         Success,
         Failed
     }
@@ -257,6 +262,9 @@ namespace EngineNS.Thread.Async
                 {
                     case ETaskStatus.Success:
                         return mResult;
+                    case ETaskStatus.Cancelling:
+                        // 取消的任务没有结果, 等待方/回调读 DirectResult 拿到 default 即可
+                        return default;
                     case ETaskStatus.Failed:
                         ExceptionDispatchInfo.Capture(mException).Throw();
                         return default;
@@ -265,6 +273,22 @@ namespace EngineNS.Thread.Async
                 }
             }
         }
+        internal bool TrySetCancel()
+        {
+            if (mStatus != ETaskStatus.Pending)
+            {
+                return false;
+            }
+            else
+            {
+                mStatus = ETaskStatus.Cancelling;
+                // 唤醒正在 await 的等待方 (RegisterContinuation 非 Pending 态会直接执行 continuation,
+                // 与 TrySetResult/TrySetException 同一语义)
+                this.mContinuation?.Invoke();
+                return true;
+            }
+        }
+
         internal bool TrySetResult(T result)
         {
             if (mStatus != ETaskStatus.Pending)
@@ -407,6 +431,18 @@ namespace EngineNS.Thread.Async
             return mTaskData.TrySetException(exception);
         }
 
+        /// <summary>
+        /// 请求取消: Pending → Cancelling, 等待方/回调立即表现为完成 (DirectResult 为 default)。
+        /// 后台执行体需要自行轮询取消标志提前退出 (见 TtAsyncTaskStateBase.IsCancelRequested)。
+        /// 幂等: 非 Pending 态返回 false。
+        /// </summary>
+        public bool CancelTask()
+        {
+            if (mTaskData == null)
+                return false;
+            return mTaskData.TrySetCancel();
+        }
+
         internal void RegisterContinuation(Action cont)
         {
             mTaskData.RegisterContinuation(cont);
@@ -509,6 +545,19 @@ namespace EngineNS.Thread.Async
                 mStatus = ETaskStatus.Success;
                 if (this.mContinuation != null)
                     this.mContinuation();
+                return true;
+            }
+        }
+        internal bool TrySetCancel()
+        {
+            if (mStatus != ETaskStatus.Pending)
+            {
+                return false;
+            }
+            else
+            {
+                mStatus = ETaskStatus.Cancelling;
+                this.mContinuation?.Invoke();
                 return true;
             }
         }
@@ -654,6 +703,13 @@ namespace EngineNS.Thread.Async
         public TtFiberAwaiter GetAwaiter()
         {
             return new TtFiberAwaiter(this);
+        }
+        /// <summary>请求取消 (语义同 TtTask&lt;T&gt;.CancelTask)。幂等: 非 Pending 态返回 false。</summary>
+        public bool CancelTask()
+        {
+            if (mTaskData == null)
+                return false;
+            return mTaskData.TrySetCancel();
         }
         internal bool TrySetResult()
         {

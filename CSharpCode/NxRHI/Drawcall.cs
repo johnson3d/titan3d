@@ -69,7 +69,11 @@ namespace EngineNS.NxRHI
         {
             return mCoreObject.FindBinder(name);
         }
-        
+        public FEffectBinder FindBinder(EShaderBindType type, string name)
+        {
+            return mCoreObject.FindBinder(type, name);
+        }
+
         public void BindPipeline(TtGpuPipeline pipeline)
         {
             mCoreObject.BindPipeline(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, pipeline.mCoreObject);

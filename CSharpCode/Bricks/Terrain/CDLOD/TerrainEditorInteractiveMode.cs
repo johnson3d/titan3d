@@ -64,7 +64,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// 本次进入模式以来 BeginEditSession 过的 level, 离开模式时要逐个 EndEditSession
         /// 把高度纹理的编码基准收回到真实范围 (会话期间是拉开 headroom 的低精度编码)。
         /// </summary>
-        readonly List<UTerrainLevelData> mSessionLevels = new List<UTerrainLevelData>();
+        readonly List<TtTerrainLevelData> mSessionLevels = new List<TtTerrainLevelData>();
 
         bool mIsPainting = false;
         bool mHasHover = false;

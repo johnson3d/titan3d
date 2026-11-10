@@ -379,7 +379,7 @@ namespace EngineNS.Thread
             get;
         } = new Queue<Async.TtAsyncTaskStateBase>();
         internal System.Threading.AutoResetEvent mEnqueueTrigger = new System.Threading.AutoResetEvent(false);
-        public void EnqueuePriority(Async.TtAsyncTaskStateBase evt)
+        public virtual void EnqueuePriority(Async.TtAsyncTaskStateBase evt)
         {
             System.Diagnostics.Debug.Assert(IsFinished == false);
             lock (PriorityEvents)

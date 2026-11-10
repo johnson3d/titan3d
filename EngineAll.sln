@@ -396,6 +396,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "editor", "editor", "{8E8463
 	ProjectSection(SolutionItems) = preProject
 		Documents\editor\ClrProfiler.md = Documents\editor\ClrProfiler.md
 		Documents\editor\ContentBrowser.md = Documents\editor\ContentBrowser.md
+		Documents\editor\CookManager.md = Documents\editor\CookManager.md
 		Documents\editor\CpuProfiler.md = Documents\editor\CpuProfiler.md
 		Documents\editor\DynConfig.md = Documents\editor\DynConfig.md
 		Documents\editor\GameProjectHotPatch.md = Documents\editor\GameProjectHotPatch.md
@@ -414,6 +415,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "editor", "editor", "{8E8463
 		Documents\editor\RendPolicyEditor.md = Documents\editor\RendPolicyEditor.md
 		Documents\editor\SceneEditor.md = Documents\editor\SceneEditor.md
 		Documents\editor\TextureEditor.md = Documents\editor\TextureEditor.md
+		Documents\editor\TitanCMD.md = Documents\editor\TitanCMD.md
 		Documents\editor\UIEditor.md = Documents\editor\UIEditor.md
 	EndProjectSection
 EndProject
@@ -563,6 +565,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Architecture", "Architecture", "{0E150C09-B1D7-4AF3-B402-6F9CC209FBF6}"
 	ProjectSection(SolutionItems) = preProject
 		Documents\Architecture\AtlasGI.md = Documents\Architecture\AtlasGI.md
+		Documents\Architecture\GpuDriven.md = Documents\Architecture\GpuDriven.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildScript", "BuildScript", "{655071C1-7C02-45CB-ABF9-B291A4A153F2}"
@@ -2199,6 +2202,7 @@ Global
 		3rd\native\xatlas\xatlas.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\zlib\zlib.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\zstd\zstd.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
+		codegen\Android\NativeBinder\CodeGen.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Base\Base.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\Animation\Animation.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\Canvas\Canvas.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4

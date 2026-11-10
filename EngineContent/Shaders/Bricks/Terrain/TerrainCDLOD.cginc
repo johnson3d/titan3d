@@ -102,6 +102,9 @@ uint GetMaterailIdTextureId(VS_MODIFIER input)
 
 float GetTerrrainVertexHeight(float2 uv, int uniqueTextureId = 0)
 {
+    // 槽表间接寻址路径。曾因 C# 端 TextureSlotBuffer.Flush2GPU 从未被调用
+    // (UpdateGpu 只写 CPU 数组置 Dirty) 而 GPU 端槽表永不存在、采样全命中空 slice,
+    // 地形渲染成平板; Flush2GPU 已在 TtTerrainSystem.TickSync 补上。
     return SampleLevelRVT(Samp_HeightMapTexture, HeightMapTexture, uv, uniqueTextureId, 0).r;
 }
 

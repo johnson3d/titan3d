@@ -61,18 +61,35 @@
 | 图标 | 含义 | 说明 |
 |---|---|---|
 | ▶️ | **Pick 模式** | 切回普通选择，不显示 Axis |
-| ✥ | **Move 模式** | 显示移动坐标轴（红 X / 绿 Y / 蓝 Z 箭头），拖动平移选中节点 |
+| ✥ | **Move 模式** | 显示移动坐标轴（红 X / 绿 Y / 蓝 Z 箭头），拖动平移选中节点；选中“位置无意义”的节点时灰化（§3.1.1） |
 | 🔄 | **Rotate 模式** | 显示旋转环，拖动绕轴旋转 |
-| 🟦 | **Scale 模式** | 显示缩放手柄，拖动缩放选中节点 |
-| 📏 | **Edge 模式** | 边吸附编辑（用于点 / 边 / 面级别操作） |
+| 🟦 | **Scale 模式** | 显示缩放手柄，拖动缩放选中节点；选中“位置无意义”的节点时灰化（§3.1.1） |
+| 📏 | **Edge 模式** | 边吸附编辑（用于点 / 边 / 面级别操作）；选中“位置无意义”的节点时灰化（§3.1.1） |
 | 🟫 / ⚪ | **AABB / Sphere 切换** | 选中节点高亮包围体显示形式：立方体或球 |
-| **C** | **Camera 设置弹窗** | 弹出 KeyMove / WheelMove / RotSpeed / ZNear / ZFar / X / Y / Z 等参数 |
+| Ⓛ / Ⓦ | **Local / World 坐标系** | Axis 方向跟随节点本地轴或世界轴；Scale / Edge 模式强制 Local 并隐藏 Ⓦ 按钮 |
+| **C** | **Center Axis（视口中心坐标轴）** | 勾选后 Axis 原点画在屏幕正中央（相机前方 10 米）而不是节点原点，详见 §3.1.1 |
+| **Camera** | **Camera 设置弹窗** | 弹出 MoveSpeed / WheelSpeed / RotSpeed 参数 |
 | **🔘 (RPolicy)** | **RenderPolicy 切换** | 弹窗选择当前视口的 RenderPolicy（Deferred / Forward / 自定义...） |
 | `SM 0.100` | **Snap Move** | 移动吸附步长（米）；拖 Move 轴时按此值整数倍吸附 |
 | `SR 10.000` | **Snap Rotate** | 旋转吸附步长（度） |
 | `SS 0.100` | **Snap Scale** | 缩放吸附步长（倍率） |
 
 > 控件由 `TtWorldViewportSlate.OnDrawViewportUI` 绘制，与 `Axis.SetType / Axis.MoveStep / RotStep / ScaleStep` 直接绑定。
+
+### 3.1.1 坐标轴原点模式（Center Axis）
+
+Axis（gizmo）原点有两种摆放方式，由 `TtAxis.CenterAxisMode` 统一表示，**生效值 = 工具栏 C 按钮 || 选中节点自身要求**：
+
+| 模式 | 原点位置 | 适用 |
+|---|---|---|
+| 常规 | 选中节点（多选时取集合中心）的原点 | 绝大多数节点 |
+| Center Axis | 屏幕正中央（`GetCenterAxisPosition()` = 相机位置 + 视线方向 × 10），忽略节点 position | 平行光等"只需要旋转、位置没有意义"的节点 |
+
+- 中心模式下**拖动结果仍按节点真实变换折算**（`TtAxis.RotWithAxis` / `MoveWithAxis` 里的 `mAxisOrigionTransformBeforeCenterOperation`），所以拖旋转环是绕节点自身原点转，不会把节点搬到视口中心去公转；gizmo 尺寸也因此固定为常量而非随节点远近缩放。
+- 节点侧的扩展点是 `TtNode.IsAxisAtViewportCenter`（`CSharpCode/GamePlay/Scene/Node_Editor.cs`）：只需要旋转编辑的节点重写为 `true` 即可，被选中时自动进入中心模式，取消选中或选中普通节点后自动退出。目前已开启的只有 `TtSunNode`（平行光方向由 `Placement.Quat` 推出，position 不参与光照）。
+- 该模式下 gizmo 要**跟着相机走**，所以不能只靠输入事件驱动：`TtWorldViewportSlate.TickOnFocus`（渲染之前，覆盖 WASD 飞行）与 `OnDrawViewportUI`（覆盖未聚焦时的 Outliner 选中）都会调 `Axis.UpdateShowForFrame`。放在渲染之前是必须的：放到 UI 阶段就晚一帧，飞行期间 gizmo 会停在上一帧的屏幕中心。该方法带 gate —— 非中心模式且没有选择集/操作类型/轴空间变化时直接早退，不会给大选择集白加一份每帧 O(N) 开销。
+- 勾选 C 按钮时写入的只是"用户期望位"：若当前选中的节点自身要求中心模式，手动取消勾选不会把它关掉（要等选中普通节点才恢复）。
+- 由**节点自身要求**进入中心模式时（多选时要求全部节点都声明），gizmo 的操作类型会锁成**只旋转**（`TtAxis.IsOperationRotOnly`）：工具栏 Move / Scale / Edge 三个按钮灰化不可点（悬停有提示），原本处于这三种状态会自动切回 Rot，Select 仍正常可用。锁定不仅在 UI 上：`Axis.SetAxisOperationType` 入口有同一个护栏，程序化调用（脚本、其它编辑器窗口）也会被拦下，不会出现“按钮灰着但 gizmo 能拖”；因此需要先换选择集再设操作类型（`SceneEditor.SelectSplineElement` 已按此顺序写）。这类节点平移/缩放不会改变任何渲染结果，锁掉可以避免误拖。用户手动勾选 C 进入的中心模式**不锁**，那种情况下平移照样是有意义的操作。
 
 ### 3.2 视口左下信息
 

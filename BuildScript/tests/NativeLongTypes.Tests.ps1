@@ -75,7 +75,7 @@ try {
     Assert-True ($r.ExitCode -eq 0) "clean tree must exit 0, got $($r.ExitCode)`n$($r.Output)"
     Assert-True ($r.Output.Contains('[lp64] OK')) "missing OK banner`n$($r.Output)"
 
-    # 相对 Root 必须先归一化，否则相对路径截取错位、allowlist 失效而报 ImGui
+    # A Root-relative path must be normalized first, otherwise relative-path slicing misaligns, the allowlist stops matching, and ImGui gets flagged
     Push-Location $tempRoot
     try {
         $r = Invoke-Guard '.'
@@ -85,11 +85,11 @@ try {
     }
     Assert-True ($r.ExitCode -eq 0) "relative root must exit 0, got $($r.ExitCode)`n$($r.Output)"
 
-    # 只命中 allowlist 的定向扫描不算错配
+    # A targeted scan that only hits the allowlist is not a mismatch
     $r = & $hostExe -NoProfile -ExecutionPolicy Bypass -File $scriptPath -Root $tempRoot -Paths 'NativeCode/ImGui' 2>&1 | Out-String
     Assert-True ($LASTEXITCODE -eq 0) "allow-listed-only scan must exit 0, got $LASTEXITCODE`n$r"
 
-    # 错配 Root 导致一个文件都没扫到时不能静默放行
+    # A wrong Root that scans zero files must not pass silently
     $r = Invoke-Guard (Join-Path $tempRoot 'NativeCode')
     Assert-True ($r.ExitCode -eq 1) "empty scan must exit 1, got $($r.ExitCode)`n$($r.Output)"
 
@@ -100,5 +100,5 @@ finally {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force
     }
 }
-# 预期失败的 fixture 会留下 LASTEXITCODE=1；全部断言通过后显式返回成功。
+# The expected-to-fail fixture leaves LASTEXITCODE=1; return success explicitly after all assertions pass.
 exit 0

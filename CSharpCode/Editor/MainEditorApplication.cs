@@ -192,6 +192,9 @@ namespace EngineNS.Editor
             InitMainMenu();
 
             await AssetEditorManager.Initialize();
+
+            // MCP 工具服务(日志/打开场景/地形 goto), 供 AI 代理或调试脚本远程调用
+            TtEditorMCPTools.RegisterAndStartup();
             return true;
         }
         protected override void PrepareImGuiIniFile(string imguiIniFile)

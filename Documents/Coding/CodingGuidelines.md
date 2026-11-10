@@ -968,6 +968,71 @@ GPU readback 的 fence wait、并行 culling、长耗时计算等。
 定义见 `Base/Thread/Async/ContextThreadManager.cs:29`。每个 target 都有独立 stack size
 配置 (`TtThreadConfig`)。
 
+#### 1.6.3 长任务的取消 —— token 轮询为主, CancelTask 仅限同步 short-circuit
+
+**适用场景**: 投递到后台 (`TPools` / `AsyncIO`) 的秒级重活 (烘焙/采样/批量计算), 宿主
+(场景节点/地图/编辑器页签) 会在任务完成前被关闭或重建, 需要取消在飞任务, 否则后台线程
+白跑数秒且拖慢退出。
+
+**强制规则**:
+
+1. **取消后台执行体用协作式取消标志, 不要硬杀线程**:
+   - 投递时把 `TtAsyncTaskToken` 关联到任务:
+     `var token = new TtAsyncTaskToken();`
+     `await EventPoster.Post((state) => {...}, target).WithToken(token);`
+   - 后台执行体在大循环顶部轮询检查点 (检查点粒度必须小于单次循环迭代耗时):
+     `if (state.IsCancelRequested == true) return null;`
+     (`IsCancelRequested` 即 `TaskToken != null && TaskToken.TaskState == Canceled`,
+     先例: `AnimationClip.cs`; 重活检查点范例: `TtVgClusterBaker.Bake/BakeFromLevel` 的
+     cancelState 参数)。
+   - 外部取消: `token.TaskState = EAsyncTaskState.Canceled;`
+2. **被取消的执行体必须走正常完成路径返回 null/default**, 让 `TrySetResult` 正常收尾、
+   等待方拿到 null、task 被 collector 正常 Dispose。禁止取消后直接不走 SetResult。
+3. **`task.CancelTask()` (置 `ETaskStatus.Cancelling`) 只允许用在"后台本就会自然结束,
+   只是等待方需要立即被唤醒"的同步 short-circuit 场景**。禁止对后台仍在跑的长任务调用,
+   原因: Cancelling 即 `IsCompleted`, `TtTaskCollector.Tick` 会立即执行回调并 Dispose
+   task, `TtTaskData` 回池; 后台数秒后 `TrySetResult` 会写到已回池、可能已被其它任务
+   复用的 data 上, 污染无关任务且不崩溃、极难归因 (真实踩坑: VGDag bake 取消)。
+4. **消费端回调必须对取消结果判 null**: 取消路径的完成值是 null/default,
+   `AddWaitTask` 回调里 `if (task.DirectResult != null)` 判定后再挂接结果。
+5. **回调闭包捕获 task 的局部副本而非成员字段** (struct 副本持同一 `TtTaskData` 引用):
+   取消路径若会把成员字段置 default/复用, 回调读字段会 NRE。
+6. **暴露幂等的取消入口 + 在飞查询**: 宿主类提供 `CancelXxxTask()` (内部只设 token,
+   无在飞时空操作) 与 `IsXxxRunning => mTask.TaskState == ETaskStatus.Pending`,
+   由宿主的 `Dispose` 遍历调用 (范例: `UTerrainLevel.CancelBakeTask/IsBakeRunning`,
+   `TtTerrainNode.Dispose`)。
+
+**标准范例** (TerrainLevel.cs 的 DAG bake):
+
+```csharp
+// 发起: token + WithToken + lambda 内检查点轮询
+mBakeCancelToken = new TtAsyncTaskToken();
+mBakeTask = BakeVgDagAsync(...);
+var bakeTask = mBakeTask;                       // 闭包捕获局部副本
+bakeTask.AddWaitTask((tsk) => {
+    if (bakeTask.DirectResult != null)          // 取消时为 null, 跳过挂接
+        CachedVgDag = bakeTask.DirectResult;
+});
+
+private async TtTask<TtVgDagAsset> BakeVgDagAsync(...)
+{
+    mBakeCancelToken = new TtAsyncTaskToken();
+    var asset = await EventPoster.Post((state) => {
+        var result = Baker.BakeFromLevel(..., state);   // state 传给重活轮询
+        if (result == null) return null;                // 被取消: 不落盘
+        Save(...); return result;
+    }, EAsyncTarget.TPools).WithToken(mBakeCancelToken);
+    return asset;
+}
+
+// 取消 (宿主 Dispose 时): 只设 token, 不调 task.CancelTask()
+public void CancelBakeTask()
+{
+    if (mBakeCancelToken != null)
+        mBakeCancelToken.TaskState = EAsyncTaskState.Canceled;
+}
+```
+
 ### 1.7 GPU 命令提交必须走 RenderQueue, 禁用 `RenderContext.GpuQueue` 直接 submit
 
 **适用场景**: 所有需要把 `TtCommandList` / `FRenderCmd` 交给 GPU 执行的位置 ——

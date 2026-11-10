@@ -96,6 +96,14 @@ namespace EngineNS.Editor
         public Vector3 StudioFallbackSkyColorBottom { get; set; } = new Vector3(0.58f, 0.62f, 0.70f);
         [Rtti.Meta("")]
         public Vector3 StudioFallbackSkyColorTop { get; set; } = new Vector3(0.26f, 0.43f, 0.68f);
+
+        /// <summary>
+        /// 运行期/编辑器里加载地形 level 时自动投递远景 VGDag bake。
+        /// 默认关: 单 level bake 可达秒级且占用线程池线程, 全图加载会拖垮运行期;
+        /// 离线 cook (TitanCMD Cook 命令 / 节点 CookAsset) 不受此开关限制。
+        /// </summary>
+        [Rtti.Meta("")]
+        public bool AutoCookTerrainVgDag { get; set; } = false;
     }
 
     public partial class TtEditor : TtModule<TtEngine>

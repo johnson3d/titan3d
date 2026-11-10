@@ -10,5 +10,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AIGCPlugin.cs" />
+        <Compile Include="$(MSBuildThisFileDirectory)EngineMCPServer.cs" />
   </ItemGroup>
 </Project>

@@ -41,6 +41,13 @@ cbuffer cbAdvanceShadow DX_AUTOBIND
     float PcfDepthBias;   // depth bias for shadow comparison
     float _cbPad0;
 
+    // 1 = clipmap/QTree pages were actually rendered this frame.
+    // 0 = AdvShadow node skipped rendering (disabled / no dirty pages):
+    //     page table & depth array are stale, receivers must be treated as lit
+    //     (stale pages contain uninitialized depth 0 -> would be full shadow).
+    int ClipmapValid;
+    int QTreeValid;
+
     // World-to-light-view rotation matrix (3x3 stored as 3 float4 rows, w unused)
     float4 WorldToLightViewRow0; // right axis
     float4 WorldToLightViewRow1; // up axis
@@ -115,6 +122,10 @@ float GetESMValue(float sampleDepth, float near, float far)
 // Returns shadow attenuation (0=full shadow, 1=lit).
 float GetClipmapShadow(float3 worldPos)
 {
+    // Pages not rendered this frame: stale page table/depth would read as full shadow.
+    if (ClipmapValid == 0)
+        return 1.0f;
+
     // Transform world position to light-view space for page selection
     float3 posLV = WorldToLightView(worldPos);
 

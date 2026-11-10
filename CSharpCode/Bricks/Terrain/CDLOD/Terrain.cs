@@ -71,6 +71,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         public void Dispose()
         {
+            // 未初始化 (Initialize 未走完/失败) 的实例 GridMipLevels 为 null, 直接返回
+            if (GridMipLevels == null)
+                return;
             for (int i = 0; i < GridMipLevels.Length; i++)
             {
                 GridMipLevels[i].Dispose();
@@ -85,6 +88,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 NormalmapRVT.UpdateGpu(cmdlist);
                 HeightmapRVT.UpdateGpu(cmdlist);
                 MaterialIdRVT.UpdateGpu(cmdlist);
+                // 槽表的 Flush2GPU 已收进 TtVirtualTextureBase.UpdateGpu 尾部 (写入与上传同点完成,
+                // 避免再出现"只写 CPU 数置 Dirty 却没人上传"的断层 —— 曾致地形渲染成平板)。
+
                 cmdlist.FlushDraws();
             }
             

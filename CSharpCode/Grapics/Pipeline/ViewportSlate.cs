@@ -669,6 +669,12 @@ namespace EngineNS.Graphics.Pipeline
                     {
                         var This = (RAct.Arg as TtViewportSlate);
                         This.ApplyPendingRenderPolicyResize();
+                        // 相机 cbv + GPU 镜像在剔影之前推进: CpuCullingNode 读的 mGpuFrustum
+                        // 与随后 GPU 绘制读的 cbPerCamera 是同一份快照。原先更新在主线程
+                        // TickSync (渲染图 Tick 之后), 剔影用上一帧视锥、画面用本帧 cbv,
+                        // 高速甩动相机时屏幕边缘会错误裁剪。帧内守卫在 RenderPolicy 里,
+                        // TickSync 阶段的重复调用不会二次推进 PreFrameViewPrjMtx。
+                        This.RenderPolicy?.UpdateCameraAttachements(NxRHI.TtCbView.EUpdateMode.Immediately);
                         This.RenderPolicy?.BeginTick(This.World);
                         This.RenderPolicy?.Tick(This.World, null);
                         This.RenderPolicy?.EndTick(This.World);

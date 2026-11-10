@@ -14,6 +14,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Command.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ECS\ECSInterface.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\ConfigSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\CookContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\CookDriver.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\CookProtocol.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\IStreaming.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\JsonOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\AssetOperator.cs" />

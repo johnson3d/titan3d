@@ -14,12 +14,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     /// </summary>
     public class TtTerrainMaterialIdCommand : Editor.Infrastructure.TtEditorCommand
     {
-        UTerrainLevelData mLevelData;
+        TtTerrainLevelData mLevelData;
         FTerrainDirtyRect mRect;
         byte[] mBefore;
         byte[] mAfter;
 
-        public TtTerrainMaterialIdCommand(string name, UTerrainLevelData levelData, in FTerrainDirtyRect rect, byte[] before, byte[] after)
+        public TtTerrainMaterialIdCommand(string name, TtTerrainLevelData levelData, in FTerrainDirtyRect rect, byte[] before, byte[] after)
         {
             Name = name;
             mLevelData = levelData;
@@ -54,7 +54,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     /// </summary>
     public class TtTerrainMaterialIdDragRecorder
     {
-        UTerrainLevelData mLevelData;
+        TtTerrainLevelData mLevelData;
         FTerrainDirtyRect mRect = FTerrainDirtyRect.Empty;
         byte[] mBefore = null;
 
@@ -62,7 +62,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             get { return mLevelData != null; }
         }
-        public UTerrainLevelData LevelData
+        public TtTerrainLevelData LevelData
         {
             get { return mLevelData; }
         }
@@ -78,7 +78,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// 在 ApplyMaterialBrush 之前调用, 传入这一笔将要覆盖的 texel 区域。
         /// 跨 level 的拖动返回 true, 表示调用方应该先把之前那段封成一条命令。
         /// </summary>
-        public bool PreStroke(UTerrainLevelData levelData, in FTerrainDirtyRect strokeRect)
+        public bool PreStroke(TtTerrainLevelData levelData, in FTerrainDirtyRect strokeRect)
         {
             if (levelData == null || strokeRect.IsValid == false)
                 return false;

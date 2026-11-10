@@ -34,6 +34,51 @@ namespace EngineNS.GamePlay.Scene
         {
             return await TtEngine.Instance.SceneManager.CreateScene(args[0] as TtWorld, GetAssetName());
         }
+        /// <summary>
+        /// 场景资产的 cook 流程 (引擎内实现, TitanCMD 的 Cook 命令只负责遍历+调用):
+        /// asset 是由驱动方 CreateAsset 物化好的 TtScene (含 LoadRootNodes 实例化节点树)。
+        /// 节点级 cook 已下沉到 TtNode.CookAsset 虚方法: 这里用 IterateNodes 做一次全树遍历
+        /// (先快照再逐个 await, 因为 IterateNodes 是同步回调), 每个节点自行决定 cook 什么
+        /// (如 TtTerrainNode 烘 PGC 高度场 → .trlvl 缓存 → 各 level 的 VGDag bake 落盘 .trvgdag),
+        /// 默认实现直接返回 true。缓存命中不重烘, 重复 cook 幂等。
+        /// 按 IAssetMeta.CookAsset 契约, 本方法在结束时释放传入的实例。
+        /// 返回 false 表示传入实例不是场景或任一节点 cook 失败。
+        /// </summary>
+        public override async Thread.Async.TtTask<bool> CookAsset(IO.IAsset asset, params object[] args)
+        {
+            var scene = asset as TtScene;
+            if (scene == null)
+                return false;
+            try
+            {
+                // IterateNodes 是同步回调, 不能在其中 await, 先收集快照
+                var nodes = new List<TtNode>();
+                scene.IterateNodes((node, arg) =>
+                {
+                    nodes.Add(node);
+                    return true;
+                }, null);
+
+                bool ok = true;
+                foreach (var node in nodes)
+                {
+                    if (await node.CookAsset() == false)
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Error,
+                            $"Scene cook: node cook failed, scene={GetAssetName()}, node={node.NodeId}({node.GetType().Name})");
+                        ok = false;
+                    }
+                }
+                Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Info,
+                    $"Scene cook: {GetAssetName()}, {nodes.Count} node(s) iterated, {(ok ? "done" : "with errors")}");
+                return ok;
+            }
+            finally
+            {
+                // 实例由驱动方物化, 按 CookAsset 契约在这里释放, 避免批量 cook 时内存累积
+                scene.DisposeWithChildren();
+            }
+        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //必须是TextureAsset

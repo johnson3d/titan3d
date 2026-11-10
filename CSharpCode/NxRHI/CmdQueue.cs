@@ -21,8 +21,13 @@ namespace EngineNS.NxRHI
         public object Tag;
     }
 
-    public class TtRCmdQueue
+    public class TtRCmdQueue : IDisposable
     {
+        public void Dispose()
+        {
+            QueueStats.Reset();
+            Cmds.Clear();
+        }
         #region RenderDoc Capture
         public bool CaptureRenderDocFrame = false;
         public int RemainingCaptureFrames = 0;

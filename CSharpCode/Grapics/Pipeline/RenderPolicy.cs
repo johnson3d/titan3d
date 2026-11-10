@@ -277,18 +277,32 @@ namespace EngineNS.Graphics.Pipeline
                 return mScopeTickSync;
             }
         }
+        // 帧内去重守卫: UpdateConstBufferData 每执行一次就会推进一次
+        // PreFrameViewPrjMtx/mPreJitterOffset 缓存, 同一帧内调用两次会把
+        // "上一帧 VP" 错推成本帧, motion vector / TAA reproject 直接归零。
+        // 现在相机 cbv 的唯一更新点是渲染帧开头 (ViewportSlate render action,
+        // 与 CPU 剔影/GPU 绘制同帧同源), TickSync 里的兜底更新被这里挡掉。
+        ulong mLastCameraUpdateFrame = 0;
         public void UpdateCameraAttachements(NxRHI.TtCbView.EUpdateMode mode = NxRHI.TtCbView.EUpdateMode.Auto)
         {
+            var frame = TtEngine.Instance.CurrentTickFrame;
+            if (mLastCameraUpdateFrame == frame)
+                return;
+            mLastCameraUpdateFrame = frame;
             foreach (var i in CameraAttachments)
             {
                 i.Value.UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext, mode);
             }
         }
+
         public override void TickSync()
         {
             using (new Profiler.TimeScopeHelper(ScopeTickSync))
             {
-                UpdateCameraAttachements(NxRHI.TtCbView.EUpdateMode.Auto);
+                // 相机 cbv 更新已提前到渲染帧开头 (render action 内, 剔影之前);
+                // 这里保留兜底调用, 由 UpdateCameraAttachements 的帧内守卫去重,
+                // 避免给 PreFrameViewPrjMtx 造成双重推进。
+                UpdateCameraAttachements(NxRHI.TtCbView.EUpdateMode.Immediately);
                 base.TickSync();
             }
             PolicyOptionData.Clear();

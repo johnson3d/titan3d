@@ -295,10 +295,22 @@ namespace EngineNS.IO
             await Thread.TtAsyncDummyClass.DummyFunc();
             return null;
         }
-        public virtual async Thread.Async.TtTask<bool> CookAsset(params object[] args)
+        /// <summary>
+        /// 资产 cook 统一入口 (TitanCMD 的 Cook 命令驱动)。契约:
+        /// 驱动方负责“物化 → 调用本方法”: 先 await CreateAsset(上下文) 拿到实例,
+        /// 再把实例作为 asset 参数传入 (必传, 实现方不需要从 args 里解)。
+        /// 实现方只负责 cook 产出 (缓存/派生数据等), 并负责在结束时释放传入的实例
+        /// (驱动无法泛型释放资产)。
+        /// 实现方不要在这里调用 SaveAssetTo —— cook 不回写资产源文件。
+        /// args 可附带一个 IO.TtCookContext (CookManager / ExeCmd=CookServer 的进度与取消通道):
+        /// 需要上报进度就取它 (或取 IO.TtCookContext.Current, 供 TtNode.CookAsset 这类无参扩展点用),
+        /// 并在资产/level 边界轮询 IsCancellationRequested, 被取消时走正常返回路径。
+        /// 默认实现直接返回 true (无 cook 内容的类型可用此默认行为)。
+        /// </summary>
+        public virtual async Thread.Async.TtTask<bool> CookAsset(IAsset asset, params object[] args)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
-            return true;
+            return asset != null;
         }
 
         #region Asset Op

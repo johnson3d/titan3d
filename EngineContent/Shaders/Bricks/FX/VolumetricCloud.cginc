@@ -1,4 +1,11 @@
-﻿#ifndef __FX_VOLUMETRICCLOUD_H__
+﻿// 由 C# 端 TtVolumetricCloudShading 的 ENV_CLOUD_CAST_SHADOW permutation 自动注入:
+// 1 = 云绘制在所有像素 (视线在到达场景几何前穿过云层时, 远景地形上会看到云本体的暗色圆盘)
+// 0 = 云只绘制在天空像素上, 场景几何像素不受云覆盖 (用户感知的"云影"被关闭)
+#ifndef ENV_CLOUD_CAST_SHADOW
+#define ENV_CLOUD_CAST_SHADOW 1
+#endif
+
+#ifndef __FX_VOLUMETRICCLOUD_H__
 #define __FX_VOLUMETRICCLOUD_H__
 #include "../../Inc/SysFunction.cginc"
 #include "../../Inc/VertexLayout.cginc"
@@ -582,7 +589,14 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     // 整数像素坐标作为 per-pixel hash 种子；raymarch 内再加入样本序号。
     uint2 pixelSeed = (uint2) floor(uv * ViewportSizeAndRcp.xy);
 
-    float4 cloud = RayMarchClouds(rayOrigin, rayDir, sceneDist, pixelSeed, screenUVPerDist, dpx, dpy);
+    float4 cloud = float4(0.0, 0.0, 0.0, 0.0);
+#if ENV_CLOUD_CAST_SHADOW
+    cloud = RayMarchClouds(rayOrigin, rayDir, sceneDist, pixelSeed, screenUVPerDist, dpx, dpy);
+#else
+    // 关闭投射阴影: 只在天空像素上 raymarch, 场景几何像素直接保留 sceneColor
+    if (linearZ >= ZFar * 0.999)
+        cloud = RayMarchClouds(rayOrigin, rayDir, sceneDist, pixelSeed, screenUVPerDist, dpx, dpy);
+#endif
 
     // 预乘 alpha 混合
     float3 result = sceneColor.rgb * (1.0 - cloud.a) + cloud.rgb;

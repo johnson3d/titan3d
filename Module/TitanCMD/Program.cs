@@ -43,6 +43,11 @@ namespace ProjectCooker
             {
                 case "SaveAsLastest":
                     return await new Command.TtSaveAsLastest().ExecuteCommand(args);
+                case "Cook":
+                    return await new Command.TtCookAsset().ExecuteCommand(args);
+                case "CookServer":
+                    // 常驻 cook worker, 供编辑器侧 CookManager 派活, 行为见 Command.TtCookServer
+                    return await new Command.TtCookServer().ExecuteCommand(args);
                 case "RunTests":
                     return await new Command.TtRunTests().ExecuteCommand(args);
                 case "MakeSln":
@@ -140,7 +145,7 @@ namespace ProjectCooker
                 args = argList.ToArray();
             }
             
-            var cfgFile = TtCookCommand.FindArgument(args, "CookCfg=");
+            var cfgFile = TtCookCommand.FindArgument(args, TtCookCommand.Param_CookCfg);
             if (!TtCommandExecutionPolicy.IsEngineConfigurationAvailable(cfgFile))
             {
                 Console.Error.WriteLine($"Engine configuration does not exist: {cfgFile}");

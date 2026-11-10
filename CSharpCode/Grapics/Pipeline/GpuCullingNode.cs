@@ -79,10 +79,10 @@ namespace EngineNS.Graphics.Pipeline
     public class TtTerrainMeshBatch : TtMeshBatchBase
     {
         public bool IsAlloc { get; set; }
-        public Bricks.Terrain.CDLOD.UTerrainInstanceMdfQueue MdfQueue;
+        public Bricks.Terrain.CDLOD.TtTerrainInstanceMdfQueue MdfQueue;
         public void Initialize(Graphics.Pipeline.TtGpuCullingNode node, Mesh.TtMaterialMesh.TtSubMaterialedMesh mesh)
         {
-            MdfQueue = InitRenderMesh<Bricks.Terrain.CDLOD.UTerrainInstanceMdfQueue>(mesh);
+            MdfQueue = InitRenderMesh<Bricks.Terrain.CDLOD.TtTerrainInstanceMdfQueue>(mesh);
             MdfQueue.InstanceModifier.SetCapacity(512, true);
             GpuDrivenData.SetupGpuData(node, MdfQueue.InstanceModifier);
             MdfQueue.InstanceModifier.GpuDrivenData = GpuDrivenData;
@@ -92,7 +92,7 @@ namespace EngineNS.Graphics.Pipeline
             return MdfQueue.InstanceModifier;
         }
 
-        public static unsafe Hash64 MeshBatchHash(Mesh.TtMaterialMesh.TtSubMaterialedMesh mesh, Bricks.Terrain.CDLOD.UTerrainMdfQueue mdfQueue)
+        public static unsafe Hash64 MeshBatchHash(Mesh.TtMaterialMesh.TtSubMaterialedMesh mesh, Bricks.Terrain.CDLOD.TtTerrainMdfQueue mdfQueue)
         {
             var size = 2 + mesh.Materials.Count;
             var data = stackalloc int[size];
@@ -125,7 +125,8 @@ namespace EngineNS.Graphics.Pipeline
         {
             AddInput(VisiblesPinIn);
             AddInput(HzbPinIn);
-            
+
+            HzbPinIn.IsAllowInputNull = true;
             GpuCullOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(GpuCullOut);
         }
@@ -177,7 +178,7 @@ namespace EngineNS.Graphics.Pipeline
                 //todo:ParrallelFor
                 for (int i = 0; i < visibleMeshes.Count; i++)
                 {
-                    if (EnableInstanceMeshCullling)
+                    if (EnableInstanceMeshCulling)
                     {
                         var mdfQueue = visibleMeshes[i].Mesh.MdfQueue as Mesh.TtMdfInstanceStaticMesh;
                         if (mdfQueue != null)
@@ -197,7 +198,7 @@ namespace EngineNS.Graphics.Pipeline
                     }
                     if (UseRVT)
                     {
-                        var mdfQueue = visibleMeshes[i].Mesh.MdfQueue as Bricks.Terrain.CDLOD.UTerrainMdfQueue;
+                        var mdfQueue = visibleMeshes[i].Mesh.MdfQueue as Bricks.Terrain.CDLOD.TtTerrainMdfQueue;
                         if (mdfQueue != null)
                         {
                             visibleMeshes[i] = PushTerrainMeshBatch(visibleMeshes[i].Mesh, mdfQueue);
@@ -206,7 +207,7 @@ namespace EngineNS.Graphics.Pipeline
                     }
                 }
             }
-            if (EnableInstanceMeshCullling)
+            if (EnableInstanceMeshCulling)
             {
                 using (new NxRHI.TtGpuEventScope(cmd, TtNameTable.InstanceMeshCulling))
                 {
@@ -288,7 +289,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         [Rtti.Meta("")]
-        public bool EnableInstanceMeshCullling { get; set; } = true;
+        public bool EnableInstanceMeshCulling { get; set; } = true;
         [Rtti.Meta("")]
         public bool EnableStaticMeshBatch { get; set; } = false;
         #region InstanceMeshCulling
@@ -359,7 +360,7 @@ namespace EngineNS.Graphics.Pipeline
                 i.Value.GetInstanceModifier().InstanceBuffers.ResetInstance();
             }
         }
-        private FVisibleMesh PushTerrainMeshBatch(Mesh.TtRenderMesh mesh, Bricks.Terrain.CDLOD.UTerrainMdfQueue mdfQueue)
+        private FVisibleMesh PushTerrainMeshBatch(Mesh.TtRenderMesh mesh, Bricks.Terrain.CDLOD.TtTerrainMdfQueue mdfQueue)
         {
             foreach (var i in mesh.MaterialMesh.SubMeshes)
             {

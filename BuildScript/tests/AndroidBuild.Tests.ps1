@@ -2,9 +2,9 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# build-android.ps1 的编排契约：阶段顺序、失败即停、单阶段不重复前置工作。
-# 全部用假 cmake/ninja/dotnet 记录调用序列，只有 ELF 门禁用真实 NDK 产物；
-# NDK 不可用时跳过 All 顺序用例并显式报 SKIPPED，不把跳过说成通过。
+# Orchestration contract of build-android.ps1: stage order, stop on failure, and no redundant prerequisite work within a single stage.
+# Fake cmake/ninja/dotnet tools record the invocation sequence; only the ELF gate uses real NDK artifacts.
+# When the NDK is unavailable, the All-order case is skipped with an explicit SKIPPED report, never counting a skip as a pass.
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).ProviderPath
 $buildScript = Join-Path $repoRoot 'BuildScript\android\build-android.ps1'
@@ -100,9 +100,9 @@ function Write-ToolchainConfig {
     return $Path
 }
 
-# 假工具只做两件事：把调用追加到 events.txt（顺序即编排契约），以及满足探测输出。
-# 真工具是 .exe，可以被 run.cmd 无 call 地调用后回到包装器；.cmd 不行，
-# 所以假工具自己把退出码写进当前目录的 exit.txt（包装器的工作目录）。
+# The fake tools only do two things: append invocations to events.txt (order is the orchestration contract), and satisfy probe output.
+# Real tools are .exe files, which run.cmd can invoke without 'call' and return to the wrapper; .cmd cannot,
+# so the fake tools write their exit code into exit.txt in the current directory (the wrapper's working directory).
 function New-FakeToolchain {
     param([Parameter(Mandatory = $true)][string]$FakeRoot)
 
@@ -227,7 +227,7 @@ function Clear-Events {
     if (Test-Path -LiteralPath $path) { Remove-Item -LiteralPath $path -Force }
 }
 
-# 版本探测与 ninja 只证明工具存在，不参与编排顺序。
+# Version probing and ninja only prove tool presence; they do not participate in orchestration order.
 function Get-Stages {
     param([string[]]$Events = @())
 
@@ -258,7 +258,7 @@ try {
     $fakeTools = New-FakeToolchain $fakeRoot
     $ndk = New-FakeNdk $fakeRoot
 
-    # Native 阶段有 ELF 门禁，假 NDK 无法提供 readelf/nm；只有真实 NDK 才能跑通。
+    # The Native stage has the ELF gate, and a fake NDK cannot provide readelf/nm; only a real NDK can run it end to end.
     . $toolsScript
     $realTools = $null
     try { $realTools = Find-AndroidTools $repoRoot -Stage Native } catch { $realTools = $null }
@@ -287,7 +287,7 @@ try {
 
     $nativeLibrary = Join-Path $repository 'binaries\android\debug\libCore.Android.so'
 
-    # 1. 缺工具：必须先退出 2（用户可修复），不能落到构建失败 1。
+    # 1. Missing tools: must exit 2 first (user-fixable), never fall through to build failure 1.
     $missingConfig = Join-Path $fakeRoot 'missing-toolchain.json'
     $missingResult = Invoke-ChildPowerShell @('-File', $buildScript, '-RepositoryRoot', $repository,
         '-ToolchainConfig', $missingConfig, '-Configuration', 'Debug', '-Stage', 'All')
@@ -301,8 +301,8 @@ try {
     Assert-True ($noDotNetResult.Code -eq 2) "An unset dotnet must exit 2, got '$($noDotNetResult.Code)': $($noDotNetResult.Output)"
     Assert-True ($noDotNetResult.Output -match '(?i)dotnet') "The failure must name the missing tool, got: $($noDotNetResult.Output)"
 
-    # 2. All：八个事件严格按 Refresh->Generate->Configure->Native->Engine->DataCopyer->Stage->Apk 出现。
-    #    Native 之后有 ELF 门禁，所以这条用例需要真实 arm64 产物；NDK 不在时显式跳过。
+    # 2. All: the eight events appear strictly as Refresh->Generate->Configure->Native->Engine->DataCopyer->Stage->Apk.
+    #    The ELF gate follows Native, so this case needs real arm64 artifacts; skip explicitly when the NDK is absent.
     if ($elfClang.Length -eq 0) {
         $script:skips += 'All-stage ordering: a real Android NDK clang.exe was not found (fill cache/config/android-toolchain.json).'
     }
@@ -323,11 +323,11 @@ try {
         Assert-True (($stages -join ',') -eq 'Refresh,Generate,Configure,Native,Engine,DataCopyer,ApkPrecheck,Apk') `
             "Stage All must run every stage in order, got '$($stages -join ',')'"
         Assert-True (@(Get-Events $fakeRoot | Where-Object { $_ -match '^apk-precheck=present$' }).Count -eq 1) 'The staged content must exist before the APK build starts'
-        # Debug 下 SDK 默认不嵌入程序集（FastDev），APK 必须显式请求嵌入，否则产物无法独立安装。
+        # Under Debug the SDK does not embed assemblies by default (FastDev); the APK must request embedding explicitly or the artifact cannot install standalone.
         Assert-True (@(Get-Events $fakeRoot | Where-Object { $_ -match 'EmbedAssembliesIntoApk=true' }).Count -ge 1) `
             'The APK build must explicitly embed assemblies into the APK'
 
-        # 原生中间产物必须落在 intermediate/cpp/<Project>/<Config>，不得写回 Core.Android 源码目录。
+        # Native intermediates must land in intermediate/cpp/<Project>/<Config>, never written back into the Core.Android source directory.
         $configureEvent = @(Get-Events $fakeRoot | Where-Object { $_ -match '^cmake -S ' })[0]
         Assert-True ($configureEvent -match [regex]::Escape('intermediate\cpp\Core.Android\Debug')) `
             "The configure build dir must be intermediate\\cpp\\Core.Android\\Debug, got '$configureEvent'"
@@ -340,7 +340,7 @@ try {
         Assert-True ($apkPath -like '*-Signed.apk') "The recorded APK path must point at the signed APK, got '$apkPath'"
         Assert-True (Test-Path -LiteralPath $apkPath -PathType Leaf) "The recorded APK must exist: '$apkPath'"
 
-        # 3. Native 失败：必须停在该阶段，后续 Engine/DataCopyer/Apk 一个都不能跑。
+        # 3. Native failure: must stop at that stage; none of Engine/DataCopyer/Apk may run afterwards.
         Set-Content -LiteralPath (Join-Path $fakeRoot 'fail-native.txt') -Encoding ASCII -Value 'fail'
         Clear-Events $fakeRoot
         $nativeFailure = Invoke-ChildPowerShell @('-File', $buildScript, '-RepositoryRoot', $repository,
@@ -353,7 +353,7 @@ try {
         Remove-Item -LiteralPath (Join-Path $fakeRoot 'fail-native.txt') -Force
     }
 
-    # 4. Managed：只做托管层，不得重跑 CMake。
+    # 4. Managed: managed layer only; CMake must not rerun.
     Clear-Events $fakeRoot
     Set-Content -LiteralPath $nativeLibrary -Encoding ASCII -Value 'not-an-elf'
     $managed = Invoke-ChildPowerShell @('-File', $buildScript, '-RepositoryRoot', $repository,
@@ -365,7 +365,7 @@ try {
     Assert-True (@(Get-Events $fakeRoot | Where-Object { $_ -match '^cmake ' -and $_ -notmatch '--version' }).Count -eq 0) `
         'Stage Managed must not configure or build native code'
 
-    # 5. Managed 缺原生前置：必须在跑 dotnet 之前失败。
+    # 5. Managed with missing native prerequisite: must fail before running dotnet.
     Clear-Events $fakeRoot
     Remove-Item -LiteralPath $nativeLibrary -Force
     $managedWithoutNative = Invoke-ChildPowerShell @('-File', $buildScript, '-RepositoryRoot', $repository,
@@ -374,7 +374,7 @@ try {
     Assert-True ($managedWithoutNative.Output -match '(?i)native') "The failure must name the missing native library, got: $($managedWithoutNative.Output)"
     Assert-True (@(Get-Stages (Get-Events $fakeRoot)).Count -eq 0) 'No tool must run when the native prerequisite is missing'
 
-    # 6. Apk：不重跑 S1，只打包并记录 APK 路径。
+    # 6. Apk: no S1 rerun, just packaging and recording the APK path.
     Set-Content -LiteralPath $nativeLibrary -Encoding ASCII -Value 'not-an-elf'
     if (Test-Path -LiteralPath (Join-Path $repository 'Module\AloneGame.Maui\bin')) {
         Remove-Item -LiteralPath (Join-Path $repository 'Module\AloneGame.Maui\bin') -Recurse -Force
@@ -387,7 +387,7 @@ try {
     Assert-True (($apkStages -join ',') -eq 'ApkPrecheck,Apk') `
         "Stage Apk must not rebuild the engine or the DataCopyer, got '$($apkStages -join ',')'"
 
-    # 7. Apk 缺 S1 状态：必须要求先跑 Managed，而不是拿旧状态打包。
+    # 7. Apk without S1 state: must demand Managed first, not package from stale state.
     $statePath = Join-Path $repository 'codegen\Android\DataCopyer\.datacopyer.state.json'
     $savedState = Get-Content -Raw -LiteralPath $statePath
     Write-Utf8Text $statePath '{"Platform":"Android","Configuration":"Release","Hash":"HASH-Release"}'
@@ -395,17 +395,17 @@ try {
     $staleState = Invoke-ChildPowerShell @('-File', $buildScript, '-RepositoryRoot', $repository,
         '-ToolchainConfig', $configPath, '-Configuration', 'Debug', '-Stage', 'Apk')
     Assert-True ($staleState.Code -eq 1) "A Release state must not be packaged as Debug, got '$($staleState.Code)'"
-    Assert-True ($staleState.Output -match '(?i)configuration|配置') "The failure must complain about the configuration, got: $($staleState.Output)"
+    Assert-True ($staleState.Output -match '(?i)configuration') "The failure must complain about the configuration, got: $($staleState.Output)"
     Set-Content -LiteralPath $statePath -Value $savedState -Encoding UTF8
 
-    # 8. 暂存脚本：同输入同 build-id、内容变化换 build-id、越界目录拒绕、空模式拒绕。
+    # 8. Staging script: same input gives the same build-id, changed content gives a new build-id, out-of-root directories are refused, empty patterns are refused.
     $stageRoot = Join-Path $tempRoot 'stage'
     $stageOutput = Join-Path $tempRoot 'stage-out'
     Assert-ThrowsLike {
         & $stageScript -RepositoryRoot $stageRoot -OutputDirectory $stageOutput -Configuration Debug
     } @('intermediate\\android\\content') 'The staging script must refuse an output directory outside intermediate/android/content/<Configuration>'
 
-    # 旧位置（Module/AloneGame.Maui/obj/titan-content）必须被拒：中间产物只能落在 intermediate 下。
+    # The old location (Module/AloneGame.Maui/obj/titan-content) must be refused: intermediates only land under intermediate.
     Assert-ThrowsLike {
         & $stageScript -RepositoryRoot $repository -OutputDirectory (Join-Path $repository 'Module\AloneGame.Maui\obj\titan-content') -Configuration Debug
     } @('intermediate\\android\\content') 'The staging script must refuse the legacy AloneGame.Maui/obj/titan-content output directory'
@@ -446,8 +446,8 @@ try {
         & $stageScript -RepositoryRoot $traversalRepo -OutputDirectory (Join-Path $traversalRepo 'intermediate\android\content\Debug') -Configuration Debug
     } @('outside|content') 'A pattern escaping its content root must be rejected'
 
-    # 9. MAUI 引用求值：引擎 TargetPath 精确落在 binaries/android/<dependencies.json TFM>，且 MAUI 引用的
-    #    GlobalPropertiesToRemove 确实挡住 RuntimeIdentifier/UseMaui/SingleProject 的传播。
+    # 9. MAUI reference evaluation: the engine TargetPath lands exactly in binaries/android/<dependencies.json TFM>, and the MAUI reference's
+    #    GlobalPropertiesToRemove actually blocks RuntimeIdentifier/UseMaui/SingleProject propagation.
     if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
         $script:skips += 'MAUI reference evaluation: dotnet was not found.'
     }
@@ -463,7 +463,7 @@ try {
         Assert-True ($targetPath -ieq $expectedTargetPath) `
             "Engine.Android TargetPath must be '$expectedTargetPath', got '$targetPath'"
 
-        # RID 泄漏会把引擎改写成 <TFM>/android-arm64 子目录；MAUI 引用必须显式去掉这些全局属性。
+        # RID leakage would rewrite the engine into a <TFM>/android-arm64 subdirectory; the MAUI reference must strip these global properties explicitly.
         $leaked = ([string]((& dotnet msbuild @engineProperties '-p:RuntimeIdentifier=android-arm64' 2>&1) | Select-Object -Last 1)).Trim()
         Assert-True ($leaked -ne $targetPath) `
             'A leaked RuntimeIdentifier must change the engine TargetPath; otherwise GlobalPropertiesToRemove is untested'
@@ -476,15 +476,15 @@ try {
                 "GlobalPropertiesToRemove must strip '$removed' from the engine build"
         }
 
-        # iOS 只在 macOS 上加入 TFM；Windows 求值不得出现 iOS 目标或第二个引擎引用。
+        # iOS only joins the TFM on macOS; Windows evaluation must not show an iOS target or a second engine reference.
         $frameworks = ([string]((& dotnet msbuild '-nologo' '-getProperty:TargetFrameworks' $mauiProject 2>&1) | Select-Object -Last 1)).Trim()
         Assert-True ($frameworks -notmatch 'ios') "Windows evaluation must not add an iOS target, got '$frameworks'"
     }
 
-    # 10. Android 中间产物落点：暂存内容与 MAUI 工程 obj（含 SDK 拷贝出的 assets/titan）
-    #     都必须位于仓库 intermediate 下，不得写回 Module/AloneGame.Maui/obj。
-    #     AndroidAssetDirectory 在 targets 执行期才赋值，求值阶段拿不到，故只钉住 IntermediateOutputPath
-    #     （SDK 的 AndroidAssetDirectory 就是 $(IntermediateOutputPath)assets\），真实产物落点由 APK 构建验证。
+    # 10. Android intermediate locations: staged content and the MAUI project obj (including assets/titan copied by the SDK)
+    #     must both live under the repo intermediate, never written back into Module/AloneGame.Maui/obj.
+    #     AndroidAssetDirectory is only assigned at targets execution time and unavailable during evaluation, so pin IntermediateOutputPath only
+    #     (the SDK's AndroidAssetDirectory is $(IntermediateOutputPath)assets\); the real artifact location is verified by the APK build.
     $mauiProject = Join-Path $repoRoot 'Module\AloneGame.Maui\AloneGame.Maui.csproj'
     $layout = [string]((& dotnet msbuild '-nologo' $mauiProject '-p:TargetFramework=net10.0-android' '-p:Configuration=Debug' `
         '-getProperty:BaseIntermediateOutputPath,IntermediateOutputPath,TitanAndroidContentDirectory' 2>&1) -join "`n")
@@ -505,17 +505,18 @@ try {
     Assert-True ($contentDirectory -eq ((Join-Path $repoRoot 'intermediate\android\content\debug').ToLowerInvariant() + '\')) `
         "TitanAndroidContentDirectory must be intermediate\\android\\content\\Debug, got '$contentDirectory'"
 
-    # 11. 阶段标记：build-android.ps1 必须在四个阶段块开头输出机器可读的
-    #     [TITAN-STAGE] 行（编辑器面板依此画步骤进度条），顺序 Native -> Managed -> Content -> Apk。
+    # 11. Stage markers: build-android.ps1 must emit machine-readable
+    #     [TITAN-STAGE] lines at the start of the four stage blocks (the editor panel draws step progress from them),
+    #     ordered Native -> Managed -> Content -> Apk.
     $buildText = (Get-Content -Raw -LiteralPath $buildScript)
     $markerOrder = @('Native', 'Managed', 'Content', 'Apk') | ForEach-Object { $buildText.IndexOf("[TITAN-STAGE] $_") }
     Assert-True (-not ($markerOrder -contains -1)) 'build-android.ps1 must emit [TITAN-STAGE] markers for Native/Managed/Content/Apk'
     $sorted = $markerOrder | Sort-Object
     Assert-True (($sorted -join ',') -eq ($markerOrder -join ',')) "[TITAN-STAGE] markers must appear in order Native,Managed,Content,Apk, got offsets $($markerOrder -join ',')"
 
-    # 12. 子步骤与内容 transfer 逐条进度：Invoke-AndroidCommand 每次调用前打印
-    #     [TITAN-STEP]，Stage-AndroidContent 每条清单模式命中后打印 [TITAN-CONTENT]，
-    #     面板日志据此展示资产准备/transfer 细分进度。
+    # 12. Sub-step and per-entry content transfer progress: Invoke-AndroidCommand prints [TITAN-STEP] before each call,
+    #     Stage-AndroidContent prints [TITAN-CONTENT] after each manifest pattern match,
+    #     and the panel log shows fine-grained asset-preparation/transfer progress from them.
     $toolsText = (Get-Content -Raw -LiteralPath (Join-Path $repoRoot 'BuildScript\android\AndroidTools.ps1'))
     Assert-True ($toolsText -match '\[TITAN-STEP\]') 'Invoke-AndroidCommand must print a [TITAN-STEP] line before running the command'
     $contentScriptText = (Get-Content -Raw -LiteralPath $stageScript)

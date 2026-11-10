@@ -25,6 +25,17 @@ void ICamera::CopyDataTo(ICamera* target)
 	*target->mLogicData = *mLogicData;
 }
 
+void ICamera::CopyGpuStateTo(ICamera* target)
+{
+	if (target == nullptr || !mHasGpuState)
+		return;
+	target->mFrustum = mGpuFrustum;
+	target->mIsOrtho = mGpuIsOrtho;
+	target->mZNear = mGpuZNear;
+	target->mZFar = mGpuZFar;
+	*target->mLogicData = mGpuState;
+}
+
 ICamera::ICamera()
 {
 	mIsOrtho = false;
@@ -63,7 +74,17 @@ void ICamera::UpdateConstBufferData(EngineNS::NxRHI::IGpuDevice* device, EngineN
 {
 	VAutoVSLLock lk(mLocker);
 	auto pBinder = buffer->GetShaderBinder();
-	v3dxMatrix4 tempM;	
+	// 在任何状态推进之前先镜像当前状态: 下面即将写入 cb 的每个字段 (矩阵/frustum/jitter/
+	// prevVP 缓存) 都取自这份快照, 保证镜像与 GPU cbuffer 内容逐字段一致。
+	// 注意必须放在末尾 mPreFrameViewProjection/mPreJitterOffset 推进之前 —— cb 里
+	// PreFrameViewPrjMtx 写的是推进前的缓存值, 镜像也必须是推进前的。
+	mGpuState = *mLogicData;
+	mGpuFrustum = mFrustum;
+	mGpuIsOrtho = mIsOrtho;
+	mGpuZNear = mZNear;
+	mGpuZFar = mZFar;
+	mHasGpuState = true;
+	v3dxMatrix4 tempM;
 	if (pBinder != nullptr)
 	{
 		auto pos = mLogicData->GetLocalPosition();

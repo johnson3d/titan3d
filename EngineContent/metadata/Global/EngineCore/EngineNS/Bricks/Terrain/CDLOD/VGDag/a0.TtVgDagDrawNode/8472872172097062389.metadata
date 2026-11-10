@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_8472872172097062389 Type="EngineNS.Bricks.Terrain.CDLOD.VGDag.TtVgDagDrawNode@EngineCore">
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <ErrorThreshold Type="System.Single@Unknown" Order="0" />
+  <FarTerrain Type="EngineNS.Bricks.Terrain.CDLOD.VGDag.TtVgDagFarTerrain@EngineCore" Order="0" />
+  <UniqueId Type="System.Guid@Unknown" Order="0" />
+</Hash_8472872172097062389>

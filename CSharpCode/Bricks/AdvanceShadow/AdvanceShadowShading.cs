@@ -597,9 +597,26 @@ namespace EngineNS.Bricks.AdvanceShadow
         }
         // Independent shadow caster list for Clipmap (rebuilt each frame)
         private List<GamePlay.Scene.TtNode> mShadowCasters = new List<GamePlay.Scene.TtNode>();
+
+        /// <summary>
+        /// True when clipmap dirty pages were actually rendered this frame.
+        /// Consumed by OnDirLightingDrawCall to fill cbAdvanceShadow.ClipmapValid:
+        /// receivers must be treated as lit when false (stale pages = uninitialized depth).
+        /// Reset at the beginning of each Tick, set after DrawClipmapDirtyPages runs.
+        /// </summary>
+        public bool ClipmapRenderedThisFrame;
+        /// <summary>
+        /// Same as ClipmapRenderedThisFrame but for the QTree (local light) path.
+        /// </summary>
+        public bool QTreeRenderedThisFrame;
         public GamePlay.TtWorld.TtVisParameter mVisParameter = new GamePlay.TtWorld.TtVisParameter();
         public override unsafe void Tick(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
+            // Reset per-frame "did we render" flags before anything can early-out.
+            // OnDirLightingDrawCall reads them later in the same frame.
+            ClipmapRenderedThisFrame = false;
+            QTreeRenderedThisFrame = false;
+
             // Lazy-init QTree on first Tick
             if (mShadowQTree == null)
             {
@@ -681,12 +698,14 @@ namespace EngineNS.Bricks.AdvanceShadow
                     if (Clipmap != null && Clipmap.DirtyPages.Count > 0)
                     {
                         DrawClipmapDirtyPages(world, policy);
+                        ClipmapRenderedThisFrame = true;
                     }
                 }
 
                 // ---- Local lights path: QTree (point/spot/area lights) ----
                 if (EnableLocalLightShadow)
                 {
+                    bool qtreeRendered = false;
                     foreach (var i in mShadowQTree.UpdateShadowMapNodes)
                     {
                         // Allocate page in the pool for this node (ensures virtual→physical mapping exists)
@@ -699,7 +718,9 @@ namespace EngineNS.Bricks.AdvanceShadow
                                 continue;
                         }
                         DrawShadowObjects(world, policy, i, i.ShadowObjects);
+                        qtreeRendered = true;
                     }
+                    QTreeRenderedThisFrame = qtreeRendered;
                 }
 
                 policy.QueueCmd((TtRCmdQueue queue, ref FRCmdInfo info) =>
@@ -797,28 +818,47 @@ namespace EngineNS.Bricks.AdvanceShadow
                 ClipmapPageDataBuffer.UpdateData(idx, in pageData);
             }
 
+            // The per-page caster gather needs a valid CullCamera (terrain FrustumCull skips
+            // everything when CullCamera==null), but the tight page camera can only be built
+            // AFTER the gather (it needs mergedAABB). Previously CullCamera was null/stale at
+            // gather time, so every page found zero visible meshes and no shadow page was ever
+            // rendered (rdc: AdvShadowDrawShadowMap region with zero GPU commands).
+            // Break the deadlock: build a provisional camera from the union of all caster
+            // AABBs first, gather with it, then rebuild the tight camera for the final render.
+            var provisionalAABB = new DBoundingBox();
+            provisionalAABB.InitEmptyBox();
+            for (int i = 0; i < mShadowCasters.Count; i++)
+            {
+                provisionalAABB.Merge(in mShadowCasters[i].BoundVolume.AbsAABB);
+            }
+
             foreach (var dirtyPage in Clipmap.DirtyPages)
             {
                 // 1) Compute page bounds in light-view XY space for precise culling
                 Clipmap.GetPageLightViewBounds(in dirtyPage, out float pageLVMinX, out float pageLVMaxX, out float pageLVMinY, out float pageLVMaxY);
 
-                // 2) Gather casters: test caster AABB overlap in light-view XY space
+                int localIndex = Clipmap.GetLocalPageIndex(in dirtyPage);
+
+                // 2) Provisional camera (conservative depth range from all casters) so the
+                //    gather below has a valid frustum to cull against
+                var pageCamera = GetClipmapPageCamera(localIndex);
+                Clipmap.BuildPageCamera(in dirtyPage, pageCamera, world, in provisionalAABB, out _, out _);
+                mVisParameter.CullCamera = pageCamera;
+
+                // 3) Gather casters: test caster AABB overlap in light-view XY space
                 mVisParameter.ClearVisibles();
                 GatherShadowCastersForPageLV(out var mergedAABB, pageLVMinX, pageLVMaxX, pageLVMinY, pageLVMaxY);
 
                 if (mVisParameter.VisibleMeshes.Count == 0)
                     continue;
 
-                int localIndex = Clipmap.GetLocalPageIndex(in dirtyPage);
                 ref var pageTableEntry = ref Clipmap.GetPageTableEntry(dirtyPage.VirtualPageIndex);
                 pageTableEntry.MarkDynamicDirty();
 
-                // 3) Build page camera with tight depth range from caster AABB
-                var pageCamera = GetClipmapPageCamera(localIndex);
+                // 4) Rebuild the page camera with tight depth range from the gathered casters
                 Clipmap.BuildPageCamera(in dirtyPage, pageCamera, world, in mergedAABB, out float tightNear, out float tightFar);
-                mVisParameter.CullCamera = pageCamera;
 
-                // 4) Fill per-page data for shader
+                // 5) Fill per-page data for shader
                 // Per CodingGuidelines §1.7: StructuredBuffer upload requires manual Transpose.
                 // Engine matrices are row-major C#; HLSL float4x4 in structured buffer is column-major.
 
@@ -829,7 +869,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                 pageData.mPad1 = 0;
                 ClipmapPageDataBuffer.UpdateData(localIndex, in pageData);
 
-                // 5) Render depth into DepthTextureArray at physical page slot
+                // 6) Render depth into DepthTextureArray at physical page slot
                 int pageIndex = dirtyPage.VirtualPageIndex;
                 int physicalIndex = GetPhysicalPageIndex(pageIndex);
                 if (physicalIndex < 0 || physicalIndex >= (mRtViews?.Length ?? 0))
@@ -1222,6 +1262,9 @@ namespace EngineNS.Bricks.AdvanceShadow
                     mDirLightingCBV.SetValue("PageCount", mShadowQTree.MaxPageCount);
                     mDirLightingCBV.SetValue("MaxShadowDistance", mShadowQTree.MaxShadowDistance);
                     mDirLightingCBV.SetValue("MaxDeepLevel", mShadowQTree.MaxDeepLevel);
+                    // Defaults for per-frame validity flags; real values are set every frame below.
+                    mDirLightingCBV.SetValue("ClipmapValid", 0);
+                    mDirLightingCBV.SetValue("QTreeValid", 0);
 
                     var indexLayerData = index.FindField("LayerData");
                     for (int i = 0; i < mShadowQTree.QTreeBuilder.Layers.Length; i++)
@@ -1272,6 +1315,9 @@ namespace EngineNS.Bricks.AdvanceShadow
                 mDirLightingCBV.SetValue("UseESM", mEnableESM ? 1 : 0);
                 mDirLightingCBV.SetValue("PcfRadius", PcfRadius);
                 mDirLightingCBV.SetValue("PcfDepthBias", PcfDepthBias);
+                // Per-frame "did we actually render" flags: stale pages must read as lit.
+                mDirLightingCBV.SetValue("ClipmapValid", ClipmapRenderedThisFrame ? 1 : 0);
+                mDirLightingCBV.SetValue("QTreeValid", QTreeRenderedThisFrame ? 1 : 0);
                 if (mDirLightingCBV.IsDirty)
                     mDirLightingCBV.FlushDirty(false);
 

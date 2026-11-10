@@ -121,6 +121,11 @@ namespace EngineNS.EGui.UIProxy
         }
 
         public bool IsChecked = false;
+        /// <summary>
+        /// false = 灰化且不吃点击 (仍然走 ButtonBehavior, 所以上层能拿到 hover 出提示)。
+        /// 默认 true, 不影响既有调用方。
+        /// </summary>
+        public bool IsEnabled = true;
         public string Name;
         public Vector2 Size = new Vector2(32, 32);
         public Action Action;
@@ -198,6 +203,9 @@ namespace EngineNS.EGui.UIProxy
 
             bool hovered = false, held = false;
             var pressed = ImGuiAPI.ButtonBehavior(in rectStart, in rectEnd, id, ref hovered, ref held, false, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+            // 禁用态照样要一次 ButtonBehavior 才有 ItemRect/hover 可以给 tooltip, 只是不响应点击
+            if (pressed && !IsEnabled)
+                pressed = false;
 
             if (pressed)
             {
@@ -221,6 +229,11 @@ namespace EngineNS.EGui.UIProxy
                 {
                     mNormalUVAnimTask.Value.DirectResult.OnDraw(in drawList, in imgPos, in imgEnd, 0);
                 }
+            }
+            if (!IsEnabled)
+            {
+                // 图标素材没有着色入口, 压一层半透明黑表示不可用 (与 Panel 里遮罩同一手法)
+                drawList.AddRectFilled(in rectStart, in rectEnd, 0x7f000000, 0.0f, ImDrawFlags_.ImDrawFlags_None);
             }
 
             return retValue;

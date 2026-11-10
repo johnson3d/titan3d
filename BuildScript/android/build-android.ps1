@@ -4,14 +4,14 @@ param(
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
     [ValidateSet('All', 'Native', 'Managed', 'Apk')][string]$Stage = 'All',
 
-    # 供测试注入假仓库根与假工具链；正常调用留空即可。
+    # For tests to inject a fake repo root and fake toolchain; leave empty for normal use.
     [string]$RepositoryRoot = '',
     [string]$ToolchainConfig = ''
 )
 
-# Android 构建编排：Native -> Managed(S1) -> 内容暂存 -> APK。
-# 每个阶段都消费上一阶段的产物并复核，缺前置时直接失败，不产出空壳 APK。
-# 本文件必须能在 Windows PowerShell 5.1 的 ConstrainedLanguage 下运行。
+# Android build orchestration: Native -> Managed(S1) -> content staging -> APK.
+# Each stage consumes and re-verifies the previous stage's artifacts; missing prerequisites fail fast instead of producing an empty-shell APK.
+# This file must run under Windows PowerShell 5.1 ConstrainedLanguage.
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -28,22 +28,22 @@ function Get-TitanRoot {
 }
 
 if ($env:OS -ne 'Windows_NT') {
-    Write-Error '一期构建要求 Windows 主机' -ErrorAction Continue
+    Write-Error 'Stage-1 build requires a Windows host' -ErrorAction Continue
     exit 2
 }
 
 $root = Get-TitanRoot $RepositoryRoot
-# 子步骤进程的 CWD 锚定仓库根：否则 dotnet 在 TEMP 下找不到 global.json 会静默选最新 SDK（含 rc 预览版）。
+# Sub-step process CWD is pinned to the repo root: otherwise dotnet cannot find global.json under TEMP and silently picks the newest SDK (including rc previews).
 $script:AndroidProcessWorkingDirectory = $root
 $config = $Configuration.ToLowerInvariant()
 $nativeLibrary = Join-Path $root "binaries\android\$config\libCore.Android.so"
-# 原生中间产物统一落在 intermediate/cpp/<Project>/<Config>（源码内构建会被 CMakeLists 守卫拒绝）。
+# Native intermediates always land in intermediate/cpp/<Project>/<Config> (in-source builds are rejected by the CMakeLists guard).
 $nativeBuildDirectory = Join-Path $root "intermediate\cpp\Core.Android\$Configuration"
 $mauiDirectory = Join-Path $root 'Module\AloneGame.Maui'
 $engineProject = Join-Path $root 'Module\Engine.Android\Engine.Android.csproj'
 $statePath = Join-Path $root 'codegen\Android\DataCopyer\.datacopyer.state.json'
 
-# Apk 阶段要用 dotnet 与 Android SDK，所以工具链按 Managed 阶段（Native + Managed）校验。
+# The Apk stage needs dotnet and the Android SDK, so the toolchain is validated for the Managed stage (Native + Managed).
 try {
     $tools = Find-AndroidTools -RepositoryRoot $root -Stage 'Managed' -ConfigPath $ToolchainConfig
 }
@@ -54,7 +54,7 @@ catch {
 
 try {
     if ($Stage -in @('All', 'Native')) {
-        # [TITAN-STAGE] 机器可读阶段标记：编辑器面板依此画步骤进度条。
+        # [TITAN-STAGE] machine-readable stage marker: the editor panel draws step progress from it.
         Write-Host '[TITAN-STAGE] Native'
         Enable-AndroidBashOnPath -Stage 'Native'
         Invoke-AndroidCommand 'RefreshSources' $tools.CMake @(
@@ -79,7 +79,7 @@ try {
     if ($Stage -in @('All', 'Managed')) {
         Write-Host '[TITAN-STAGE] Managed'
         if (-not (Test-Path -LiteralPath $nativeLibrary -PathType Leaf)) {
-            throw "Native 产物缺失：$nativeLibrary；先运行 -Stage Native"
+            throw "Native artifact missing: $nativeLibrary; run -Stage Native first"
         }
         Invoke-AndroidCommand 'Engine.Android' $tools.DotNet @(
             'build', $engineProject, '-c', $Configuration,
@@ -93,20 +93,20 @@ try {
     if ($Stage -in @('All', 'Apk')) {
         if (-not (Test-Path -LiteralPath $nativeLibrary -PathType Leaf) -or
             -not (Test-Path -LiteralPath $statePath -PathType Leaf)) {
-            throw "Apk 缺少 Native/Managed 前置：$nativeLibrary 或 $statePath；先运行 -Stage All"
+            throw "Apk is missing Native/Managed prerequisites: $nativeLibrary or $statePath; run -Stage All first"
         }
         $state = Get-Content -Raw -LiteralPath $statePath | ConvertFrom-Json
         if ([string]$state.Platform -ne 'Android' -or [string]$state.Configuration -ne $Configuration) {
-            throw "S1 状态配置不匹配：Platform=$($state.Platform) Configuration=$($state.Configuration)，期望 Android/$Configuration；先运行 -Stage Managed"
+            throw "S1 state configuration mismatch: Platform=$($state.Platform) Configuration=$($state.Configuration), expected Android/$Configuration; run -Stage Managed first"
         }
 
-        # 中间产物统一落在 intermediate/android/content/<Configuration>；工程目录不再承载暂存内容。
+        # Intermediates always land in intermediate/android/content/<Configuration>; project directories no longer hold staged content.
         $stageOutput = Join-Path $root "intermediate\android\content\$Configuration"
         Write-Host '[TITAN-STAGE] Content'
         & (Join-Path $PSScriptRoot 'Stage-AndroidContent.ps1') -RepositoryRoot $root -OutputDirectory $stageOutput -Configuration $Configuration
 
-        # Start-Process 不继承 Push-Location（进程 CWD 不变），所以 csproj 必须用绝对路径。
-        # Debug 下 SDK 默认 EmbedAssembliesIntoApk=False（FastDev 模式），产物不能独立安装；这里必须显式嵌入。
+        # Start-Process does not inherit Push-Location (the process CWD is unchanged), so the csproj must be an absolute path.
+        # Under Debug the SDK defaults EmbedAssembliesIntoApk=False (FastDev mode) and the artifact cannot install standalone; embedding must be requested explicitly here.
         $mauiProject = Join-Path $mauiDirectory 'AloneGame.Maui.csproj'
         Write-Host '[TITAN-STAGE] Apk'
         Invoke-AndroidCommand 'Apk' $tools.DotNet @(
@@ -122,7 +122,7 @@ try {
             $signed = @(Get-ChildItem -LiteralPath $apkDirectory -Filter '*-Signed.apk' -File -Recurse)
         }
         if ($signed.Count -ne 1) {
-            throw "预期唯一 Signed APK，实际 $($signed.Count) 个（$apkDirectory）"
+            throw "Expected exactly one signed APK, got $($signed.Count) ($apkDirectory)"
         }
 
         $resultDirectory = Join-Path $root 'cache\android_build'

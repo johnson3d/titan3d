@@ -1,0 +1,97 @@
+#include "../../../Inc/GlobalDefine.cginc"
+
+// 地形 cluster DAG 远景绘制: GPU cull + compact + indirect args (M2 第二片)
+// Pass 1: CS_ClearDrawArgs - 清零 DrawIndexedInstancedIndirect 参数(InstanceCount=0)
+// Pass 2: CS_CullClusters  - 每 cluster 一线程: Nanite 式 LOD 选择 + frustum cull,
+//                            可见 cluster 压缩写入 DrawClusters, InstanceCount atomicAdd
+//
+// 绘制端(VgDagDrawModifier.cginc): instance = DrawClusters[i], 每实例画一个
+// 固定拓扑 patch(16x16 grid, VG_PATCH_INDEX_COUNT 个 index), 顶点从顶点池拉取。
+
+#define VG_PATCH_GRID_SIDE 16
+#define VG_PATCH_INDEX_COUNT (VG_PATCH_GRID_SIDE * VG_PATCH_GRID_SIDE * 6)
+
+cbuffer cbVgVisParams
+{
+    FVgVisParams VgVisParams;
+};
+
+StructuredBuffer<FVgVisCluster> VisClusterBuffer;
+
+RWStructuredBuffer<FVgVisCluster> DrawClusters;
+RWStructuredBuffer<uint>          DrawArgs;
+
+[numthreads(1, 1, 1)]
+void CS_ClearDrawArgs(uint tid : SV_DispatchThreadID)
+{
+    DrawArgs[0] = VG_PATCH_INDEX_COUNT;  // IndexCountPerInstance
+    DrawArgs[1] = 0;                     // InstanceCount(cull 端 atomicAdd)
+    DrawArgs[2] = 0;                     // StartIndexLocation
+    DrawArgs[3] = 0;                     // BaseVertexLocation
+    DrawArgs[4] = 0;                     // StartInstanceLocation
+}
+
+// cluster AABB 对视锥的保守测试: 8 角变换到 clip, 全部落在同一外侧平面则剔除。
+// 高度范围取 [Origin.y, Origin.y + Vis.z] (Vis.z = 地形最大高度, CPU 端填入)。
+bool ClusterVisible(FVgVisCluster c)
+{
+    float texel = VgVisParams.OriginAndTexel.w;
+    float3 bmin = VgVisParams.OriginAndTexel.xyz
+        + float3(c.MinTexelX * texel, 0, c.MinTexelZ * texel);
+    float3 bmax = bmin + float3(c.ExtentTexel * texel, VgVisParams.Vis.z, c.ExtentTexel * texel);
+
+    float3 ndcMin = float3(1e9, 1e9, 1e9);
+    float3 ndcMax = float3(-1e9, -1e9, -1e9);
+    uint hit = 0;
+    [unroll]
+    for (uint i = 0; i < 8; i++)
+    {
+        float3 p = float3((i & 1) ? bmax.x : bmin.x,
+                          (i & 2) ? bmax.y : bmin.y,
+                          (i & 4) ? bmax.z : bmin.z);
+        float4 clip = mul(float4(p, 1), VgVisParams.ViewProj);
+        // w<=0 在相机后方, 不计为命中
+        if (clip.w > 0)
+        {
+            float3 ndc = clip.xyz / clip.w;
+            if (ndc.x >= -1 && ndc.x <= 1 && ndc.y >= -1 && ndc.y <= 1 && ndc.z >= 0 && ndc.z <= 1)
+                hit = 1;
+            ndcMin = min(ndcMin, ndc);
+            ndcMax = max(ndcMax, ndc);
+        }
+    }
+    if (hit)
+        return true;
+    // 8 角全在外但可能包裹视锥: 任一 NDC 包围盒与 [-1,1] 相交即保留(保守)
+    bool overlap = ndcMax.x >= -1 && ndcMin.x <= 1
+                && ndcMax.y >= -1 && ndcMin.y <= 1
+                && ndcMax.z >= 0 && ndcMin.z <= 1;
+    // w<=0 的角不在 ndcMin/Max 统计内; 若所有角都 w<=0 则 ndc 统计无效, 直接剔除
+    return overlap && (ndcMin.x < 1e8);
+}
+
+[numthreads(64, 1, 1)]
+void CS_CullClusters(uint tid : SV_DispatchThreadID)
+{
+    uint clusterCount = (uint)VgVisParams.Vis.y;
+    if (tid >= clusterCount)
+        return;
+
+    FVgVisCluster c = VisClusterBuffer[tid];
+    if (c.IndexCount == 0 || c.VertCount == 0)
+        return;
+
+    // Nanite 式 LOD 选择: 自身误差 <= 阈值 且 (无父 或 父误差 > 阈值)
+    float threshold = VgVisParams.Vis.x;
+    if (c.MaxError > threshold)
+        return;
+    if (c.Parent >= 0 && c.ParentMaxError <= threshold)
+        return;
+
+    if (ClusterVisible(c) == false)
+        return;
+
+    uint slot;
+    InterlockedAdd(DrawArgs[1], 1, slot);
+    DrawClusters[slot] = c;
+}

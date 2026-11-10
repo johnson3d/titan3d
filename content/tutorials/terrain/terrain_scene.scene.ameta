@@ -2,11 +2,11 @@
 <Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
   <AssetFiles Type="System.Collections.Generic.List&lt;EngineNS.IO.TtFileInfo@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="e6e4d87f953a342c1a88b47031f86fd6b3183e43998158bababaa84463e4517d" />
+      <Hash Type="System.String@Unknown" Value="9584598c61c315f03d9c54cfb40ad6f04e510a143beda6976c5fad182d68d1eb" />
       <Path Type="System.String@Unknown" Value="terrain_scene.scene/terrain_scene.scene" />
     </e_0>
     <e_1 Type="EngineNS.IO.TtFileInfo@EngineCore">
-      <Hash Type="System.String@Unknown" Value="dbad93e4990934d753945da2cb204d76bca9c1d1f2320bac87426d8ceb1ea575" />
+      <Hash Type="System.String@Unknown" Value="fb83eda4150d065fe8f21a237d2a2ad6b2291071ff618596db1d90f1049e5948" />
       <Path Type="System.String@Unknown" Value="terrain_scene.scene/class_graph.dat" />
     </e_1>
   </AssetFiles>
@@ -21,9 +21,12 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
-    <e_0 Value="Game,tutorials/terrain/terrain_gen01.pgc,d2a5fe45-8b63-4ce7-bf0e-59bacfa9efe3" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="5">
+    <e_0 Value="Engine,template/emptyterrain.pgc,5d465e03-5de6-45aa-8243-65b9d40c0bde" />
     <e_1 Value="Engine,material/terrainidmap.material,3a5bde1e-39df-4c8a-a2cc-6eadaeabcefe" />
+    <e_2 Value="Engine,material/gridline.material,fe431749-ed31-45b1-93d8-34462bd00922" />
+    <e_3 Value="Game,tutorials/common/box.vms,fefaa1e1-5deb-4b9e-bc04-4e5da924cc22" />
+    <e_4 Value="Engine,material/sysdft.material,8c2e9c64-ae7a-4172-9e64-114a3d36cc40" />
   </RefAssetRNames>
   <SnapshotStorage Type="EngineNS.IO.ESnapshotStorage@EngineCore" Value="InAssetDir" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />

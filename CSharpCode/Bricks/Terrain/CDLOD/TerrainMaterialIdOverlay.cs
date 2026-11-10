@@ -22,6 +22,14 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// </summary>
         const int AllocAlign = 64;
 
+        /// <summary>
+        /// 保护 mRect / mIds / mMask / mSetCount / mSaveHash。
+        /// 主线程编辑 (Set/Clear) 与 AsyncIO 线程的 level 异步加载 (BuildLevelDataFromPGC → ApplyTo)
+        /// 会同时访问这些数据, 无锁时 IO 线程可能在 SureCapacity 换数组的间隙读到旧/空数组。
+        /// 锁顺序固定为 manager 锁 → 本锁 (manager 只在持锁状态下调进来), 不要反向嵌套。
+        /// </summary>
+        readonly object mLocker = new object();
+
         public int LevelX { get; private set; }
         public int LevelZ { get; private set; }
 
@@ -46,19 +54,19 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
         public FTerrainDirtyRect Rect
         {
-            get { return mRect; }
+            get { lock (mLocker) { return mRect; } }
         }
         public bool IsEmpty
         {
-            get { return mIds == null || mRect.IsValid == false || mSetCount == 0; }
+            get { lock (mLocker) { return mIds == null || mRect.IsValid == false || mSetCount == 0; } }
         }
         public int SetCount
         {
-            get { return mSetCount; }
+            get { lock (mLocker) { return mSetCount; } }
         }
         public string SaveHash
         {
-            get { return mSaveHash; }
+            get { lock (mLocker) { return mSaveHash; } }
         }
 
         static int AlignDown(int v)
@@ -102,15 +110,18 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// </summary>
         public void Set(int x, int y, byte id)
         {
-            SureCapacity(x, y);
-            int i = (y - mRect.MinY) * mRect.Width + (x - mRect.MinX);
-            if (mMask[i] != 0 && mIds[i] == id)
-                return;
-            if (mMask[i] == 0)
-                mSetCount++;
-            mMask[i] = 1;
-            mIds[i] = id;
-            mSaveHash = null;
+            lock (mLocker)
+            {
+                SureCapacity(x, y);
+                int i = (y - mRect.MinY) * mRect.Width + (x - mRect.MinX);
+                if (mMask[i] != 0 && mIds[i] == id)
+                    return;
+                if (mMask[i] == 0)
+                    mSetCount++;
+                mMask[i] = 1;
+                mIds[i] = id;
+                mSaveHash = null;
+            }
         }
         /// <summary>
         /// 撤掉一个 texel 的手绘记录 (该 texel 回归 PGC 基底)。
@@ -118,32 +129,41 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// </summary>
         public void Clear(int x, int y)
         {
-            if (mIds == null || mRect.IsValid == false)
-                return;
-            if (x < mRect.MinX || x > mRect.MaxX || y < mRect.MinY || y > mRect.MaxY)
-                return;
+            lock (mLocker)
+            {
+                if (mIds == null || mRect.IsValid == false)
+                    return;
+                if (x < mRect.MinX || x > mRect.MaxX || y < mRect.MinY || y > mRect.MaxY)
+                    return;
 
-            int i = (y - mRect.MinY) * mRect.Width + (x - mRect.MinX);
-            if (mMask[i] == 0)
-                return;
-            mMask[i] = 0;
-            mIds[i] = 0;
-            mSetCount--;
-            mSaveHash = null;
+                int i = (y - mRect.MinY) * mRect.Width + (x - mRect.MinX);
+                if (mMask[i] == 0)
+                    return;
+                mMask[i] = 0;
+                mIds[i] = 0;
+                mSetCount--;
+                mSaveHash = null;
+            }
         }
         public bool HasId(int x, int y)
         {
-            if (mIds == null || mRect.IsValid == false)
-                return false;
-            if (x < mRect.MinX || x > mRect.MaxX || y < mRect.MinY || y > mRect.MaxY)
-                return false;
-            return mMask[(y - mRect.MinY) * mRect.Width + (x - mRect.MinX)] != 0;
+            lock (mLocker)
+            {
+                if (mIds == null || mRect.IsValid == false)
+                    return false;
+                if (x < mRect.MinX || x > mRect.MaxX || y < mRect.MinY || y > mRect.MaxY)
+                    return false;
+                return mMask[(y - mRect.MinY) * mRect.Width + (x - mRect.MinX)] != 0;
+            }
         }
         public byte GetId(int x, int y)
         {
-            if (HasId(x, y) == false)
-                return 0;
-            return mIds[(y - mRect.MinY) * mRect.Width + (x - mRect.MinX)];
+            lock (mLocker)
+            {
+                if (HasId(x, y) == false)
+                    return 0;
+                return mIds[(y - mRect.MinY) * mRect.Width + (x - mRect.MinX)];
+            }
         }
 
         /// <summary>
@@ -151,6 +171,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// 调用方必须保证 idMap 不是会被写进 .trlvl 缓存的那份原始 buffer。
         /// </summary>
         public FTerrainDirtyRect ApplyTo(Procedure.TtBufferComponent idMap)
+        {
+            lock (mLocker)
+            {
+                return ApplyToInternal(idMap);
+            }
+        }
+        FTerrainDirtyRect ApplyToInternal(Procedure.TtBufferComponent idMap)
         {
             var applied = FTerrainDirtyRect.Empty;
             if (idMap == null || IsEmpty)
@@ -193,6 +220,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// 写出 .tml。返回内容 hash (供 levellist.txt 记录), 内容未变且文件仍在时跳过写盘。
         /// </summary>
         public unsafe string SaveToFile(string file)
+        {
+            lock (mLocker)
+            {
+                return SaveToFileInternal(file);
+            }
+        }
+        unsafe string SaveToFileInternal(string file)
         {
             if (IsEmpty)
                 return null;
@@ -246,6 +280,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             return hash;
         }
         public unsafe bool LoadFromFile(string file)
+        {
+            lock (mLocker)
+            {
+                return LoadFromFileInternal(file);
+            }
+        }
+        unsafe bool LoadFromFileInternal(string file)
         {
             if (IO.TtFileManager.FileExists(file) == false)
                 return false;

@@ -52,7 +52,7 @@ foreach ($propertyGroup in @($hostXml.Project.PropertyGroup)) {
         $targetFrameworks += ([string]$propertyGroup.TargetFrameworks -split ';')
     }
 }
-# 宿主 TFM 必须跟随 dependencies.json：接受 dotnetSdk.targetFramework 的值或 $(_TitanTargetFramework) 表达式。
+# The host TFM must follow dependencies.json: accept the dotnetSdk.targetFramework value or the $(_TitanTargetFramework) expression.
 $depsJsonPath = Join-Path $repoRoot 'BuildScript\common\dependencies.json'
 $manifestTfm = $null
 if (Test-Path -LiteralPath $depsJsonPath) {
@@ -143,11 +143,11 @@ else {
     $stubContent = @"
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <!-- 编译 $hostProjectName 生成的 VM 桩源码，产出 $hostProjectName.LeanClrStub.dll，部署到 content\LeanCLR\$pluginName\ 由引擎自动扫描注册 -->
+    <!-- Compile the VM stub sources generated for $hostProjectName into $hostProjectName.LeanClrStub.dll, deployed to content\LeanCLR\$pluginName\ and auto-scanned/registered by the engine -->
     <LeanClrHostProject>$hostProjectRelativePath</LeanClrHostProject>
-    <!-- VM 桩只消费宿主生成的 LeanCLR 源码，不拥有 RPC/Property/Macross 输出。 -->
+    <!-- The VM stub only consumes host-generated LeanCLR sources; it does not own RPC/Property/Macross outputs. -->
     <TitanConsumeSourceOutputs>false</TitanConsumeSourceOutputs>
-    <!-- Plugins\Directory.Build.targets 的 PreBuild 会清空 TtOutputBasePath；与 $hostProjectName 共用目录会删掉插件 dll -->
+    <!-- The PreBuild in Plugins\Directory.Build.targets clears TtOutputBasePath; sharing a directory with $hostProjectName would delete the plugin dll -->
     <TtOutputBasePath>`$(TtTitanRoot)binaries\LeanClrStub\`$(TtPluginName)\</TtOutputBasePath>
     <OutDir>`$(TtOutputBasePath)</OutDir>
   </PropertyGroup>

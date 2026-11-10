@@ -55,6 +55,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)TtPreviewViewportInteractiveMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIWindowsTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MainEditorApplication.cs" />
+        <Compile Include="$(MSBuildThisFileDirectory)EditorMCPTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MetaViewEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayInEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderCompiler\HLSLCompiler.cs" />

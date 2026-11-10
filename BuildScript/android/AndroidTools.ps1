@@ -1,17 +1,17 @@
 ﻿#requires -Version 5.1
 
-# Android 工具链定位：只读取用户在配置文件里填写的本机路径，不自动下载、不自动猜测版本。
-# 本文件必须能在 Windows PowerShell 5.1 的 ConstrainedLanguage 下运行：
-# 不使用 [IO.Path]、Diagnostics.Process、Text.Encoding、Cryptography 等非核心类型。
+# Android toolchain locator: only reads the local paths the user filled in the config file; never auto-downloads or guesses versions.
+# This file must run under Windows PowerShell 5.1 ConstrainedLanguage:
+# it must not use non-core types such as [IO.Path], Diagnostics.Process, Text.Encoding, Cryptography.
 
 Set-StrictMode -Version Latest
 
 $script:AndroidToolchainConfigRelativePath = 'cache\config\android-toolchain.json'
 $script:AndroidToolchainExampleRelativePath = 'BuildScript\android\AndroidToolchain.example.json'
-# Invoke-AndroidProcess 子进程的默认 CWD：宿主脚本设为仓库根（见 Invoke-AndroidProcess 内注释）。
+# Default CWD of child processes spawned by Invoke-AndroidProcess: the host script pins it to the repo root (see comments inside Invoke-AndroidProcess).
 $script:AndroidProcessWorkingDirectory = ''
 
-# ELF 门禁的静态契约：真机只保证这些系统库可用，16 KB 页对齐是 Android 15 的加载前提。
+# Static contract of the ELF gate: real devices only guarantee these system libraries, and 16 KB page alignment is a load requirement on Android 15.
 $script:AndroidAllowedNeededLibraries = @('libc.so', 'libm.so', 'libdl.so', 'liblog.so', 'libandroid.so', 'libvulkan.so')
 $script:AndroidForbiddenExports = @(
     '_Znwm', '_Znam', '_ZdlPv', '_ZdlPvm', '_ZdaPv', '_ZdaPvm',
@@ -56,8 +56,8 @@ function Get-AndroidConfigProperty {
     return $Object.$Name
 }
 
-# 相对路径一律以仓库根为基准（配置文件和工具目录同规则），避免跟随调用方当前目录。
-# 不展开环境变量；'C:foo' 这种盘符相对路径直接拒绝，因为它会隐式命中当前目录。
+# Relative paths are always resolved against the repo root (same rule for config files and tool directories), never following the caller's current directory.
+# Environment variables are not expanded; drive-relative paths like 'C:foo' are rejected outright because they implicitly hit the current directory.
 function Resolve-AndroidToolPath {
     param(
         [Parameter(Mandatory = $true)][string]$RepositoryRoot,
@@ -89,8 +89,8 @@ function Resolve-AndroidToolPath {
     return (Join-Path $RepositoryRoot $expanded).TrimEnd('\')
 }
 
-# 通过 Start-Process + 临时文件读取输出：ConstrainedLanguage 下不使用 Process 对象，
-# 也不依赖调用方 PowerShell 的 stdout 重定向。.cmd/.bat 包装器经 cmd.exe 执行。
+# Output is read via Start-Process + temp files: under ConstrainedLanguage we avoid Process objects,
+# and we do not depend on the caller PowerShell's stdout redirection. .cmd/.bat wrappers are executed via cmd.exe.
 function Invoke-AndroidToolCapture {
     param(
         [Parameter(Mandatory = $true)][string]$File,
@@ -114,8 +114,8 @@ function Invoke-AndroidToolCapture {
     $commandFile = $File
     $commandArguments = $Arguments
     if ($isWrapper) {
-        # cmd 需要 /s 配合整体成对引号：""<路径>" "<参数>""。
-        # 路径含空格、(x86)、& 时才不会被拆开或截断。
+        # cmd needs /s combined with a fully paired quoted command line: ""<path>" "<args>"".
+        # Only then do paths containing spaces, (x86), or & avoid being split or truncated.
         $commandFile = $env:ComSpec
         $inner = '""' + $File + '"'
         foreach ($argument in $Arguments) {
@@ -127,9 +127,9 @@ function Invoke-AndroidToolCapture {
 
     $process = $null
     try {
-        # 必须用 -Wait -PassThru：ConstrainedLanguage 禁止 WaitForExit/Refresh，
-        # 不用 -Wait 时 $process.ExitCode 读不到值。代价是没有内部超时，
-        # 工具挂起时需要手动结束（错误消息也提醒用户手工重跑）。
+        # Must use -Wait -PassThru: ConstrainedLanguage forbids WaitForExit/Refresh,
+        # and without -Wait $process.ExitCode reads back as empty. The cost is no internal timeout;
+        # if a tool hangs it must be killed manually (the error message reminds the user to rerun by hand).
         try {
             $process = Start-Process -FilePath $commandFile -ArgumentList $commandArguments `
                 -RedirectStandardOutput $outFile -RedirectStandardError $errFile `
@@ -140,7 +140,7 @@ function Invoke-AndroidToolCapture {
         }
 
         $code = $process.ExitCode
-        # 控制台程序输出按 OEM 代码页解码，否则含中文的报错会变成 '???'。
+        # Console program output is decoded with the OEM code page, otherwise errors containing non-ASCII text become '???'.
         $text = ''
         if (Test-Path -LiteralPath $outFile) {
             $text = (Get-Content -Raw -LiteralPath $outFile -Encoding Oem)
@@ -159,11 +159,11 @@ function Invoke-AndroidToolCapture {
     }
 }
 
-# 把参数转成 batch 文件里可安全使用的形式。
-# 只在必要时加引号：cmd 自己的开关（/d /s /c）一旦被引号包住就不再被识别，
-# 实测 '"exe" "/d" "/s" "/c" "..."' 会直接报“文件名、目录名或卷标语法不正确”。
-# 需要引号时按 CRT 规则转义（引号前反斜杠加倍、结尾反斜杠加倍）；%
-# 无论在不在引号里都要加倍，否则 batch 会把它当变量展开。
+# Convert arguments into a form that is safe inside a batch file.
+# Only quote when necessary: once cmd's own switches (/d /s /c) are wrapped in quotes they are no longer recognized.
+# Empirically '"exe" "/d" "/s" "/c" "..."' fails outright with "The filename, directory name, or volume label syntax is incorrect".
+# When quoting is required, escape per CRT rules (double the backslashes before a quote, double trailing backslashes); %
+# must be doubled whether quoted or not, otherwise the batch treats it as a variable to expand.
 function ConvertTo-AndroidBatchArgument {
     param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Value)
 
@@ -172,7 +172,7 @@ function ConvertTo-AndroidBatchArgument {
         return '""'
     }
 
-    # 空格、引号、cmd 元字符和结尾反斜杠都必须加引号；其余保持裸形式。
+    # Spaces, quotes, cmd metacharacters and trailing backslashes all require quoting; everything else stays bare.
     if ($text -notmatch '[\s"&|<>^()]' -and $text -notmatch '\\$') {
         return $text
     }
@@ -182,9 +182,9 @@ function ConvertTo-AndroidBatchArgument {
     return '"' + $text + '"'
 }
 
-# 有界执行外部命令。ConstrainedLanguage 禁止 New-Object Diagnostics.Process 与 WaitForExit，
-# 所以用一个 .cmd 包装器把 stdout/stderr/退出码写进临时文件，再轮询 HasExited 实现超时。
-# 不能用 Wait-Process 后再读 ExitCode：实测那样 $process.ExitCode 仍是空值。
+# Run an external command with a bounded duration. ConstrainedLanguage forbids New-Object Diagnostics.Process and WaitForExit,
+# so a .cmd wrapper writes stdout/stderr/exit code into temp files, and we poll HasExited to implement the timeout.
+# Do not use Wait-Process and then read ExitCode: empirically $process.ExitCode is still empty that way.
 function Invoke-AndroidProcess {
     param(
         [Parameter(Mandatory = $true)][string]$File,
@@ -206,7 +206,7 @@ function Invoke-AndroidProcess {
     New-Item -ItemType Directory -Force -Path $directory | Out-Null
 
     $wrapper = Join-Path $directory 'run.cmd'
-    # 输出文件必须用绝对路径：子进程 CWD 锚定到仓库根后，相对重定向会写到仓库根去。
+    # Output files must use absolute paths: after the child CWD is pinned to the repo root, relative redirects would write there.
     $stdoutPath = Join-Path $directory 'stdout.txt'
     $stderrPath = Join-Path $directory 'stderr.txt'
     $exitPath = Join-Path $directory 'exit.txt'
@@ -214,19 +214,19 @@ function Invoke-AndroidProcess {
     foreach ($argument in $Arguments) {
         $line += (ConvertTo-AndroidBatchArgument $argument) + ' '
     }
-    # 括号不能省：PowerShell 里逗号优先级高于 '+'，否则这行会被拆成两个数组元素。
+    # Parentheses are mandatory: in PowerShell comma binds tighter than '+', so the line would split into two array elements.
     $lines = @(
         '@echo off',
         ($line + '1>' + (ConvertTo-AndroidBatchArgument $stdoutPath) + ' 2>' + (ConvertTo-AndroidBatchArgument $stderrPath)),
-        # '%ERRORLEVEL%' 与 '>' 之间必须有空格，否则写出的是空文件。
+        # There must be a space between '%ERRORLEVEL%' and '>', otherwise the file is written empty.
         ('echo %ERRORLEVEL% > ' + (ConvertTo-AndroidBatchArgument $exitPath))
     )
-    # 必须是 Default（ANSI）编码：ASCII 会把中文用户名写成 '??'，路径就废了。
+    # Must be Default (ANSI) encoding: ASCII would turn non-ASCII usernames into '??' and break the path.
     Set-Content -LiteralPath $wrapper -Value ($lines -join "`r`n") -Encoding Default
 
-    # 子进程默认工作目录：由宿主脚本（如 build-android.ps1）设为仓库根。
-    # 不能留在 TEMP：dotnet 选 SDK 是按进程 CWD 向上找 global.json，TEMP 下找不到
-    # 会静默选最新 SDK（如 rc 预览版），导致版本漂移与 SDK 内 MSBuild.exe 缺失类报错。
+    # Default working directory of the child process: the host script (e.g. build-android.ps1) pins it to the repo root.
+    # It must not stay in TEMP: dotnet picks an SDK by walking up from the process CWD looking for global.json; in TEMP none is found
+    # and it silently selects the newest SDK (e.g. an rc preview), causing version drift and errors like missing MSBuild.exe inside the SDK.
     $cwd = $script:AndroidProcessWorkingDirectory
     if ([string]::IsNullOrWhiteSpace($cwd) -or -not (Test-Path -LiteralPath $cwd -PathType Container)) {
         $cwd = (Get-Location).ProviderPath
@@ -244,7 +244,7 @@ function Invoke-AndroidProcess {
         $remaining = $TimeoutMs
         while (-not $process.HasExited) {
             if ($remaining -le 0) {
-                # 超时必须杀整棵树：否则 adb 之类的孙进程会留在后台，下次构建会被它挡住。
+                # A timeout must kill the whole tree: otherwise grandchildren like adb stay in the background and block the next build.
                 & taskkill.exe /T /F /PID $process.Id 2>&1 | Out-Null
                 throw "Command '$File' exceeded the timeout budget of $TimeoutMs ms; the process tree was terminated."
             }
@@ -264,7 +264,7 @@ function Invoke-AndroidProcess {
             throw "Command '$File' finished but did not report an exit code (wrapper '$wrapper'). Check that '$File' can be started from cmd.exe."
         }
 
-        # 控制台程序输出按 OEM 代码页解码，否则含中文的报错会变成 '???'。
+        # Console program output is decoded with the OEM code page, otherwise errors containing non-ASCII text become '???'.
         $text = ''
         foreach ($name in @($stdoutPath, $stderrPath)) {
             $path = $name
@@ -283,9 +283,9 @@ function Invoke-AndroidProcess {
     }
 }
 
-# TitanCodegenGen.cmake 用 'bash progress-run.sh' 包裹 NuGet 还原/工具编译等长任务。
-# Windows 上 Git Bash 装了但不一定在 PATH（编辑器启动的进程尤其常见）；
-# 这里按 PATH → 常见 Git 安装位置找到 bash 后把其目录前置到 PATH，找不到则报错并给安装提示。
+# TitanCodegenGen.cmake wraps long tasks (NuGet restore, tool compilation, etc.) with 'bash progress-run.sh'.
+# On Windows Git Bash is often installed but not on PATH (especially for processes launched by the editor);
+# here we locate bash via PATH then common Git install locations and prepend its directory to PATH, erroring with install guidance if not found.
 function Enable-AndroidBashOnPath {
     param([string]$Stage = 'Native')
 
@@ -307,15 +307,15 @@ function Enable-AndroidBashOnPath {
     foreach ($dir in $candidates) {
         if (Test-Path -LiteralPath (Join-Path $dir 'bash.exe') -PathType Leaf) {
             $env:PATH = "$dir;$env:PATH"
-            Write-Host "[TITAN-CHECK] OK bash - $dir\bash.exe (不在原 PATH，已前置)"
+            Write-Host "[TITAN-CHECK] OK bash - $dir\bash.exe (not on original PATH, prepended)"
             return
         }
     }
-    throw "[$Stage] 找不到 bash：TitanCodegen 需要 bash 运行进度包裹脚本。安装 Git for Windows（https://git-scm.com/download/win）或把 Git\bin 加入 PATH 后重试。"
+    throw "[$Stage] bash not found: TitanCodegen needs bash to run the progress wrapper script. Install Git for Windows (https://git-scm.com/download/win) or add Git\bin to PATH, then retry."
 }
 
-# 调用外部命令的默认入口：失败时把阶段、退出码和输出尾巴一起抛出去，
-# 让调用方不需要翻日志就能判断是哪个阶段挂了。
+# Default entry point for external commands: on failure, throw with the stage, exit code and output tail together,
+# so the caller can tell which stage failed without digging through logs.
 function Invoke-AndroidCommand {
     param(
         [Parameter(Mandatory = $true)][string]$Stage,
@@ -324,7 +324,7 @@ function Invoke-AndroidCommand {
         [int]$TimeoutMs = 1800000
     )
 
-    # 每个子步骤执行前打一条机器可读进度（面板日志据此展示细分进度，失败时知道卡在哪步）。
+    # Print a machine-readable progress line before each sub-step (the panel log shows fine-grained progress and where it stalled on failure).
     $displayArgs = if ($Arguments.Count -gt 0) { $Arguments[0] } else { '' }
     Write-Host ("[TITAN-STEP] {0} - {1} {2}" -f $Stage, (Split-Path $File -Leaf), $displayArgs)
     try {
@@ -345,8 +345,8 @@ function Invoke-AndroidCommand {
     return $result
 }
 
-# ELF 门禁：产物必须同时满足架构、16 KB 页对齐、NEEDED 白名单和 C++ operator 不导出，
-# 否则真机上要么装不上、要么和别的 .so 抢符号。
+# ELF gate: the artifact must satisfy architecture, 16 KB page alignment, the NEEDED whitelist, and no exported C++ operator,
+# otherwise it either fails to install on a real device or fights other .so files over symbols.
 function Test-AndroidNativeLibrary {
     param(
         [Parameter(Mandatory = $true)][hashtable]$Tools,
@@ -490,7 +490,7 @@ function Assert-AndroidToolchainValue {
     }
 }
 
-# requirements 里的整数字段：空字符串不能被当成 0（否则会得到 'r0' 这种误导性错误）。
+# Integer fields inside requirements: empty strings must not be treated as 0 (otherwise you get misleading errors like 'r0').
 function Get-AndroidRequiredInt {
     param(
         [Parameter(Mandatory = $true)]$Requirements,
@@ -510,7 +510,7 @@ function Get-AndroidRequiredInt {
         return $Default
     }
 
-    # 不用 [int]::TryParse（[ref] 在 ConstrainedLanguage 下无法创建类型）。
+    # Do not use [int]::TryParse ([ref] cannot create types under ConstrainedLanguage).
     if ($text -notmatch '^[0-9]+$' -or [int]$text -le 0) {
         throw "Android toolchain config 'requirements.$Name' must be a positive integer, got '$raw'. $InstallHint $(Get-AndroidToolchainConfigHint $ConfigPath)"
     }
@@ -518,8 +518,8 @@ function Get-AndroidRequiredInt {
     return [int]$text
 }
 
-# 按阶段读取并校验工具链配置，返回相对/绝对路径统一后的定位结果。
-# Stage: Native = 编译 libCore.Android.so；Managed = 构建托管层与 APK；Device = adb 真机操作。
+# Read and validate the toolchain config per stage, returning a located result with relative/absolute paths unified.
+# Stage: Native = build libCore.Android.so; Managed = build the managed layer and APK; Device = adb operations on a real device.
 function Find-AndroidTools {
     param(
         [Parameter(Mandatory = $true)][string]$RepositoryRoot,
@@ -552,7 +552,7 @@ function Find-AndroidTools {
 
     $requirements = Get-AndroidConfigProperty $config 'requirements'
 
-    # 逐项进度打印：每过一项检查写一条 [TITAN-CHECK] 行，失败时用户能看到已通过哪些。
+    # Per-item progress printing: each passed check writes a [TITAN-CHECK] line so the user can see what already passed on failure.
     $checkStep = {
         param([string]$Name, [string]$Detail)
         Write-Host ("[TITAN-CHECK] OK {0} - {1}" -f $Name, $Detail)
@@ -572,7 +572,7 @@ function Find-AndroidTools {
 
     $hint = Get-AndroidToolchainConfigHint $resolvedConfig
 
-    # abi/apiLevel/stl/generator 是编译契约，缺失时不能静默变成空串或 0。
+    # abi/apiLevel/stl/generator are compile contracts; missing values must not silently become empty strings or 0.
     $abi = [string](Get-AndroidConfigProperty $config 'abi')
     Assert-AndroidToolchainValue -Name 'abi' -Value $abi -ConfigPath $resolvedConfig -Stage $Stage `
         -InstallHint "Set 'abi' to the target ABI, for example 'arm64-v8a'."
@@ -592,7 +592,7 @@ function Find-AndroidTools {
         throw "[$Stage] Android toolchain entry 'apiLevel' must be a positive integer such as 28, got '$apiRaw'. $hint"
     }
     $apiLevel = [int]$apiText
-    # apiLevel 可配但不能低于引擎运行时下限（与 Core.Android/CMakeLists 的 TITAN_ANDROID_MIN_API_LEVEL 同一契约）。
+    # apiLevel is configurable but must not go below the engine runtime floor (same contract as TITAN_ANDROID_MIN_API_LEVEL in Core.Android/CMakeLists).
     $minApiLevel = 28
     if ($apiLevel -lt $minApiLevel) {
         throw "[$Stage] Android toolchain entry 'apiLevel' is $apiLevel, but the engine requires >= $minApiLevel. Raise it in $resolvedConfig."
@@ -618,7 +618,7 @@ function Find-AndroidTools {
         Adb        = $null
     }
 
-    # 每个阶段都建立在原生工具链之上；Device 在 Managed 之上追加 adb，避免只配 adb 就报绿。
+    # Every stage builds on the native toolchain; Device adds adb on top of Managed, so a config with only adb can never report green.
     $wantsNative = $true
     $wantsManaged = ($Stage -eq 'Managed' -or $Stage -eq 'Device')
 
@@ -749,7 +749,7 @@ function Find-AndroidTools {
     return $result
 }
 
-# 面向命令行的结果：不抛异常，只返回 Code = 0（工具齐备）/ 2（需用户补齐）与可直接打印的文本。
+# Command-line facing result: never throws; returns Code = 0 (all tools present) / 2 (user must supply tools) plus directly printable text.
 function Get-AndroidToolchainCheckResult {
     param(
         [Parameter(Mandatory = $true)][string]$RepositoryRoot,

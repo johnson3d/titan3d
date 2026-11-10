@@ -169,6 +169,10 @@ namespace EngineNS.Graphics.Mesh.Modifier
 
         public unsafe void InstanceCulling(TtInstanceModifier mdf, NxRHI.ICommandList cmd, Pipeline.TtRenderPolicy policy)
         {
+            // Feature_UseGpuCulling 关闭: 跳过剔除 compute (Setup/Cull/Flush 三个 dispatch),
+            // 绘制端 TtInstanceBufferSSBO.OnDrawCall 走 else 分支直绘 CPU 侧 InstanceBuffer
+            if (TtEngine.Instance.Config.Feature_UseGpuCulling == false)
+                return;
             if (!GpuCullSetupShading.IsReady || !GpuCullShading.IsReady || !GpuCullFlushShading.IsReady)
             {
                 return;
@@ -296,7 +300,9 @@ namespace EngineNS.Graphics.Mesh.Modifier
         {
             drawcall.mCoreObject.DrawInstance = (ushort)NumOfInstance;
 
-            if (mdf.GpuDrivenData != null)
+            // GPU 剔除开启时由 TtGpuDrivenData.OnDrawCall 绑 CullingBuffer + indirect args
+            // (instance 已被剔除压缩, 不能再用 NumOfInstance); 关闭时直绘全量 instance
+            if (mdf.GpuDrivenData != null && TtEngine.Instance.Config.Feature_UseGpuCulling)
             {
                 mdf.GpuDrivenData.OnDrawCall(mdf, cmd, drawcall, policy, atom);
             }

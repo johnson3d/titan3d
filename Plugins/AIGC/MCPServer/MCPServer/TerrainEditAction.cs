@@ -161,7 +161,7 @@ namespace EngineNS.Plugins.MCPServer
                 var common = new Dictionary<string, object>
                 {
                     ["playMode"] = TtEngine.Instance.PlayMode.ToString(),
-                    ["isTerrainEditSupported"] = UTerrainLevelData.IsTerrainEditSupported,
+                    ["isTerrainEditSupported"] = TtTerrainLevelData.IsTerrainEditSupported,
                     ["featureUseRVT"] = TtEngine.Instance.Config.Feature_UseRVT,
                 };
                 if (ctx.Terrain == null)
@@ -322,7 +322,7 @@ namespace EngineNS.Plugins.MCPServer
             return JsonSerializer.Serialize(payload);
         }
 
-        private static object BuildTerrainSample(TtTerrainNode terrain, UTerrainLevelData ld,
+        private static object BuildTerrainSample(TtTerrainNode terrain, TtTerrainLevelData ld,
             DVector3 pos, float localX, float localZ, string how)
         {
             float cpuHeight = float.NaN;

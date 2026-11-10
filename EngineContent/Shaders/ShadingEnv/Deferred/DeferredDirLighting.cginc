@@ -563,7 +563,8 @@ PS_OUTPUT PS_Main(PS_INPUT input)
         else
         {
             // Fallback to QTree (local lights / outside clipmap range)
-            int nodeIndex = GetPageNode(WorldPos.xz);
+            // QTree pages not rendered this frame -> stale node data/depth pages, treat as lit.
+            int nodeIndex = (QTreeValid == 0) ? -1 : GetPageNode(WorldPos.xz);
             if (nodeIndex < 0)
             {
                 ShadowValue = 1.0h;

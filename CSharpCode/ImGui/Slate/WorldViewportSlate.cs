@@ -191,6 +191,16 @@ namespace EngineNS.EGui.Slate
         {
             return AutoZoomToNode(World?.Root);
         }
+        /// <summary>
+        /// 相机位移 (WASD 等) 在这一步逐帧轮询里推进, 而渲染 action 紧接着就入队了,
+        /// 所以中心轴模式的 gizmo 原点要在这里跟上 —— 放到下面的 OnDrawViewportUI 就晚了一帧,
+        /// 飞行期间 gizmo 会停在上一帧的屏幕中心。UI 阶段那次调用负责没聚焦时的选择集刷新。
+        /// </summary>
+        protected override void TickOnFocus()
+        {
+            base.TickOnFocus();
+            mAxis?.UpdateShowForFrame(this);
+        }
         
 
         #region Debug Assist
@@ -260,8 +270,16 @@ namespace EngineNS.EGui.Slate
             var totalUsedSize = baseUsedSize;
             var adjustedStartPos = new Vector2(startDrawPos.X, startDrawPos.Y + baseUsedSize.Y);
 
-            if (mAxis != null && DrawAxisUI)
-                mUIOperated = mAxis.OnDrawUI(this, adjustedStartPos);
+            if (mAxis != null)
+            {
+                // 补一次 gizmo 原点: 中心轴模式下相机走了要跟上 (没聚焦时 TickOnFocus 不会跑),
+                // 从 Outliner 选中节点时根本不会产生视口事件, 只靠输入事件驱动会停在旧位置。
+                // 没东西要刷时这个调用会直接早退, 与下面的 DrawAxisUI 开关无关
+                mAxis.UpdateShowForFrame(this);
+
+                if (DrawAxisUI)
+                    mUIOperated = mAxis.OnDrawUI(this, adjustedStartPos);
+            }
 
             if(DrawCameraOPUI)
             {

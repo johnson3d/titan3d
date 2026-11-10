@@ -647,7 +647,7 @@ namespace EngineNS
 
         public static bool IsEmpty(RName rName)
         {
-            return string.IsNullOrEmpty(rName.mName);
+            return rName == null || string.IsNullOrEmpty(rName.mName);
         }
         public static bool IsExist(RName rName)
         {

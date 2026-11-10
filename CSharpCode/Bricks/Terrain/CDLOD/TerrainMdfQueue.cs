@@ -98,7 +98,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             get
             {
                 if (mScopeOnDrawCall == null)
-                    mScopeOnDrawCall = new Profiler.TimeScope(typeof(UTerrainMdfQueue), nameof(OnDrawCall));
+                    mScopeOnDrawCall = new Profiler.TimeScope(typeof(TtTerrainMdfQueue), nameof(OnDrawCall));
                 return mScopeOnDrawCall;
             }
         }
@@ -142,7 +142,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     // 它只填 Position/Quat/Scale, UserData/UserData2 恒为 0, 于是 TerrainCDLOD.cginc
                     // 里六个 Get* 全部归零, 地形被渲染成一块位于原点的平板。
                     // 所以这条路径改由 cbPerPatch 传参, 并置 UsePatchRVTParams = 1 通知 shader。
-                    if ((mdfQueue1 is UTerrainInstanceMdfQueue) == false && effectBinder.cbPerPatch != null)
+                    if ((mdfQueue1 is TtTerrainInstanceMdfQueue) == false && effectBinder.cbPerPatch != null)
                     {
                         var pat = Patch;
                         pat.SureCBuffer(shaderProg, ref pat.PatchCBuffer);
@@ -226,7 +226,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 drawcall.BindSampler(effectBinder.Samp_NormalTextureArray, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
             }
         }
-        public static void SetInstanceData(Graphics.Mesh.TtRenderMesh mesh, Bricks.Terrain.CDLOD.UTerrainMdfQueue mdfQueue, ref Graphics.Pipeline.Shader.FVSInstanceData instance)
+        public static void SetInstanceData(Graphics.Mesh.TtRenderMesh mesh, Bricks.Terrain.CDLOD.TtTerrainMdfQueue mdfQueue, ref Graphics.Pipeline.Shader.FVSInstanceData instance)
         {
             var cb =  mesh.PerMeshCBuffer;
             var matrix = cb.GetMatrix(Graphics.Pipeline.TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.WorldMatrix);
@@ -260,7 +260,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             //instance.PointLightIndices.Y = CoreSDK.AsUInt32(mdfQueue.Patch.TexUVOffset.Y);
         }
     }
-    public class UTerrainMdfQueue : Graphics.Pipeline.Shader.TtMdfQueue1<TtTerrainModifier>
+    public class TtTerrainMdfQueue : Graphics.Pipeline.Shader.TtMdfQueue1<TtTerrainModifier>
     {
         public TtPatch Patch
         {
@@ -272,25 +272,25 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public override void CopyFrom(TtMdfQueueBase mdf)
         {
             base.CopyFrom(mdf);
-            TerrainModifier.Patch = (mdf as UTerrainInstanceMdfQueue).TerrainModifier.Patch;
-            TerrainModifier.TerrainNode = (mdf as UTerrainInstanceMdfQueue).TerrainModifier.TerrainNode;
-            TerrainModifier.Dimension = (mdf as UTerrainInstanceMdfQueue).TerrainModifier.Dimension;
-            TerrainModifier.IsWater = (mdf as UTerrainInstanceMdfQueue).TerrainModifier.IsWater;
+            TerrainModifier.Patch = (mdf as TtTerrainInstanceMdfQueue).TerrainModifier.Patch;
+            TerrainModifier.TerrainNode = (mdf as TtTerrainInstanceMdfQueue).TerrainModifier.TerrainNode;
+            TerrainModifier.Dimension = (mdf as TtTerrainInstanceMdfQueue).TerrainModifier.Dimension;
+            TerrainModifier.IsWater = (mdf as TtTerrainInstanceMdfQueue).TerrainModifier.IsWater;
         }
         public TtTerrainModifier TerrainModifier
         {
             get => this.Modifiers[0] as TtTerrainModifier;
         }
     }
-    public class UTerrainInstanceMdfQueue : Graphics.Pipeline.Shader.TtMdfQueue2<TtTerrainModifier, Graphics.Mesh.Modifier.TtInstanceModifier>
+    public class TtTerrainInstanceMdfQueue : Graphics.Pipeline.Shader.TtMdfQueue2<TtTerrainModifier, Graphics.Mesh.Modifier.TtInstanceModifier>
     {
         public override void CopyFrom(TtMdfQueueBase mdf)
         {
             base.CopyFrom(mdf);
-            TerrainModifier.Patch = (mdf as UTerrainInstanceMdfQueue).TerrainModifier.Patch;
-            TerrainModifier.TerrainNode = (mdf as UTerrainInstanceMdfQueue).TerrainModifier.TerrainNode;
-            TerrainModifier.Dimension = (mdf as UTerrainInstanceMdfQueue).TerrainModifier.Dimension;
-            TerrainModifier.IsWater = (mdf as UTerrainInstanceMdfQueue).TerrainModifier.IsWater;
+            TerrainModifier.Patch = (mdf as TtTerrainInstanceMdfQueue).TerrainModifier.Patch;
+            TerrainModifier.TerrainNode = (mdf as TtTerrainInstanceMdfQueue).TerrainModifier.TerrainNode;
+            TerrainModifier.Dimension = (mdf as TtTerrainInstanceMdfQueue).TerrainModifier.Dimension;
+            TerrainModifier.IsWater = (mdf as TtTerrainInstanceMdfQueue).TerrainModifier.IsWater;
         }
         public TtTerrainModifier TerrainModifier
         {

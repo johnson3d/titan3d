@@ -133,6 +133,7 @@ namespace EngineNS.GamePlay
         {
             mAxisSpace = space;
             mOldAxisSpace = mAxisSpace;
+            mAxisShowDirty = true;
         }
 
         enum enEdgeType
@@ -699,40 +700,111 @@ namespace EngineNS.GamePlay
         DBoundingBox mEdgeAxisBB = DBoundingBox.EmptyBox();
         DBoundingBox mEdgeAxisOrigionBBBeforeCenterOperation;
         FTransform mAxisOrigionTransformBeforeCenterOperation;
+        // 生效中的中心轴模式: gizmo 原点画在视口中心 (GetCenterAxisPosition) 而不是节点原点上;
+        // 拖动结果仍按节点真实变换折算, 所以绕 gizmo 旋转不会把节点拖着绕视口中心公转。
         bool mCenterAxisMode = false;
+        // 模式有两个来源, 任一为真即生效: 用户在视口工具栏 "C" 按钮上的期望值, 与选择集里节点自身
+        // 的要求 (TtNode.IsAxisAtViewportCenter —— 平行光这类只需要旋转、位置没有意义的节点)。
+        bool mUserCenterAxisMode = false;
+        bool mSelectionCenterAxisMode = false;
+        // "需要重算一次 gizmo 原点"标记。非中心模式下原点只跟节点走, 相机不参与计算,
+        // 所以只靠输入事件驱动就够; 但选择集 / 操作类型 / 轴空间变了(典型是从 Outliner 选中,
+        // 根本不会产生视口事件), 就得靠这个标记补一次。
+        bool mAxisShowDirty = false;
+        /// <summary>当前生效的中心轴模式 = 用户开关 || 选中节点自身要求。</summary>
         public bool CenterAxisMode
         {
             get => mCenterAxisMode;
+            // set 写入的只是用户期望值; 节点自身要求的那一份由 UpdateSelectionCenterAxisMode 维护,
+            // 不会因为我手动关掉按钮就把平行光要求的中心模式也关掉。
             set
             {
-                mCenterAxisMode = value;
-                switch(mAxisOperationType)
-                {
-                    case enAxisOperationType.Edge:
+                mUserCenterAxisMode = value;
+                UpdateCenterAxisMode();
+            }
+        }
+        void UpdateCenterAxisMode()
+        {
+            var enable = mUserCenterAxisMode || mSelectionCenterAxisMode;
+            if (enable == mCenterAxisMode)
+                return;
+
+            mCenterAxisMode = enable;
+            mAxisShowDirty = true;
+            // 选择集可能在 Initialize 完成之前就被宿主恢复, 这时只更新标记:
+            // 相机 / gizmo 节点还不存在, 原点交给 UpdateAxisShow 每帧重算
+            if (!mInitialized)
+                return;
+
+            switch(mAxisOperationType)
+            {
+                case enAxisOperationType.Edge:
+                    {
+                        mEdgeAxisOrigionBBBeforeCenterOperation = mEdgeAxisBB;
+                        UpdateEdgeBB();
+                        UpdateEdgeAxisTransform();
+                    }
+                    break;
+                default:
+                    {
+                        if(mRootNode != null)
                         {
-                            mEdgeAxisOrigionBBBeforeCenterOperation = mEdgeAxisBB;
-                            UpdateEdgeBB();
-                            UpdateEdgeAxisTransform();
-                        }
-                        break;
-                    default:
-                        {
-                            if(mRootNode != null)
+                            if (mCenterAxisMode)
                             {
-                                if (mCenterAxisMode)
-                                {
-                                    mAxisOrigionTransformBeforeCenterOperation = ((TtPlacement)mRootNode.Placement).TransformData;
-                                    mRootNode.Placement.Position = GetCenterAxisPosition();
-                                }
-                                else
-                                {
-                                    mRootNode.Placement.SetTransform(in mAxisOrigionTransformBeforeCenterOperation);
-                                }
+                                mAxisOrigionTransformBeforeCenterOperation = ((TtPlacement)mRootNode.Placement).TransformData;
+                                mRootNode.Placement.Position = GetCenterAxisPosition();
+                            }
+                            else
+                            {
+                                mRootNode.Placement.SetTransform(in mAxisOrigionTransformBeforeCenterOperation);
                             }
                         }
-                        break;
-                }
+                    }
+                    break;
             }
+        }
+        /// <summary>
+        /// 选择集变化后重算"节点自身要求": 只有全部选中节点都要求中心显示才生效,
+        /// 免得平行光和普通节点一起被选中时把普通节点也搬到视口中心绕着转。
+        /// </summary>
+        void UpdateSelectionCenterAxisMode()
+        {
+            var request = mSelectedNodes != null && mSelectedNodes.Count > 0;
+            for (int i = 0; request && i < mSelectedNodes.Count; i++)
+            {
+                request = mSelectedNodes[i].Node != null && mSelectedNodes[i].Node.IsAxisAtViewportCenter;
+            }
+            if (request == mSelectionCenterAxisMode)
+                return;
+
+            mSelectionCenterAxisMode = request;
+            ClampOperationTypeForSelection();
+            UpdateCenterAxisMode();
+        }
+
+        /// <summary>
+        /// 当前选中集是否"位置无意义" (全部节点都声明 IsAxisAtViewportCenter)。
+        /// 这类节点只有旋转会改变渲染结果, 所以 gizmo 锁成只旋转: Move/Scale/Edge 灰化,
+        /// 已有的 Move/Scale/Edge 状态会在选择集变化时自动切回 Rot。
+        /// 只看节点自身的要求, 用户手按 "C" 进的中心轴模式不锁 —— 那种情况下平移照样是有意义的操作。
+        /// </summary>
+        public bool IsOperationRotOnly => mSelectionCenterAxisMode;
+
+        /// <summary>
+        /// 选择集要求"位置无意义"时把操作类型压回 Rot (Select 留着, 否则连点选都不能用)。
+        /// 必须在 UpdateCenterAxisMode 之前调用: 那边会按当前操作类型决定 gizmo 原点来源。
+        /// </summary>
+        void ClampOperationTypeForSelection()
+        {
+            if (!mSelectionCenterAxisMode)
+                return;
+            if (mAxisOperationType == enAxisOperationType.Select || mAxisOperationType == enAxisOperationType.Rot)
+                return;
+            // Initialize 之前 SetAxisOperationType 还没有 gizmo 节点可挂, 操作类型默认就是 Select
+            if (!mInitialized)
+                return;
+
+            SetAxisOperationType(enAxisOperationType.Rot);
         }
 
         // 统一Undo/Redo接入点: 宿主编辑器开门时把自己的历史栈挂到下方HistoryHost(旧UActionRecorder机制已废弃删除)
@@ -1119,6 +1191,8 @@ namespace EngineNS.GamePlay
                     SelectedNodes.RemoveAt(i);
                 }
             }
+            mAxisShowDirty = true;
+            UpdateSelectionCenterAxisMode();
         }
         public void SetSelectedNodes(List<GamePlay.Scene.TtNode> nodes)
         {
@@ -1145,6 +1219,8 @@ namespace EngineNS.GamePlay
             {
                 SelectedNodes.Clear();
             }
+            mAxisShowDirty = true;
+            UpdateSelectionCenterAxisMode();
         }
         public void SetSelectedNodes(params GamePlay.Scene.TtNode[] nodes)
         {
@@ -1199,11 +1275,19 @@ namespace EngineNS.GamePlay
                 //SelectedNodes = null;
                 SelectedNodes.Clear();
             }
+            mAxisShowDirty = true;
+            UpdateSelectionCenterAxisMode();
         }
 
         enAxisSpace mOldAxisSpace;
         public void SetAxisOperationType(enAxisOperationType type)
         {
+            // "位置无意义"的节点(自声明 IsAxisAtViewportCenter)只吃旋转。UI 按钮已经灰化,
+            // 这里是程序化调用方的同一个护栏: 不拦住会出现"按钮灰着但 gizmo 能拖"的矛盾状态
+            if (IsOperationRotOnly
+                && type != enAxisOperationType.Select && type != enAxisOperationType.Rot)
+                return;
+
             for (int i = 0; i < mAxisMeshDatas.Count; i++)
             {
                 mAxisMeshDatas[i].MeshNode.Parent = null;
@@ -1253,6 +1337,7 @@ namespace EngineNS.GamePlay
                     }
                     break;
             }
+            mAxisShowDirty = true;
         }
 
         protected bool mCtrlKeyIsDown = false;
@@ -1499,6 +1584,22 @@ namespace EngineNS.GamePlay
             else
                 absRot = node.Placement.AbsTransform.mQuat;
 
+        }
+        /// <summary>
+        /// 宿主视口每帧(渲染之前)调一次, 让 gizmo 原点跟上选择集与相机。
+        ///
+        /// OnEvent 只在有输入事件时驱动 UpdateAxisShow, 而在 Outliner 里选中节点不会产生视口事件;
+        /// 中心轴模式下 gizmo 是要跟着相机走的, 只靠事件就会停在上一处的位置, 所以这里补一次。
+        /// 不在中心模式且没任何东西变过时直接跳过: UpdateAxisShow 对每个选中节点算 AABB,
+        /// 无条件每帧跑会白给大选择集加一份 O(N) 开销。拖动期间内部会跳过原点重算。
+        /// </summary>
+        public void UpdateShowForFrame(Graphics.Pipeline.TtViewportSlate viewport)
+        {
+            if (!mCenterAxisMode && !mAxisShowDirty)
+                return;
+
+            mAxisShowDirty = false;
+            UpdateAxisShow(viewport);
         }
         void UpdateAxisShow(Graphics.Pipeline.TtViewportSlate viewport)
         {
@@ -2848,6 +2949,17 @@ namespace EngineNS.GamePlay
             float normalElp = 4 * dpiScale;
             float maxElp = 10 * dpiScale;
 
+            // 选中"位置无意义"的节点 (自声明 IsAxisAtViewportCenter, 典型是平行光) 时,
+            // 平移/缩放/边缘改了不会改变任何渲染结果, 这三个按钮灰化, 操作类型也会被压回 Rot
+            var rotOnlyOperation = IsOperationRotOnly;
+            void DrawRotOnlyTip(bool hovered)
+            {
+                if (!rotOnlyOperation || !hovered)
+                    return;
+                slate.IsHoverGuiItem = true;
+                EGui.Controls.CtrlUtility.DrawHelper(TtLocalization.Tr("Move/Scale/Edge are disabled for this node: its position doesn't affect the result, only the rotation does."));
+            }
+
             mSelectButton.IsChecked = mAxisOperationType == enAxisOperationType.Select;
             if(mSelectButton.OnDraw(in drawList, in Support.TtAnyPointer.Default))
             {
@@ -2861,6 +2973,7 @@ namespace EngineNS.GamePlay
             slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
             ImGuiAPI.SameLine(0, normalElp);
             mMoveButton.IsChecked = mAxisOperationType == enAxisOperationType.Move;
+            mMoveButton.IsEnabled = !rotOnlyOperation;
             if(mMoveButton.OnDraw(in drawList, in Support.TtAnyPointer.Default))
             {
                 SetAxisOperationType(enAxisOperationType.Move);
@@ -2869,7 +2982,9 @@ namespace EngineNS.GamePlay
             rectMin = ImGuiAPI.GetItemRectMin();
             rectMax = ImGuiAPI.GetItemRectMax();
             slate.RegisterOverlappedArea("MoveButton", new RectangleF(in rectMin, in rectMax));
-            slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
+            var hoverMove = ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
+            slate.IsHoverGuiItem |= hoverMove;
+            DrawRotOnlyTip(hoverMove);
 
             ImGuiAPI.SameLine(0, normalElp);
             mRotButton.IsChecked = mAxisOperationType == enAxisOperationType.Rot;
@@ -2885,6 +3000,7 @@ namespace EngineNS.GamePlay
 
             ImGuiAPI.SameLine(0, normalElp);
             mScaleButton.IsChecked = mAxisOperationType == enAxisOperationType.Scale;
+            mScaleButton.IsEnabled = !rotOnlyOperation;
             if (mScaleButton.OnDraw(in drawList, in Support.TtAnyPointer.Default))
             {
                 SetAxisOperationType(enAxisOperationType.Scale);
@@ -2893,10 +3009,13 @@ namespace EngineNS.GamePlay
             rectMin = ImGuiAPI.GetItemRectMin();
             rectMax = ImGuiAPI.GetItemRectMax();
             slate.RegisterOverlappedArea("ScaleButton", new RectangleF(in rectMin, in rectMax));
-            slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
+            var hoverScale = ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
+            slate.IsHoverGuiItem |= hoverScale;
+            DrawRotOnlyTip(hoverScale);
 
             ImGuiAPI.SameLine(0, normalElp);
             mEdgeButton.IsChecked = mAxisOperationType == enAxisOperationType.Edge;
+            mEdgeButton.IsEnabled = !rotOnlyOperation;
             if (mEdgeButton.OnDraw(in drawList, in Support.TtAnyPointer.Default))
             {
                 SetAxisOperationType(enAxisOperationType.Edge);
@@ -2905,7 +3024,9 @@ namespace EngineNS.GamePlay
             rectMin = ImGuiAPI.GetItemRectMin();
             rectMax = ImGuiAPI.GetItemRectMax();
             slate.RegisterOverlappedArea("EdgeButton", new RectangleF(in rectMin, in rectMax));
-            slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
+            var hoverEdge = ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
+            slate.IsHoverGuiItem |= hoverEdge;
+            DrawRotOnlyTip(hoverEdge);
 
             ImGuiAPI.SameLine(0, maxElp);
             mAxisLocalButton.IsChecked = mAxisSpace == enAxisSpace.Local;
@@ -2941,15 +3062,21 @@ namespace EngineNS.GamePlay
                     break;
             }
             ImGuiAPI.SameLine(0, maxElp);
-            if (ImGuiAPI.ToggleButton("C", ref mCenterAxisMode, in btnSize, 0))
+            // 按钮显示的是生效值; 平行光这类节点自身要求中心模式时, 在这里取消勾选只能清掉用户期望位,
+            // 节点要求的那一份要等选中普通节点(或取消选中)才会退掉
+            var centerAxisMode = mCenterAxisMode;
+            if (ImGuiAPI.ToggleButton("C", ref centerAxisMode, in btnSize, 0))
             {
-                CenterAxisMode = mCenterAxisMode;
+                CenterAxisMode = centerAxisMode;
                 retValue = true;
             }
             rectMin = ImGuiAPI.GetItemRectMin();
             rectMax = ImGuiAPI.GetItemRectMax();
             slate.RegisterOverlappedArea("CenterAxisButton", new RectangleF(in rectMin, in rectMax));
-            slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
+            var hoverCenterAxis = ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
+            slate.IsHoverGuiItem |= hoverCenterAxis;
+            if (hoverCenterAxis)
+                EGui.Controls.CtrlUtility.DrawHelper(TtLocalization.Tr("Center Axis: show the gizmo at the viewport center instead of at the node origin.\nNodes which only need rotating (e.g. Sun) ask for it by themselves."));
 
             ImGuiAPI.SameLine(0, maxElp);
             var snapGrid = HasSnapType(enSnapType.MoveGrid);

@@ -1869,6 +1869,17 @@ namespace EngineNS.GamePlay.Scene
         }
         
         public delegate bool FVisitNode(TtNode node, object arg);
+        /// <summary>
+        /// 节点级 cook 入口 (场景资产 CookAsset 经 IterateNodes 逐个节点调用):
+        /// 需要产出派生数据的节点重写此方法 (如 TtTerrainNode 烘 PGC 高度场与 VGDag),
+        /// 默认无 cook 内容返回 true, 所以场景 cook 只需一次节点遍历, 不关心具体类型。
+        /// 实现注意: 不得在此增删节点 (遍历基于快照); 失败返回 false 并自行记日志。
+        /// </summary>
+        public virtual async Thread.Async.TtTask<bool> CookAsset()
+        {
+            await Thread.TtAsyncDummyClass.DummyFunc();
+            return true;
+        }
         public bool IterateNodes(FVisitNode fn, object arg)
         {
             if (fn(this, arg) == false)

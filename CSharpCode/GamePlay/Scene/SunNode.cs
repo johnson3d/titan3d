@@ -37,6 +37,9 @@ namespace EngineNS.GamePlay.Scene
             get => GetNodeData<TtSunNodeData>().DirectionLight;
             set => GetNodeData<TtSunNodeData>().DirectionLight = value;
         }
+        // 平行光只看旋转推出的方向, position 不参与任何光照计算, 所以 gizmo 不绑在本节点原点上:
+        // 画在视口中心, 相机怎么飞都能随时拖旋转环调光照角度 (原点上的 gizmo 常年在视野外/贴地看不见)。
+        public override bool IsAxisAtViewportCenter => true;
         Graphics.Pipeline.Shader.TtMaterialInstance SunMaterial;
         [System.ComponentModel.Category("Option")]
         [Rtti.Meta("")]

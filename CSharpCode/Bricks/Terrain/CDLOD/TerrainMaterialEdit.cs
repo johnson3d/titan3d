@@ -42,7 +42,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
     }
 
-    public partial class UTerrainLevelData
+    public partial class TtTerrainLevelData
     {
         #region SourceBuffers
         /// <summary>
@@ -500,9 +500,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             get
             {
-                if (mMaterialIdOverlay == null)
-                    mMaterialIdOverlay = new TtTerrainMaterialIdOverlay(this);
-                return mMaterialIdOverlay;
+                // 与 HeightOverlay 共用 TtTerrainNode.mOverlayLocker, 异步 level 加载线程也会首次访问到这里
+                lock (mOverlayLocker)
+                {
+                    if (mMaterialIdOverlay == null)
+                        mMaterialIdOverlay = new TtTerrainMaterialIdOverlay(this);
+                    return mMaterialIdOverlay;
+                }
             }
         }
         /// <summary>
@@ -510,7 +514,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// </summary>
         internal TtTerrainMaterialIdOverlay MaterialIdOverlayIfCreated
         {
-            get { return mMaterialIdOverlay; }
+            get { lock (mOverlayLocker) { return mMaterialIdOverlay; } }
         }
 
         /// <summary>
@@ -519,7 +523,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// 与 ApplyHeightBrushAtWorld 的差别: 不需要 BeginEditSession (ID 图没有编码基准
         /// 可冻结), 也不需要重建物理。
         /// </summary>
-        public UTerrainLevelData ApplyMaterialBrushAtWorld(in DVector3 worldPos, in FTerrainMaterialBrushParam param, bool bFlushNow)
+        public TtTerrainLevelData ApplyMaterialBrushAtWorld(in DVector3 worldPos, in FTerrainMaterialBrushParam param, bool bFlushNow)
         {
             var levelData = GetLevelDataAtWorld(in worldPos, out var localX, out var localZ);
             if (levelData == null)

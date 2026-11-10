@@ -89,7 +89,7 @@ foreach ($file in $scanFiles) {
     $text = Get-Content -Raw -LiteralPath $file.FullName
     if ($null -eq $text) { continue }
     foreach ($name in $grouped.Keys) {
-        # C# 用 Path.Combine(root, 'BuildScript', '<name>') 拼路径，不是字面量斜杠，所以单独识别
+        # C# builds paths with Path.Combine(root, 'BuildScript', '<name>'), not literal slashes, so it is matched separately
         $stale = $text.Contains("BuildScript\$name") -or $text.Contains("BuildScript/$name") -or $text.Contains('"BuildScript", "' + $name + '"')
         if ($stale) {
             $relative = $file.FullName.Substring($repoRoot.Length + 1)

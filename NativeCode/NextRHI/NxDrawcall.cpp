@@ -98,6 +98,10 @@ namespace NxRHI
 	{
 		return ShaderEffect->FindBinder(name);
 	}
+	const FEffectBinder* IGraphicDraw::FindBinder(EShaderBindType type, const char* name) const
+	{
+		return ShaderEffect->FindBinder(type, name);
+	}
 	IGpuResource* IGraphicDraw::FindGpuResource(VNameString name)
 	{
 		auto binder = GetGraphicsEffect()->FindBinder(name);

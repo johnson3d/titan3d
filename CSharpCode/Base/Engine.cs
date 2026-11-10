@@ -86,6 +86,14 @@ namespace EngineNS
         [Rtti.Meta("")]
         [System.ComponentModel.Category("Option")]
         public bool Feature_UseRVT { get; set; } = false;
+        /// <summary>
+        /// GPU-Driven 剔除总开关 (TtGpuDrivenData 的 InstanceCulling compute)。
+        /// 关闭后 TtGpuCullingNode 仍做 CPU 侧合批 (PushInstance), 但不跑剔除 dispatch,
+        /// 绘制端直接用 CPU 侧 InstanceBuffer 以 DrawInstance = NumOfInstance 直绘。
+        /// </summary>
+        [Rtti.Meta("")]
+        [System.ComponentModel.Category("Option")]
+        public bool Feature_UseGpuCulling { get; set; } = true;
         public string ConfigName;
         [Rtti.Meta("")]
         [System.ComponentModel.Category("Option")]

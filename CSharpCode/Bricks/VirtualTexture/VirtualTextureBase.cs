@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.ECS;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -165,14 +166,28 @@ namespace EngineNS.Bricks.VirtualTexture
                         System.Diagnostics.Debug.Assert(false);
                     }
                 }
-
-                foreach (var i in Rvts)
+                
+                // 按名复用只服务"同名资产纹理重载换实例"的场景; 运行时创建的纹理
+                // AssetName 可能为空, 空 == 空会让所有无主纹理错误共享同一个注册项
+                // (同一 UniqueTexID / 同一 atlas 层, 后加载者把先加载者的内容顶掉),
+                // 因此任何一侧名字为空时一律走新建注册项。
+                if (RName.IsEmpty(tex.AssetName) == false)
                 {
-                    if (i.TextureName == tex.AssetName)
+                    foreach (var i in Rvts)
                     {
-                        i.Texture = tex;
-                        return i;
+                        if (i.TextureName != null && i.TextureName == tex.AssetName)
+                        {
+                            i.Texture = tex;
+                            return i;
+                        }
                     }
+                }
+                else
+                {
+                    // 空名注册本身就是要杜绝的坑: 若断言触发, 说明某个运行时创建的 SRV
+                    // 没在进入 RegRVT 之前赋唯一 AssetName (Release 下仍会被下面守卫拦截新建)
+                    System.Diagnostics.Debug.Assert(false,
+                        "RegRVT: texture has empty AssetName, it would silently share a slot with other unnamed textures");
                 }
 
                 TtRVT result = new TtRVT();
@@ -247,6 +262,10 @@ namespace EngineNS.Bricks.VirtualTexture
                 else
                     TextureSlotBuffer.UpdateData(i, slot.GetGpuDesc());
             }
+            // 槽表写入与上传必须同点完成: UpdateData 只写 CPU 数组置 Dirty, 不接着 Flush2GPU
+            // 的话 GPU 端 buffer/Srv 永不创建, OnDrawCall 绑 null SRV, GetSlotRVT 读到垃圾 ——
+            // 曾因此导致地形高度采样全命中空 slice、渲染成平板 (详见 TerrainCDLOD.cginc 注释)。
+            TextureSlotBuffer.Flush2GPU(cmd);
         }
         public void UpLoadRVT(NxRHI.TtCommandList cmd, TtRVT rvt)
         {

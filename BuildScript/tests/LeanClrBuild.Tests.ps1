@@ -186,7 +186,7 @@ $engineSource = Get-Content -Raw -LiteralPath $engineSourcePath
 if (-not $engineSource.Contains('public List<RName> LeanClrAssemblies { get; set; }')) {
     throw 'TtEngineConfig LeanCLR assembly configuration is missing: LeanClrAssemblies'
 }
-# VM 程序集改为扫描 content\LeanCLR 自动注册，LeanClrAssemblies 只作补充；默认列 BCL 会让未用热更的工程也启动 VM
+# VM assemblies are now auto-registered by scanning content\LeanCLR, with LeanClrAssemblies as a supplement; a default BCL list would make projects without hot-reload start the VM too
 if ($engineSource.Contains('RName.GetRName("LeanCLR/mscorlib.dll")')) {
     throw 'TtEngineConfig.LeanClrAssemblies must default to empty; BCL is picked up by the content\LeanCLR scan.'
 }
@@ -228,7 +228,7 @@ if (-not (Test-Path -LiteralPath $leanClrDeployTargetsPath)) {
     throw "LeanCLR deploy targets was not found: $leanClrDeployTargetsPath"
 }
 $leanClrDeployTargets = Get-Content -Raw -LiteralPath $leanClrDeployTargetsPath
-# 插件 PostBuild 会把输出目录 pdb 改名为 tpdb 并删掉 obj 里的 pdb，部署必须赶在 PostBuildEvent 之前
+# The plugin PostBuild renames the output pdb to tpdb and deletes the obj pdb, so deployment must run before PostBuildEvent
 foreach ($expectedText in @(
     'AfterTargets="CopyFilesToOutputDirectory"',
     '''$(LeanClrDeployToContent)'' == ''true''',
@@ -362,7 +362,7 @@ if ($compilingGeneratorItems.Contains('LeanClrGenerator')) {
 
 $leanClrPluginTargetsPath = Join-Path $repoRoot 'BuildScript\leanclr\LeanClrPlugin.targets'
 $leanClrPluginTargets = Get-Content -Raw -LiteralPath $leanClrPluginTargetsPath
-# Plugins\Directory.Build.props 把 obj 移到 intermediate\，默认通配不再排除工程内 obj\；不移除会把落盘的 .g.cs 重复编译
+# Plugins\Directory.Build.props moves obj to intermediate\, so default globs no longer exclude in-project obj\; failing to remove it double-compiles the written .g.cs
 if (-not $leanClrPluginTargets.Contains('<Compile Remove="$(CompilerGeneratedFilesOutputPath)\**" />')) {
     throw 'LeanClrPlugin.targets must exclude emitted generator files from Compile items.'
 }
@@ -375,7 +375,7 @@ if (-not $survivorProject.Contains('BuildScript\leanclr\LeanClrPlugin.targets'))
 
 $survivorStubProjectPath = Join-Path $repoRoot 'Plugins\Game\Survivor\Survivor.LeanClrStub\Survivor.LeanClrStub.csproj'
 $survivorStubProject = Get-Content -Raw -LiteralPath $survivorStubProjectPath
-# Plugins\Directory.Build.targets 的 PreBuild 会清空 TtOutputBasePath，桩工程必须与插件本体分开目录
+# The PreBuild in Plugins\Directory.Build.targets clears TtOutputBasePath, so the stub project must live in a separate directory from the plugin itself
 foreach ($expectedText in @(
     'BuildScript\leanclr\LeanClrStub.targets',
     '<TtOutputBasePath>$(TtTitanRoot)binaries\LeanClrStub\',
@@ -391,7 +391,7 @@ if (-not $ignoreContent.Contains('/3rd/native/LeanCLR/lib/')) {
     throw 'Generated LeanCLR library directory must be ignored by Git.'
 }
 
-# content\LeanCLR 只有 BCL 入库，其余 VM 程序集都是构建产物
+# Only the BCL is checked into content\LeanCLR; all other VM assemblies are build outputs
 foreach ($ignoredPath in @(
     'content/LeanCLR/Titan.LeanClr.EngineStub.dll',
     'content/LeanCLR/Survivor/Survivor.All.LeanClrStub.dll',

@@ -18,6 +18,8 @@ public class CommandExecutionPolicyTests
     [TestCase("StartLoginServer", true)]
     [TestCase("StartLevelServer", true)]
     [TestCase("StartGateServer", true)]
+    [TestCase("CookServer", true)]
+    [TestCase("Cook", false)]
     public void IsServiceCommand_KnownCommand_ReturnsExpectedLifetime(string command, bool expected)
     {
         Assert.That(TtCommandExecutionPolicy.IsServiceCommand(command), Is.EqualTo(expected));

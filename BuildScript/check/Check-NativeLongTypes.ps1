@@ -1,13 +1,13 @@
 ﻿#requires -Version 5.1
 <#
 .SYNOPSIS
-    LP64 守护：跨平台原生代码禁止 long / unsigned long / ULONG 系列类型。
+    LP64 guard: cross-platform native code must not use long / unsigned long / ULONG style types.
 .DESCRIPTION
-    Windows(LLP64) 上 long 是 4 字节，macOS/iOS/Android(LP64) 上是 8 字节；结构体字段、胶水返回值一旦用到就会两端不一致。
-    扫描前剥离注释与字符串/字符字面量；long long、long double 不算。
-    确需保留的行（CRT/系统 API 签名）在行尾写 '// lp64-ok: <原因>'；整文件/整目录例外写进 $AllowList 并注明原因。
-    已知局限：字符串里出现 '/*' 会导致之后到 '*/' 的代码被当成注释（只会漏报不会误报）；原始字符串 R"(...)" 不识别。
-    脚本需在 ConstrainedLanguage 下可运行，不调用非核心 .NET 类型。
+    On Windows (LLP64) long is 4 bytes; on macOS/iOS/Android (LP64) it is 8 bytes; using it in struct fields or glue return values makes the two sides disagree.
+    Comments and string/char literals are stripped before scanning; long long and long double do not count.
+    Lines that must keep it (CRT/system API signatures) end with '// lp64-ok: <reason>'; whole-file/directory exceptions go into $AllowList with a reason.
+    Known limitation: a '/*' inside a string makes everything up to '*/' be treated as a comment (only false negatives, never false positives); raw strings R"(...)" are not recognized.
+    The script must run under ConstrainedLanguage without calling non-core .NET types.
 .EXAMPLE
     powershell -ExecutionPolicy Bypass -File BuildScript/check/Check-NativeLongTypes.ps1
 #>
@@ -19,17 +19,17 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# -Root 必须是仓库根（-Paths 相对它）；归一化后才能正确截取相对路径
+# -Root must be the repo root (-Paths are relative to it); normalize before extracting relative paths
 $Root = (Resolve-Path -LiteralPath $Root).ProviderPath.TrimEnd('\', '/')
 
-# 前缀匹配（相对 $Root，正斜杠，不区分大小写）
+# Prefix match (relative to $Root, forward slashes, case-insensitive)
 $AllowList = [ordered]@{
-    'NativeCode/ImGui/'                              = '第三方 ImGui/implot/stb，按上游维护'
-    'NativeCode/Platform/Windows/'                   = 'ICorProfilerCallback 等 Windows SDK COM 签名（ULONG），只在 Windows 编译'
-    'NativeCode/NextRHI/Dx12/'                       = 'D3D12 后端与 d3dx12.h，只在 Windows 编译'
-    'NativeCode/Bricks/TcpClient/TcpClient.cpp'      = 'Winsock ioctlsocket 的 u_long 参数'
-    'NativeCode/Bricks/DestinyPX/NxMath/NxUtility.h' = 'Int128 对全部内建整数类型的转换重载，不参与跨边界布局'
-    'Core.Mac/build/'                                = '构建产物（含规范化后的胶水副本）'
+    'NativeCode/ImGui/'                              = 'Third-party ImGui/implot/stb, maintained upstream'
+    'NativeCode/Platform/Windows/'                   = 'Windows SDK COM signatures such as ICorProfilerCallback (ULONG); only compiled on Windows'
+    'NativeCode/NextRHI/Dx12/'                       = 'D3D12 backend and d3dx12.h; only compiled on Windows'
+    'NativeCode/Bricks/TcpClient/TcpClient.cpp'      = 'u_long parameter of Winsock ioctlsocket'
+    'NativeCode/Bricks/DestinyPX/NxMath/NxUtility.h' = 'Int128 conversion overloads for all built-in integer types; not part of cross-boundary layout'
+    'Core.Mac/build/'                                = 'Build outputs (including the normalized glue copies)'
 }
 $Extensions = @('.h', '.hpp', '.hh', '.inl', '.c', '.cc', '.cpp', '.cxx', '.m', '.mm')
 $TypePattern = '\b(?:ULONG|LPULONG|LPCULONG|ulong)\b|(?<!\blong\s+)\blong\b(?!\s+(?:long|double)\b)'
@@ -48,7 +48,7 @@ function Test-Allowed([string]$RelativePath) {
 }
 
 function Remove-BlockComments([string]$Text) {
-    # 块注释换成同样数量的换行，保持行号不变
+    # Replace block comments with the same number of newlines to keep line numbers stable
     $parts = @()
     $last = 0
     foreach ($m in [regex]::Matches($Text, '(?s)/\*.*?\*/')) {
@@ -101,7 +101,7 @@ foreach ($p in $Paths) {
 
 if ($violations.Count -gt 0) {
     $violations | ForEach-Object { Write-Output $_ }
-    Write-Output ("[lp64] {0} violation(s) in {1} scanned file(s). 改用 int/UINT/INT64 等定长类型；CRT/系统 API 签名在行尾加 '// lp64-ok: <原因>'." -f $violations.Count, $scanned)
+    Write-Output ("[lp64] {0} violation(s) in {1} scanned file(s). Use fixed-width types such as int/UINT/INT64; append '// lp64-ok: <reason>' at end of line for CRT/system API signatures." -f $violations.Count, $scanned)
     exit 1
 }
 if ($candidates -eq 0) {

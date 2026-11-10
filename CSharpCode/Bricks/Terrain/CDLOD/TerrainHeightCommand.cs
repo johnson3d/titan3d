@@ -13,12 +13,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     /// </summary>
     public class TtTerrainHeightCommand : Editor.Infrastructure.TtEditorCommand
     {
-        UTerrainLevelData mLevelData;
+        TtTerrainLevelData mLevelData;
         FTerrainDirtyRect mRect;
         float[] mBefore;
         float[] mAfter;
 
-        public TtTerrainHeightCommand(string name, UTerrainLevelData levelData, in FTerrainDirtyRect rect, float[] before, float[] after)
+        public TtTerrainHeightCommand(string name, TtTerrainLevelData levelData, in FTerrainDirtyRect rect, float[] before, float[] after)
         {
             Name = name;
             mLevelData = levelData;
@@ -57,7 +57,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     /// </summary>
     public class TtTerrainHeightDragRecorder
     {
-        UTerrainLevelData mLevelData;
+        TtTerrainLevelData mLevelData;
         FTerrainDirtyRect mRect = FTerrainDirtyRect.Empty;
         float[] mBefore = null;
 
@@ -65,7 +65,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             get { return mLevelData != null; }
         }
-        public UTerrainLevelData LevelData
+        public TtTerrainLevelData LevelData
         {
             get { return mLevelData; }
         }
@@ -83,7 +83,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// 跨 level 的拖动直接从新 level 重新开始记录 (返回 true 表示调用方应该先把
         /// 之前那段封成一条命令) —— 一条命令只描述一个 level 的一块矩形。
         /// </summary>
-        public bool PreStroke(UTerrainLevelData levelData, in FTerrainDirtyRect strokeRect)
+        public bool PreStroke(TtTerrainLevelData levelData, in FTerrainDirtyRect strokeRect)
         {
             if (levelData == null || strokeRect.IsValid == false)
                 return false;

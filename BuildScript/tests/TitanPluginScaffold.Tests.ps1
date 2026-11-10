@@ -40,7 +40,7 @@ function Get-FirstBytes {
 }
 
 function Get-SlnProject {
-    # 按名称和类型查找 sln 中的 Project 条目；返回 @{ Path; Guid } 列表。
+    # Find Project entries in the sln by name and type; returns a list of @{ Path; Guid }.
     param(
         [Parameter(Mandatory = $true)]
         [string]$Content,
@@ -124,7 +124,7 @@ function New-FakeRepository {
     New-Item -ItemType Directory -Force -Path (Join-Path $inventoryRoot 'Inventory.All'), $ghostCopyRoot, $buildScriptDirectory | Out-Null
 
     Set-Content -LiteralPath (Join-Path $inventoryRoot 'Inventory.plugin') -Value '{}' -Encoding UTF8
-    # 编译输出里的 .plugin 拷贝不算已有插件。
+    # A .plugin copy in the build output does not count as an existing plugin.
     Set-Content -LiteralPath (Join-Path $ghostCopyRoot 'GhostCopy.plugin') -Value '{}' -Encoding UTF8
     Set-Content -LiteralPath (Join-Path $buildScriptDirectory 'LeanClrPlugin.targets') -Value '<Project />' -Encoding UTF8
     Set-Content -LiteralPath (Join-Path $buildScriptDirectory 'LeanClrStub.targets') -Value '<Project />' -Encoding UTF8
@@ -187,7 +187,7 @@ EndGlobal
 }
 
 function Assert-PluginRegistered {
-    # 校验插件文件夹、shproj、各平台 csproj 在 sln 中的条目、嵌套、配置与共享导入；返回插件文件夹 GUID。
+    # Validate the plugin folder, shproj, per-platform csproj entries in the sln, nesting, configurations, and shared imports; returns the plugin folder GUID.
     param(
         [Parameter(Mandatory = $true)]
         [string]$Content,
@@ -207,7 +207,7 @@ function Assert-PluginRegistered {
         [Parameter(Mandatory = $true)]
         [string]$SharedGuid,
 
-        # 插件目录名（sln 中插件文件夹同名），缺省等于插件名。
+        # Plugin directory name (same-named folder in the sln); defaults to the plugin name.
         [string]$FolderName = ''
     )
 
@@ -229,7 +229,7 @@ function Assert-PluginRegistered {
     Assert-True ((Get-SlnParent $Content $shared[0].Guid) -ieq $folderGuid) "Shared project '$Name' must be nested under its plugin folder."
 
     $configLines = @(Get-SlnSectionLines $Content 'GlobalSection(ProjectConfigurationPlatforms) = postSolution')
-    # dotnet sln add（LeanClr 桩工程）会向 sln 补充 x86/x64 配置，按当前配置数校验。
+    # dotnet sln add (the LeanClr stub project) adds x86/x64 configurations to the sln; validate against the current configuration count.
     $solutionConfigCount = @(Get-SlnSectionLines $Content 'GlobalSection(SolutionConfigurationPlatforms) = preSolution' | Where-Object { $_ }).Count
     $sharedImports = @(Get-SlnSectionLines $Content 'GlobalSection(SharedMSBuildProjectFiles) = preSolution')
     $projitems = "$RelativeRoot\$Name\$Name.projitems"
@@ -253,7 +253,7 @@ function Assert-PluginRegistered {
 }
 
 function Assert-PluginFiles {
-    # 校验生成的文件；返回 shproj GUID。
+    # Validate generated files; returns the shproj GUID.
     param(
         [Parameter(Mandatory = $true)]
         [string]$PluginRoot,
@@ -319,7 +319,7 @@ function Assert-PluginFiles {
             Assert-True ($text -notlike '*Engine.Window.dll</HintPath>*') 'Android project must not reference Engine.Window.dll.'
         }
         elseif ($hostName -eq 'All') {
-            # All 宿主通过 TitanManagedProject.props 的平台映射引用引擎工程，不写死单平台 dll。
+            # The All host references the engine project via the platform mapping in TitanManagedProject.props, without pinning a single-platform dll.
             Assert-True ($text -like '*<ProjectReference Include="$(TitanEngineProject)" />*') 'All project must reference the engine through $(TitanEngineProject).'
             Assert-True ($text -like '*Import Project=*TitanManagedProject.props*') 'All project must import TitanManagedProject.props.'
             Assert-True ($text -like '*binaries\Plugins\*\*.All.dll*') 'All project must reference other All plugins.'
@@ -366,7 +366,7 @@ try {
     $solutionPath = New-FakeRepository $root
     New-Item -ItemType Directory -Force -Path (Join-Path $root 'Plugins\Game\Occupied') | Out-Null
 
-    # 错误输入：校验全部发生在写盘前，失败时不留下任何改动。
+    # Invalid input: all validation happens before writing to disk; a failure leaves no changes behind.
     Assert-Rejected $root @{ Name = 'Inventory'; SolutionPath = $solutionPath } 'already exists' 'Duplicate plugin name'
     Assert-Rejected $root @{ Name = 'inventory'; Category = 'Game'; SolutionPath = $solutionPath } 'already exists' 'Case-insensitive duplicate plugin name'
     Assert-Rejected $root @{ Name = 'Occupied'; Category = 'Game'; SolutionPath = $solutionPath } 'already exists' 'Existing target directory'
@@ -384,7 +384,7 @@ try {
     Assert-Rejected $root @{ Name = 'Foo'; Dependencies = @('GhostCopy'); SolutionPath = $solutionPath } 'GhostCopy' 'Dependency that only exists as a build output copy'
     Assert-Rejected $root @{ Name = 'Foo'; Platforms = @('Android'); LeanClr = $true; SolutionPath = $solutionPath } 'LeanClr' 'LeanCLR without an All or Windows host'
 
-    # 默认 All + 新建 Category：Game 文件夹必须挂在顶层 Plugins 下，而不是 Bricks 下的同名文件夹。
+    # Default All + new Category: the Game folder must hang under the top-level Plugins, not under a same-named folder under Bricks.
     & $scriptPath -Name Foo -Category Game -Dependencies Inventory -SolutionPath $solutionPath | Out-Null
     $fooRoot = Join-Path $root 'Plugins\Game\Foo'
     $fooShared = Assert-PluginFiles $fooRoot 'Foo' @('PLTF_ALL') @('Inventory') $true
@@ -397,20 +397,20 @@ try {
     Assert-True ($bom.Count -eq 3 -and $bom[0] -eq 0xEF -and $bom[1] -eq 0xBB -and $bom[2] -eq 0xBF) 'Solution must keep its UTF-8 BOM.'
     Assert-Rejected $root @{ Name = 'foo'; SolutionPath = $solutionPath } 'already exists' 'Name of a freshly created plugin'
 
-    # 已有 Category 复用 + NoLoadOnInit + 空依赖。
+    # Existing Category reuse + NoLoadOnInit + empty dependencies.
     & $scriptPath -Name Baz -Category GameCore -NoLoadOnInit -SolutionPath $solutionPath | Out-Null
     $bazShared = Assert-PluginFiles (Join-Path $root 'Plugins\GameCore\Baz') 'Baz' @('PLTF_ALL') @() $false
     $content = Get-Content -Raw -LiteralPath $solutionPath
     Assert-True (@(Get-SlnProject $content $folderType 'GameCore').Count -eq 1) 'Existing category folder must be reused.'
     Assert-PluginRegistered $content 'Baz' 'Plugins\GameCore\Baz' $gameCoreFolderGuid @('All') $bazShared | Out-Null
 
-    # 无 Category：插件文件夹直接挂在顶层 Plugins 下。
+    # No Category: the plugin folder hangs directly under the top-level Plugins.
     & $scriptPath -Name Qux -SolutionPath $solutionPath | Out-Null
     $quxShared = Assert-PluginFiles (Join-Path $root 'Plugins\Qux') 'Qux' @('PLTF_ALL') @() $true
     $content = Get-Content -Raw -LiteralPath $solutionPath
     Assert-PluginRegistered $content 'Qux' 'Plugins\Qux' $pluginsFolderGuid @('All') $quxShared | Out-Null
 
-    # 以 -File 启动（BrickManager 的调用方式）：逗号分隔的数组参数会作为单个字符串传入。
+    # Launched with -File (how BrickManager invokes it): the comma-separated array parameter arrives as a single string.
     $hostExe = 'powershell'
     if ($PSVersionTable.PSEdition -eq 'Core') {
         $hostExe = 'pwsh'
@@ -423,7 +423,7 @@ try {
     Assert-True (@(Get-SlnProject $content $folderType 'Game').Count -eq 1) 'Category created by an earlier run must be reused.'
     Assert-PluginRegistered $content 'Bar' 'Plugins\Game\Bar' $gameFolders[0].Guid @('Window', 'Android') $barShared | Out-Null
 
-    # 多次插入后 SharedMSBuildProjectFiles 仍按 GUID 升序，且段只有一个。
+    # After repeated inserts SharedMSBuildProjectFiles stays GUID-ascending and the section exists only once.
     $sharedImports = @(Get-SlnSectionLines $content 'GlobalSection(SharedMSBuildProjectFiles) = preSolution')
     $importGuids = @($sharedImports | ForEach-Object { ($_ -split '\*')[1] })
     Assert-True ($importGuids.Count -eq 9) "SharedMSBuildProjectFiles must contain 9 lines (actual: $($importGuids.Count))."
@@ -439,7 +439,7 @@ try {
     }
     Assert-True ($sharedIndex -gt $extensibilityIndex -and $extensibilityIndex -ge 0) 'New SharedMSBuildProjectFiles section must follow ExtensibilityGlobals like Visual Studio writes it.'
 
-    # LeanClr：为 All 宿主补导入并生成桩工程。
+    # LeanClr: add the import for the All host and generate the stub project.
     & $scriptPath -Name Lean -LeanClr -SolutionPath $solutionPath | Out-Null
     $leanRoot = Join-Path $root 'Plugins\Lean'
     Assert-True (Test-Path -LiteralPath (Join-Path $leanRoot 'Lean.LeanClrStub\Lean.LeanClrStub.csproj') -PathType Leaf) 'LeanClr switch must generate the stub project.'
@@ -450,7 +450,7 @@ try {
     Assert-True ($stub.Count -eq 1) 'LeanClr stub must be registered in the solution once.'
     Assert-True ((Get-SlnParent $content $stub[0].Guid) -ieq $leanFolder[0].Guid) 'LeanClr stub must be nested under the plugin folder.'
 
-    # 多级 Category（经 -File 传入带 '/' 的单个字符串）：已有层复用，缺失层逐级新建。
+    # Multi-level Category (a single '/'-containing string passed via -File): existing levels are reused, missing levels are created one by one.
     & $hostExe -NoProfile -ExecutionPolicy Bypass -File $scriptPath -Name Deep -Category 'GameCore/Tools/Editor' -SolutionPath $solutionPath | Out-Null
     Assert-True ($LASTEXITCODE -eq 0) "Nested category run must succeed (exit $LASTEXITCODE)."
     $deepShared = Assert-PluginFiles (Join-Path $root 'Plugins\GameCore\Tools\Editor\Deep') 'Deep' @('PLTF_ALL') @() $true
@@ -463,14 +463,14 @@ try {
     Assert-True ((Get-SlnParent $content $editorFolders[0].Guid) -ieq $toolsFolders[0].Guid) 'Third category level must be nested under the second.'
     Assert-PluginRegistered $content 'Deep' 'Plugins\GameCore\Tools\Editor\Deep' $editorFolders[0].Guid @('All') $deepShared | Out-Null
 
-    # 反斜杠写法复用上一步新建的中间层。
+    # The backslash spelling reuses the intermediate level created by the previous step.
     & $scriptPath -Name Deep2 -Category 'GameCore\Tools' -SolutionPath $solutionPath | Out-Null
     $deep2Shared = Assert-PluginFiles (Join-Path $root 'Plugins\GameCore\Tools\Deep2') 'Deep2' @('PLTF_ALL') @() $true
     $content = Get-Content -Raw -LiteralPath $solutionPath
     Assert-True (@(Get-SlnProject $content $folderType 'Tools').Count -eq 1) 'Nested category level created by an earlier run must be reused.'
     Assert-PluginRegistered $content 'Deep2' 'Plugins\GameCore\Tools\Deep2' $toolsFolders[0].Guid @('All') $deep2Shared | Out-Null
 
-    # 目录名与插件名不同（同 Plugins\GameServer\Gate\GateServer.plugin）：工程仍按插件名命名，sln 文件夹按目录名。
+    # Directory name differs from the plugin name (as in Plugins\GameServer\Gate\GateServer.plugin): the project is still named after the plugin, and the sln folder after the directory.
     & $scriptPath -Name GateServer -Category Game -Folder Gate -SolutionPath $solutionPath | Out-Null
     $gateRoot = Join-Path $root 'Plugins\Game\Gate'
     Assert-True (-not (Test-Path -LiteralPath (Join-Path $root 'Plugins\Game\GateServer'))) 'Custom folder must replace the default plugin directory.'

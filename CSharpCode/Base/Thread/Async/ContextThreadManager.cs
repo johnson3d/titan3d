@@ -67,6 +67,11 @@ namespace EngineNS.Thread.Async
         internal System.Threading.AutoResetEvent CompletedEvent = null;
         internal Action ContinueAction;
         public TtAsyncTaskToken TaskToken = null;
+        /// <summary>
+        /// 后台执行体轮询此标志实现协作式取消 (先例: AnimationClip.cs)。
+        /// 外部把 TaskToken.TaskState 置为 Canceled 后, 长任务在检查点发现并提前退出。
+        /// </summary>
+        public bool IsCancelRequested => TaskToken != null && TaskToken.TaskState == EAsyncTaskState.Canceled;
         public override string ToString()
         {
             return ContinueAction?.ToString();
@@ -137,6 +142,9 @@ namespace EngineNS.Thread.Async
             ContinueAction = null;
             TaskState = EAsyncTaskState.Ready;
             CompletedEvent = null;
+            // 必须清掉上一个任务的 token: state 池化复用后, 若残留旧 token 且它已被外部置 Canceled,
+            // 新任务的执行体轮询 IsCancelRequested 会读到旧状态而被静默误取消 (真实风险: VGDag bake)
+            TaskToken = null;
 
             AsyncType = EAsyncType.Normal;            
             ContinueThread = null;

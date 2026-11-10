@@ -98,6 +98,34 @@ public:
 		return &mFrustum;
 	}
 
+	// =============================================================================================
+	// GPU 状态镜像: UpdateConstBufferData 每次把状态写进 cbPerCamera 的同时, 把同一份状态
+	// (CameraData + Frustum + 裁剪相关标量) 缓存到 mGpuState/mGpuFrustum 等镜像字段 —— CPU 侧
+	// 永远有一份与 GPU cbuffer 完全一致的数据。镜像在 cb 写入前取 (与本次写入内容逐字段一致)。
+	// 所有裁剪 (CPU frustum 剔除 / GPU-driven 剔影的常量来源) 都应取这份镜像, 而不是读
+	// mLogicData —— 后者被逻辑线程在帧内持续修改, 剔影读它会与渲染 cbuffer 错位,
+	// 曾表现为大幅转动相机时屏幕边缘错误裁剪。
+	// 消费方式: C# 侧剔影判定 (TtCamera.WhichContainTypeFast) 直接读 mGpuFrustum 镜像;
+	// CopyGpuStateTo(target) 可把镜像拷进任意 ICamera, 供 GPU-driven 剔影等需要完整相机
+	// 状态的场景使用。
+	// =============================================================================================
+	CameraData				mGpuState;		// 与最近一次 cbPerCamera 写入内容逐字段一致的镜像
+	v3dxFrustum				mGpuFrustum;	// 与 mGpuState 同时刻的视锥
+	bool					mGpuIsOrtho = false;
+	float					mGpuZNear = 0.1f;
+	float					mGpuZFar = 500.0f;
+	bool					mHasGpuState = false;	// 首次 UpdateConstBufferData 前无有效镜像
+
+	// 把 GPU 状态镜像拷进 target (通常为 policy 持有的 culling camera), target 的 frustum/logic
+	// 数据随之变为与 GPU cbuffer 一致。无镜像时 (首次 cb 更新前) 不做任何拷贝。
+	void CopyGpuStateTo(ICamera* target);
+
+	// GPU 状态镜像里的 ViewProjection 矩阵 (与最近一次 cbPerCamera 写入逐字段一致)。
+	// 供 GPU-driven 剔影 (如 VGDag 远景地形) 构建剔影常量, 不读实时 mLogicData。
+	v3dxMatrix4 GetGpuViewProjection() const {
+		return mGpuState.mViewProjection;
+	}
+
 	v3dxDVector3 GetMatrixStartPosition() const {
 		return mLogicData->mMatrixStartPosition;
 	}

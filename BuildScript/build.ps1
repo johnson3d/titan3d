@@ -17,6 +17,9 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# Keep all build output in English so .NET localized text never garbles on non-UTF-8 consoles.
+$env:DOTNET_CLI_UI_LANGUAGE = 'en'
+
 . "$PSScriptRoot\common\common.ps1"
 
 Assert-WindowsHost
@@ -29,11 +32,11 @@ Import-VsDevEnvironment $msbuild
 #$llvmBin = Find-VsLlvmBin $msbuild
 #Add-PathEntry $llvmBin
 
-# 清单已按 owner+configuration 子目录隔离，All 双轮的顺序不再影响清单有效性。
+# Manifests are already isolated under owner+configuration subdirectories, so the order of the two All passes no longer affects manifest validity.
 $configs = if ($Configuration -eq 'All') { @('Debug', 'Release') } else { @($Configuration) }
 $toolConfig = if ($Configuration -eq 'Release') { 'Release' } else { 'Debug' }
 
-# 两种生成工具独立编译自身源码；完成自举后才按配置执行生成。
+# The two generator tools compile their own sources independently; generation per configuration only starts after bootstrap succeeds.
 $cppWeavingProject = 'Module\CppWeavingTools\CppWeavingTools.csproj'
 $csharpCodeToolsProject = 'Module\CSharpCodeTools\CSharpCodeTools.csproj'
 
@@ -66,7 +69,7 @@ foreach ($pluginFile in (Get-ChildItem -Path $pluginsRoot -Filter '*.plugin' -Re
     }
 }
 $pluginProjects = $pluginProjects | Select-Object -Unique
-# DataCopyer.All 依赖反射阶段生成的 Copyer 与插件引用清单，由 TitanRunDataCopyerStage 在其他插件之后构建。
+# DataCopyer.All depends on the Copyer and plugin reference manifests produced by the reflection stage, and is built by TitanRunDataCopyerStage after the other plugins.
 $pluginProjects = @($pluginProjects | Where-Object { $_ -notmatch '(^|\\)DataCopyer\.All\.csproj$' })
 
 function Invoke-DotNetRestore {
@@ -220,7 +223,7 @@ if (-not $SkipTools) {
     Invoke-DotNetBuild $csharpCodeToolsProject $toolConfig
 }
 
-# 同一平台输出根逐配置串行消费，避免 All 先发布 Release 却编译 Debug。
+# The same platform output root is consumed serially per configuration, so All publishing Release first does not race with the Debug build.
 foreach ($config in $configs) {
     if (-not $SkipCodeGen) {
         Write-Host ''

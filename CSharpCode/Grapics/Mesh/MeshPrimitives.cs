@@ -142,6 +142,7 @@ namespace EngineNS.Graphics.Mesh
                     nd.Parent = worldViewport.World.Root;
                     nd.Placement.Position = hitPos;
                     nd.HitproxyType = TtHitProxy.EHitproxyType.Root;
+                    nd.IsCastShadow = true;
                 }, meshNodeData);
         
                 if (mPreviewNode != null)
@@ -151,6 +152,9 @@ namespace EngineNS.Graphics.Mesh
             }
         }
         TtPrimitiveMeshNode mPreviewNode;
+        // OnDragging 在拖拽悬停期间每帧都会被调一次; 冷加载 .vms 的那几帧里 mPreviewNode 一直是 null,
+        // 不拦的话每帧都会 SpawnNode 一个预览节点, drop 后只清最后一个, 剩下的全留在场景里
+        bool mPreviewSpawning = false;
         public override async Thread.Async.TtTask OnDragging(TtViewportSlate vpSlate)
         {
             var worldViewport = vpSlate as EGui.Slate.TtWorldViewportSlate;
@@ -159,12 +163,25 @@ namespace EngineNS.Graphics.Mesh
         
             if (mPreviewNode == null)
             {
-                var meshNodeData = await CreatePrimitiveMeshNodeData();
-                mPreviewNode = await TtNode.SpawnNode<TtPrimitiveMeshNode>(worldViewport.World.Root, async (nd) =>
+                if (mPreviewSpawning)
+                    return;
+                mPreviewSpawning = true;
+                try
                 {
-            
-                }, meshNodeData, EBoundVolumeType.Box, typeof(TtPlacement));
+                    var meshNodeData = await CreatePrimitiveMeshNodeData();
+                    mPreviewNode = await TtNode.SpawnNode<TtPrimitiveMeshNode>(worldViewport.World.Root, async (nd) =>
+                    {
+                        nd.IsCastShadow = true;
+                    }, meshNodeData, EBoundVolumeType.Box, typeof(TtPlacement));
+                }
+                finally
+                {
+                    mPreviewSpawning = false;
+                }
             }
+        
+            if (mPreviewNode == null)
+                return;
         
             if (mPreviewNode.Parent != worldViewport.World.Root)
                 mPreviewNode.Parent = worldViewport.World.Root;

@@ -38,6 +38,11 @@ namespace EngineNS.GamePlay.Scene
             {
                 var rsState = materialInstance.Rasterizer;
                 rsState.CullMode = NxRHI.ECullMode.CMD_NONE;
+                // grid 面片与地形基底/地面共面 (y=0), 不加偏移会 z-fighting 闪烁。
+                // 负深度偏移让 grid 在深度比较中永远输一点点 (UE 编辑器 grid 同款方案),
+                // 斜率缩放项负责掠射角下自动放大偏移量。
+                rsState.m_DepthBias = -2;
+                rsState.m_SlopeScaledDepthBias = -2.0f;
                 materialInstance.Rasterizer = rsState;
 
                 var blend0 = materialInstance.Blend;

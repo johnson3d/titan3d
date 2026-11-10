@@ -1,0 +1,135 @@
+#include "../../../Inc/GlobalDefine.cginc"
+
+// 地形 cluster DAG 调试可视化(M2 第一片)
+// Pass 1: CS_ClearVisTexture   - 清空颜色/深度 UAV
+// Pass 2: CS_VisualizeClusters - 每 cluster 一线程: LOD 误差选择 + 软光栅(atomic depth)
+
+cbuffer cbVgVisParams
+{
+    FVgVisParams VgVisParams;
+};
+
+StructuredBuffer<FVgVisCluster> VisClusterBuffer;
+StructuredBuffer<FVgVisVertex>  VisVertexBuffer;
+StructuredBuffer<uint>          VisIndexBuffer;
+
+RWTexture2D<float4> VisColorTexture;
+RWTexture2D<uint>   VisDepthTexture;
+
+[numthreads(8, 8, 1)]
+void CS_ClearVisTexture(uint3 tid : SV_DispatchThreadID)
+{
+    if (tid.x >= (uint)VgVisParams.RTSize.x || tid.y >= (uint)VgVisParams.RTSize.y)
+        return;
+    VisColorTexture[tid.xy] = float4(0.02, 0.02, 0.05, 1);
+    VisDepthTexture[tid.xy] = 0xFFFFFFFFu;
+}
+
+float3 LevelColor(uint level)
+{
+    // 按层级取蓝→绿→黄→红渐变, 根层白色
+    float t = frac(level * 0.22);
+    return lerp(float3(0.15, 0.35, 1.0), float3(1.0, 0.85, 0.2), t);
+}
+
+float3 VertexWorld(uint vi)
+{
+    FVgVisVertex v = VisVertexBuffer[vi];
+    float texel = VgVisParams.OriginAndTexel.w;
+    return VgVisParams.OriginAndTexel.xyz + float3(v.TexelX * texel, v.Y, v.TexelZ * texel);
+}
+
+// 单线程软件光栅一个可见 cluster 的全部三角形
+void RasterCluster(FVgVisCluster c)
+{
+    float2 rtSize = VgVisParams.RTSize.xy;
+    float3 color = LevelColor(c.Level);
+
+    uint triCount = c.IndexCount / 3;
+    for (uint t = 0; t < triCount; t++)
+    {
+        uint i0 = VisIndexBuffer[c.IndexStart + t * 3 + 0];
+        uint i1 = VisIndexBuffer[c.IndexStart + t * 3 + 1];
+        uint i2 = VisIndexBuffer[c.IndexStart + t * 3 + 2];
+
+        float3 w0 = VertexWorld(i0);
+        float3 w1 = VertexWorld(i1);
+        float3 w2 = VertexWorld(i2);
+
+        // 局部坐标 -> clip (cbuffer 列主序, 已在 CPU 转置)
+        float4 c0 = mul(float4(w0, 1), VgVisParams.ViewProj);
+        float4 c1 = mul(float4(w1, 1), VgVisParams.ViewProj);
+        float4 c2 = mul(float4(w2, 1), VgVisParams.ViewProj);
+
+        // 近平面裁剪: 任一顶点 w<=0 直接跳过(远景相机后方)
+        if (c0.w <= 0 || c1.w <= 0 || c2.w <= 0)
+            continue;
+
+        float2 p0 = (c0.xy / c0.w * 0.5 + 0.5) * rtSize;
+        float2 p1 = (c1.xy / c1.w * 0.5 + 0.5) * rtSize;
+        float2 p2 = (c2.xy / c2.w * 0.5 + 0.5) * rtSize;
+        float z0 = c0.w;
+        float z1 = c1.w;
+        float z2 = c2.w;
+
+        float2 bbMin = min(min(p0, p1), p2);
+        float2 bbMax = max(max(p0, p1), p2);
+        // 一像素外扩防缝
+        bbMin = max(bbMin - 1, float2(0, 0));
+        bbMax = min(bbMax + 1, rtSize - 1);
+        if (bbMin.x > bbMax.x || bbMin.y > bbMax.y)
+            continue;
+
+        float area = (p1.x - p0.x) * (p2.y - p0.y) - (p1.y - p0.y) * (p2.x - p0.x);
+        if (abs(area) < 1e-9)
+            continue;
+        float invArea = 1.0 / area;
+
+        int2 bb0 = (int2)floor(bbMin);
+        int2 bb1 = (int2)ceil(bbMax);
+        [loop]
+        for (int y = bb0.y; y <= bb1.y; y++)
+        {
+            [loop]
+            for (int x = bb0.x; x <= bb1.x; x++)
+            {
+                float2 p = float2(x + 0.5, y + 0.5);
+                float w0 = ((p1.x - p.x) * (p2.y - p.y) - (p1.y - p.y) * (p2.x - p.x)) * invArea;
+                float w1 = ((p2.x - p.x) * (p0.y - p.y) - (p2.y - p.y) * (p0.x - p.x)) * invArea;
+                float w2 = 1.0 - w0 - w1;
+                if (w0 < 0 || w1 < 0 || w2 < 0)
+                    continue;
+
+                float z = w0 * z0 + w1 * z1 + w2 * z2;
+                // 透视非线性忽略(调试视图), 用 1/w 提升远处精度
+                uint depth = (uint)clamp(1.0 / z * 1e6, 0, 4e9);
+                uint prev;
+                InterlockedMin(VisDepthTexture[int2(x, y)], depth, prev);
+                if (depth <= prev)
+                    VisColorTexture[int2(x, y)] = float4(color, 1);
+            }
+        }
+    }
+}
+
+[numthreads(64, 1, 1)]
+void CS_VisualizeClusters(uint tid : SV_DispatchThreadID)
+{
+    uint clusterCount = (uint)VgVisParams.Vis.y;
+    if (tid >= clusterCount)
+        return;
+
+    FVgVisCluster c = VisClusterBuffer[tid];
+    if (c.IndexCount == 0)
+        return;
+
+    // Nanite 式 LOD 选择: 自身误差 <= 阈值 且 (无父 或 父误差 > 阈值)
+    // 误差单调(ParentLODError >= 子误差)保证每片区域恰选中一层
+    float threshold = VgVisParams.Vis.x;
+    if (c.MaxError > threshold)
+        return;
+    if (c.Parent >= 0 && c.ParentMaxError <= threshold)
+        return;
+
+    RasterCluster(c);
+}

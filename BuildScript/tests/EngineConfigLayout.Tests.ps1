@@ -2,16 +2,16 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# 引擎配置布局契约：
-#   1) 所有启动配置都放在 content\config 下，content 根不允许残留 .jscfg
-#   2) 主配置统一命名为 engineconfig_<平台>_<功能>.jscfg
-#   3) 代码、脚本、工程文件与文档里不得再引用搬迁前的旧路径
+# Engine config layout contract:
+#   1) All launch configs live under content\config; no .jscfg may remain at the content root
+#   2) Main configs are uniformly named engineconfig_<platform>_<feature>.jscfg
+#   3) Code, scripts, project files, and docs must no longer reference the pre-move old paths
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).ProviderPath
 $contentRoot = Join-Path $repoRoot 'content'
 $configRoot = Join-Path $contentRoot 'config'
 
-# 搬迁前（content 根）-> 搬迁后（相对 content 的路径）
+# Before the move (content root) -> after the move (path relative to content)
 $moved = [ordered]@{
     'engineconfigdx11.jscfg'          = 'config\engineconfig_windows_dx11.jscfg'
     'engineconfigdx12.jscfg'          = 'config\engineconfig_windows_dx12.jscfg'
@@ -26,19 +26,19 @@ $moved = [ordered]@{
     'slateapp.jscfg'                  = 'config\engineconfig_windows_slateapp.jscfg'
 }
 
-# 已经在 content\config 下、但文件名不符合 <平台>_<功能> 规则的配置
+# Configs already under content\config whose file names do not match the <platform>_<feature> rule
 $renamedInPlace = [ordered]@{
     'engineconfigfortest.jscfg' = 'engineconfig_windows_test.jscfg'
 }
 
 $problems = @()
 
-# 1. content 根不再允许出现任何 .jscfg
+# 1. No .jscfg may appear at the content root anymore
 foreach ($file in @(Get-ChildItem -LiteralPath $contentRoot -File -Filter '*.jscfg')) {
     $problems += "content\$($file.Name) must move into content\config (engine configs are grouped there)"
 }
 
-# 2. 搬迁目标必须存在，旧名不得留下
+# 2. Move targets must exist and the old names must be gone
 foreach ($old in $moved.Keys) {
     if (-not (Test-Path -LiteralPath (Join-Path $contentRoot $moved[$old]) -PathType Leaf)) {
         $problems += "content\$old was not moved to content\$($moved[$old])"
@@ -53,7 +53,7 @@ foreach ($old in $renamedInPlace.Keys) {
     }
 }
 
-# 3. content\config 下的主配置必须遵守 engineconfig_<平台>_<功能>.jscfg
+# 3. Main configs under content\config must follow engineconfig_<platform>_<feature>.jscfg
 $namingPattern = '^engineconfig_[a-z0-9]+_[a-z0-9]+\.jscfg$'
 foreach ($file in @(Get-ChildItem -LiteralPath $configRoot -File -Filter 'engineconfig*.jscfg')) {
     if ($file.Name -cnotmatch $namingPattern) {
@@ -61,7 +61,7 @@ foreach ($file in @(Get-ChildItem -LiteralPath $configRoot -File -Filter 'engine
     }
 }
 
-# 4. 旧路径不得再被引用（扫描源码/工程/脚本/文档，跳过产物目录与本测试自身）
+# 4. Old paths must no longer be referenced (scan sources/projects/scripts/docs, skipping output directories and this test itself)
 $scanRoots = @(
     'CSharpCode', 'Module', 'Tests', 'BuildScript', 'Documents', 'Core.Android', 'Core.Mac',
     'Core.Window', 'Core.iOS', 'NativeCode', 'Plugins', '.vscode', '.github'
@@ -96,7 +96,7 @@ foreach ($file in $scanFiles) {
     }
 }
 
-# 5. 未显式传 config 时的默认回退路径也必须在 content\config 下
+# 5. The default fallback path used when no config is passed explicitly must also live under content\config
 $engineCs = Join-Path $repoRoot 'CSharpCode\Base\Engine.cs'
 $engineText = Get-Content -Raw -LiteralPath $engineCs
 if ($engineText -notmatch 'config[/\\]engineconfig_windows_dx11\.jscfg') {

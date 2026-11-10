@@ -130,7 +130,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
     }
 
-    public partial class UTerrainLevelData
+    public partial class TtTerrainLevelData
     {
         /// <summary>
         /// 地形编辑只在编辑器态可用: 需要额外常驻一份 CPU 侧高度源缓冲 (约 4MB 每个已加载 level),
@@ -150,6 +150,23 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// 并直接上传即可 (省 12MB/level); 材质 ID 等到做材质笔刷时再单独引入。
         /// </summary>
         public Procedure.TtBufferComponent SourceHeightMap;
+
+        /// <summary>
+        /// 高度编辑版本号: 任何真正写入 SourceHeightMap 的路径都会自增 (笔刷 ApplyHeightBrush /
+        /// Undo-Redo SetHeightBlock, 两者都经由 SetSourceHeightPixel)。
+        /// 供 ShowLODGrid 的边界调试线感知改动并重建贴地 (见 TtPatch.EnsureDebugBorderMeshes)。
+        /// </summary>
+        public int HeightMapEditVersion { get; private set; }
+
+        /// <summary>
+        /// 源高度唯一写入口: 写一个 texel 并自增编辑版本号。
+        /// 绕过这里的直接 SetPixel 会让依赖版本号的订阅者 (调试边界线等) 收不到变更通知。
+        /// </summary>
+        void SetSourceHeightPixel(int tx, int ty, float newHeight)
+        {
+            SourceHeightMap.SetPixel(tx, ty, newHeight);
+            HeightMapEditVersion++;
+        }
 
         public bool IsEditable
         {
@@ -771,7 +788,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     float newHeight = heights[y * w + x];
                     if (newHeight == oldHeight)
                         continue;
-                    SourceHeightMap.SetPixel(tx, ty, newHeight);
+                    SetSourceHeightPixel(tx, ty, newHeight);
                     // Undo/Redo 也得进覆盖层, 否则回退后保存, 盘上的 delta 会和实际地形对不上。
                     AccumulateOverlayDelta(tx, ty, newHeight - oldHeight);
                 }
@@ -929,7 +946,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     if (newHeight == oldHeight)
                         continue;
 
-                    SourceHeightMap.SetPixel(x, y, newHeight);
+                    SetSourceHeightPixel(x, y, newHeight);
                     AccumulateOverlayDelta(x, y, newHeight - oldHeight);
                     affected.Include(x, y);
                 }
@@ -989,6 +1006,16 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 {
     public partial class TtTerrainNode
     {
+        /// <summary>
+        /// 保护 HeightOverlay / MaterialIdOverlay 的懒创建。
+        /// 这两个属性会被两条线程首次访问: 主线程编辑 (SureHeightOverlay / 材质笔刷)
+        /// 与 AsyncIO 线程的异步 level 加载 (BuildLevelDataFromPGC → ApplyHeightOverlayIfAny)。
+        /// 无锁时两个线程可能各自 new 一个 manager: 编辑累积进 A, 异步加载从 B 里读不到 →
+        /// 重载出来的地形没有手绘数据, 表现就是"跳转几次后原来刷过的 level 变回基底"。
+        /// 锁顺序固定为 本锁 → manager 锁 → level overlay 锁, 不要反向嵌套。
+        /// </summary>
+        readonly object mOverlayLocker = new object();
+
         TtTerrainHeightOverlay mHeightOverlay = null;
         /// <summary>
         /// 本节点所有 level 的高度覆盖层管理器。懒创建 —— 但只要有 level 开始查盘上
@@ -999,9 +1026,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             get
             {
-                if (mHeightOverlay == null)
-                    mHeightOverlay = new TtTerrainHeightOverlay(this);
-                return mHeightOverlay;
+                lock (mOverlayLocker)
+                {
+                    if (mHeightOverlay == null)
+                        mHeightOverlay = new TtTerrainHeightOverlay(this);
+                    return mHeightOverlay;
+                }
             }
         }
 
@@ -1013,8 +1043,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             base.OnSaveNodeExtraData(scene);
             // 用字段而不是属性: 避免每次保存都凭空造一个空管理器。
-            mHeightOverlay?.Save(scene);
-            MaterialIdOverlayIfCreated?.Save(scene);
+            lock (mOverlayLocker)
+            {
+                mHeightOverlay?.Save(scene);
+                MaterialIdOverlayIfCreated?.Save(scene);
+            }
         }
 
         /// <summary>
@@ -1022,7 +1055,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// 注意 TtTerrainNode.GetAltitude 里 xInLevel 是直接对世界坐标取模的 (没减 placement),
         /// placement 非零时会算错; 这里按正确方式减掉。
         /// </summary>
-        public UTerrainLevelData GetLevelDataAtWorld(in DVector3 worldPos, out float localX, out float localZ)
+        public TtTerrainLevelData GetLevelDataAtWorld(in DVector3 worldPos, out float localX, out float localZ)
         {
             localX = 0.0f;
             localZ = 0.0f;
@@ -1062,7 +1095,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// 在世界坐标处落一笔。跨 level 的笔刷目前只作用于圆心所在的 level,
         /// level 边界的接缝处理留给后续任务。
         /// </summary>
-        public UTerrainLevelData ApplyHeightBrushAtWorld(in DVector3 worldPos, in FTerrainBrushParam param, bool bFlushNow, bool bRebuildPhysics)
+        public TtTerrainLevelData ApplyHeightBrushAtWorld(in DVector3 worldPos, in FTerrainBrushParam param, bool bFlushNow, bool bRebuildPhysics)
         {
             var levelData = GetLevelDataAtWorld(in worldPos, out var localX, out var localZ);
             if (levelData == null)
