@@ -374,7 +374,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
         /// <summary>
         /// 地形显示模式: Normal=实体 / WireFrame=线框 / Both=实体叠线框。
-        /// 纯转发到 TtTerrainSystem.ShowMode, 由 TtPatch.OnGatherVisibleMeshes 每帧消费, 改动立即生效。
+        /// 纯转发到 TtTerrainSystem.ShowMode, 由 TtPatch.OnGatherVisibleMeshes_OnRenderThread 每帧消费, 改动立即生效。
         /// </summary>
         [Category("Debug")]
         public TtTerrainSystem.EShowMode ShowMode
@@ -859,8 +859,6 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     lv.LevelData.AssignLODLevel(in sphere, i);
                 }
             }
-            // 未分配哨兵 (最远圈之外的 patch) 不在此收尾: 消费侧
-            // TtPatch.OnGatherVisibleMeshes 会把越界 CurrentLOD 钳到最粗糙网格
         }
 
         // MorphRange + cbuffer: 必须每帧跟随当前 EyeCenter, 不能随 CurrentLOD 一起节流 ——
@@ -918,7 +916,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 return mScopeTick;
             }
         }
-        
+
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
@@ -935,8 +933,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
                 if (SetActiveCenter(in EyeCenter))
                 {
-                    args.World.CameraOffset = EyeCenter;
-                    args.Policy.DefaultCamera.mCoreObject.SetMatrixStartPosition(in EyeCenter);
+                    args.World.SetCameraOffset(in EyeCenter, args.Policy.DefaultCamera);
+                    UpdateAfterCameraOffset();
                 }
 
                 // MorphRange/cbuffer 每帧跟随当前 EyeCenter (分界环不能滞后, 否则越阈值跳变);
@@ -951,27 +949,30 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     UpdateLODAssignment(lodRadius, EyeCenter - this.Location);
                 }
 
-                foreach (var i in ActiveLevels)
-                {
-                    if (i == null)
-                        continue;
-                    i.LevelData?.Tick(args.World, args.Policy);
-                }
-
                 LevelStreaming.Tick(TtEngine.Instance.ElapsedSecond);
-                
-                if (TtEngine.Instance.Config.Feature_UseRVT)
-                {
-                    TtEngine.Instance.TickableManager.AddTickSync(static (arg) =>
-                    {
-                        var ts = arg as TtTerrainSystem;
-                        ts.TickSync();
-                    }, this.Terrain);
-                }
-
-                return base.OnTickLogic(args);
             }   
+            return base.OnTickLogic(args);
         }
+        // 渲染空间的 patch 原点基准 = 节点世界位置 - world.CameraOffset。
+        // Patch.StartPosition 只在该基准变化时刷新, 平时保持只读供渲染线程读。
+        internal DVector3 PatchRenderOffset = DVector3.Zero;
+
+        void UpdateAfterCameraOffset()
+        {
+            var world = GetWorld();
+            if (world == null)
+                return;
+            PatchRenderOffset = this.Placement.AbsTransform.mPosition - world.CameraOffset;
+            if (ActiveLevels == null)
+                return;
+            foreach (var i in ActiveLevels)
+            {
+                if (i == null)
+                    continue;
+                i.LevelData?.UpdateAfterCameraOffset(this, in PatchRenderOffset);
+            }
+        }
+
         protected override void OnAbsTransformChanged()
         {
             if (ActiveLevels != null)
@@ -984,6 +985,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     i.LevelData?.OnAbsTransformChanged(this, world);
                 }
             }
+            // 节点被移动时渲染空间基准同步变化 (StartPosition 消费方是 shader, 必须跟手)
+            UpdateAfterCameraOffset();
         }
         public override void GetHitProxyDrawMesh(List<TtRenderMesh> meshes)
         {
@@ -1002,16 +1005,28 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     continue;
                 i.LevelData?.UpdateCameraOffset(world);
             }
+            UpdateAfterCameraOffset();
         }
-        public override void OnGatherVisibleMeshes(GamePlay.TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(GamePlay.TtWorld.TtVisParameter rp)
         {
+            // 渲染帧开头拍 LOD 快照: 之后整帧内选网格/打包 instance 读到的都是同一份,
+            // 逻辑线程的重算 (可含哨兵中态) 对渲染侧不可见; 原子读+钳制保证单值合法
+            if (ActiveLevels != null)
+            {
+                foreach (var lv in ActiveLevels)
+                {
+                    if (lv == null)
+                        continue;
+                    lv.LevelData?.PublishRenderLOD_OnRenderThread();
+                }
+            }
             UpdateCameralOffset(rp.World);
             //todo: QTree culling?
             //foreach (var i in ActiveLevels)
             //{
             //    if (i == null)
             //        continue;
-            //    i.LevelData?.OnGatherVisibleMeshes(rp);
+            //    i.LevelData?.OnGatherVisibleMeshes_OnRenderThread(rp);
             //}
 
             FrustumCull(rp, VisiblePatches);
@@ -1019,7 +1034,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             foreach (var i in VisiblePatches)
             {
-                i.OnGatherVisibleMeshes(rp);
+                i.OnGatherVisibleMeshes_OnRenderThread(rp);
             }
 
             // RVT 上传不能依赖某个具体渲染节点存在。原来唯一的活跃点在
@@ -1031,15 +1046,16 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 foreach (var i in VisiblePatches)
                 {
-                    i.ActiveRVTs();
+                    i.ActiveRVTs_OnRenderThread();
                 }
+                Terrain.UpdateRVT_OnRenderThread();
             }
 
             foreach (var i in ActiveLevels)
             {
                 if (i == null)
                     continue;
-                i.LevelData?.PlantManager.OnGatherVisibleMeshes(rp);
+                i.LevelData?.PlantManager.OnGatherVisibleMeshes_OnRenderThread(rp);
             }
 
             rp.AddVisibleNode(this);

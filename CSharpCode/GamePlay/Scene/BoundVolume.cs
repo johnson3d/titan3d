@@ -169,7 +169,7 @@ namespace EngineNS.GamePlay.Scene
 
                         if (node.HasStyle(TtNode.ENodeStyles.Invisible) == false)
                         {
-                            node.OnGatherVisibleMeshes(VisParameter);
+                            node.OnGatherVisibleMeshes_OnRenderThread(VisParameter);
                         }
                         if (node.HasStyle(TtNode.ENodeStyles.ChildrenInvisible) == false)
                         {
@@ -235,7 +235,7 @@ namespace EngineNS.GamePlay.Scene
 
                     if (node.HasStyle(TtNode.ENodeStyles.Invisible) == false)
                     {
-                        node.OnGatherVisibleMeshes(VisParameter);
+                        node.OnGatherVisibleMeshes_OnRenderThread(VisParameter);
                     }
                     if (node.HasStyle(TtNode.ENodeStyles.ChildrenInvisible) == false)
                     {

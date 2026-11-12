@@ -307,8 +307,9 @@ namespace NxRHI
 
 		if (Desc.Usage == EGpuUsage::USAGE_DYNAMIC)
 		{
+			// DYNAMIC buffer 常驻 GENERIC_READ(已包含 COPY_DEST/COPY_SRC 与全部读状态),
+			// 任意目标状态都无需 barrier
 			ASSERT(GpuState == EGpuResourceState::GRS_GenericRead);
-			ASSERT(state == GpuState);
 			return;
 		}
 		else if (Desc.Usage == EGpuUsage::USAGE_STAGING)
@@ -326,10 +327,12 @@ namespace NxRHI
 
 	void DX12Buffer::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* pFootPrint)
 	{
-		if (cmd != nullptr && Desc.Usage == EGpuUsage::USAGE_DEFAULT)
+		// DEFAULT buffer 不可 Map, 必须走 staging 拷贝; 传入 cmd 排进该 cmdlist,
+		// 无 cmd 则开 transient 队列排队执行 -- 不能直接 Map 填入正在被 GPU 使用的 buffer
+		if (cmd != nullptr || Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
 			auto device = mDeviceRef.GetPtr();
-			
+
 			auto copyDesc = this->Desc;
 			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
 			copyDesc.Type = EBufferType::BFT_NONE;
@@ -358,11 +361,20 @@ namespace NxRHI
 				cpDraw->FootPrint.TotalSize = pFootPrint->RowPitch * pFootPrint->Height;
 				cpDraw->DstX = pFootPrint->X;
 
-				cmd->PushGpuDraw(cpDraw.GetPtr());
+				if (cmd != nullptr)
+				{
+					cmd->PushGpuDraw(cpDraw.GetPtr());
+				}
+				else
+				{
+					FTransientCmd tsCmd(device, EQueueType::QU_Transfer, "UpdateGpuData");
+					tsCmd.GetCmdList()->PushGpuDraw(cpDraw.GetPtr());
+				}
 			}
 		}
 		else
 		{
+			ASSERT(cmd == nullptr);
 			FMappedSubResource mapped{};
 			if (this->Map(subRes, &mapped, false))
 			{

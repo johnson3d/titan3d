@@ -144,7 +144,7 @@ namespace EngineNS.Bricks.Recast
         public TtNavMesh mNavMesh;
         public Graphics.Mesh.TtRenderMesh mDebugMesh;
         public Graphics.Mesh.TtRenderMesh mDebugMeshWireFrame;
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
             if ((rp.CullFilters & GamePlay.TtWorld.TtVisParameter.EVisCullFilter.NavMesh) == 0)
                 return;
@@ -160,7 +160,7 @@ namespace EngineNS.Bricks.Recast
                 mDebugMeshWireFrame = mNavMesh.CreateRenderMesh().ToDrawMesh(TtEngine.Instance.GfxDevice.MaterialManager.NavMeshDebugWireMaterial);
             rp.AddVisibleMesh(mDebugMesh);
             rp.AddVisibleMesh(mDebugMeshWireFrame);
-            base.OnGatherVisibleMeshes(rp);
+            base.OnGatherVisibleMeshes_OnRenderThread(rp);
         }
         protected override void OnAbsTransformChanged()
         {

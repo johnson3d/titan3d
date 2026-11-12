@@ -80,8 +80,12 @@ namespace EngineNS.Graphics.Pipeline
     {
         public bool IsAlloc { get; set; }
         public Bricks.Terrain.CDLOD.TtTerrainInstanceMdfQueue MdfQueue;
-        public void Initialize(Graphics.Pipeline.TtGpuCullingNode node, Mesh.TtMaterialMesh.TtSubMaterialedMesh mesh)
+        // 本 batch 合并的是哪一级 LOD 的地形网格 (与 patch.TerrainMesh[LodLevel] 对应,
+        // 同一 batch 内所有实例几何同 LOD, per-patch 的运行时 LOD 走 instance 数据)
+        public int LodLevel;
+        public void Initialize(Graphics.Pipeline.TtGpuCullingNode node, Mesh.TtMaterialMesh.TtSubMaterialedMesh mesh, int lodLevel)
         {
+            LodLevel = lodLevel;
             MdfQueue = InitRenderMesh<Bricks.Terrain.CDLOD.TtTerrainInstanceMdfQueue>(mesh);
             MdfQueue.InstanceModifier.SetCapacity(512, true);
             GpuDrivenData.SetupGpuData(node, MdfQueue.InstanceModifier);
@@ -196,7 +200,7 @@ namespace EngineNS.Graphics.Pipeline
                             continue;
                         }
                     }
-                    if (UseRVT)
+                    if (EnableTerrainBatch && UseRVT)
                     {
                         var mdfQueue = visibleMeshes[i].Mesh.MdfQueue as Bricks.Terrain.CDLOD.TtTerrainMdfQueue;
                         if (mdfQueue != null)
@@ -231,7 +235,7 @@ namespace EngineNS.Graphics.Pipeline
                     }
                 }
             }
-            if (UseRVT)
+            if (EnableTerrainBatch && UseRVT)
             {
                 using (new NxRHI.TtGpuEventScope(cmd, TtNameTable.TerrainMeshBatchCulling))
                 {
@@ -292,6 +296,8 @@ namespace EngineNS.Graphics.Pipeline
         public bool EnableInstanceMeshCulling { get; set; } = true;
         [Rtti.Meta("")]
         public bool EnableStaticMeshBatch { get; set; } = false;
+        [Rtti.Meta("")]
+        public bool EnableTerrainBatch { get; set; } = true;
         #region InstanceMeshCulling
         public Dictionary<Hash64, TtInstanceStaticMeshBatch> InstanceMeshes = new Dictionary<Hash64, TtInstanceStaticMeshBatch>();
         private void ResetInstanceMesh()
@@ -359,6 +365,7 @@ namespace EngineNS.Graphics.Pipeline
             {
                 i.Value.GetInstanceModifier().InstanceBuffers.ResetInstance();
             }
+            TerrainMeshBatches.Clear();
         }
         private FVisibleMesh PushTerrainMeshBatch(Mesh.TtRenderMesh mesh, Bricks.Terrain.CDLOD.TtTerrainMdfQueue mdfQueue)
         {
@@ -369,16 +376,28 @@ namespace EngineNS.Graphics.Pipeline
                 if (TerrainMeshBatches.TryGetValue(hash, out batch) == false)
                 {
                     batch = new TtTerrainMeshBatch();
-                    batch.Initialize(this, i);
-                    batch.MdfQueue.TerrainModifier.Patch = mdfQueue.Patch;
+                    batch.Initialize(this, i, mdfQueue.LodLevel);
+                    //batch.MdfQueue.TerrainModifier.Patch = mdfQueue.Patch;
                     batch.MdfQueue.TerrainModifier.TerrainNode = mdfQueue.Patch.TerrainNode;
-                    batch.RenderMesh.SetWorldTransform(in mdfQueue.Patch.TerrainNode.Placement.TransformRef, mdfQueue.Patch.TerrainNode.GetWorld(), true);
                     TerrainMeshBatches.Add(hash, batch);
+                    //batch.RenderMesh.SetWorldTransform(in mdfQueue.Patch.TerrainNode.Placement.TransformRef, mdfQueue.Patch.TerrainNode.GetWorld(), true);
+                    //batch.RenderMesh.UnsafeSetPerMeshCBuffer(mesh.PerMeshCBuffer);
                 }
-                batch.RenderMesh.UnsafeSetPerMeshCBuffer(mesh.PerMeshCBuffer);
-
+                else
+                {
+                    //batch.Initialize(this, i, mdfQueue.LodLevel);
+                    //batch.MdfQueue.TerrainModifier.TerrainNode = mdfQueue.Patch.TerrainNode;
+                }
+                // 世界矩阵每次 cull 都要重刷: SetWorldTransform 会把 world.CameraOffset
+                // 烘焙进 WorldMatrix, 而 batch 按"几何+材质"哈希缓存、与基准无关,
+                // 只在创建时写一次的话, 跨 level 换基准后矩阵停在旧偏移上,
+                // 表现为 EnableTerrainBatch 开启时整个地形持续错位一个 cell 差。
+                // 每帧重刷成本可忽略 (一次减法+矩阵组装), 与 patch cbuffer/instance
+                // 数据/cull AABB 同源同帧。
+                batch.RenderMesh.SetWorldTransform(in mdfQueue.Patch.TerrainNode.Placement.TransformRef, mdfQueue.Patch.TerrainNode.GetWorld(), true);
+                
                 var world = mdfQueue.TerrainModifier.TerrainNode.GetWorld();
-                mdfQueue.TerrainModifier.ActiveRVTs();
+                mdfQueue.TerrainModifier.ActiveRVTs_OnRenderThread();
                 var instance = new Graphics.Pipeline.Shader.FVSInstanceData();
                 Bricks.Terrain.CDLOD.TtTerrainModifier.SetInstanceData(mesh, mdfQueue, ref instance);
                 DBoundingBox aabb;

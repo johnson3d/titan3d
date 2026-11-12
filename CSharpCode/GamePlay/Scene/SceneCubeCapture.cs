@@ -221,7 +221,7 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         public override bool HashVisual => true;
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
             if ((rp.CullFilters & TtWorld.TtVisParameter.EVisCullFilter.UtilityEditor) == 0)
             {
@@ -322,7 +322,7 @@ namespace EngineNS.GamePlay.Scene
                         foreach (var n in OnlyShowNodes)
                         {
                             if (n != null)
-                                n.OnGatherVisibleMeshes(visParam);
+                                n.OnGatherVisibleMeshes_OnRenderThread(visParam);
                         }
                     }
                     else

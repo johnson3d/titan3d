@@ -76,7 +76,7 @@ namespace EngineNS.EGui.Slate
             if (false == await OnInitialize(this, application, policy, zMin, zMax))
                 return false;
 
-            SetCameraOffset(in DVector3.Zero);
+            World.SetCameraOffset(in DVector3.Zero, this.RenderPolicy.DefaultCamera);
 
             //mDefaultHUD.RenderCamera = this.RenderPolicy.DefaultCamera;
             //this.PushHUD(mDefaultHUD);

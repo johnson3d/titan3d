@@ -229,7 +229,7 @@ namespace EngineNS.Bricks.VirtualTexture
             ActiveTexIDs.Clear();
             return (AddTexIDs.Count + RemoveTexIDs.Count + DirtyTexIDs.Count) > 0;
         }
-        public void UpdateGpu(NxRHI.TtCommandList cmd)
+        public void UpdateGpu(NxRHI.ICommandList cmd)
         {
             if (ProcessChanged() == false)
                 return;
@@ -267,7 +267,7 @@ namespace EngineNS.Bricks.VirtualTexture
             // 曾因此导致地形高度采样全命中空 slice、渲染成平板 (详见 TerrainCDLOD.cginc 注释)。
             TextureSlotBuffer.Flush2GPU(cmd);
         }
-        public void UpLoadRVT(NxRHI.TtCommandList cmd, TtRVT rvt)
+        public void UpLoadRVT(NxRHI.ICommandList cmd, TtRVT rvt)
         {
             //Copy rvt to
             //TextureArrays[rvt.SlotDesc.TextureIndex]
@@ -280,7 +280,8 @@ namespace EngineNS.Bricks.VirtualTexture
                 ref var fp = ref cpDraw.FootPrint;
                 cpDraw.DestSubResource = rvt.Slot.ArrayIndex * TextureSlotAllocator.TexDesc.MipLevels + mip;
                 cpDraw.SrcSubResource = mip;
-                cmd.PushGpuDraw(cpDraw);
+                EngineNS.NxRHI.ICopyDraw dc = cpDraw.mCoreObject;
+                cmd.PushGpuDraw(dc);
             }
         }
     }

@@ -1,3 +1,4 @@
+using EngineNS.ECS;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -102,7 +103,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 // read as uninitialized garbage by the GPU (real values get written by the caller
                 // before BindCBV in TerrainMdfQueue, but we guard against any reordering issue).
                 cbuffer.SetValue(coreBinder.StartPosition, in StartPosition);
-                cbuffer.SetValue(coreBinder.CurrentLOD, mCurrentLOD >= TerrainMesh.Length ? TerrainMesh.Length - 1 : mCurrentLOD);
+                cbuffer.SetValue(coreBinder.CurrentLOD, RenderLOD >= TerrainMesh.Length ? TerrainMesh.Length - 1 : RenderLOD);
                 cbuffer.SetValue(coreBinder.TexUVOffset, in TexUVOffset);
                 // 0 = "参数不在本 cbuffer 里", 是两条路径里更保守的默认值:
                 // 它让 shader 去读 instance data 而不是相信一份还没填好的 patch 参数。
@@ -131,7 +132,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         // 把本 patch 用到的四张图标记为本帧活跃, 供 TtVirtualTextureBase.TickSync 分配 slot 并上传到 atlas。
         // ActiveTexIDs 每帧会被 ProcessChanged 清空, 所以只要 patch 还可见就必须每帧重新调一次。
         // 幂等: ActiveRVT 内部会对 UniqueTexID 去重, 同一 level 的多个 patch 重复调用无副作用。
-        public void ActiveRVTs()
+        public void ActiveRVTs_OnRenderThread()
         {
             var terrain = TerrainNode.Terrain;
             terrain.HeightmapRVT.ActiveRVT(Level.HeightMapSRV);
@@ -142,14 +143,32 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
         public Vector3 StartPosition = new Vector3(0);
         public Vector2 TexUVOffset;        
-        int mCurrentLOD;
+        // LOD 双缓冲: 逻辑线程重算 (哨兵重置+逐圈赋值) 只写 LogicLOD, 渲染线程只读 RenderLOD;
+        // 发布点 (UpdateLODAssignment 末尾) 一次性翻转。避免渲染帧内两次读 (选网格/打包 instance)
+        // 撞上重算中态 —— 帧内不一致会让 morph 顶点折叠成缺块, 比读到哨兵更难归因
+        int mLogicLOD = 0;
+        int mRenderLOD = int.MaxValue;
+        /// <summary>逻辑侧 LOD, 仅 LOD 分配路径写 (含 int.MaxValue 哨兵)</summary>
         public int CurrentLOD
         {
-            get => mCurrentLOD;
+            get => mLogicLOD;
             set
             {
-                mCurrentLOD = value;
+                mLogicLOD = value;
             }
+        }
+        /// <summary>渲染侧 LOD 快照, 帧内稳定; 哨兵已在发布点钩到最粗</summary>
+        public int RenderLOD => System.Threading.Volatile.Read(ref mRenderLOD);
+        /// <summary>发布点: 逻辑线程把当前 LOD (含哨兵钳制) 快照给渲染线程</summary>
+        internal void PublishRenderLOD_OnRenderThread()
+        {
+            int lod = mLogicLOD;
+            if (TerrainMesh != null && lod >= TerrainMesh.Length)
+            {
+                int prev = mRenderLOD;
+                lod = (prev >= 0 && prev < TerrainMesh.Length) ? prev : TerrainMesh.Length - 1;
+            }
+            System.Threading.Volatile.Write(ref mRenderLOD, lod);
         }
         ~TtPatch()
         {
@@ -235,6 +254,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 trMdfQueue.TerrainModifier.TerrainNode = this.TerrainNode;
                 trMdfQueue.TerrainModifier.Patch = this;
                 trMdfQueue.TerrainModifier.Dimension = (int)Math.Pow(2, terrain.GridMipLevels.Length - i - 1);
+                trMdfQueue.TerrainModifier.LodLevel = i;
 
                 WireFrameTerrainMesh[i] = new Graphics.Mesh.TtRenderMesh();
                 WireFrameTerrainMesh[i].Initialize(terrain.GridMipLevels[i], tWireFrameMaterials, mdfType);
@@ -242,6 +262,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 trMdfQueue.TerrainModifier.TerrainNode = this.TerrainNode;
                 trMdfQueue.TerrainModifier.Patch = this;
                 trMdfQueue.TerrainModifier.Dimension = (int)Math.Pow(2, terrain.GridMipLevels.Length - i - 1);
+                trMdfQueue.TerrainModifier.LodLevel = i;
 
                 WaterMesh[i] = new Graphics.Mesh.TtRenderMesh();
                 WaterMesh[i].Initialize(terrain.GridMipLevels[i], twMaterials, mdfType);
@@ -249,6 +270,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 trMdfQueue.TerrainModifier.TerrainNode = this.TerrainNode;
                 trMdfQueue.TerrainModifier.Patch = this;
                 trMdfQueue.TerrainModifier.Dimension = (int)Math.Pow(2, terrain.GridMipLevels.Length - i - 1);
+                trMdfQueue.TerrainModifier.LodLevel = i;
                 trMdfQueue.TerrainModifier.IsWater = true;
 
                 //trMdfQueue.StartPosition.X = IndexX * terrain.PatchSize;
@@ -447,20 +469,16 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 mMesh.IsAcceptShadow = value;
             }
         }
-        public void Tick(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        // StartPosition 不再每帧写入: 渲染线程 SetInstanceData/PatchCBuffer 会并发读它,
+        // 每帧写 = 每帧开撕裂窗口。改为只在渲染空间基准变化时(跨 level / 节点移动 /
+        // CameraOffset 变化)由 TtTerrainNode.RefreshPatchStartPosition 统一刷新。
+        internal void UpdateAfterCameraOffset(TtTerrainNode node, in DVector3 CameraOffset)
         {
-            if (TerrainMesh == null)
-                return;
-
-            var node = Level.GetTerrainNode();
             var patchSize = node.PatchSize;
-            
-            DVector3 CameraOffset = node.Placement.AbsTransform.mPosition - world.CameraOffset;
-
             StartPosition.X = (float)(((double)(IndexX * patchSize)) + CameraOffset.X);
             StartPosition.Z = (float)(((double)(IndexZ * patchSize)) + CameraOffset.Z);
             StartPosition.Y = (float)(Level.HeightMapMinHeight + CameraOffset.Y);
-        }        
+        }
         public void OnAbsTransformChanged(TtTerrainNode node, GamePlay.TtWorld world)
         {
             ref var transform = ref node.Placement.AbsTransform;
@@ -506,11 +524,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 i.UpdateCameraOffset(world);
             }
         }
-        public void OnGatherVisibleMeshes(GamePlay.TtWorld.TtVisParameter rp)
+        public void OnGatherVisibleMeshes_OnRenderThread(GamePlay.TtWorld.TtVisParameter rp)
         {
-            // CurrentLOD 未分配 (int.MaxValue 哨兵残留) 或越界时钳到最粗糙网格,
-            // 而不是跳过绘制: 最远圈之外的 patch 不会被任何 LOD 圈命中, 但仍需可见
-            int lod = CurrentLOD;
+            // 读渲染侧快照; 钳制保留作防御 (新 patch 首帧等), 不再依赖它挡哨兵
+            int lod = RenderLOD;
             if (lod >= TerrainMesh.Length)
                 lod = TerrainMesh.Length - 1;
 
@@ -540,7 +557,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             if (DebugLevelBorderMesh != null)
                 rp.AddVisibleMesh(DebugLevelBorderMesh);
 
-            GrassManager?.OnGatherVisibleMeshes(rp);
+            GrassManager?.OnGatherVisibleMeshes_OnRenderThread(rp);
         }
     }
 }

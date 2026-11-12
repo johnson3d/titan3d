@@ -144,7 +144,7 @@ namespace EngineNS.Graphics.Mesh.PhysicsAsset
             return null;
         }
 
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
             if (!mShowDebug)
                 return;
@@ -238,7 +238,7 @@ namespace EngineNS.Graphics.Mesh.PhysicsAsset
                 }
             }
 
-            base.OnGatherVisibleMeshes(rp);
+            base.OnGatherVisibleMeshes_OnRenderThread(rp);
         }
 
         static int FindBoneIndex(Animation.SkeletonAnimation.Skeleton.TtSkinSkeleton skeleton, string boneName)

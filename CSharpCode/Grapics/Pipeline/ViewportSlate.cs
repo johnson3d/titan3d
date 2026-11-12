@@ -12,7 +12,6 @@ namespace EngineNS.Graphics.Pipeline
     {
         public Graphics.Pipeline.TtRenderPolicy RenderPolicy { get; }
         public GamePlay.TtWorld World { get; }
-        void SetCameraOffset(in DVector3 offset);
         public UI.TtUIHost HUD { get; }
         void PushHUD(UI.Controls.TtUIElement hud);
         void PopHUD();
@@ -60,11 +59,6 @@ namespace EngineNS.Graphics.Pipeline
                 World = new GamePlay.TtWorld(this);
                 await World.InitWorld();
             }
-        }
-        public void SetCameraOffset(in DVector3 offset)
-        {
-            World.CameraOffset = offset;
-            this.RenderPolicy.DefaultCamera.mCoreObject.SetMatrixStartPosition(in offset);
         }
         public virtual string Title { get; set; } = "Game";
         protected bool mVisible = true;
@@ -550,7 +544,7 @@ namespace EngineNS.Graphics.Pipeline
                 await OnInitialize(this, application, policy, zMin, zMax);
             }
             await InitWorld();
-            SetCameraOffset(in DVector3.Zero);
+            World.SetCameraOffset(in DVector3.Zero, this.RenderPolicy.DefaultCamera);
 
             //mDefaultHUD.RenderCamera = this.RenderPolicy.DefaultCamera;
             //PushHUD(mDefaultHUD);
@@ -1122,11 +1116,6 @@ namespace EngineNS.Graphics.Pipeline
             TtEngine.Instance.UIManager.RemoveActivedUI(hud);
         }
         public GamePlay.TtWorld.TtVisParameter VisParameter = new GamePlay.TtWorld.TtVisParameter();
-        public void SetCameraOffset(in DVector3 offset)
-        {
-            World.CameraOffset = offset;
-            RenderPolicy.DefaultCamera.mCoreObject.SetMatrixStartPosition(in offset);
-        }
         public virtual async Thread.Async.TtTask Initialize(RName policyName)
         {
             RenderPolicy = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.CreateRenderPolicy(policyName, null);
@@ -1135,7 +1124,7 @@ namespace EngineNS.Graphics.Pipeline
             World = new GamePlay.TtWorld(null);
             await this.World.InitWorld();
             World.DirectionLight.Direction = new Vector3(0, 0, 1);
-            SetCameraOffset(in DVector3.Zero);
+            World.SetCameraOffset(in DVector3.Zero, RenderPolicy.DefaultCamera);
 
             RenderPolicy.CmdQueue = new NxRHI.TtRCmdQueue();
 

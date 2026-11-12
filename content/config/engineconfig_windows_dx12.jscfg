@@ -8,6 +8,7 @@
   "UsePhysxMT": true,
   "UseRenderDoc": true,
   "Feature_UseRVT": true,
+  "Feature_UseGpuCulling": true,
   "NumOfThreadPool": -1,
   "IsParrallelWorldGather": true,
   "Interval": 15,

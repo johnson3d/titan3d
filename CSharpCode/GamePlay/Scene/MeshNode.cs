@@ -507,7 +507,7 @@ namespace EngineNS.GamePlay.Scene
         }
         #endregion
 
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
             // If merged into an InstanceMeshNode, skip independent rendering
             if (mInstanceGroupNode != null)

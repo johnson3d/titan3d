@@ -162,7 +162,7 @@ namespace EngineNS.GamePlay.Scene
             if (mHitproxyMesh != null)
                 meshes.Add(mHitproxyMesh);
         }
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
             //灯光比较特殊，无论是否debug都要加入visnode列表，否则Tiling过程得不到可见灯光集
             rp.AddVisibleNode(this);
@@ -205,7 +205,7 @@ namespace EngineNS.GamePlay.Scene
                 mDebugMesh.SetWorldTransform(in Placement.AbsTransform, world, false);
             if (mHitproxyMesh != null)
             {
-                // hitproxy mesh 不跟随 node 的 Scale，使用固定大小；朝向由 OnGatherVisibleMeshes 中相机驱动
+                // hitproxy mesh 不跟随 node 的 Scale，使用固定大小；朝向由 OnGatherVisibleMeshes_OnRenderThread 中相机驱动
                 var hitproxyTransform = FTransform.CreateTransform(in Placement.AbsTransform.mPosition, in Vector3.One, in Quaternion.Identity);
                 mHitproxyMesh.SetWorldTransform(in hitproxyTransform, world, true);
             }

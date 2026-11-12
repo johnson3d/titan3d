@@ -393,37 +393,37 @@ vBOOL v3dxFrustum::isContain(const v3dxBox3 & box) const
 	return true;
 }
 
-//int v3dxFrustum::whichContainTypeFast(const v3dxBox3* pBBox) const
-//{
-//	float f;
-//	//int iInner = 0;
-//	int iOuter = 0;
-//	for (int i = 0; i < ENUM_FRUSTUMPL_NUMBER; i++)
-//	{
-//		int iPlaneOuts = 0;
-//		for (int j = 0; j < BOX3_CORNER_NUMBER; j++)
-//		{
-//			f = m_aPlane[i].classify(pBBox->GetCorner(j));
-//			if (f > 0.f)
-//			{
-//				iPlaneOuts++;
-//				iOuter++;
-//			}
-//		}
-//		if (iPlaneOuts == BOX3_CORNER_NUMBER)
-//		{
-//			return CONTAIN_TEST_OUTER;
-//		}
-//	}
-//	if (iOuter == 0)
-//	{
-//		return CONTAIN_TEST_INNER;
-//	}
-//	else
-//	{
-//		return CONTAIN_TEST_REFER;
-//	}
-//}
+CONTAIN_TYPE v3dxFrustum::whichContainType(const v3dxBox3* pBBox) const
+{
+	float f;
+	//int iInner = 0;
+	int iOuter = 0;
+	for (int i = 0; i < ENUM_FRUSTUMPL_NUMBER; i++)
+	{
+		int iPlaneOuts = 0;
+		for (int j = 0; j < BOX3_CORNER_NUMBER; j++)
+		{
+			f = m_aPlane[i].classify(pBBox->GetCorner(j));
+			if (f > 0.f)
+			{
+				iPlaneOuts++;
+				iOuter++;
+			}
+		}
+		if (iPlaneOuts == BOX3_CORNER_NUMBER)
+		{
+			return CONTAIN_TEST_OUTER;
+		}
+	}
+	if (iOuter == 0)
+	{
+		return CONTAIN_TEST_INNER;
+	}
+	else
+	{
+		return CONTAIN_TEST_REFER;
+	}
+}
 CONTAIN_TYPE v3dxFrustum::whichContainTypeFast( const v3dxBox3* pBBox, vBOOL testInner) const
 {
 	//https://www.xuebuyuan.com/2963193.html

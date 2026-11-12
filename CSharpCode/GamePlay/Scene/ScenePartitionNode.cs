@@ -126,20 +126,19 @@ namespace EngineNS.GamePlay.Scene
 
             if (SetActiveCenter(in EyeCenter))
             {
-                args.World.CameraOffset = EyeCenter;
-                args.Policy.DefaultCamera.mCoreObject.SetMatrixStartPosition(in EyeCenter);
+                args.World.SetCameraOffset(in EyeCenter, args.Policy.DefaultCamera);
             }
 
             return base.OnTickLogic(args);
         }
 
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
             foreach (var i in ActiveLevels)
             {
                 if (i == null)
                     continue;
-                i.OnGatherVisibleMeshes(rp);
+                i.OnGatherVisibleMeshes_OnRenderThread(rp);
             }
         }
 

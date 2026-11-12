@@ -64,7 +64,7 @@ namespace EngineNS.GamePlay.Scene
             world.mSuns.Add(this);
             return true;
         }
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
             if ((rp.CullFilters & TtWorld.TtVisParameter.EVisCullFilter.UtilityEditor) == 0)
             {

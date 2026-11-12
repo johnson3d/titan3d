@@ -64,11 +64,11 @@ namespace EngineNS.Bricks.Particle
             this.UnsetStyle(ENodeStyles.ParallelTick);
             return ret;
         }
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
             if (mNebulaParticle == null)
                 return;
-            base.OnGatherVisibleMeshes(rp);
+            base.OnGatherVisibleMeshes_OnRenderThread(rp);
 
             foreach (var i in mNebulaParticle.Emitter.Values)
             {

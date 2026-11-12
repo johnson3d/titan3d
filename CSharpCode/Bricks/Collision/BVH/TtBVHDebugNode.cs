@@ -15,7 +15,7 @@ using System.ComponentModel;
 //     hit leaves in red until the next query / clear.
 //
 // Visualization strategy:
-//   Every frame we walk the BVH in OnGatherVisibleMeshes and submit each
+//   Every frame we walk the BVH in OnGatherVisibleMeshes_OnRenderThread and submit each
 //   node's AABB through TtVisParameter.AddAABB (yellow = internal node,
 //   green = leaf, red = highlighted by last query). This is the same path
 //   TtBoundsOctreeNode.DrawAllBounds uses, so we don't need any per-node
@@ -122,7 +122,7 @@ namespace EngineNS.Bricks.Collision.BVH
 
         // Proxy ids that are currently highlighted by the latest query demo.
         // Touched on the gameplay thread (set in RunQueryDemo) and read on the
-        // gather thread (OnGatherVisibleMeshes). Concurrent-modification risk
+        // gather thread (OnGatherVisibleMeshes_OnRenderThread). Concurrent-modification risk
         // is acceptable for a debug visualization: a flicker for one frame is
         // harmless, and we never resize the BVH during gather.
         readonly HashSet<int> mHighlightedProxies = new HashSet<int>();
@@ -499,7 +499,7 @@ namespace EngineNS.Bricks.Collision.BVH
             }
         }
 
-        // Toggles for what to draw in OnGatherVisibleMeshes.
+        // Toggles for what to draw in OnGatherVisibleMeshes_OnRenderThread.
         [System.ComponentModel.Category("BVH/Display")]
         public bool DrawInternalNodes
         {
@@ -525,7 +525,7 @@ namespace EngineNS.Bricks.Collision.BVH
             if (await base.InitializeNode(world, data, GamePlay.Scene.EBoundVolumeType.Box, placementType) == false)
                 return false;
 
-            // We draw all AABBs ourselves in OnGatherVisibleMeshes via vp.AddAABB,
+            // We draw all AABBs ourselves in OnGatherVisibleMeshes_OnRenderThread via vp.AddAABB,
             // so make sure we get gathered every frame regardless of camera culling
             // (the BVH is centered on the node origin, but individual leaf boxes can
             // sit far away from it — DiscardAABB avoids being culled by our own
@@ -629,9 +629,9 @@ namespace EngineNS.Bricks.Collision.BVH
         // mesh.
         // ==================================================================
 
-        public override void OnGatherVisibleMeshes(GamePlay.TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(GamePlay.TtWorld.TtVisParameter rp)
         {
-            base.OnGatherVisibleMeshes(rp);
+            base.OnGatherVisibleMeshes_OnRenderThread(rp);
             if (mBvh == null || mBvh.ProxyCount == 0)
                 return;
 

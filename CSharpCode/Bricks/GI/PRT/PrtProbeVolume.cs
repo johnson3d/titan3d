@@ -158,7 +158,7 @@ namespace EngineNS.Bricks.GI.PRT
                 drawcall.mCoreObject.AtomDesc = mAtomDesc.mCoreObject;
             };
         }
-        public unsafe override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public unsafe override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
             var ptr = mAtomDesc.mCoreObject.GetAtomDescPtr();
             ptr->m_StartIndex = 6 * 2 * (uint)ShowTetrahedronIndex;

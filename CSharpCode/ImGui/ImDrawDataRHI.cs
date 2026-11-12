@@ -377,10 +377,10 @@ namespace EngineNS.EGui
                     indexOffsetInElements += (uint)cmd_list.IdxBufferSize;
                 }
 
-                rhiData.VertexBuffer.UpdateGpuData(drawCmd.mCoreObject, 0,
+                rhiData.VertexBuffer.UpdateGpuData(new NxRHI.ICommandList(), 0,
                     rhiData.DataVB.UnsafeAddressAt(0).ToPointer(), (uint)(vertexOffsetInVertices * sizeof(ImDrawVert)));
 
-                rhiData.IndexBuffer.UpdateGpuData(drawCmd.mCoreObject, 0,
+                rhiData.IndexBuffer.UpdateGpuData(new NxRHI.ICommandList(), 0,
                     rhiData.DataIB.UnsafeAddressAt(0).ToPointer(), (uint)(indexOffsetInElements * sizeof(ushort)));
 
                 rhiData.GeomMesh.mCoreObject.GetVertexArray().BindVB(NxRHI.EVertexStreamType.VST_Position, rhiData.VertexBuffer.mCoreObject);

@@ -1138,7 +1138,7 @@ namespace EngineNS.GamePlay.Scene
         {
             return true;
         }
-        public virtual void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public virtual void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
             rp.AddVisibleNode(this);
         }
@@ -1150,7 +1150,7 @@ namespace EngineNS.GamePlay.Scene
                     continue;
                 if (i.HasStyle(ENodeStyles.VisibleFollowParent) && i.TryTreeGatherVisibleMeshes(rp))
                 {
-                    i.OnGatherVisibleMeshes(rp);
+                    i.OnGatherVisibleMeshes_OnRenderThread(rp);
                     i.GatherFollowVisibleMeshes(rp);
                 }
             }

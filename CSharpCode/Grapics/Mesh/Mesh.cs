@@ -919,7 +919,7 @@ namespace EngineNS.Graphics.Mesh
             tm.Translation = realPos.ToSingleVector3();
             this.DirectSetWorldMatrix(in tm);
         }
-        private DVector3 WorldLocation
+        internal DVector3 WorldLocation
         {
             get => mTransform.Position;
         }
@@ -941,9 +941,9 @@ namespace EngineNS.Graphics.Mesh
             if (world != null)
             {
                 if (isNoScale == false)
-                    this.DirectSetWorldMatrix(transform.ToMatrixWithScale(in world.mCameraOffset));
+                    this.DirectSetWorldMatrix(transform.ToMatrixWithScale(world.CameraOffset));
                 else
-                    this.DirectSetWorldMatrix(transform.ToMatrixNoScale(in world.mCameraOffset));
+                    this.DirectSetWorldMatrix(transform.ToMatrixNoScale(world.CameraOffset));
             }
             else
             {

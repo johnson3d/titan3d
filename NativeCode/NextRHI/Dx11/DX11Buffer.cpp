@@ -116,9 +116,11 @@ namespace NxRHI
 	{
 		if (Desc.Usage == USAGE_DEFAULT)
 		{
-			auto cmd = (DX11CommandList*)cmd1;
-
 			auto device = mDeviceRef.GetPtr();
+
+			auto cmd = (DX11CommandList*)cmd1;
+			if (cmd == nullptr)
+				cmd = (DX11CommandList*)((DX11CmdQueue*)device->GetCmdQueue())->mHardwareContext;
 			//auto cmd = ((DX11CmdQueue*)device->GetCmdQueue())->mHardwareContext;
 			D3D11_BOX box{};
 			box.left = footPrint->X;
@@ -136,6 +138,8 @@ namespace NxRHI
 			auto device = mDeviceRef.GetPtr();
 
 			auto cmd = (DX11CommandList*)cmd1;
+			if (cmd == nullptr)
+				cmd = (DX11CommandList*)((DX11CmdQueue*)device->GetCmdQueue())->mHardwareContext;
 			/*auto cmdQueue = ((DX11CmdQueue*)device->GetCmdQueue());
 			auto cmd = cmdQueue->mHardwareContext;
 			VAutoVSLLock locker(cmdQueue->mImmCmdListLocker);*/

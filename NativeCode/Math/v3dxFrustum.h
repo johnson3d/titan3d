@@ -97,6 +97,8 @@ public:
 	bool fastTestOBB2(const v3dxBox3* pBox, const v3dxMatrix4* pTM) const;
 
 	TR_DISCARD()
+	CONTAIN_TYPE whichContainType(const v3dxBox3* pBBox) const;
+	TR_DISCARD()
 	CONTAIN_TYPE whichContainTypeFast(const v3dxBox3* pBBox, vBOOL testInner) const;
 	TR_DISCARD()
 	CONTAIN_TYPE whichContainTypeFast(const v3dxPoly3* pPoly, const v3dxMatrix4* pTM = NULL) const;

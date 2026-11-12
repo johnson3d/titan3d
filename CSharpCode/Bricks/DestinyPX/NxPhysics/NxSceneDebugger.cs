@@ -103,7 +103,7 @@ namespace EngineNS.NxPhysics
 
             return base.OnTickLogic(args);
         }
-        public override void OnGatherVisibleMeshes(GamePlay.TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(GamePlay.TtWorld.TtVisParameter rp)
         {
             foreach (var i in mScene.mRigidBodies)
             {

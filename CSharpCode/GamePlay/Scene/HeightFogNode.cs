@@ -126,7 +126,7 @@ namespace EngineNS.GamePlay.Scene
         }
 
         // 纯控制器节点, 不产生可见 mesh
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
         }
 

@@ -335,7 +335,9 @@ namespace NxRHI
 	}
 	void VKBuffer::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
 	{
-		if (cmd != nullptr && Desc.Usage == EGpuUsage::USAGE_DEFAULT)
+		// 传入 cmd 时必须排队执行, 禁止直接 Map 填入正在被 GPU 使用的 buffer;
+		// DEFAULT buffer 是 device-local 不可 Map, 只能走 staging 拷贝
+		if (cmd != nullptr || Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
 			auto device = mDeviceRef.GetPtr();
 			auto copyDesc = this->Desc;
@@ -367,7 +369,16 @@ namespace NxRHI
 				cpDraw->FootPrint.TotalSize = footPrint->RowPitch * footPrint->Height;
 				cpDraw->DstX = footPrint->X;
 
-				cmd->PushGpuDraw(cpDraw.GetPtr());
+				if (cmd != nullptr)
+				{
+					cmd->PushGpuDraw(cpDraw.GetPtr());
+				}
+				else
+				{
+					// 无 cmd 时排队到 transient 队列
+					FTransientCmd tsCmd(device, EQueueType::QU_Transfer, "UpdateGpuData.Buffer");
+					tsCmd.GetCmdList()->PushGpuDraw(cpDraw.GetPtr());
+				}
 			}
 		}
 		else

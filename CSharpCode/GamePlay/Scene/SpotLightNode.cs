@@ -159,7 +159,7 @@ namespace EngineNS.GamePlay.Scene
             }
         }
 
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
             rp.AddVisibleNode(this);
 

@@ -33,9 +33,9 @@ namespace EngineNS.GamePlay.Character
             bv.LocalAABB = new BoundingBox(Vector3.Zero, 1.0f);
             return true;
         }
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
-            base.OnGatherVisibleMeshes(rp);
+            base.OnGatherVisibleMeshes_OnRenderThread(rp);
         }
         protected override void OnParentSceneChanged(TtScene prev, TtScene cur)
         {

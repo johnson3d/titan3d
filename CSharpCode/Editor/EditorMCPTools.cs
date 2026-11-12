@@ -297,6 +297,34 @@ namespace EngineNS.Editor
             return $"goto_level({levelX},{levelZ}) ok";
         }
 
+        // ---------- set_terrain_batch ----------
+
+        static string ToolSetTerrainBatch(JsonElement args)
+        {
+            bool enabled = false;
+            string sceneName = null;
+            if (args.ValueKind == JsonValueKind.Object)
+            {
+                if (args.TryGetProperty("enabled", out var e))
+                    enabled = e.GetBoolean();
+                if (args.TryGetProperty("scene", out var s) && s.ValueKind == JsonValueKind.String)
+                    sceneName = s.GetString();
+            }
+            string result = null;
+            var err = RunOnMainAndWait(() =>
+            {
+                var se = FindSceneEditor(sceneName);
+                if (se == null) { result = "no open scene editor found"; return; }
+                var policy = se.PreviewViewport?.RenderPolicy;
+                if (policy == null) { result = "scene editor render policy not ready"; return; }
+                var node = policy.FindNode<Graphics.Pipeline.TtGpuCullingNode>();
+                if (node == null) { result = "no TtGpuCullingNode in policy"; return; }
+                node.EnableTerrainBatch = enabled;
+                result = $"EnableTerrainBatch={node.EnableTerrainBatch} (policy={policy.ToString()})";
+            });
+            return err ?? result;
+        }
+
         // ---------- get_level_states ----------
 
         static string ToolGetLevelStates(JsonElement args)
@@ -542,6 +570,7 @@ namespace EngineNS.Editor
             Bricks.AIGC.TtEngineMCPServer.RegisterTool("open_scene", ToolOpenScene);
                         Bricks.AIGC.TtEngineMCPServer.RegisterTool("renderdoc_capture", ToolRenderDocCapture);
             Bricks.AIGC.TtEngineMCPServer.RegisterTool("goto_level", ToolGotoLevel);
+            Bricks.AIGC.TtEngineMCPServer.RegisterTool("set_terrain_batch", ToolSetTerrainBatch);
             Bricks.AIGC.TtEngineMCPServer.RegisterTool("get_level_states", ToolGetLevelStates);
             Bricks.AIGC.TtEngineMCPServer.RegisterTool("level_height_stats", ToolLevelHeightStats);
             Bricks.AIGC.TtEngineMCPServer.RegisterTool("rvt_layer_probe", ToolRvtLayerProbe);

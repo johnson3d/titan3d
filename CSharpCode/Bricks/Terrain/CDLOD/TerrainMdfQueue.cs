@@ -11,11 +11,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public TtTerrainNode TerrainNode;
         public TtPatch Patch;
         public int Dimension = 64;
+        // 本 mesh 是哪一级 LOD 的地形网格 (patch.TerrainMesh[LodLevel]), 与 Dimension 同源
+        public int LodLevel = 0;
         public bool IsWater = false;
 
-        public void ActiveRVTs()
+        public void ActiveRVTs_OnRenderThread()
         {
-            Patch.ActiveRVTs();
+            Patch.ActiveRVTs_OnRenderThread();
         }
 
         public void Dispose()
@@ -149,7 +151,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
                         var patchBinder = Graphics.Pipeline.TtCoreShaderBinder.TtPerTerrainPatchCBufferVarIndexer.Instance;
                         pat.PatchCBuffer.SetValue(patchBinder.StartPosition, in pat.StartPosition);
-                        pat.PatchCBuffer.SetValue(patchBinder.CurrentLOD, pat.CurrentLOD);
+                        // 读渲染侧快照 + 钳制防御 (与前两处同源, 不读逻辑侧 CurrentLOD)
+                        int lodCbuf2 = pat.RenderLOD >= pat.TerrainMesh.Length ? pat.TerrainMesh.Length - 1 : pat.RenderLOD;
+                        pat.PatchCBuffer.SetValue(patchBinder.CurrentLOD, lodCbuf2);
 
                         pat.TexUVOffset.X = ((float)pat.XInLevel / (float)pat.Level.GetTerrainNode().PatchSide);
                         pat.TexUVOffset.Y = ((float)pat.ZInLevel / (float)pat.Level.GetTerrainNode().PatchSide);
@@ -191,7 +195,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                         var terrain = pat.Level.GetTerrainNode();
 
                         pat.PatchCBuffer.SetValue(coreBinder.StartPosition, in pat.StartPosition);
-                        pat.PatchCBuffer.SetValue(coreBinder.CurrentLOD, pat.CurrentLOD);                        
+                        // 读渲染侧快照 + 钳制防御, 与 SetInstanceData 同源 (不读逻辑侧 CurrentLOD)
+                        int lodCbuf = pat.RenderLOD >= pat.TerrainMesh.Length ? pat.TerrainMesh.Length - 1 : pat.RenderLOD;
+                        pat.PatchCBuffer.SetValue(coreBinder.CurrentLOD, lodCbuf);                        
                         
                         //pat.TexUVOffset.X = (Patch.XInLevel * 64.0f) / 1024.0f;
                         //pat.TexUVOffset.Y = (Patch.ZInLevel * 64.0f) / 1024.0f;
@@ -229,21 +235,32 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public static void SetInstanceData(Graphics.Mesh.TtRenderMesh mesh, Bricks.Terrain.CDLOD.TtTerrainMdfQueue mdfQueue, ref Graphics.Pipeline.Shader.FVSInstanceData instance)
         {
             var cb =  mesh.PerMeshCBuffer;
-            var matrix = cb.GetMatrix(Graphics.Pipeline.TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.WorldMatrix);
+            //var matrix = cb.GetMatrix(Graphics.Pipeline.TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.WorldMatrix);
 
-            instance.Position = matrix.Translation;
-            instance.Scale = matrix.Scale;// mdfQueue.Patch.StartPosition;
-            instance.Quat = matrix.Rotation;
+            // Position 不再从 cbuffer 取: batch 化后该 mesh 可能不被单独绘制, 其 cbuffer 的 WorldMatrix
+            // 不保证在 CameraOffset 变化后被刷新(陈旧基准会表现为整个 batch 持续错位)。
+            // 改为直接用 mesh 绝对世界位置减当前 CameraOffset 重算, 与 Patch.StartPosition / cull AABB 同源。
+            //var world = mdfQueue.Patch.TerrainNode.GetWorld();
+            //instance.Position = (mesh.WorldLocation - world.CameraOffset).ToSingleVector3();
+            //instance.Scale = matrix.Scale;// mdfQueue.Patch.StartPosition;
+            //instance.Quat = matrix.Rotation;
+            instance.Position = Vector3.Zero;
+            instance.Scale = Vector3.One;
+            instance.Quat = Quaternion.Identity;
             instance.HitProxyId = cb.GetValue<uint>(Graphics.Pipeline.TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.HitProxyId);
 
             var patch = mdfQueue.Patch;
+            // 读渲染侧快照 (帧内稳定, 与 OnGatherVisibleMeshes_OnRenderThread 选网格同源);
+            // 钳制保留作防御: 哨兵/越界不能裸出引擎, 否则 shader 算 morph/法线会整块渲染成黑色
+            uint lodForShader = patch.RenderLOD >= patch.TerrainMesh.Length
+                ? (uint)(patch.TerrainMesh.Length - 1) : (uint)patch.RenderLOD;
             if (mdfQueue.TerrainModifier.IsWater && patch.Level.WaterHMap!=null)
                 instance.UserData.X = patch.Level.GetWaterHeightmapRVT().UniqueTexID;
             else
                 instance.UserData.X = patch.Level.GetHeightmapRVT().UniqueTexID;
             instance.UserData.Y = patch.Level.GetNormalmapRVT().UniqueTexID;
             instance.UserData.Z = patch.Level.GetMaterialIdRVT().UniqueTexID; 
-            instance.UserData.W = (uint)mdfQueue.Patch.CurrentLOD;
+            instance.UserData.W = lodForShader;
 
             instance.UserData2.X = CoreSDK.AsUInt32(patch.StartPosition.X);
             instance.UserData2.Y = CoreSDK.AsUInt32(patch.StartPosition.Y);
@@ -275,11 +292,18 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             TerrainModifier.Patch = (mdf as TtTerrainInstanceMdfQueue).TerrainModifier.Patch;
             TerrainModifier.TerrainNode = (mdf as TtTerrainInstanceMdfQueue).TerrainModifier.TerrainNode;
             TerrainModifier.Dimension = (mdf as TtTerrainInstanceMdfQueue).TerrainModifier.Dimension;
+            TerrainModifier.LodLevel = (mdf as TtTerrainInstanceMdfQueue).TerrainModifier.LodLevel;
             TerrainModifier.IsWater = (mdf as TtTerrainInstanceMdfQueue).TerrainModifier.IsWater;
         }
         public TtTerrainModifier TerrainModifier
         {
             get => this.Modifiers[0] as TtTerrainModifier;
+        }
+        // 本 mdfQueue 所在 mesh 是哪一级 LOD 的地形网格 (patch.TerrainMesh[LodLevel])
+        public int LodLevel
+        {
+            get => TerrainModifier.LodLevel;
+            set => TerrainModifier.LodLevel = value;
         }
     }
     public class TtTerrainInstanceMdfQueue : Graphics.Pipeline.Shader.TtMdfQueue2<TtTerrainModifier, Graphics.Mesh.Modifier.TtInstanceModifier>
@@ -290,11 +314,18 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             TerrainModifier.Patch = (mdf as TtTerrainInstanceMdfQueue).TerrainModifier.Patch;
             TerrainModifier.TerrainNode = (mdf as TtTerrainInstanceMdfQueue).TerrainModifier.TerrainNode;
             TerrainModifier.Dimension = (mdf as TtTerrainInstanceMdfQueue).TerrainModifier.Dimension;
+            TerrainModifier.LodLevel = (mdf as TtTerrainInstanceMdfQueue).TerrainModifier.LodLevel;
             TerrainModifier.IsWater = (mdf as TtTerrainInstanceMdfQueue).TerrainModifier.IsWater;
         }
         public TtTerrainModifier TerrainModifier
         {
             get => this.Modifiers[0] as TtTerrainModifier;
+        }
+        // 本 mdfQueue 所在 mesh 是哪一级 LOD 的地形网格 (patch.TerrainMesh[LodLevel])
+        public int LodLevel
+        {
+            get => TerrainModifier.LodLevel;
+            set => TerrainModifier.LodLevel = value;
         }
         public Graphics.Mesh.Modifier.TtInstanceModifier InstanceModifier
         {

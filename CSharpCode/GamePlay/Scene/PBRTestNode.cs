@@ -291,7 +291,7 @@ namespace EngineNS.GamePlay.Scene
                 this.IsAcceptShadow = this.IsAcceptShadow;
             }
         }
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
             UpdateCameralOffset(rp.World);
 

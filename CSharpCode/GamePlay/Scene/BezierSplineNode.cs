@@ -836,7 +836,7 @@ namespace EngineNS.GamePlay.Scene
                 mSplinePoints[i].GetHitProxyDrawMesh(meshes);
         }
 
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
             if ((rp.CullFilters & TtWorld.TtVisParameter.EVisCullFilter.UtilityEditor) == 0)
                 return;

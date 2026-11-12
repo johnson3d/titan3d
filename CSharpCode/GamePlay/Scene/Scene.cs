@@ -872,13 +872,13 @@ namespace EngineNS.GamePlay.Scene
         {
             return true;
         }
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
             FHostNotify notify = new FHostNotify();
-            notify.Info = "OnGatherVisibleMeshes";
+            notify.Info = "OnGatherVisibleMeshes_OnRenderThread";
             notify.Parameter = rp;
             mMemberTickables.SendNotify(this, in notify);
-            base.OnGatherVisibleMeshes(rp);
+            base.OnGatherVisibleMeshes_OnRenderThread(rp);
         }
     }
 

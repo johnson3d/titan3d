@@ -1,4 +1,5 @@
-﻿using EngineNS.NxRHI;
+﻿using EngineNS.GamePlay.Scene;
+using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -80,21 +81,27 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
             GridMipLevels = null;
         }        
-        public void TickSync()
+        public void UpdateRVT_OnRenderThread()
         {
-            var cmdlist = TtCommandList.GetCmdList();
-            using (new NxRHI.TtCmdListScope(cmdlist, "RVT"))
+            using (var tsCmd = new FTransientCmd(EQueueType.QU_Default, "TerrainRVT.Flush"))
             {
-                NormalmapRVT.UpdateGpu(cmdlist);
-                HeightmapRVT.UpdateGpu(cmdlist);
-                MaterialIdRVT.UpdateGpu(cmdlist);
-                // 槽表的 Flush2GPU 已收进 TtVirtualTextureBase.UpdateGpu 尾部 (写入与上传同点完成,
-                // 避免再出现"只写 CPU 数置 Dirty 却没人上传"的断层 —— 曾致地形渲染成平板)。
-
-                cmdlist.FlushDraws();
+                NormalmapRVT.UpdateGpu(tsCmd.CmdList);
+                HeightmapRVT.UpdateGpu(tsCmd.CmdList);
+                MaterialIdRVT.UpdateGpu(tsCmd.CmdList);
             }
+            //var cmdlist = TtCommandList.GetCmdList();
+            //using (new NxRHI.TtCmdListScope(cmdlist, "RVT"))
+            //{
+            //    NormalmapRVT.UpdateGpu(cmdlist);
+            //    HeightmapRVT.UpdateGpu(cmdlist);
+            //    MaterialIdRVT.UpdateGpu(cmdlist);
+            //    // 槽表的 Flush2GPU 已收进 TtVirtualTextureBase.UpdateGpu 尾部 (写入与上传同点完成,
+            //    // 避免再出现"只写 CPU 数置 Dirty 却没人上传"的断层 —— 曾致地形渲染成平板)。
+
+            //    cmdlist.FlushDraws();
+            //}
             
-            TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(cmdlist, "RVT.UpdateData", NxRHI.EQueueType.QU_Transfer);
+            //TtEngine.Instance.GfxDevice.RenderQueue.QueueCmdlist(cmdlist, "RVT.UpdateData", NxRHI.EQueueType.QU_Transfer);
         }
     }
 }

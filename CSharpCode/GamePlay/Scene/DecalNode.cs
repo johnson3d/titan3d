@@ -568,7 +568,7 @@ namespace EngineNS.GamePlay.Scene
                 meshes.Add(mDirectionMesh);
         }
 
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
             // 贴花必须无条件进可见节点列表, 否则 TtDecalPassNode 拿不到可见贴花集
             rp.AddVisibleNode(this);

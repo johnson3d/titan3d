@@ -303,9 +303,12 @@ namespace EngineNS.Bricks.AdvanceShadow
         /// Builds the WorldToLightView rotation matrix, snaps the center in light-view space,
         /// then requests pages from the pool and collects dirty pages that need rendering.
         /// </summary>
-        /// <param name="cameraWorldPos">Camera world position (clipmap center).</param>
+        /// <param name="cameraRenderPos">Camera position in CameraOffset-relative ("render") space, i.e.
+        /// absolute camera position minus world.CameraOffset - what the GPU sees, NOT the absolute world
+        /// position. The whole clipmap - center, page windows, page cameras - is defined in that space
+        /// because that is the space mesh WorldMatrix and the shader's WorldPos live in.</param>
         /// <param name="lightDir">Normalized light direction (toward light, e.g., sun direction).</param>
-        public void Update(TtAdvanceShadowMapNode advNode, in DVector3 cameraWorldPos, in Vector3 lightDir)
+        public void Update(TtAdvanceShadowMapNode advNode, in DVector3 cameraRenderPos, in Vector3 lightDir)
         {
             LightDirection = lightDir;
 
@@ -338,7 +341,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             mLightViewToWorldRotation = Matrix.Transpose(mWorldToLightViewRotation);
 
             // Transform camera position to light-view space
-            var camWorldF = new Vector3((float)cameraWorldPos.X, (float)cameraWorldPos.Y, (float)cameraWorldPos.Z);
+            var camWorldF = new Vector3((float)cameraRenderPos.X, (float)cameraRenderPos.Y, (float)cameraRenderPos.Z);
             var camLV = Vector3.TransformCoordinate(camWorldF, mWorldToLightViewRotation);
 
             // Snap in light-view space XY using finest level's texel size
@@ -420,8 +423,9 @@ namespace EngineNS.Bricks.AdvanceShadow
         /// </summary>
         /// <param name="dirtyPage">Which page to render.</param>
         /// <param name="camera">Output camera.</param>
-        /// <param name="world">World for camera offset.</param>
-        /// <param name="casterAABB">Merged AABB of all casters overlapping this page.</param>
+        /// <param name="world">Unused - the page camera keeps a zero split base on purpose (see below).</param>
+        /// <param name="casterAABB">Merged AABB of all casters overlapping this page, already in
+        /// CameraOffset-relative space (see AdvanceShadowShading.GatherShadowCastersForPageLV).</param>
         /// <param name="outNear">Actual near plane used (for FVSMClipmapPageData).</param>
         /// <param name="outFar">Actual far plane used (for FVSMClipmapPageData).</param>
         public void BuildPageCamera(in FVSMClipmapDirtyPage dirtyPage, TtCamera camera,
@@ -480,9 +484,11 @@ namespace EngineNS.Bricks.AdvanceShadow
             // Ortho size matches pageSize with small margin for floating-point tolerance
             float orthoSize = pageSize * 1.05f;
 
-            // Shadow page cameras must NOT use CameraOffset. The DirLighting shader does
-            // mul(worldPos, pageVP) with raw world coordinates (no offset subtracted).
-            // If VP encodes eye-offset, the transform is wrong → shadow flickers when camera moves.
+            // Page cameras work in CameraOffset-relative space, exactly like the caster AABBs and
+            // pageCenterLV above, so the double-precision split base must stay zero: encoding
+            // world.CameraOffset here would translate the view by the offset while the vertices fed to
+            // it (cbPerMesh.WorldMatrix) and the receiver WorldPos already have that offset removed,
+            // which slides every shadow off its caster in big-world scenes.
             camera.SetMatrixStartPosition(in DVector3.Zero);
             camera.LookAtLH(eye, pageCenterWorld, in up);
             camera.DoOrthoProjectionForShadow(orthoSize, orthoSize, outNear, outFar, 0, 0);
@@ -717,7 +723,8 @@ namespace EngineNS.Bricks.AdvanceShadow
         /// Given a world-space position, determine which clipmap level and page it maps to.
         /// Returns the finest level that contains the point.
         /// </summary>
-        /// <param name="worldPos">World position to query.</param>
+        /// <param name="worldPos">Position in CameraOffset-relative (render) space - the same space the
+        /// clipmap center and the shader queries are in.</param>
         /// <param name="level">Output: clipmap level index.</param>
         /// <param name="pageX">Output: page X coordinate within the level.</param>
         /// <param name="pageY">Output: page Y coordinate within the level.</param>

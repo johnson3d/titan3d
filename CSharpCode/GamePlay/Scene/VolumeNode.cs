@@ -212,7 +212,7 @@ namespace EngineNS.GamePlay.Scene
                 meshes.Add(mHitproxyMesh);
         }
 
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
             rp.AddVisibleNode(this);
 
@@ -247,7 +247,7 @@ namespace EngineNS.GamePlay.Scene
                 mWireframeMesh.SetWorldTransform(in Placement.AbsTransform, world, false);
             if (mHitproxyMesh != null)
             {
-                // hitproxy 不跟随 node Scale，朝向由 OnGatherVisibleMeshes 中相机驱动
+                // hitproxy 不跟随 node Scale，朝向由 OnGatherVisibleMeshes_OnRenderThread 中相机驱动
                 var hitproxyTransform = FTransform.CreateTransform(in Placement.AbsTransform.mPosition, in Vector3.One, in Quaternion.Identity);
                 mHitproxyMesh.SetWorldTransform(in hitproxyTransform, world, true);
             }

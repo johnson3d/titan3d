@@ -199,9 +199,9 @@ namespace EngineNS.GamePlay
             {
                 return false;
             }
-            public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+            public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
             {
-                base.OnGatherVisibleMeshes(rp);
+                base.OnGatherVisibleMeshes_OnRenderThread(rp);
             }
         }
 

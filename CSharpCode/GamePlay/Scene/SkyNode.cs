@@ -77,9 +77,9 @@ namespace EngineNS.GamePlay.Scene
             SunMesh.UserShading = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<Graphics.Pipeline.Shader.CommanShading.UDrawViewportShading>();
             return true;
         }
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
-            base.OnGatherVisibleMeshes(rp);
+            base.OnGatherVisibleMeshes_OnRenderThread(rp);
 
             if (SunMesh != null)
             {

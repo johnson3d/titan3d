@@ -226,8 +226,9 @@ namespace EngineNS.Graphics.Pipeline
                 }
 
                 BoundingBox aabb;
-                DBoundingBox.OffsetToSingleBox(in world.mCameraOffset, in dAabb, out aabb);
+                DBoundingBox.OffsetToSingleBox(world.CameraOffset, in dAabb, out aabb);
                 return frustum->whichContainTypeFast(in aabb, testInner ? 1 : 0);
+                //return frustum->whichContainType(in aabb);
             }   
         }
 

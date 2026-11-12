@@ -639,7 +639,7 @@ namespace EngineNS.GamePlay.Scene
         private const int ParallelCullThreshold = 64;
         private byte[] mCullVisibility = null;
 
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
             // Draw editor hitproxy billboard icon (UtilityEditor mode)
             if ((rp.CullFilters & GamePlay.TtWorld.TtVisParameter.EVisCullFilter.UtilityEditor) != 0)
@@ -811,7 +811,7 @@ namespace EngineNS.GamePlay.Scene
 
         protected override void OnCameralOffsetChanged(TtWorld world)
         {
-            // mRenderMesh uses Identity WorldMatrix (set per-frame in OnGatherVisibleMeshes)
+            // mRenderMesh uses Identity WorldMatrix (set per-frame in OnGatherVisibleMeshes_OnRenderThread)
             // Only hitproxy mesh needs camera offset update
             mHitproxyMesh?.UpdateCameraOffset(world);
         }
@@ -823,7 +823,7 @@ namespace EngineNS.GamePlay.Scene
             var world = this.GetWorld();
             if (mHitproxyMesh != null)
             {
-                // Hitproxy billboard uses fixed scale; facing is driven by OnGatherVisibleMeshes
+                // Hitproxy billboard uses fixed scale; facing is driven by OnGatherVisibleMeshes_OnRenderThread
                 var hitproxyTransform = FTransform.CreateTransform(in Placement.AbsTransform.mPosition, in Vector3.One, in Quaternion.Identity);
                 mHitproxyMesh.SetWorldTransform(in hitproxyTransform, world, true);
             }

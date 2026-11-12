@@ -248,9 +248,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             // SetActiveCenter 把 CameraOffset/startPosition 切到新位置后, view 仍是旧基准算的,
             // 与地形的世界平移(新基准)差一个基准位移 -> 地形整体跑出视锥, goto 后画面一片空。
             // 所以 goto 必须在这里同步切基准(CameraOffset + startPosition)并按新基准重算 view。
-            if (world != null)
-                world.CameraOffset = eye;
-            camera.mCoreObject.SetMatrixStartPosition(in eye);
+            world.SetCameraOffset(in eye, camera);
             camera.LookAtLH(in eye, in center, Vector3.Up);
             // 打断可能还在飞的 AutoZoom 动画, 否则下一帧会被旧目标点拉回去
             TtEngine.Instance.TickableManager.RemoveTickable(camera);

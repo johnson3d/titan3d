@@ -427,6 +427,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     if (TiledPatch[i, j] == null)
                         TiledPatch[i, j] = new TtPatch();
                     TiledPatch[i, j].Initialize(this, j, i, hMap);
+                    // 新建 patch 不再依赖每帧 Tick 补 StartPosition, 创建时立即用当前渲染空间基准刷一次
+                    TiledPatch[i, j].UpdateAfterCameraOffset(Level.Node, in Level.Node.PatchRenderOffset);
                 }
             }
 
@@ -1185,7 +1187,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 i.UpdateCameraOffset(world);
             }
         }
-        public unsafe void OnGatherVisibleMeshes(GamePlay.TtWorld.TtVisParameter rp)
+        public unsafe void OnGatherVisibleMeshes_OnRenderThread(GamePlay.TtWorld.TtVisParameter rp)
         {
             foreach (var i in TiledPatch)
             {
@@ -1193,16 +1195,26 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     continue;
                 if (rp.CullCamera.WhichContainTypeFast(rp.World, i.AABB, false) == CONTAIN_TYPE.CONTAIN_TEST_OUTER)
                     continue;
-                i.OnGatherVisibleMeshes(rp);
+                i.OnGatherVisibleMeshes_OnRenderThread(rp);
             }
         }
-        public void Tick(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public void UpdateAfterCameraOffset(TtTerrainNode node, in DVector3 CameraOffset)
         {
             foreach (var i in TiledPatch)
             {
                 if (i==null)
                     continue;
-                i.Tick(world, policy);
+                i.UpdateAfterCameraOffset(node, in CameraOffset);
+            }
+        }
+        /// <summary>发布点: LOD 分配完成后, 逻辑线程一次性把快照交给渲染线程</summary>
+        public void PublishRenderLOD_OnRenderThread()
+        {
+            foreach (var i in TiledPatch)
+            {
+                if (i==null)
+                    continue;
+                i.PublishRenderLOD_OnRenderThread();
             }
         }
         public void OnParentSceneChanged(GamePlay.Scene.TtScene prev, GamePlay.Scene.TtScene cur)
@@ -1260,10 +1272,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 if (i.CurrentLOD == int.MaxValue && DBoundingBox.Intersects(in i.AABB, sphere))
                     i.CurrentLOD = level;
+                //else
+                //    i.CurrentLOD = 0;
             }
         }
 
-        // int.MaxValue 哨兵不在生产侧收尾: 消费侧 TtPatch.OnGatherVisibleMeshes 把
+        // int.MaxValue 哨兵不在生产侧收尾: 消费侧 TtPatch.OnGatherVisibleMeshes_OnRenderThread 把
         // 越界 CurrentLOD 钳到最粗糙网格 (TerrainMesh.Length - 1)
         #endregion
     }

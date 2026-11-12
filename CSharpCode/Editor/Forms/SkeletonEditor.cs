@@ -296,7 +296,7 @@ namespace EngineNS.Editor.Forms
             mHighlightedBoneIndex = newIndex;
         }
 
-        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
             if (CurrentPose == null)
                 return;
@@ -311,7 +311,7 @@ namespace EngineNS.Editor.Forms
             }
             //ShowBoneLine(SkeletonAsset.Skeleton.Root, runtimePose, rp);
             ShowBoneLineWhitInitMatrix(SkeletonAsset.Skeleton.Root, rp);
-            base.OnGatherVisibleMeshes(rp);
+            base.OnGatherVisibleMeshes_OnRenderThread(rp);
         }
     }
     public class TtSkeletonEditor : Editor.IAssetEditor, ITickable, IRootForm, ISkeletonTreeHost

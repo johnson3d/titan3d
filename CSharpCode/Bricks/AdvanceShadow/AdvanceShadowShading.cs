@@ -682,7 +682,15 @@ namespace EngineNS.Bricks.AdvanceShadow
 
                     if (policy.DefaultCamera != null)
                     {
-                        var camPos = policy.DefaultCamera.GetPosition();
+                        // The clipmap has to live in the same space the GPU works in: cbPerMesh.WorldMatrix
+                        // and the GBuffer-reconstructed WorldPos both have world.CameraOffset subtracted
+                        // (big-world origin relocation). Feeding the absolute camera position here put the
+                        // whole clipmap grid CameraOffset away from the geometry it is supposed to cover,
+                        // so casters were drawn into the wrong pages and receivers sampled empty
+                        // (ZFar<=0) pages = no directional shadow at all once a terrain/partition node
+                        // sets CameraOffset. Subtract world.CameraOffset (not the camera's own split
+                        // base) so this stays the exact space the caster/receiver matrices are in.
+                        var camPos = policy.DefaultCamera.GetPosition() - world.CameraOffset;
                         Clipmap.Update(this, in camPos, world.DirectionLight.Direction);
                     }
                 }
@@ -825,12 +833,19 @@ namespace EngineNS.Bricks.AdvanceShadow
             // rendered (rdc: AdvShadowDrawShadowMap region with zero GPU commands).
             // Break the deadlock: build a provisional camera from the union of all caster
             // AABBs first, gather with it, then rebuild the tight camera for the final render.
+            // Caster AABBs are absolute world space, while the page cameras, the clipmap center and
+            // the shader's WorldPos all work in CameraOffset-relative space - shift by renderOffset
+            // below so the two sides meet in the same space.
+            var renderOffset = world.CameraOffset;
             var provisionalAABB = new DBoundingBox();
             provisionalAABB.InitEmptyBox();
             for (int i = 0; i < mShadowCasters.Count; i++)
             {
                 provisionalAABB.Merge(in mShadowCasters[i].BoundVolume.AbsAABB);
             }
+            // Translating the union is equivalent to translating every box, so shift just once here.
+            provisionalAABB.Minimum -= renderOffset;
+            provisionalAABB.Maximum -= renderOffset;
 
             foreach (var dirtyPage in Clipmap.DirtyPages)
             {
@@ -847,7 +862,7 @@ namespace EngineNS.Bricks.AdvanceShadow
 
                 // 3) Gather casters: test caster AABB overlap in light-view XY space
                 mVisParameter.ClearVisibles();
-                GatherShadowCastersForPageLV(out var mergedAABB, pageLVMinX, pageLVMaxX, pageLVMinY, pageLVMaxY);
+                GatherShadowCastersForPageLV(out var mergedAABB, pageLVMinX, pageLVMaxX, pageLVMinY, pageLVMaxY, in renderOffset);
 
                 if (mVisParameter.VisibleMeshes.Count == 0)
                     continue;
@@ -897,9 +912,12 @@ namespace EngineNS.Bricks.AdvanceShadow
         /// Gather shadow casters by testing overlap in light-view XY space.
         /// This is precise for orthographic projection: a caster can only appear in a page
         /// if its AABB, projected onto the light-view XY plane, overlaps the page's XY range.
+        /// Caster AABBs are absolute world space, so cameraOffset (world.CameraOffset) is subtracted
+        /// to test them against the page window in the same CameraOffset-relative space the page
+        /// camera and the depth pass vertices use.
         /// </summary>
         private unsafe void GatherShadowCastersForPageLV(out DBoundingBox mergedAABB,
-            float pageLVMinX, float pageLVMaxX, float pageLVMinY, float pageLVMaxY)
+            float pageLVMinX, float pageLVMaxX, float pageLVMinY, float pageLVMaxY, in DVector3 cameraOffset)
         {
             mergedAABB = new DBoundingBox();
             mergedAABB.InitEmptyBox();
@@ -909,7 +927,8 @@ namespace EngineNS.Bricks.AdvanceShadow
             for (int i = 0; i < mShadowCasters.Count; i++)
             {
                 var caster = mShadowCasters[i];
-                ref var aabb = ref caster.BoundVolume.AbsAABB;
+                ref var absAABB = ref caster.BoundVolume.AbsAABB;
+                var aabb = new DBoundingBox(absAABB.Minimum - cameraOffset, absAABB.Maximum - cameraOffset);
 
                 // Project caster AABB to light-view space and compute LV XY bounds
                 float casterLVMinX = float.MaxValue, casterLVMaxX = float.MinValue;
@@ -933,7 +952,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                     casterLVMaxY < pageLVMinY || casterLVMinY > pageLVMaxY)
                     continue;
 
-                caster.OnGatherVisibleMeshes(mVisParameter);
+                caster.OnGatherVisibleMeshes_OnRenderThread(mVisParameter);
                 mergedAABB.Merge(in aabb);
             }
         }
@@ -1072,7 +1091,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             mVisParameter.CullCamera = node.Leaf.ShadowCamera;
             foreach (var j in shadowObjects)
             {
-                j.SceneNode.OnGatherVisibleMeshes(mVisParameter);
+                j.SceneNode.OnGatherVisibleMeshes_OnRenderThread(mVisParameter);
             }
             var cmdlist = TtCommandList.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist, "AdvShadow"))

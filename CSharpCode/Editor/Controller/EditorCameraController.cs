@@ -55,6 +55,23 @@ namespace EngineNS.Editor.Controller
                 case Graphics.Pipeline.ECameraAxis.Right:
                     {
                         var right = Camera.mCoreObject.GetRight();
+                        // UE 风格的 pitch 钳制: 绕 Right 轴的旋转不允许越过头顶/脚底极点,
+                        // 否则下方由 cross 推导的 up 会方向突变, 视图整体翻转。
+                        // 精确解: 设单位化 dir, 绕 right 转 θ 后 dir·Y = dY*cosθ + c*sinθ,
+                        // 其中 dY = dir·Y, c = (right×dir)·Y; 把 dir·Y 限制在 ±cos(85°) 内,
+                        // 反解出 θ 的合法区间再截断 angle。
+                        var dirBefore = (pos - lookAt).ToSingleVector3();
+                        dirBefore.Normalize();
+                        float dY = dirBefore.Y;
+                        float c = EngineNS.Vector3.Dot(EngineNS.Vector3.Cross(right, dirBefore), EngineNS.Vector3.UnitY);
+                        float r = (float)System.Math.Sqrt(dY * dY + c * c);
+                        if (r > 1e-6f)
+                        {
+                            const float Bound = 0.99619470f; // sin(85°), 即限制视俯仰在 ±85°, 避免越过极点后 up 退化
+                            float boundAngle = (float)System.Math.Asin(System.Math.Clamp(Bound / r, 0.0f, 1.0f));
+                            float phi = (float)System.Math.Atan2(dY, c);
+                            angle = System.Math.Clamp(angle, -boundAngle - phi, boundAngle - phi);
+                        }
                         var mat = EngineNS.Matrix.RotationAxis(right, angle);
                         var dir = EngineNS.Vector3.TransformCoordinate((pos - lookAt).ToSingleVector3(), mat);
                         var up = EngineNS.Vector3.Cross(right, dir);

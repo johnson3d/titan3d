@@ -71,18 +71,19 @@ namespace EngineNS.GamePlay
             await mMemberTickables.InitializeMembers(this);
             return true;
         }
-        internal DVector3 mCameraOffset = DVector3.Zero;
+        private DVector3 mCameraOffset = DVector3.Zero;
         internal uint CameralOffsetSerialId = 1;
         [System.ComponentModel.Category("Option")]
         [ReadOnly(true)]
         public DVector3 CameraOffset 
         {
             get => mCameraOffset;
-            set
-            {
-                mCameraOffset = value;
-                CameralOffsetSerialId++;
-            }
+        }
+        public void SetCameraOffset(in DVector3 offset, TtCamera camera)
+        {
+            mCameraOffset = offset;
+            camera?.SetMatrixStartPosition(offset);
+            CameralOffsetSerialId++;
         }
         Scene.TtScene mRoot;
         [Rtti.Meta("")]
@@ -280,14 +281,14 @@ namespace EngineNS.GamePlay
             }
         }
         [ThreadStatic]
-        private static Profiler.TimeScope mScopeOnGatherVisibleMeshes;
-        private static Profiler.TimeScope ScopeOnGatherVisibleMeshes
+        private static Profiler.TimeScope mScopeOnGatherVisibleMeshes_OnRenderThread;
+        private static Profiler.TimeScope ScopeOnGatherVisibleMeshes_OnRenderThread
         {
             get
             {
-                if (mScopeOnGatherVisibleMeshes == null)
-                    mScopeOnGatherVisibleMeshes = new Profiler.TimeScope(typeof(TtNode), "OnGatherVisibleMeshes");
-                return mScopeOnGatherVisibleMeshes;
+                if (mScopeOnGatherVisibleMeshes_OnRenderThread == null)
+                    mScopeOnGatherVisibleMeshes_OnRenderThread = new Profiler.TimeScope(typeof(TtNode), "OnGatherVisibleMeshes_OnRenderThread");
+                return mScopeOnGatherVisibleMeshes_OnRenderThread;
             }
         }
         public virtual void GatherVisibleMeshes(TtVisParameter rp)
@@ -373,9 +374,9 @@ namespace EngineNS.GamePlay
                 //    node.IterateNodes(static (node, arg) =>
                 //    {
                 //        var rp = arg as TtVisParameter;
-                //        using (new Profiler.TimeScopeHelper(ScopeOnGatherVisibleMeshes))
+                //        using (new Profiler.TimeScopeHelper(ScopeOnGatherVisibleMeshes_OnRenderThread))
                 //        {
-                //            node.OnGatherVisibleMeshes(rp);
+                //            node.OnGatherVisibleMeshes_OnRenderThread(rp);
                 //        }
                 //        return true;
                 //    }, rp);
@@ -383,10 +384,10 @@ namespace EngineNS.GamePlay
                 //}
                 else if (node.HasStyle(TtNode.ENodeStyles.Invisible) == false)
                 {
-                    using (new Profiler.TimeScopeHelper(ScopeOnGatherVisibleMeshes))
+                    using (new Profiler.TimeScopeHelper(ScopeOnGatherVisibleMeshes_OnRenderThread))
                     {
                         if (rp.IsGatherVisibleMeshes == null || rp.IsGatherVisibleMeshes(node, rp))
-                            node.OnGatherVisibleMeshes(rp);
+                            node.OnGatherVisibleMeshes_OnRenderThread(rp);
                     }
                 }
                 return true;

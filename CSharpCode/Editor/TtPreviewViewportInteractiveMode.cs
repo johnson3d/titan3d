@@ -130,19 +130,8 @@ namespace EngineNS.Editor
             float step = (TtEngine.Instance.ElapseTickCountMS * 0.001f) * previewViewport.CameraMoveSpeed;
             var keyboards = TtEngine.Instance.InputSystem;
 
-            // F11: trigger RenderDoc capture
-            if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_F11))
-            {
-                if (!mF11WasDown)
-                {
-                    mF11WasDown = true;
-                    TriggerRenderDocCapture();
-                }
-            }
-            else
-            {
-                mF11WasDown = false;
-            }
+            // F11: trigger RenderDoc capture (实现在 TtWorldViewportInteractiveMode 基类)
+            TickRenderDocCaptureHotkey();
 
             if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_w))
             {
@@ -161,16 +150,6 @@ namespace EngineNS.Editor
             {
                 previewViewport.CameraController.Move(ECameraAxis.Right, -step, true);
             }
-        }
-
-        private bool mF11WasDown = false;
-
-        private unsafe void TriggerRenderDocCapture()
-        {
-#if PWindow
-            IRenderDocTool.GetInstance().SetGpuDevice(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject);
-            TtEngine.Instance.GfxDevice.RenderQueue.CaptureRenderDocFrame = true;
-#endif
         }
     }
 }

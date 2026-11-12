@@ -309,7 +309,7 @@ namespace EngineNS.Bricks.FX.Water
             get => mMesh;
             set => mMesh = value;
         }
-        public override void OnGatherVisibleMeshes(GamePlay.TtWorld.TtVisParameter rp)
+        public override void OnGatherVisibleMeshes_OnRenderThread(GamePlay.TtWorld.TtVisParameter rp)
         {
             if (mMesh == null)
                 return;

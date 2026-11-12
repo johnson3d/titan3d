@@ -94,11 +94,46 @@ namespace EngineNS.EGui.Slate
             return true;
         }
 
+        #region RenderDoc 抓帧热键 (F11)
+        private bool mF11WasDown = false;
+
+        /// <summary>
+        /// 每帧调用一次的 F11 边沿触发检测，由 TickOnFocus 或派生类驱动。
+        /// 前提：编辑器进程须已注入 renderdoc.dll (cache\rd_launch.ps1 启动)，否则静默无效。
+        /// </summary>
+        protected void TickRenderDocCaptureHotkey()
+        {
+            var keyboards = TtEngine.Instance.InputSystem;
+            if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_F11))
+            {
+                if (!mF11WasDown)
+                {
+                    mF11WasDown = true;
+                    TriggerRenderDocCapture();
+                }
+            }
+            else
+            {
+                mF11WasDown = false;
+            }
+        }
+
+        protected unsafe void TriggerRenderDocCapture()
+        {
+#if PWindow
+            IRenderDocTool.GetInstance().SetGpuDevice(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject);
+            TtEngine.Instance.GfxDevice.RenderQueue.CaptureRenderDocFrame = true;
+#endif
+        }
+        #endregion
+
         public override void TickOnFocus()
         {
             var worldViewport = WorldViewport;
             if (worldViewport == null)
                 return;
+
+            TickRenderDocCaptureHotkey();
 
             float step = (TtEngine.Instance.ElapseTickCountMS * 0.001f) * worldViewport.CameraMoveSpeed;
             var keyboards = TtEngine.Instance.InputSystem;
