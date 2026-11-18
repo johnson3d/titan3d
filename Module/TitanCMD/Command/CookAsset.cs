@@ -7,7 +7,7 @@ namespace ProjectCooker.Command
     /// 全部在引擎内的 <see cref="EngineNS.IO.TtCookDriver"/> 里 (与 ExeCmd=CookServer 同源)。
     /// 每个类型 cook 什么 (见 IAssetMeta.CookAsset 重写) 全部实现于引擎内, 新增类型只需在对应
     /// TtXxxAMeta 重写 CookAsset, 这里无需改动。
-    /// 用法: TitanCMD.exe CookCfg=... ExeCmd=Cook [AssetType=Scene+Texture ...] [Blacklist=...] [Asset=...]
+    /// 用法: TitanCMD.exe CookCfg=... ExeCmd=Cook [AssetType=Scene+Texture ...] [Blacklist=...] [Asset=...] [WorkerStallSec=600]
     /// AssetType 缺省时按 DynConfig 的 CookAssetType 列表逐个 cook (由 Program.Run 回填)。
     /// </summary>
     class TtCookAsset : TtCookCommand
@@ -16,6 +16,8 @@ namespace ProjectCooker.Command
         {
             var driver = EngineNS.IO.TtCookDriver.Instance;
             driver.LoadBlacklist(FindArgument(args, Param_Blacklist));
+            // 与 CookServer 同一判据: 连续无上报超限即协作式取消, 防无人值守批量 cook 永久挂起
+            driver.StandaloneStallSec = FindIntArgument(args, Param_WorkerStallSec, TtCookServer.DefaultStallSec);
 
             // 单资源模式: Asset=相对路径 (可带扩展名), 优先于 AssetType 批量扫描
             var singleAsset = FindArgument(args, Param_Asset);

@@ -473,7 +473,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 mFadeParam.X = 1.0f / (ShadowDistance - FadeStartDistance + 0.0001f);
                 mFadeParam.Y = -FadeStartDistance * mFadeParam.X;
 
-                mShadowCameraArray[CsmIdx].UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext, TtCbView.EUpdateMode.Immediately);
+                mShadowCameraArray[CsmIdx].UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext);
                 
                 var cmdlist = TtCommandList.GetCmdList();
                 using (new NxRHI.TtCmdListScope(cmdlist, "ShadowMap"))

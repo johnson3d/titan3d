@@ -729,9 +729,9 @@ namespace EngineNS.NxRHI
             //TtEngine.Instance.GfxDevice.CoreShaderBinder.ShaderResource.cbPerCamera
 
             if (GBuffers.PerViewportCBuffer != null && Effect.BindIndexer.cbPerViewport != null)
-                mCoreObject.BindResource(Effect.BindIndexer.cbPerViewport.mCoreObject, GBuffers.PerViewportCBuffer.mCoreObject.NativeSuper);
+                mCoreObject.BindResource(Effect.BindIndexer.cbPerViewport.mCoreObject, GBuffers.PerViewportCBuffer.mCoreObject.NativeSuper.NativeSuper);
             if (camera.PerCameraCBuffer != null && Effect.BindIndexer.cbPerCamera != null)
-                mCoreObject.BindResource(Effect.BindIndexer.cbPerCamera.mCoreObject, camera.PerCameraCBuffer.mCoreObject.NativeSuper);
+                mCoreObject.BindResource(Effect.BindIndexer.cbPerCamera.mCoreObject, camera.PerCameraCBuffer.mCoreObject.NativeSuper.NativeSuper);
         }
     }
 }

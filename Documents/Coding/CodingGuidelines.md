@@ -983,8 +983,9 @@ GPU readback 的 fence wait、并行 culling、长耗时计算等。
    - 后台执行体在大循环顶部轮询检查点 (检查点粒度必须小于单次循环迭代耗时):
      `if (state.IsCancelRequested == true) return null;`
      (`IsCancelRequested` 即 `TaskToken != null && TaskToken.TaskState == Canceled`,
-     先例: `AnimationClip.cs`; 重活检查点范例: `TtVgClusterBaker.Bake/BakeFromLevel` 的
-     cancelState 参数)。
+     先例: `AnimationClip.cs`; 重活跑在原生库里时, 把取消转发到原生检查点, 范例:
+     `TtQuarkTerrainBaker.RequestCancel` + `TtTerrainLevel.RegisterDagBaker`, 原生侧
+     Quark DAG 构建在每个 group 处轮询)。
    - 外部取消: `token.TaskState = EAsyncTaskState.Canceled;`
 2. **被取消的执行体必须走正常完成路径返回 null/default**, 让 `TrySetResult` 正常收尾、
    等待方拿到 null、task 被 collector 正常 Dispose。禁止取消后直接不走 SetResult。
@@ -1018,7 +1019,11 @@ private async TtTask<TtVgDagAsset> BakeVgDagAsync(...)
 {
     mBakeCancelToken = new TtAsyncTaskToken();
     var asset = await EventPoster.Post((state) => {
-        var result = Baker.BakeFromLevel(..., state);   // state 传给重活轮询
+        using var baker = new TtQuarkTerrainBaker();
+        Level.RegisterDagBaker(baker);                  // 先登记再查 token, 取消不漏网
+        if (state.IsCancelRequested) return null;
+        var result = baker.Bake(...);                   // 被取消时原生侧返回, 结果为 null
+        Level.UnregisterDagBaker(baker);
         if (result == null) return null;                // 被取消: 不落盘
         Save(...); return result;
     }, EAsyncTarget.TPools).WithToken(mBakeCancelToken);

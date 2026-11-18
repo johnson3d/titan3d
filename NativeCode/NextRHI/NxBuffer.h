@@ -3,6 +3,7 @@
 #include "NxShader.h"
 #include "NxRHIDefine.h"
 #include "../Base/BlobObject.h"
+#include <memory>
 
 NS_BEGIN
 
@@ -139,7 +140,7 @@ namespace NxRHI
 			GRS_SrvNonPS,
 			GRS_GenericRead,
 			GRS_Uav,
-			GRS_UavIndirect,
+			GRS_Indirect,
 			GRS_RenderTarget,
 			GRS_DepthStencil,
 			GRS_DepthRead,
@@ -188,19 +189,301 @@ namespace NxRHI
 			return GetPixelByteWidth(Format) * Width * Height * Depth;
 		}*/
 	};
+
+	// Count 取此值表示从 Base 到末尾的全部 mip / layer
+	constexpr UINT SubresourceRemaining = 0xFFFFFFFF;
+	// 子资源范围 (mip 与 array layer 二维), 缺省构造即整资源
+	struct TR_CLASS(SV_LayoutStruct = 8)
+		FSubresourceRange
+	{
+		UINT BaseMip = 0;
+		UINT MipCount = SubresourceRemaining;
+		UINT BaseLayer = 0;
+		UINT LayerCount = SubresourceRemaining;
+		void SetWhole()
+		{
+			BaseMip = 0;
+			MipCount = SubresourceRemaining;
+			BaseLayer = 0;
+			LayerCount = SubresourceRemaining;
+		}
+		void SetRange(UINT baseMip, UINT mipCount, UINT baseLayer, UINT layerCount)
+		{
+			BaseMip = baseMip;
+			MipCount = mipCount;
+			BaseLayer = baseLayer;
+			LayerCount = layerCount;
+		}
+		// 按 ITexture::GetSubResource 的线性序号 (mip + layer * mipLevels) 取单个子资源
+		void SetSubresource(UINT subResource, UINT mipLevels)
+		{
+			if (mipLevels == 0)
+				mipLevels = 1;
+			SetRange(subResource % mipLevels, 1, subResource / mipLevels, 1);
+		}
+		bool IsWhole() const
+		{
+			return BaseMip == 0 && MipCount == SubresourceRemaining && BaseLayer == 0 && LayerCount == SubresourceRemaining;
+		}
+		UINT GetMipEnd(UINT mipLevels) const
+		{
+			if (MipCount == SubresourceRemaining || BaseMip + MipCount > mipLevels)
+				return mipLevels;
+			return BaseMip + MipCount;
+		}
+		UINT GetLayerEnd(UINT arraySize) const
+		{
+			if (LayerCount == SubresourceRemaining || BaseLayer + LayerCount > arraySize)
+				return arraySize;
+			return BaseLayer + LayerCount;
+		}
+		bool Covers(UINT mipLevels, UINT arraySize) const
+		{
+			return BaseMip == 0 && GetMipEnd(mipLevels) == mipLevels && BaseLayer == 0 && GetLayerEnd(arraySize) == arraySize;
+		}
+		bool Overlaps(const FSubresourceRange& other, UINT mipLevels, UINT arraySize) const
+		{
+			return BaseMip < other.GetMipEnd(mipLevels) && other.BaseMip < GetMipEnd(mipLevels)
+				&& BaseLayer < other.GetLayerEnd(arraySize) && other.BaseLayer < GetLayerEnd(arraySize);
+		}
+	};
+
+	// view 被使用时对底层资源的要求: Range 内的子资源应处于 State; State 为 GRS_Undefine 表示不做自动转换
+	struct TR_CLASS(SV_LayoutStruct = 8)
+		FViewLayout
+	{
+		EGpuResourceState State = EGpuResourceState::GRS_Undefine;
+		FSubresourceRange Range;
+	};
+
+	enum TR_ENUM(SV_EnumNoFlags)
+		ELayoutTrackMode
+	{
+		LTM_Whole = 0,
+		LTM_PerSubresource,
+	};
+
+	// 资源 layout 跟踪: 缺省 Whole 只记一个状态, 任何范围都按整资源转换;
+	// PerSubresource 由创建期 FTextureDesc::LayoutTrack 声明 (如 HZB 不同 mip 同时作 SRV / UAV), 按 mip + layer * MipLevels 逐个记录
 	class TR_CLASS()
-		IGpuBufferData : public IGpuResource
+		FLayoutTracker
 	{
 	public:
-		ENGINE_RTTI(IGpuBufferData);
+		// tracker 内嵌于资源, 托管端只能借用查询, 不能独立创建或释放
+		TR_FUNCTION(SV_NoBind)
+		FLayoutTracker() = default;
+		TR_FUNCTION(SV_NoBind)
+		void SetPerSubresource(UINT mipLevels, UINT arraySize)
+		{
+			// 逐子资源状态放堆上: 绝大多数资源是 Whole, 不能让 tracker 撑大 buffer 对象 (DX12Buffer / VKBuffer 须留在 small_alloc)
+			Sub = std::make_unique<FSubStates>();
+			Sub->MipLevels = mipLevels > 0 ? mipLevels : 1;
+			Sub->ArraySize = arraySize > 0 ? arraySize : 1;
+			Sub->States.assign(Sub->MipLevels * Sub->ArraySize, WholeState);
+		}
+		bool IsPerSubresource() const
+		{
+			return Sub != nullptr;
+		}
+		// 固定状态资源 (如 UPLOAD/READBACK heap 上的 DYNAMIC/STAGING buffer) 锁定后任何转换请求都忽略
+		TR_FUNCTION(SV_NoBind)
+		void LockState(EGpuResourceState state)
+		{
+			SetState(state);
+			Locked = true;
+		}
+		bool IsLocked() const
+		{
+			return Locked;
+		}
+		UINT GetMipLevels() const
+		{
+			return Sub != nullptr ? Sub->MipLevels : 1;
+		}
+		UINT GetArraySize() const
+		{
+			return Sub != nullptr ? Sub->ArraySize : 1;
+		}
+		EGpuResourceState GetState() const
+		{
+			return GetState(FSubresourceRange{});
+		}
+		// 范围内状态一致时返回该状态, 否则返回 GRS_Undefine
+		// range 必须非空; 托管端整资源查询用无参重载, 或显式 range.SetWhole()
+		EGpuResourceState GetState(const FSubresourceRange& range) const
+		{
+			if (IsPerSubresource() == false)
+				return WholeState;
+			UINT mipBegin, mipEnd, layerBegin, layerEnd;
+			Resolve(range, mipBegin, mipEnd, layerBegin, layerEnd);
+			auto result = At(mipBegin, layerBegin);
+			for (UINT layer = layerBegin; layer < layerEnd; layer++)
+			{
+				for (UINT mip = mipBegin; mip < mipEnd; mip++)
+				{
+					if (At(mip, layer) != result)
+						return EGpuResourceState::GRS_Undefine;
+				}
+			}
+			return result;
+		}
+		// 只记账不发 barrier
+		TR_FUNCTION(SV_NoBind)
+		void SetState(EGpuResourceState state, const FSubresourceRange& range = FSubresourceRange{})
+		{
+			if (IsPerSubresource() == false)
+			{
+				WholeState = state;
+				return;
+			}
+			UINT mipBegin, mipEnd, layerBegin, layerEnd;
+			Resolve(range, mipBegin, mipEnd, layerBegin, layerEnd);
+			for (UINT layer = layerBegin; layer < layerEnd; layer++)
+			{
+				for (UINT mip = mipBegin; mip < mipEnd; mip++)
+					At(mip, layer) = state;
+			}
+		}
+		bool NeedTransition(const FSubresourceRange& range, EGpuResourceState toState) const
+		{
+			if (Locked)
+				return false;
+			if (IsPerSubresource() == false)
+				return WholeState != toState;
+			UINT mipBegin, mipEnd, layerBegin, layerEnd;
+			Resolve(range, mipBegin, mipEnd, layerBegin, layerEnd);
+			for (UINT layer = layerBegin; layer < layerEnd; layer++)
+			{
+				for (UINT mip = mipBegin; mip < mipEnd; mip++)
+				{
+					if (At(mip, layer) != toState)
+						return true;
+				}
+			}
+			return false;
+		}
+		// 先枚举范围内需要转换的段 onSegment(const FSubresourceRange& seg, EGpuResourceState from), 再把范围推进到 toState
+		// Whole 模式或整资源状态一致时只产生一段整资源 (FSubresourceRange{}); 否则每个 layer 内按连续同源状态的 mip 合并
+		template<class _Fn>
+		TR_FUNCTION(SV_NoBind)
+		void Transition(const FSubresourceRange& range, EGpuResourceState toState, _Fn&& onSegment)
+		{
+			if (Locked)
+				return;
+			if (IsPerSubresource() == false)
+			{
+				if (WholeState != toState)
+				{
+					onSegment(FSubresourceRange{}, WholeState);
+					WholeState = toState;
+				}
+				return;
+			}
+			UINT mipBegin, mipEnd, layerBegin, layerEnd;
+			Resolve(range, mipBegin, mipEnd, layerBegin, layerEnd);
+			if (range.Covers(Sub->MipLevels, Sub->ArraySize))
+			{
+				auto cur = GetState();
+				if (cur != EGpuResourceState::GRS_Undefine)
+				{
+					if (cur != toState)
+					{
+						onSegment(FSubresourceRange{}, cur);
+						Sub->States.assign(Sub->States.size(), toState);
+					}
+					return;
+				}
+			}
+			for (UINT layer = layerBegin; layer < layerEnd; layer++)
+			{
+				UINT mip = mipBegin;
+				while (mip < mipEnd)
+				{
+					auto from = At(mip, layer);
+					UINT runEnd = mip + 1;
+					while (runEnd < mipEnd && At(runEnd, layer) == from)
+						runEnd++;
+					if (from != toState)
+					{
+						FSubresourceRange seg;
+						seg.SetRange(mip, runEnd - mip, layer, 1);
+						onSegment(seg, from);
+						for (UINT i = mip; i < runEnd; i++)
+							At(i, layer) = toState;
+					}
+					mip = runEnd;
+				}
+			}
+		}
+	private:
+		struct FSubStates
+		{
+			UINT							MipLevels = 1;
+			UINT							ArraySize = 1;
+			std::vector<EGpuResourceState>	States;
+		};
+		EGpuResourceState& At(UINT mip, UINT layer)
+		{
+			return Sub->States[mip + layer * Sub->MipLevels];
+		}
+		EGpuResourceState At(UINT mip, UINT layer) const
+		{
+			return Sub->States[mip + layer * Sub->MipLevels];
+		}
+		void Resolve(const FSubresourceRange& range, UINT& mipBegin, UINT& mipEnd, UINT& layerBegin, UINT& layerEnd) const
+		{
+			mipEnd = range.GetMipEnd(Sub->MipLevels);
+			layerEnd = range.GetLayerEnd(Sub->ArraySize);
+			mipBegin = range.BaseMip < mipEnd ? range.BaseMip : mipEnd;
+			layerBegin = range.BaseLayer < layerEnd ? range.BaseLayer : layerEnd;
+			// 越界的 view 范围在 PerSubresource 下会漏转换
+			ASSERT(mipBegin < mipEnd && layerBegin < layerEnd);
+		}
+		TR_MEMBER(SV_NoBind)
+		EGpuResourceState				WholeState = EGpuResourceState::GRS_Undefine;
+		TR_MEMBER(SV_NoBind)
+		bool							Locked = false;
+		TR_MEMBER(SV_NoBind)
+		std::unique_ptr<FSubStates>		Sub;
+	};
+
+	class TR_CLASS()
+		IGpuBufferDataBase : public IGpuResource
+	{
+	public:
+		ENGINE_RTTI(IGpuBufferDataBase);
 		virtual void Release() const override{
 			IGpuResource::Release();
 		}
-		virtual EGpuResourceState GetGpuResourceState() {
-			return GpuState;
+		// 返回资源内嵌 tracker 的借用指针, 仅在资源存活期间有效
+		FLayoutTracker* GetLayoutTracker()
+		{
+			return &LayoutTracker;
 		}
-		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) {
-			GpuState = state;
+		// native 内部查询整资源; PerSubresource 状态混合时返回 GRS_Undefine
+		TR_FUNCTION(SV_NoBind)
+		EGpuResourceState GetGpuResourceState() const {
+			return LayoutTracker.GetState();
+		}
+		// 只登记 tracker 不发 GPU 命令: 创建期初始化或接管外部资源 (如交换链 back buffer) 时使用
+		TR_FUNCTION(SV_NoBind)
+		void SetGpuResourceState(EGpuResourceState state) {
+			LayoutTracker.SetState(state);
+		}
+		// 只给 native 内部必然的转换使用; 外部通过 view 绑定由 drawcall/cmdlist 自动决定转换
+		TR_FUNCTION(SV_NoBind)
+		void TransitionTo(ICommandList* cmd, EGpuResourceState state) {
+			TransitionTo(cmd, FSubresourceRange{}, state);
+		}
+		TR_FUNCTION(SV_NoBind)
+		void TransitionTo(ICommandList* cmd, const FSubresourceRange& range, EGpuResourceState state) {
+			LayoutTracker.Transition(range, state, [&](const FSubresourceRange& seg, EGpuResourceState from) {
+				EmitTransition(cmd, seg, from, state);
+			});
+		}
+		// 只发 GPU barrier 不改 tracker, 由 TransitionTo / FTransitionScope / IBarriersDraw 在 tracker 记账后调用; from != to
+		TR_FUNCTION(SV_NoBind)
+		virtual void EmitTransition(ICommandList* cmd, const FSubresourceRange& range, EGpuResourceState from, EGpuResourceState to) {
 		}
 		virtual bool FetchGpuData(IGpuDevice* device, UINT subRes, IBlobObject* blob) = 0;
 		virtual IBuffer* CreateReadable(IGpuDevice* device, int subRes, ICopyDraw* cpDraw) = 0;
@@ -237,11 +520,12 @@ namespace NxRHI
 		virtual bool Map(UINT index, FMappedSubResource* res, bool forRead) = 0;
 		virtual void Unmap(UINT index) = 0;
 	public:
-		EGpuResourceState	GpuState = EGpuResourceState::GRS_Undefine;
+		TR_MEMBER(SV_NoBind)
+		FLayoutTracker		LayoutTracker;
 		bool IsAutoTransition = true;
 	};
 	class TR_CLASS(SV_Dispose = self->Release())
-		IBuffer : public IGpuBufferData
+		IBuffer : public IGpuBufferDataBase
 	{
 	public:
 		ENGINE_RTTI(IBuffer);
@@ -293,7 +577,7 @@ namespace NxRHI
 				MapBuffer.resize(Desc.Size);
 			}
 			auto offset = binder.Offset + stride * (UINT)index;
-			if (memcmp(&MapBuffer[binder.Offset], pData, size) == 0)
+			if (memcmp(&MapBuffer[offset], pData, size) == 0)
 			{
 				return false;
 			}
@@ -417,6 +701,7 @@ namespace NxRHI
 			CpuAccess = (ECpuAccess)0;
 			MiscFlags = (EResourceMiscFlag)0;
 			InitData = nullptr;
+			LayoutTrack = ELayoutTrackMode::LTM_Whole;
 		}
 		void SetShared() {
 			MiscFlags = (EResourceMiscFlag)(MiscFlags | EResourceMiscFlag::RM_SHARED);
@@ -436,9 +721,11 @@ namespace NxRHI
 		ECpuAccess CpuAccess = (ECpuAccess)0;
 		EResourceMiscFlag MiscFlags = (EResourceMiscFlag)0;
 		FMappedSubResource* InitData;
+		// 只有不同子资源会同时处于不同 layout 的纹理 (如 HZB 逐级 mip 建 SRV/UAV) 才需 LTM_PerSubresource
+		ELayoutTrackMode LayoutTrack = ELayoutTrackMode::LTM_Whole;
 	};
 	class TR_CLASS(SV_Dispose = self->Release())
-		ITexture : public IGpuBufferData
+		ITexture : public IGpuBufferDataBase
 	{
 	protected:
 		static std::atomic<int> AliveCount;
@@ -472,6 +759,13 @@ namespace NxRHI
 		{
 			return mipIndex + arrayIndex * Desc.MipLevels;
 		}
+		// 各后端 Init 在设置 Desc 之后, 初始状态登记之前调用
+		TR_FUNCTION(SV_NoBind)
+		void InitLayoutTracker()
+		{
+			if (Desc.LayoutTrack == ELayoutTrackMode::LTM_PerSubresource)
+				LayoutTracker.SetPerSubresource(Desc.MipLevels, Desc.ArraySize);
+		}
 		virtual void* GetSharedHandle() { return nullptr; }
 		virtual bool Map(UINT index, FMappedSubResource* res, bool forRead) override = 0;
 		virtual void Unmap(UINT index) override = 0;
@@ -482,7 +776,7 @@ namespace NxRHI
 		virtual FResourceState* GetResourceState() override {
 			return &mResourceState;
 		}
-		virtual IGpuBufferData* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) = 0;
+		virtual IGpuBufferDataBase* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) = 0;
 		virtual bool FetchGpuData(IGpuDevice* device, UINT index, IBlobObject* blob) override
 		{
 			FMappedSubResource subRes;
@@ -512,6 +806,23 @@ namespace NxRHI
 	{
 		FShaderBinder*	ShaderBinder;
 		UINT			BufferSize = 0;
+		// 仅在 CBV 自建 buffer (pBuffer == nullptr) 时生效, 只接受 DYNAMIC / DEFAULT:
+		// DYNAMIC: upload heap, CPU 直接 Map 写入, 单份内存会与 in-flight 帧竞争;
+		// DEFAULT: 显存, 更新经 staging 拷贝在 GPU 队列中排队, 适合 cbPerCamera 这类跨帧一致性敏感的数据
+		EGpuUsage		Usage = EGpuUsage::USAGE_DYNAMIC;
+	};
+
+	class TR_CLASS()
+		IGpuViewBase : public IGpuResource
+	{
+	public:
+		ENGINE_RTTI(IGpuViewBase);
+		virtual IGpuBufferDataBase* GetBufferDataBase() = 0;
+		// view 被 drawcall 绑定使用时底层资源哪些子资源应处的状态, 由 FTransitionScope::TryAutoTransition(cmd, view, ...) 自动转换
+		// State 为 GRS_Undefine 表示不做自动转换 (如 CBV: DYNAMIC 在 upload heap 上不能转换)
+		virtual FViewLayout GetViewLayout() const {
+			return FViewLayout{};
+		}
 	};
 
 	class ICbView;
@@ -530,11 +841,14 @@ namespace NxRHI
 		void UpdateCBVs();
 	};
 	class TR_CLASS()
-		ICbView : public IGpuResource
+		ICbView : public IGpuViewBase
 	{
 	public:
 		ENGINE_RTTI(ICbView);
 		IBuffer* GetBuffer() {
+			return Buffer;
+		}
+		virtual IGpuBufferDataBase* GetBufferDataBase() override {
 			return Buffer;
 		}
 		const FShaderBinder* GetShaderBinder() {
@@ -663,9 +977,12 @@ namespace NxRHI
 		}
 	};
 	class TR_CLASS()
-		IVbView : public IGpuResource
+		IVbView : public IGpuViewBase
 	{
 	public:
+		virtual IGpuBufferDataBase* GetBufferDataBase() override {
+			return Buffer;
+		}
 		void UpdateGpuData(ICommandList* cmd, UINT offset, void* pData, UINT size)
 		{
 			Buffer->UpdateGpuDataSimple(cmd, (UINT)Desc.Offset + offset, pData, size, 0);
@@ -700,9 +1017,12 @@ namespace NxRHI
 		}
 	};
 	class TR_CLASS()
-		IIbView : public IGpuResource
+		IIbView : public IGpuViewBase
 	{
 	public:
+		virtual IGpuBufferDataBase* GetBufferDataBase() override {
+			return Buffer;
+		}
 		void UpdateGpuData(ICommandList* cmd, UINT offset, void* pData, UINT size)
 		{
 			Buffer->UpdateGpuDataSimple(cmd, (UINT)Desc.Offset + offset, pData, size, 0);
@@ -713,6 +1033,27 @@ namespace NxRHI
 		}
 	public:
 		FIbvDesc			Desc{};
+		AutoRef<IBuffer>	Buffer;
+	};
+
+	// 把 buffer 作为 Indirect Draw/Dispatch 参数使用的 view
+	// drawcall 只记录 view, 由 view 决定 Commit 时 buffer 应转换到的状态
+	class TR_CLASS()
+		IIndirectArgView : public IGpuViewBase
+	{
+	public:
+		virtual IGpuBufferDataBase* GetBufferDataBase() override {
+			return Buffer;
+		}
+		virtual FViewLayout GetViewLayout() const override {
+			FViewLayout result;
+			result.State = EGpuResourceState::GRS_Indirect;
+			return result;
+		}
+		IBuffer* GetBuffer() {
+			return Buffer;
+		}
+	public:
 		AutoRef<IBuffer>	Buffer;
 	};
 
@@ -890,7 +1231,7 @@ namespace NxRHI
 		};
 	};
 	class TR_CLASS()
-		ISrView : public IGpuResource
+		ISrView : public IGpuViewBase
 	{
 	public:
 		ENGINE_RTTI(ISrView);
@@ -900,10 +1241,14 @@ namespace NxRHI
 				return true;
 			return false;
 		}
-		virtual bool UpdateBuffer(IGpuDevice* device, IGpuBufferData* buffer)  = 0;
-		IGpuBufferData* GetBuffer() {
+		virtual bool UpdateBuffer(IGpuDevice* device, IGpuBufferDataBase* buffer)  = 0;
+		IGpuBufferDataBase* GetBuffer() {
 			return Buffer;
 		}
+		virtual IGpuBufferDataBase* GetBufferDataBase() override {
+			return Buffer;
+		}
+		virtual FViewLayout GetViewLayout() const override;
 		ITexture* GetBufferAsTexture();
 		IBuffer* GetBufferAsBuffer();
 		virtual FResourceState* GetResourceState() override{
@@ -915,7 +1260,7 @@ namespace NxRHI
 	public:
 		TR_MEMBER(SV_NoBind)
 		FResourceState			ResourceState;
-		AutoRef<IGpuBufferData>	Buffer;
+		AutoRef<IGpuBufferDataBase>	Buffer;
 		FSrvDesc		Desc;
 	};
 
@@ -1018,12 +1363,17 @@ namespace NxRHI
 		};
 	};
 	class TR_CLASS()
-		IUaView : public IGpuResource
+		IUaView : public IGpuViewBase
 	{
 	public:
 		ENGINE_RTTI(IUaView);
+		virtual FViewLayout GetViewLayout() const override;
+		virtual IGpuBufferDataBase* GetBufferDataBase() override {
+			return Buffer;
+		}
+	public:
 		FUavDesc		Desc;
-		AutoRef<IGpuBufferData>	Buffer;
+		AutoRef<IGpuBufferDataBase>	Buffer;
 	};
 	
 	enum TR_ENUM()
@@ -1138,12 +1488,16 @@ namespace NxRHI
 	};
 
 	class TR_CLASS()
-		IRenderTargetView : public IGpuResource
+		IRenderTargetView : public IGpuViewBase
 	{
 	public:
 		ENGINE_RTTI(IRenderTargetView);
+		virtual FViewLayout GetViewLayout() const override;
 
 		ITexture* GetTexture() {
+			return GpuResource;
+		}
+		virtual IGpuBufferDataBase* GetBufferDataBase() override {
 			return GpuResource;
 		}
 	public:
@@ -1193,11 +1547,15 @@ namespace NxRHI
 	};
 
 	class TR_CLASS()
-		IDepthStencilView : public IGpuResource
+		IDepthStencilView : public IGpuViewBase
 	{
 	public:
 		ENGINE_RTTI(IDepthStencilView);
+		virtual FViewLayout GetViewLayout() const override;
 		ITexture* GetTexture() {
+			return GpuResource;
+		}
+		virtual IGpuBufferDataBase* GetBufferDataBase() override {
 			return GpuResource;
 		}
 	public:

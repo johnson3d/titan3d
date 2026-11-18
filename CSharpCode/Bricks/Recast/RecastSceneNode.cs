@@ -115,7 +115,7 @@ namespace EngineNS.Bricks.Recast
                 }
                 return false;
             };
-            world.GatherVisibleMeshes(rp);
+            GatherNavMeshInputOnRenderThread(rp);
             var wholeMdp = new Graphics.Mesh.TtMeshDataProvider();
             wholeMdp.Init((1 << (int)NxRHI.EVertexStreamType.VST_Position), true, 0);
             foreach (var i in rp.VisibleMeshes)
@@ -141,11 +141,34 @@ namespace EngineNS.Bricks.Recast
 
             return true;
         }
+        // 场景遍历只能在渲染线程进行, 编辑器按钮回调在主线程, 投递后等待收集完成
+        static void GatherNavMeshInputOnRenderThread(TtWorld.TtVisParameter rp)
+        {
+            var engine = TtEngine.Instance;
+            if (engine.Config.UseRenderThread == false || engine.ThreadRender.IsFinished ||
+                engine.EventPoster.IsThread(Thread.Async.EAsyncTarget.Render))
+            {
+                rp.World.GatherVisibleMeshes(rp);
+                return;
+            }
+
+            using (var completedEvent = new System.Threading.AutoResetEvent(false))
+            {
+                engine.ThreadRender.QueueRenderAction("RecastSceneNode.GatherNavMeshInput",
+                    static (in Thread.TtThreadRender.FRenderAction action) =>
+                    {
+                        var p = action.Arg as TtWorld.TtVisParameter;
+                        p.World.GatherVisibleMeshes(p);
+                    }, rp);
+                engine.ThreadRender.WaitFinishRenderAction(completedEvent);
+            }
+        }
         public TtNavMesh mNavMesh;
         public Graphics.Mesh.TtRenderMesh mDebugMesh;
         public Graphics.Mesh.TtRenderMesh mDebugMeshWireFrame;
         public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             if ((rp.CullFilters & GamePlay.TtWorld.TtVisParameter.EVisCullFilter.NavMesh) == 0)
                 return;
 

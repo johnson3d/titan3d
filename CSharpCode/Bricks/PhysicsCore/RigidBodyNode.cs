@@ -289,6 +289,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public override void OnGatherVisibleMeshes_OnRenderThread(GamePlay.TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             //if (TtEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug) == false)
             //    return;
 

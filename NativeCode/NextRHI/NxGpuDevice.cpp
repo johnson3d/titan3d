@@ -136,6 +136,15 @@ namespace NxRHI
 	{
 		return mDescriptorPoolManager;
 	}
+	IIndirectArgView* IGpuDevice::CreateIAV(IBuffer* pBuffer, const char* file, int line)
+	{
+		if (pBuffer == nullptr)
+			return nullptr;
+		ASSERT(pBuffer->Desc.Type & EBufferType::BFT_IndirectArgs);
+		auto result = NewObjectWithInfo<IIndirectArgView>(file ? file : __FILE__, line);
+		result->Buffer = pBuffer;
+		return result;
+	}
 	IGraphicDraw* IGpuDevice::CreateGraphicDraw(const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<IGraphicDraw>(file ? file : __FILE__, line);

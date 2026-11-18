@@ -21,16 +21,85 @@ IRenderDocTool::IRenderDocTool()
 	mHWDevice = nullptr;
 }
 
+static bool PrepareRenderDocLayerPath(const std::string& directory)
+{
+	const auto manifest = directory + "/renderdoc.json";
+	const auto attributes = GetFileAttributesA(manifest.c_str());
+	if (attributes == INVALID_FILE_ATTRIBUTES || (attributes & FILE_ATTRIBUTE_DIRECTORY) != 0)
+	{
+		VFX_LTRACE(ELTT_Warning, "RenderDoc: missing Vulkan layer manifest %s; D3D capture remains available, Vulkan capture requires a matching layer\r\n", manifest.c_str());
+		return false;
+	}
+
+	auto readEnvironment = [](const char* name)
+	{
+		const auto size = GetEnvironmentVariableA(name, nullptr, 0);
+		std::string value(size, '\0');
+		if (size != 0)
+		{
+			const auto length = GetEnvironmentVariableA(name, &value[0], size);
+			if (length < size)
+				value.resize(length);
+			else
+				value.clear();
+		}
+		return value;
+	};
+
+	// 显式覆盖存在时 ADD 路径会被 loader 忽略; 保留原路径并在最前面加入同 DLL 的 manifest 目录。
+	const auto overridePath = readEnvironment("VK_IMPLICIT_LAYER_PATH");
+	const char* variable = overridePath.empty() ? "VK_ADD_IMPLICIT_LAYER_PATH" : "VK_IMPLICIT_LAYER_PATH";
+	const auto previous = overridePath.empty() ? readEnvironment(variable) : overridePath;
+	const auto searchPath = directory + (previous.empty() ? "" : ";" + previous);
+	if (!SetEnvironmentVariableA(variable, searchPath.c_str()) ||
+		!SetEnvironmentVariableA("ENABLE_VULKAN_RENDERDOC_CAPTURE", "1"))
+	{
+		VFX_LTRACE(ELTT_Error, "RenderDoc: could not configure process-local Vulkan layer path, error %lu\r\n", GetLastError());
+		return false;
+	}
+	VFX_LTRACE(ELTT_info, "RenderDoc: %s=%s\r\n", variable, searchPath.c_str());
+	return true;
+}
+
 void IRenderDocTool::InitRenderDoc(const char* path)
 {
 	// At init, on windows
-	auto rdModule = LoadLibraryA(path);
-	if (HMODULE mod = GetModuleHandleA(path))
+	if (mApi != nullptr)
+		return;
+
+	// 外部工具注入时复用已有模块; 普通启动使用调用方选定的 DLL, 两者都让 layer 与 API 指向同一份文件。
+	HMODULE mod = GetModuleHandleA("renderdoc.dll");
+	char modulePath[32768]{};
+	const auto length = mod != nullptr ? GetModuleFileNameA(mod, modulePath, sizeof(modulePath)) :
+		(path != nullptr ? GetFullPathNameA(path, sizeof(modulePath), modulePath, nullptr) : 0);
+	if (length == 0 || length >= sizeof(modulePath))
+	{
+		VFX_LTRACE(ELTT_Error, "RenderDoc: invalid DLL path\r\n");
+		return;
+	}
+	if (mod == nullptr)
+		mod = LoadLibraryA(modulePath);
+	if (mod == nullptr)
+	{
+		VFX_LTRACE(ELTT_Error, "RenderDoc: failed to load %s, error %lu\r\n", modulePath, GetLastError());
+		return;
+	}
 	{
 		pRENDERDOC_GetAPI RENDERDOC_GetAPI =
 			(pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
-		int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_6_0, (void**)&mApi);
-		assert(ret == 1);
+		RENDERDOC_API_1_6_0* api = nullptr;
+		if (RENDERDOC_GetAPI == nullptr || RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_6_0, (void**)&api) != 1 || api == nullptr)
+		{
+			VFX_LTRACE(ELTT_Error, "RenderDoc: could not obtain API 1.6.0 from %s\r\n", modulePath);
+			return;
+		}
+		mApi = api;
+		VFX_LTRACE(ELTT_info, "RenderDoc: API module %s\r\n", modulePath);
+		const std::string fullPath(modulePath);
+		const auto separator = fullPath.find_last_of("/\\");
+		// Vulkan instance 尚未创建; manifest 不存在只影响 Vulkan, 不阻断已注入的 D3D API。
+		if (separator != std::string::npos)
+			PrepareRenderDocLayerPath(fullPath.substr(0, separator));
 		mApi->SetCaptureOptionU32(RENDERDOC_CaptureOption::eRENDERDOC_Option_CaptureAllCmdLists, 1);
 
 		auto opt = FGlobalConfig::GetInstance()->GetConfigValueI32("RenderDocCallStacks");
@@ -143,7 +212,12 @@ const char* IRenderDocTool::GetCapture(UINT idx, UINT64* timestamp)
 
 UINT IRenderDocTool::OpenFile(const char* capturedFile)
 {
-	return mApi->LaunchReplayUI(1, capturedFile);
+	if (mApi == nullptr)
+		return 0;
+	const auto result = mApi->LaunchReplayUI(1, capturedFile);
+	if (result == 0)
+		VFX_LTRACE(ELTT_Warning, "RenderDoc: capture saved, but replay UI could not be opened; open %s in RenderDoc manually\r\n", capturedFile);
+	return result;
 }
 
 NS_END

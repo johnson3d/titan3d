@@ -75,14 +75,13 @@ namespace EngineNS.NxRHI
     }
     public interface TtGpuResource : IDisposable
     {
-        IGpuBufferData GetGpuBufferDataPointer();
+        IGpuBufferDataBase GetGpuBufferDataPointer();
         unsafe void Map(uint subRes, FMappedSubResource* mapped, bool forRead);
         unsafe void Umap(uint subRes);
-        void TransitionTo(ICommandList cmd, EGpuResourceState state);
-        void TransitionTo(TtCommandList cmd, EGpuResourceState state);
         unsafe void UpdateGpuData(NxRHI.ICommandList cmd, uint subRes, void* pData, EngineNS.NxRHI.FSubResourceFootPrint* footPrint);
         void SetDebugName(string name);
-        EGpuResourceState GpuState
+        // 借用资源内嵌的原生 tracker, 仅在资源存活期间可查询
+        FLayoutTracker LayoutTracker
         {
             get;
         }
@@ -108,7 +107,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.SetDebugName(name);
         }
-        public IGpuBufferData GetGpuBufferDataPointer()
+        public IGpuBufferDataBase GetGpuBufferDataPointer()
         {
             return mCoreObject.NativeSuper;
         }
@@ -180,17 +179,10 @@ namespace EngineNS.NxRHI
         {
             return mCoreObject.CreateReadable(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, subRes, cpDraw);
         }
-        public void TransitionTo(ICommandList cmd, EGpuResourceState state)
+        // 不拥有 tracker; 资源释放后不能再使用此指针包装
+        public FLayoutTracker LayoutTracker
         {
-            mCoreObject.NativeSuper.TransitionTo(cmd, state);
-        }
-        public void TransitionTo(TtCommandList cmd, EGpuResourceState state)
-        {
-            mCoreObject.NativeSuper.TransitionTo(cmd.mCoreObject, state);
-        }
-        public EGpuResourceState GpuState
-        {
-            get => mCoreObject.NativeSuper.GpuState;
+            get => mCoreObject.NativeSuper.GetLayoutTracker();
         }
         public bool IsAutoTransition
         {
@@ -252,7 +244,7 @@ namespace EngineNS.NxRHI
             mCoreObject = ptr;
             mCoreObject.NativeSuper.NativeSuper.AddRef();
         }
-        public IGpuBufferData GetGpuBufferDataPointer()
+        public IGpuBufferDataBase GetGpuBufferDataPointer()
         {
             return mCoreObject.NativeSuper;
         }
@@ -300,14 +292,6 @@ namespace EngineNS.NxRHI
         {
             return mCoreObject.CreateReadable(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, subRes, cpDraw);
         }
-        public void TransitionTo(ICommandList cmd, EGpuResourceState state)
-        {
-            mCoreObject.NativeSuper.TransitionTo(cmd, state);
-        }
-        public void TransitionTo(TtCommandList cmd, EGpuResourceState state)
-        {
-            mCoreObject.NativeSuper.TransitionTo(cmd.mCoreObject, state);
-        }
         public unsafe TtGpuResource CreateBufferData(uint mipIndex, ECpuAccess cpuAccess, ref EngineNS.NxRHI.FSubResourceFootPrint outFootPrint)
         {
             var device = TtEngine.Instance.GfxDevice.RenderContext;
@@ -331,9 +315,10 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.SetDebugName(name);
         }
-        public EGpuResourceState GpuState
+        // 不拥有 tracker; 资源释放后不能再使用此指针包装
+        public FLayoutTracker LayoutTracker
         {
-            get => mCoreObject.NativeSuper.GpuState;
+            get => mCoreObject.NativeSuper.GetLayoutTracker();
         }
         public bool IsAutoTransition
         {
@@ -353,7 +338,7 @@ namespace EngineNS.NxRHI
     {
         public void SetDebugName(string name)
         {
-            mCoreObject.NativeSuper.SetDebugName(name);
+            mCoreObject.NativeSuper.NativeSuper.SetDebugName(name);
         }
         public void FlushDirty(NxRHI.ICommandList cmd, bool clear = false)
         {
@@ -555,6 +540,21 @@ namespace EngineNS.NxRHI
     public class TtUaView : AuxPtrType<NxRHI.IUaView>
     {
     }
+    /// <summary>
+    /// buffer 作为 Indirect Draw/Dispatch 参数的 view, 由 RenderContext.CreateIAV 创建。
+    /// drawcall 只记录 view, Commit 时由 native 按 view 自动转换 buffer 状态, 外部不再手动 TransitionTo。
+    /// </summary>
+    public class TtIndirectArgBufferView : AuxPtrType<NxRHI.IIndirectArgView>
+    {
+        public TtIndirectArgBufferView()
+        {
+
+        }
+        public TtIndirectArgBufferView(IIndirectArgView ptr)
+        {
+            mCoreObject = ptr;
+        }
+    }
 
     // -------------------------------------------------------------------------
     // TtBindless: bindless descriptor table 的托管包装. 一份 TtBindless 实例对应
@@ -610,15 +610,15 @@ namespace EngineNS.NxRHI
 
         public bool SetSrv(uint index, TtSrView res)
         {
-            return mCoreObject.SetResource(index, res.mCoreObject.NativeSuper);
+            return mCoreObject.SetResource(index, res.mCoreObject.NativeSuper.NativeSuper);
         }
         public bool SetCbv(uint index, TtCbView res)
         {
-            return mCoreObject.SetResource(index, res.mCoreObject.NativeSuper);
+            return mCoreObject.SetResource(index, res.mCoreObject.NativeSuper.NativeSuper);
         }
         public bool SetUav(uint index, TtUaView res)
         {
-            return mCoreObject.SetResource(index, res.mCoreObject.NativeSuper);
+            return mCoreObject.SetResource(index, res.mCoreObject.NativeSuper.NativeSuper);
         }
         // bindless sampler 表. HLSL 端: SamplerState Foo[] DX_AUTOBIND;
         public bool SetSampler(uint index, TtSampler res)

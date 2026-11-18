@@ -66,7 +66,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             PassDesc.NumOfMRT = 1;
             PassDesc.AttachmentMRTs[0].Format = format;
             PassDesc.AttachmentMRTs[0].Samples = 1;
-            PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+            PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
             PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             PassDesc.m_AttachmentDepthStencil.Format = DepthPinInOut.Attachement.Format;// dfPolicy.BasePassNode.GBuffers.DepthStencil.AttachBuffer.Srv.mCoreObject.GetFormat(); //dsFmt;
             PassDesc.m_AttachmentDepthStencil.Samples = 1;

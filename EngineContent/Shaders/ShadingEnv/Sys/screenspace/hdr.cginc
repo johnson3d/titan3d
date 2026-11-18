@@ -36,7 +36,12 @@ float3 ACESToneMapping(float3 color)
 float EyeAdaption(float lum)
 {
 	//return lum;
-	return GpuSceneDescSRV[0].EyeAdapter;
+	float eyeAdapter = GpuSceneDescSRV[0].EyeAdapter;
+	if (isnan(eyeAdapter) || isinf(eyeAdapter) || eyeAdapter < 0.0f)
+		eyeAdapter = lum;
+	if (isnan(eyeAdapter) || isinf(eyeAdapter) || eyeAdapter < 0.0f)
+		eyeAdapter = 0.5f;
+	return eyeAdapter;
 }
 
 float3 ToneMap2(float3 color)

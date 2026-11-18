@@ -23,7 +23,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
         /// <summary>
         /// 远景绘制 modifier: 绑定 cull 产物 + indirect args。
         /// indirect 路径与 VoxelDebugger/TtParticleMdfQueue 同款
-        /// (TtGraphicDraw.Commit 检测到 IndirectDrawArgsBuffer 时走 ExecuteIndirect)。
+        /// (TtGraphicDraw.Commit 检测到 IndirectDrawArgsView 时走 ExecuteIndirect)。
         /// </summary>
         public class TtVgDagDrawModifier : Graphics.Pipeline.Shader.IMeshModifier
         {
@@ -64,7 +64,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
                     return;
 
                 drawcall.BindSRV("VgDrawClusters", host.ReadClusters.Srv);
+                drawcall.BindSRV("VgClusterBuffer", host.VisClusters.Srv);
                 drawcall.BindSRV("VgVertexBuffer", host.VisVertices.Srv);
+                drawcall.BindSRV("VgIndexBuffer", host.VisIndices.Srv);
                 var binder = drawcall.FindBinder(EShaderBindType.SBT_CBV, "cbVgVisParams");
                 if (binder.IsValidPointer)
                 {
@@ -83,7 +85,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
                     drawcall.BindCBV(binder, node.CBVisParams);
                 }
                 // arg 初始全 0(InstanceCount=0), 首帧天然执行 0 个 draw
-                drawcall.BindIndirectDrawArgsBuffer(host.ReadArgs.GpuBuffer, 0);
+                drawcall.BindIndirectDrawArgsView(host.ReadArgs.Iav, 0);
             }
             public void Dispose()
             {
@@ -115,12 +117,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
 
         public TtCbView CBVisParams;
 
-        /// <summary>LOD 选择阈值(QEM 代价, 量纲 texel²), 转发给 FarTerrain。</summary>
+        /// <summary>LOD 选择阈值: 屏幕空间竖直误差(像素), 转发给 FarTerrain。</summary>
         [Rtti.Meta("")]
-        public float ErrorThreshold
+        public float PixelErrorThreshold
         {
-            get => FarTerrain.ErrorThreshold;
-            set => FarTerrain.ErrorThreshold = value;
+            get => FarTerrain.PixelErrorThreshold;
+            set => FarTerrain.PixelErrorThreshold = value;
         }
 
         /// <summary>patch mesh 材质(默认无光调试材质; 最终应换成地形材质走完整延迟光照)。</summary>
@@ -137,6 +139,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
         private Graphics.Mesh.TtRenderMesh mDrawMesh;
         private GamePlay.Scene.TtMeshNode mDrawMeshNode;
         private bool mMaterialLoading = false;
+        /// <summary>绘制网格建立失败(材质缺失等): 不再每帧重试, 改 MaterialName 后复位。</summary>
+        private bool mDrawMeshFailed = false;
+        private RName mFailedMaterialName;
+        private bool mDisposed = false;
 
         public TtVgDagDrawNode()
         {
@@ -150,6 +156,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
             base.InitNodePins();
         }
 
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
+        {
+            base.OnResize(policy, x, y);
+            FarTerrain.ViewportHeight = y;
+        }
+
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
@@ -159,33 +171,73 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
 
         public override void Dispose()
         {
+            mDisposed = true;
             CoreSDK.DisposeObject(ref CBVisParams);
-            CoreSDK.DisposeObject(ref mDrawMesh);
+            // 先把绘制节点从 world 摘掉并断开 modifier → 节点的反向引用, 再释放网格
+            DetachDrawMesh();
             mFarTerrain?.Dispose();
             mFarTerrain = null;
             base.Dispose();
         }
 
         /// <summary>
-        /// 建立 patch 绘制网格(17x17 顶点, 16x16 quads)并挂到 world。
-        /// 网格几何是 dummy(modifier VS 用 vVertexID 行主序重定位到顶点池),
-        /// 但 index buffer 的行主序拓扑就是绘制连法。
+        /// 建立 patch 绘制网格并挂到 world: MaxClusterIndexCount 个顶点 + 顺序索引,
+        /// 使 vVertexID 恰为实例内索引序号; 几何是 dummy, modifier VS 按 cluster
+        /// 局部索引重定位到顶点池。
         /// </summary>
+        private static unsafe Graphics.Mesh.TtMeshDataProvider MakePatchMesh()
+        {
+            var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
+            meshBuilder.AssetName = RName.GetRName("@VgDagPatch", RName.ERNameType.Transient);
+            var builder = meshBuilder.mCoreObject;
+            builder.Init((uint)(1 << (int)NxRHI.EVertexStreamType.VST_Position), true, 1);
+            const int count = TtVgDagGpuData.MaxClusterIndexCount;
+            for (int i = 0; i < count; i++)
+            {
+                // 各顶点位置互不相同, 避免任何按位置的顶点合并
+                var pos = new Vector3((float)i, 0, 0);
+                builder.AddVertex(in pos, in Vector3.Zero, in Vector2.Zero, 0xFFFFFFFF);
+            }
+            for (uint t = 0; t < count / 3; t++)
+                builder.AddTriangle(t * 3, t * 3 + 1, t * 3 + 2);
+
+            var dpDesc = new NxRHI.FMeshAtomDesc();
+            dpDesc.SetDefault();
+            dpDesc.NumPrimitives = (uint)(count / 3);
+            builder.PushAtomLOD(0, in dpDesc);
+            return meshBuilder;
+        }
+
+        private void DetachDrawMesh()
+        {
+            if (mDrawMeshNode != null)
+            {
+                mDrawMeshNode.Parent = null;
+                mDrawMeshNode = null;
+            }
+            if (mDrawMesh != null && mDrawMesh.MdfQueue != null)
+                mDrawMesh.MdfQueue.MdfDatas = null;
+            CoreSDK.DisposeObject(ref mDrawMesh);
+        }
+
         private async Thread.Async.TtTask EnsureDrawMesh(GamePlay.TtWorld world)
         {
             if (mDrawMesh != null || MaterialName == null || mMaterialLoading)
                 return;
+            if (mDrawMeshFailed && mFailedMaterialName == MaterialName)
+                return;
+            mDrawMeshFailed = false;
             mMaterialLoading = true;
 
             var material = await MaterialName.GetAsset<Graphics.Pipeline.Shader.TtMaterial>();
-            if (material == null)
+            if (material == null || mDisposed)
             {
-                mMaterialLoading = false;
+                MarkDrawMeshFailed(material == null);
                 return;
             }
 
-            // patch 固定拓扑必须与 VgDagCull.compute 的 VG_PATCH_GRID_SIDE 一致
-            var patch = Graphics.Mesh.TtMeshDataProvider.MakeGridForTerrain(16, 16);
+            // patch 容量必须与 VgDagLod.cginc 的 VG_CLUSTER_MAX_INDEX 一致
+            var patch = MakePatchMesh();
             mDrawMesh = new Graphics.Mesh.TtRenderMesh();
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = material;
@@ -193,7 +245,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
                 Rtti.TtTypeDescGetter<TtMdfVgDagDrawMesh>.TypeDesc))
             {
                 CoreSDK.DisposeObject(ref mDrawMesh);
-                mMaterialLoading = false;
+                MarkDrawMeshFailed(true);
                 return;
             }
             mDrawMesh.MdfQueue.MdfDatas = this;
@@ -201,12 +253,34 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
             var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, world.Root,
                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement),
                 mDrawMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+            if (meshNode == null)
+            {
+                DetachDrawMesh();
+                MarkDrawMeshFailed(true);
+                return;
+            }
             meshNode.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleAlways);
             meshNode.NodeData.Name = "VGDag_FarDrawMesh";
             meshNode.IsAcceptShadow = false;
             meshNode.IsCastShadow = false;
             meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
             mDrawMeshNode = meshNode;
+            mMaterialLoading = false;
+            // await 期间节点已被 Dispose: 立刻摘掉, 不留孤儿节点在 world 里
+            if (mDisposed)
+                DetachDrawMesh();
+        }
+
+        private void MarkDrawMeshFailed(bool failed)
+        {
+            mMaterialLoading = false;
+            if (failed)
+            {
+                mDrawMeshFailed = true;
+                mFailedMaterialName = MaterialName;
+                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning,
+                    $"VgDagDrawNode: build far draw mesh failed (material={MaterialName}), will not retry until MaterialName changes");
+            }
         }
 
         public unsafe override void Tick(GamePlay.TtWorld world, TtRenderPolicy policy, TtCommandList frameCmdList, bool bClear)
@@ -219,7 +293,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
             FarTerrain.TickPrepare(policy);
 
             // 绘制网格惰性建立(需 world 与材质就绪); 之后由 scene 采集链走 gbuffer
-            if (world != null && mDrawMeshNode == null)
+            // (异步但有 mMaterialLoading 防重入 + 失败不重试; 完成前本节点仅做 prepare 不出图)
+            if (world != null && mDrawMeshNode == null && !mDisposed)
             {
                 var task = EnsureDrawMesh(world);
             }

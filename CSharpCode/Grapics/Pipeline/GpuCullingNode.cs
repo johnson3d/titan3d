@@ -16,14 +16,15 @@ namespace EngineNS.Graphics.Pipeline
         {
             return null;
         }
-        public T InitRenderMesh<T>(Mesh.TtMaterialMesh.TtSubMaterialedMesh mesh) where T : Pipeline.Shader.TtMdfQueueBase
+        public T InitRenderMesh<T>(Mesh.TtMaterialMesh.TtSubMaterialedMesh mesh, TtMaterial.ERenderFlags meshRenderFlags) where T : Pipeline.Shader.TtMdfQueueBase
         {
             Mesh = mesh.Mesh;
             Materials = mesh.Materials;
             MaterialMesh = new Mesh.TtMaterialMesh();
             MaterialMesh.Initialize(new List<Mesh.TtMeshPrimitives>() { Mesh }, new List<List<Pipeline.Shader.TtMaterial>> { Materials });
 
-            RenderMesh = new Graphics.Mesh.TtRenderMesh();
+            // flags 属于 batch，在初始化期间、首次创建 cbPerMesh 之前确定。
+            RenderMesh = new Graphics.Mesh.TtRenderMesh() { MeshRenderFlags = meshRenderFlags };
             RenderMesh.Initialize(MaterialMesh, Rtti.TtTypeDescGetter<T>.TypeDesc );
             return RenderMesh.MdfQueue as T;
         }
@@ -34,9 +35,10 @@ namespace EngineNS.Graphics.Pipeline
         public Graphics.Mesh.TtRenderMesh RenderMesh;
         public Mesh.TtMdfInstanceStaticMesh MdfQueue;
         public Graphics.Mesh.Modifier.TtGpuDrivenData GpuDrivenData = new Graphics.Mesh.Modifier.TtGpuDrivenData();
-        public void Initialize(Graphics.Pipeline.TtGpuCullingNode node, Mesh.TtMaterialMesh mesh, Mesh.TtMdfInstanceStaticMesh mdfQueue)
+        public void Initialize(Graphics.Pipeline.TtGpuCullingNode node, Mesh.TtMaterialMesh mesh, Mesh.TtMdfInstanceStaticMesh mdfQueue, TtMaterial.ERenderFlags meshRenderFlags)
         {
-            RenderMesh = new Graphics.Mesh.TtRenderMesh();
+            // 在共享源 mesh 的 CBV 之前缓存 flags，构建后不再逐实例写入。
+            RenderMesh = new Graphics.Mesh.TtRenderMesh() { MeshRenderFlags = meshRenderFlags };
             RenderMesh.Initialize(mesh, Rtti.TtTypeDescGetter<Mesh.TtMdfInstanceStaticMesh>.TypeDesc);
 
             MdfQueue = RenderMesh.MdfQueue as Mesh.TtMdfInstanceStaticMesh;
@@ -54,9 +56,9 @@ namespace EngineNS.Graphics.Pipeline
     public class TtStaticMeshBatch : TtMeshBatchBase
     {
         public Mesh.TtMdfInstanceStaticMesh MdfQueue;
-        public void Initialize(Graphics.Pipeline.TtGpuCullingNode node, Mesh.TtMaterialMesh.TtSubMaterialedMesh mesh)
+        public void Initialize(Graphics.Pipeline.TtGpuCullingNode node, Mesh.TtMaterialMesh.TtSubMaterialedMesh mesh, TtMaterial.ERenderFlags meshRenderFlags)
         {
-            MdfQueue = InitRenderMesh<Mesh.TtMdfInstanceStaticMesh>(mesh);
+            MdfQueue = InitRenderMesh<Mesh.TtMdfInstanceStaticMesh>(mesh, meshRenderFlags);
             MdfQueue.InstanceModifier.SetCapacity(512, true);
             GpuDrivenData.SetupGpuData(node, MdfQueue.InstanceModifier);
             MdfQueue.InstanceModifier.GpuDrivenData = GpuDrivenData;
@@ -83,13 +85,19 @@ namespace EngineNS.Graphics.Pipeline
         // 本 batch 合并的是哪一级 LOD 的地形网格 (与 patch.TerrainMesh[LodLevel] 对应,
         // 同一 batch 内所有实例几何同 LOD, per-patch 的运行时 LOD 走 instance 数据)
         public int LodLevel;
-        public void Initialize(Graphics.Pipeline.TtGpuCullingNode node, Mesh.TtMaterialMesh.TtSubMaterialedMesh mesh, int lodLevel)
+        public void Initialize(Graphics.Pipeline.TtGpuCullingNode node, Mesh.TtMaterialMesh.TtSubMaterialedMesh mesh, int lodLevel, Bricks.Terrain.CDLOD.TtTerrainNode terrainNode)
         {
             LodLevel = lodLevel;
-            MdfQueue = InitRenderMesh<Bricks.Terrain.CDLOD.TtTerrainInstanceMdfQueue>(mesh);
+            MdfQueue = InitRenderMesh<Bricks.Terrain.CDLOD.TtTerrainInstanceMdfQueue>(mesh, terrainNode.MeshRenderFlags);
+            MdfQueue.TerrainModifier.TerrainNode = terrainNode;
             MdfQueue.InstanceModifier.SetCapacity(512, true);
             GpuDrivenData.SetupGpuData(node, MdfQueue.InstanceModifier);
             MdfQueue.InstanceModifier.GpuDrivenData = GpuDrivenData;
+        }
+        public void UpdateRenderFlags()
+        {
+            // 节点是唯一来源；每个 batch 在剔除阶段检查一次，属性 setter 只上传变化值。
+            RenderMesh.MeshRenderFlags = MdfQueue.TerrainModifier.TerrainNode.MeshRenderFlags;
         }
         public override Graphics.Mesh.Modifier.TtInstanceModifier GetInstanceModifier()
         {
@@ -241,13 +249,14 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     foreach (var i in TerrainMeshBatches)
                     {
+                        i.Value.UpdateRenderFlags();
                         var modifier = i.Value.GetInstanceModifier();
                         i.Value.GpuDrivenData.InstanceCulling(modifier, cmd.mCoreObject, policy);
                     }
                 }
             }   
         }
-        public void Commit(TtRenderPolicy policy, NxRHI.TtCommandList cmd, TtGraphicsBuffers GBuffers)
+        public void Commit(TtRenderPolicy policy, NxRHI.TtCommandList cmd, NxRHI.TtCmdRecorder cmdRecorder, TtGraphicsBuffers GBuffers)
         {
             var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
             foreach (var i in TerrainMeshBatches.Values)
@@ -263,7 +272,7 @@ namespace EngineNS.Graphics.Pipeline
                             if (drawcall != null)
                             {
                                 drawcall.BindGBuffer(camera, GBuffers);
-                                cmd.PushGpuDraw(drawcall);
+                                cmdRecorder.PushGpuDraw(drawcall);
                             }
                         }
                     }
@@ -285,7 +294,7 @@ namespace EngineNS.Graphics.Pipeline
                             if (drawcall != null)
                             {
                                 drawcall.BindGBuffer(camera, GBuffers);
-                                cmd.PushGpuDraw(drawcall);
+                                cmdRecorder.PushGpuDraw(drawcall);
                             }
                         }
                     }
@@ -299,7 +308,8 @@ namespace EngineNS.Graphics.Pipeline
         [Rtti.Meta("")]
         public bool EnableTerrainBatch { get; set; } = true;
         #region InstanceMeshCulling
-        public Dictionary<Hash64, TtInstanceStaticMeshBatch> InstanceMeshes = new Dictionary<Hash64, TtInstanceStaticMeshBatch>();
+        // flags 在 batch 构建时固定，运行时切换会选取对应的实例渲染 batch。
+        public Dictionary<(Hash64 MeshHash, TtMaterial.ERenderFlags MeshRenderFlags), TtInstanceStaticMeshBatch> InstanceMeshes = new Dictionary<(Hash64, TtMaterial.ERenderFlags), TtInstanceStaticMeshBatch>();
         private void ResetInstanceMesh()
         {
             foreach (var i in InstanceMeshes.Values)
@@ -309,13 +319,13 @@ namespace EngineNS.Graphics.Pipeline
         }
         private FVisibleMesh PushInstanceMesh(Mesh.TtRenderMesh mesh, Mesh.TtMdfInstanceStaticMesh mdfQueue)
         {
-            var hash = TtInstanceStaticMeshBatch.MeshBatchHash(mesh);
+            var key = (TtInstanceStaticMeshBatch.MeshBatchHash(mesh), mesh.MeshRenderFlags);
             TtInstanceStaticMeshBatch batch;
-            if (InstanceMeshes.TryGetValue(hash, out batch) == false)
+            if (InstanceMeshes.TryGetValue(key, out batch) == false)
             {
                 batch = new TtInstanceStaticMeshBatch();
-                batch.Initialize(this, mesh.MaterialMesh, mdfQueue);
-                InstanceMeshes.Add(hash, batch);
+                batch.Initialize(this, mesh.MaterialMesh, mdfQueue, key.Item2);
+                InstanceMeshes.Add(key, batch);
             }
             batch.IsDraw = true;
             //var tm = mesh.PerMeshCBuffer.GetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
@@ -327,7 +337,8 @@ namespace EngineNS.Graphics.Pipeline
         }
         #endregion
         #region StaticMeshBatch
-        public Dictionary<Hash64, TtStaticMeshBatch> StaticMeshBatches = new Dictionary<Hash64, TtStaticMeshBatch>();
+        // flags 是精确键的一部分，不能让不同 flags 的实例共享同一份 batch CBV。
+        public Dictionary<(Hash64 MeshHash, TtMaterial.ERenderFlags MeshRenderFlags), TtStaticMeshBatch> StaticMeshBatches = new Dictionary<(Hash64, TtMaterial.ERenderFlags), TtStaticMeshBatch>();
         private void ResetStaticMeshBatch()
         {
             foreach(var i in StaticMeshBatches)
@@ -339,13 +350,13 @@ namespace EngineNS.Graphics.Pipeline
         {
             foreach (var i in mesh.MaterialMesh.SubMeshes)
             {
-                var hash = TtStaticMeshBatch.MeshBatchHash(i);
+                var key = (TtStaticMeshBatch.MeshBatchHash(i), mesh.MeshRenderFlags);
                 TtStaticMeshBatch batch;
-                if (StaticMeshBatches.TryGetValue(hash, out batch) == false)
+                if (StaticMeshBatches.TryGetValue(key, out batch) == false)
                 {
                     batch = new TtStaticMeshBatch();
-                    batch.Initialize(this, i);
-                    StaticMeshBatches.Add(hash, batch);
+                    batch.Initialize(this, i, key.Item2);
+                    StaticMeshBatches.Add(key, batch);
                 }
                 var cb = mesh.PerMeshCBuffer;
                 var matrix = cb.GetMatrix(TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.WorldMatrix);
@@ -358,6 +369,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         #endregion
         #region TerrainMeshBatch
+        // 地形 flags 由 TerrainNode 统一维护，不按 patch 的 flags 拆分 batch。
         public Dictionary<Hash64, TtTerrainMeshBatch> TerrainMeshBatches = new Dictionary<Hash64, TtTerrainMeshBatch>();
         private void ResetTerrainMeshBatch()
         {
@@ -365,7 +377,6 @@ namespace EngineNS.Graphics.Pipeline
             {
                 i.Value.GetInstanceModifier().InstanceBuffers.ResetInstance();
             }
-            TerrainMeshBatches.Clear();
         }
         private FVisibleMesh PushTerrainMeshBatch(Mesh.TtRenderMesh mesh, Bricks.Terrain.CDLOD.TtTerrainMdfQueue mdfQueue)
         {
@@ -376,9 +387,8 @@ namespace EngineNS.Graphics.Pipeline
                 if (TerrainMeshBatches.TryGetValue(hash, out batch) == false)
                 {
                     batch = new TtTerrainMeshBatch();
-                    batch.Initialize(this, i, mdfQueue.LodLevel);
+                    batch.Initialize(this, i, mdfQueue.LodLevel, mdfQueue.Patch.TerrainNode);
                     //batch.MdfQueue.TerrainModifier.Patch = mdfQueue.Patch;
-                    batch.MdfQueue.TerrainModifier.TerrainNode = mdfQueue.Patch.TerrainNode;
                     TerrainMeshBatches.Add(hash, batch);
                     //batch.RenderMesh.SetWorldTransform(in mdfQueue.Patch.TerrainNode.Placement.TransformRef, mdfQueue.Patch.TerrainNode.GetWorld(), true);
                     //batch.RenderMesh.UnsafeSetPerMeshCBuffer(mesh.PerMeshCBuffer);

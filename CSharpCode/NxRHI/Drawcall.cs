@@ -80,13 +80,13 @@ namespace EngineNS.NxRHI
         }
         public bool BindCBV(VNameString name, TtCbView buffer)
         {
-            return mCoreObject.BindResource(name, buffer.mCoreObject.NativeSuper);
+            return mCoreObject.BindResource(name, buffer.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindCBV(FEffectBinder binder, TtCbView buffer)
         {
             if (binder.IsValidPointer == false || buffer == null || binder.BindType != EShaderBindType.SBT_CBV)
                 return;
-            mCoreObject.BindResource(binder, buffer.mCoreObject.NativeSuper);
+            mCoreObject.BindResource(binder, buffer.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindCBV(TtEffectBinder binder, TtCbView buffer)
         {
@@ -102,13 +102,13 @@ namespace EngineNS.NxRHI
         {
             if (srv == null)
                 return false;
-            return mCoreObject.BindResource(name, srv.mCoreObject.NativeSuper);
+            return mCoreObject.BindResource(name, srv.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindSRV(FEffectBinder binder, TtSrView srv)
         {
             if (binder.IsValidPointer == false || binder.BindType != EShaderBindType.SBT_SRV)
                 return;
-            var res = (srv == null) ? new IGpuResource() : srv.mCoreObject.NativeSuper;
+            var res = (srv == null) ? new IGpuResource() : srv.mCoreObject.NativeSuper.NativeSuper;
             mCoreObject.BindResource(binder, res);
         }
         public void BindSRV(NxRHI.TtEffectBinder binder, TtSrView srv)
@@ -119,13 +119,13 @@ namespace EngineNS.NxRHI
         }
         public bool BindUAV(VNameString name, TtUaView uav)
         {
-            return mCoreObject.BindResource(name, uav.mCoreObject.NativeSuper);
+            return mCoreObject.BindResource(name, uav.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindUAV(FEffectBinder binder, TtUaView uav)
         {
             if (binder.IsValidPointer == false || uav == null || binder.BindType != EShaderBindType.SBT_UAV)
                 return;
-            mCoreObject.BindResource(binder, uav.mCoreObject.NativeSuper);
+            mCoreObject.BindResource(binder, uav.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindUAV(TtEffectBinder binder, TtUaView uav)
         {
@@ -163,14 +163,14 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.BindAttachVertexArray(va.mCoreObject);
         }
-        public void BindIndirectDrawArgsBuffer(TtBuffer buffer, uint offset)
+        public void BindIndirectDrawArgsView(TtIndirectArgBufferView view, uint offset)
         {
-            if (buffer == null)
+            if (view == null)
             {
-                mCoreObject.BindIndirectDrawArgsBuffer(new IBuffer(), offset);
+                mCoreObject.BindIndirectDrawArgsView(new IIndirectArgView(), offset);
                 return;
             }
-            mCoreObject.BindIndirectDrawArgsBuffer(buffer.mCoreObject, offset);
+            mCoreObject.BindIndirectDrawArgsView(view.mCoreObject, offset);
         }
         public void SetDebugName(string name)
         {
@@ -214,12 +214,11 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.SetDispatch(x, y, z);
         }
-        public void BindIndirectDispatchArgsBuffer(TtBuffer buffer)
+        public void BindIndirectDispatchArgsView(TtIndirectArgBufferView view)
         {
-            if (buffer == null)
+            if (view == null)
                 return;
-            if (buffer != null)
-                mCoreObject.BindIndirectDispatchArgsBuffer(buffer.mCoreObject);
+            mCoreObject.BindIndirectDispatchArgsView(view.mCoreObject);
         }
         public FShaderBinder FindBinder(EShaderBindType type, string name)
         {
@@ -229,7 +228,7 @@ namespace EngineNS.NxRHI
         {
             if (resource == null || binder.IsValidPointer == false)
                 return;
-            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper.NativeSuper);
         }
         // RHI 直通重载: 接受底层 ICbView (核心对象), 用于已经持有 mCoreObject 句柄
         // 而不需要走托管包装的场景 (例如外部 RHI 模块或 acceleration structure 暴露的 view).
@@ -237,7 +236,7 @@ namespace EngineNS.NxRHI
         {
             if (binder.IsValidPointer == false)
                 return;
-            mCoreObject.BindResource(binder, resource.NativeSuper);
+            mCoreObject.BindResource(binder, resource.NativeSuper.NativeSuper);
         }
         public void BindCBV(string name, TtCbView resource)
         {
@@ -254,13 +253,13 @@ namespace EngineNS.NxRHI
             {
                 resource = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
             }
-            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindSrv(FShaderBinder binder, TtSrView resource)
         {
             if (resource == null || binder.IsValidPointer == false)
                 return;
-            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper.NativeSuper);
         }
         // RHI 直通重载: 接受底层 ISrView, 主要用于绑定 acceleration structure 的 SRV
         // (TtTopAccelerationStructure.mCoreObject.GetGpuBufferSRV() 返回此类型),
@@ -269,7 +268,7 @@ namespace EngineNS.NxRHI
         {
             if (binder.IsValidPointer == false)
                 return;
-            mCoreObject.BindResource(binder, resource.NativeSuper);
+            mCoreObject.BindResource(binder, resource.NativeSuper.NativeSuper);
         }
         public void BindSrv(string name, TtSrView resource)
         {
@@ -281,14 +280,14 @@ namespace EngineNS.NxRHI
         {
             if (resource == null || binder.IsValidPointer == false)
                 return;
-            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper.NativeSuper);
         }
         // RHI 直通重载: 接受底层 IUaView, 与 BindSrv(FShaderBinder, ISrView) 对称完整.
         public void BindUav(FShaderBinder binder, IUaView resource)
         {
             if (binder.IsValidPointer == false)
                 return;
-            mCoreObject.BindResource(binder, resource.NativeSuper);
+            mCoreObject.BindResource(binder, resource.NativeSuper.NativeSuper);
         }
         public void BindUav(string name, TtUaView resource)
         {
@@ -348,14 +347,11 @@ namespace EngineNS.NxRHI
             mCoreObject.Height = h;
             mCoreObject.Depth = d;
         }
-        public void BindIndirectDispatchArgsBuffer(TtBuffer buffer)
+        public void BindIndirectDispatchArgsView(TtIndirectArgBufferView view)
         {
-            if (buffer == null)
+            if (view == null)
                 return;
-            if (buffer != null)
-            {
-                //mCoreObject.BindIndirectDispatchArgsBuffer(buffer.mCoreObject);
-            }
+            //mCoreObject.BindIndirectDispatchArgsView(view.mCoreObject);
         }
         public FShaderBinder FindBinder(EShaderBindType type, string name)
         {
@@ -365,13 +361,13 @@ namespace EngineNS.NxRHI
         {
             if (resource == null || binder.IsValidPointer == false)
                 return;
-            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindCBV(FShaderBinder binder, ICbView resource)
         {
             if (binder.IsValidPointer == false)
                 return;
-            mCoreObject.BindResource(binder, resource.NativeSuper);
+            mCoreObject.BindResource(binder, resource.NativeSuper.NativeSuper);
         }
         public void BindCBV(string name, TtCbView resource)
         {
@@ -388,19 +384,19 @@ namespace EngineNS.NxRHI
             {
                 resource = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
             }
-            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindSrv(FShaderBinder binder, TtSrView resource)
         {
             if (resource == null || binder.IsValidPointer == false)
                 return;
-            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindSrv(FShaderBinder binder, ISrView resource)
         {
             if (binder.IsValidPointer == false)
                 return;
-            mCoreObject.BindResource(binder, resource.NativeSuper);
+            mCoreObject.BindResource(binder, resource.NativeSuper.NativeSuper);
         }
         public void BindSrv(string name, TtSrView resource)
         {
@@ -412,13 +408,13 @@ namespace EngineNS.NxRHI
         {
             if (resource == null || binder.IsValidPointer == false)
                 return;
-            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindUav(FShaderBinder binder, IUaView resource)
         {
             if (binder.IsValidPointer == false)
                 return;
-            mCoreObject.BindResource(binder, resource.NativeSuper);
+            mCoreObject.BindResource(binder, resource.NativeSuper.NativeSuper);
         }
         public void BindUav(string name, TtUaView resource)
         {

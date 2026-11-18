@@ -66,6 +66,7 @@ namespace EngineNS.Bricks.Particle
         }
         public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             if (mNebulaParticle == null)
                 return;
             base.OnGatherVisibleMeshes_OnRenderThread(rp);

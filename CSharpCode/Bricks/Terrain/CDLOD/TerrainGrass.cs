@@ -456,6 +456,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         public void OnGatherVisibleMeshes_OnRenderThread(GamePlay.TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             if(mCurrentPatchLOD != mHostPatch.CurrentLOD)
             {
                 foreach (var type in GrassTypes.Values)

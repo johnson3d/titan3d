@@ -171,5 +171,10 @@ namespace EngineNS.Bricks.Procedure
         {
             AssetGraph.Compile(root, context, resetCache);
         }
+
+        public void Compile(TtPgcNodeBase root, TtPgcExecutionContext context, bool resetCache, Action<string> reportStage, Func<bool> isCancelRequested)
+        {
+            AssetGraph.Compile(root, context, resetCache, reportStage, isCancelRequested);
+        }
     }
 }

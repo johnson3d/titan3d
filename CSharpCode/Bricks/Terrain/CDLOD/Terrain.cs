@@ -83,6 +83,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }        
         public void UpdateRVT_OnRenderThread()
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             using (var tsCmd = new FTransientCmd(EQueueType.QU_Default, "TerrainRVT.Flush"))
             {
                 NormalmapRVT.UpdateGpu(tsCmd.CmdList);

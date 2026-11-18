@@ -146,6 +146,7 @@ namespace EngineNS.Graphics.Mesh.PhysicsAsset
 
         public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             if (!mShowDebug)
                 return;
 

@@ -4,6 +4,8 @@
   "UsePhysxMT": true,
   "UseRenderDoc": false,
   "Feature_UseRVT": false,
+  "Feature_UseGpuCulling": false,
+  "Feature_UseCpuCulling": true,
   "UseECS": true,
   "NumOfThreadPool": -1,
   "IsParrallelWorldGather": true,

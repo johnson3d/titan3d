@@ -140,20 +140,20 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             PassDesc.NumOfMRT = hasMotionVector ? (uint)2 : (uint)1;
             PassDesc.AttachmentMRTs[0].Format = format;
             PassDesc.AttachmentMRTs[0].Samples = 1;
-            PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+            PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
             PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             if (hasMotionVector)
             {
                 PassDesc.AttachmentMRTs[1].Format = MotionVectorPinInOut.Attachement.Format;
                 PassDesc.AttachmentMRTs[1].Samples = 1;
-                PassDesc.AttachmentMRTs[1].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                PassDesc.AttachmentMRTs[1].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
                 PassDesc.AttachmentMRTs[1].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             }
             PassDesc.m_AttachmentDepthStencil.Format = DepthPinInOut.Attachement.Format;
             PassDesc.m_AttachmentDepthStencil.Samples = 1;
-            PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+            PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
             PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-            PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+            PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
             PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
@@ -356,20 +356,20 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 PassDesc.NumOfMRT = hasMotionVector ? (uint)2 : (uint)1;
                 PassDesc.AttachmentMRTs[0].Format = format;
                 PassDesc.AttachmentMRTs[0].Samples = 1;
-                PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
                 PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 if (hasMotionVector)
                 {
                     PassDesc.AttachmentMRTs[1].Format = MotionVectorPinInOut.Attachement.Format;
                     PassDesc.AttachmentMRTs[1].Samples = 1;
-                    PassDesc.AttachmentMRTs[1].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                    PassDesc.AttachmentMRTs[1].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
                     PassDesc.AttachmentMRTs[1].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 }
                 PassDesc.m_AttachmentDepthStencil.Format = DepthPinInOut.Attachement.Format;
                 PassDesc.m_AttachmentDepthStencil.Samples = 1;
-                PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
                 PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-                PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
                 PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
 
                 WithDepthRenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
@@ -389,13 +389,13 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 GizmosPassDesc.NumOfMRT = hasMotionVector ? (uint)2 : (uint)1;
                 GizmosPassDesc.AttachmentMRTs[0].Format = format;
                 GizmosPassDesc.AttachmentMRTs[0].Samples = 1;
-                GizmosPassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                GizmosPassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
                 GizmosPassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 if (hasMotionVector)
                 {
                     GizmosPassDesc.AttachmentMRTs[1].Format = MotionVectorPinInOut.Attachement.Format;
                     GizmosPassDesc.AttachmentMRTs[1].Samples = 1;
-                    GizmosPassDesc.AttachmentMRTs[1].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                    GizmosPassDesc.AttachmentMRTs[1].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
                     GizmosPassDesc.AttachmentMRTs[1].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 }
                 GizmosPassDesc.m_AttachmentDepthStencil.Format = GizmosDepthPinOut.Attachement.Format;

@@ -96,6 +96,16 @@ namespace NxRHI
 		mDirectDrawNum += pCmdRecorder->mDirectDrawNum;
 		mPrimitiveNum += pCmdRecorder->mPrimitiveNum;
 	}
+	bool ICmdRecorder::HasPendingShaderDraws() const
+	{
+		for (UINT i = mFlushStart; i < (UINT)mDrawcallArray.size(); i++)
+		{
+			auto draw = mDrawcallArray[i].GetPtr();
+			if (dynamic_cast<const IGraphicDraw*>(draw) || dynamic_cast<const IComputeDraw*>(draw) || dynamic_cast<const IRayTracingDraw*>(draw))
+				return true;
+		}
+		return false;
+	}
 	void ICmdRecorder::FlushDraws(ICommandList* cmdlist)
 	{
 		//mCmdList.FromObject(cmdlist);
@@ -160,6 +170,9 @@ namespace NxRHI
 	}
 	bool ICommandList::PushGpuDraw(IGraphicDraw* draw)
 	{
+		// Graphic draw 只能在 pass 内提交; pass 外 push 会在下个 pass 内 Build, 转换被收进 BeginBarriers 却排在其前执行
+		// 需要提前收集的请改用独立 TtCmdRecorder, 在 BeginPass 之后 AppendDraws
+		ASSERT(GetCurrentRenderPass() != nullptr);
 		return PushGpuDrawImpl(draw, true);
 	}
 	bool ICommandList::PushGpuDraw(IComputeDraw* draw)
@@ -260,42 +273,51 @@ namespace NxRHI
 			this->PushGpuDraw(cpDraw.GetPtr());
 		}
 	}
-	EGpuResourceState FTransitionScope::TryAutoTransition(ICommandList* cmd, IGpuBufferData* resource, EGpuResourceState toState, bool bTryRenderPass)
+	EGpuResourceState FTransitionScope::TryAutoTransition(ICommandList* cmd, IGpuBufferDataBase* resource, const FSubresourceRange& range, EGpuResourceState toState, bool bTryRenderPass)
 	{
-		auto save = resource->GpuState;
+		auto save = resource->LayoutTracker.GetState(range);
 		if (resource->IsAutoTransition == false)
 			return save;
-		auto bNeedTransition = resource->GpuState != toState;
-		if (bNeedTransition)
+		if (resource->LayoutTracker.NeedTransition(range, toState))
 		{
 			auto pass = cmd->GetCurrentRenderPass();
 			if (bTryRenderPass && pass)
 			{
-				pass->PushBeginBarrier(resource, toState);
+				pass->PushBeginBarrier(resource, range, toState);
 			}
 			else
 			{
-				resource->TransitionTo(cmd, toState);
+				resource->TransitionTo(cmd, range, toState);
 			}
 		}
 		return save;
 	}
-	FTransitionScope::FTransitionScope(ICommandList* cmd, IGpuBufferData* resource, EGpuResourceState toState)
+	EGpuResourceState FTransitionScope::TryAutoTransition(ICommandList* cmd, IGpuViewBase* view, bool bTryRenderPass)
+	{
+		if (view == nullptr)
+			return EGpuResourceState::GRS_Undefine;
+		auto resource = view->GetBufferDataBase();
+		if (resource == nullptr)
+			return EGpuResourceState::GRS_Undefine;
+		auto layout = view->GetViewLayout();
+		if (layout.State == EGpuResourceState::GRS_Undefine)
+			return resource->LayoutTracker.GetState(layout.Range);
+		return TryAutoTransition(cmd, resource, layout.Range, layout.State, bTryRenderPass);
+	}
+	FTransitionScope::FTransitionScope(ICommandList* cmd, IGpuBufferDataBase* resource, const FSubresourceRange& range, EGpuResourceState toState)
 	{
 		CmdList = cmd;
 		Resource = resource;
-		SaveState = resource->GpuState;
-		bNeedTransition = SaveState != toState;
-		if (bNeedTransition)
-		{
-			resource->TransitionTo(cmd, toState);
-		}
+		resource->LayoutTracker.Transition(range, toState, [&](const FSubresourceRange& seg, EGpuResourceState from) {
+			SaveSegments.push_back(FSaveSegment{ seg, from });
+			resource->EmitTransition(cmd, seg, from, toState);
+		});
 	}
 	FTransitionScope::~FTransitionScope()
 	{
-		if (bNeedTransition)
+		for (const auto& i : SaveSegments)
 		{
-			Resource->TransitionTo(CmdList, SaveState);
+			Resource->TransitionTo(CmdList, i.Range, i.State);
 		}
 	}
 }

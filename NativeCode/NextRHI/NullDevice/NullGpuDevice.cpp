@@ -93,7 +93,7 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ISrView* NullGpuDevice::CreateSRV(IGpuBufferData* pBuffer, const FSrvDesc* desc, const char* file, int line)
+	ISrView* NullGpuDevice::CreateSRV(IGpuBufferDataBase* pBuffer, const FSrvDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<NullSrView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, desc) == false)
@@ -103,7 +103,7 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IUaView* NullGpuDevice::CreateUAV(IGpuBufferData* pBuffer, const FUavDesc* desc, const char* file, int line)
+	IUaView* NullGpuDevice::CreateUAV(IGpuBufferDataBase* pBuffer, const FUavDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<NullUaView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, desc) == false)

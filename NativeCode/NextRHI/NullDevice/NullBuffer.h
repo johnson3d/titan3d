@@ -37,7 +37,7 @@ namespace NxRHI
 		virtual bool Map(UINT subRes, FMappedSubResource* res, bool forRead) override;
 		virtual void Unmap(UINT subRes) override;
 		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
-		virtual IGpuBufferData* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) override;
+		virtual IGpuBufferDataBase* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) override;
 	public:
 	};
 
@@ -67,8 +67,8 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return nullptr;
 		}
-		bool Init(NullGpuDevice* device, IGpuBufferData* pBffer, const FSrvDesc* desc);
-		virtual bool UpdateBuffer(IGpuDevice* device, IGpuBufferData* buffer) override;
+		bool Init(NullGpuDevice* device, IGpuBufferDataBase* pBffer, const FSrvDesc* desc);
+		virtual bool UpdateBuffer(IGpuDevice* device, IGpuBufferDataBase* buffer) override;
 	public:
 	};
 

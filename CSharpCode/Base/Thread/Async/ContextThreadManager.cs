@@ -80,6 +80,10 @@ namespace EngineNS.Thread.Async
         internal EAsyncType AsyncType = EAsyncType.Normal;
         public TtContextThread ContinueThread;
         public TtContextThread AsyncTarget;
+        /// <summary>
+        /// 发起本次异步任务的线程 (CreateInstance 时的 CurrentContext), 不随 ContinueThread 被置空而丢失
+        /// </summary>
+        public TtContextThread DispatchThread;
         public struct FUserArguments : IDisposable
         {
             public Vector4ui Value0;
@@ -149,6 +153,7 @@ namespace EngineNS.Thread.Async
             AsyncType = EAsyncType.Normal;            
             ContinueThread = null;
             AsyncTarget = null;
+            DispatchThread = null;
             Tag = null;
             ExceptionInfo = null;
             CallStackTrace = null;
@@ -252,6 +257,7 @@ namespace EngineNS.Thread.Async
             result.PostAction = null;
             result.AsyncTarget = null;
             result.ContinueThread = TtContextThread.CurrentContext;
+            result.DispatchThread = TtContextThread.CurrentContext;
             return result;
         }
         public override void Dispose()
@@ -399,6 +405,7 @@ namespace EngineNS.Thread.Async
 
             var smp = ParallelForSmpAllocator.QueryObjectSync();
             smp.Reset(numTask);
+            //smp.Tag = Thread.TtContextThread.CurrentContext;
             var userArgs = new TtAsyncTaskStateBase.FUserArguments();
             userArgs.Obj0 = action;
             userArgs.Obj1 = smp;
@@ -418,6 +425,8 @@ namespace EngineNS.Thread.Async
                     userArgs.Value0.X = (uint)i;
                     this.RunParallel(static (state) =>
                     {
+                        var ct = (Thread.TtThreadPool)(Thread.TtContextThread.CurrentContext);
+                        ct.DispatchThread = state.DispatchThread;
                         var action = (Delegate_ParrallelForAction)state.UserArguments.Obj0;
                         var stride = state.UserArguments.StrideOfParallelFor;
                         var start = (int)(state.UserArguments.TaskIndexOfParallelFor * stride);
@@ -432,6 +441,7 @@ namespace EngineNS.Thread.Async
                         }
                         finally
                         {
+                            ct.DispatchThread = null;
                             ((TtPooledSemaphore)state.UserArguments.Obj1).Semaphore.AddNum(-workCount);
                         }
                         return true;

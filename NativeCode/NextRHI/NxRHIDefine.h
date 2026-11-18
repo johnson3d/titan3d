@@ -1,4 +1,5 @@
 #pragma once
+#include "../Base/debug/vfxmemory.h"
 #include "../Base/IUnknown.h"
 #include "../Base/thread/vfxcritical.h"
 #include "../Math/v3dxVector2.h"

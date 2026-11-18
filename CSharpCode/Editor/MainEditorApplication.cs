@@ -126,6 +126,8 @@ namespace EngineNS.Editor
             mBrickManager = new Bricks.ProjectGen.UBrickManager();
             mEditorSettings = new Forms.TtEditorSettings();
             mAndroidBuildPanel = new Forms.TtAndroidBuildPanel();
+            mCookPanel = new Forms.TtCookManagerPanel();
+            mCookProgress = new Forms.TtCookProgressForm();
             mPIEController = new TtPIEController();
         }
         private bool IsVisible = true;
@@ -139,6 +141,8 @@ namespace EngineNS.Editor
         public Bricks.ProjectGen.UBrickManager mBrickManager = null;
         public Editor.Forms.TtEditorSettings mEditorSettings;
         public Editor.Forms.TtAndroidBuildPanel mAndroidBuildPanel;
+        public Editor.Forms.TtCookManagerPanel mCookPanel;
+        public Editor.Forms.TtCookProgressForm mCookProgress;
         public TtPIEController mPIEController;
         public TtPluginMenuManager PluginMenuManager { get; } = new TtPluginMenuManager();
 
@@ -152,6 +156,8 @@ namespace EngineNS.Editor
         public override void Cleanup()
         {
             TtEngine.Instance?.TickableManager.RemoveTickable(this);
+            // cook worker 是子进程: 不显式收尾的话它要等 stdin EOF 且在飞 job 跑完才退, 编辑器关掉后还会挂很久
+            Cook.TtCookManager.ShutdownIfCreated();
 #if (UseWindowTest)
             mWinTest.Cleanup();
 #endif
@@ -174,6 +180,13 @@ namespace EngineNS.Editor
 
             await mEditorSettings.Initialize();
             await mAndroidBuildPanel.Initialize();
+            await mCookPanel.Initialize();
+            await mCookProgress.Initialize();
+            // 两个 cook 窗体常驻 RootForms: 批次由 TickableManager 驱动, 表单不可见时只是不绘制, 不会停摆
+            TtEngine.RootFormManager.RegRootForm(mCookPanel);
+            TtEngine.RootFormManager.RegRootForm(mCookProgress);
+            mCookPanel.Visible = false;
+            mCookProgress.Visible = false;
             //TtEngine.Instance.Config.PlayGameName = RName.GetRName("utest/test_game01.macross");
 
             mMainInspector.PropertyGrid.PGName = TtLocalization.Label("MainInspector", "###MainInspector");
@@ -305,6 +318,24 @@ namespace EngineNS.Editor
                     {
                         new EGui.UIProxy.MenuItemProxy()
                         {
+                            MenuName = TtLocalization.Tr("Cook Manager"),
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                mCookPanel.Visible = !mCookPanel.Visible;
+                                item.Selected = mCookPanel.Visible;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = TtLocalization.Tr("Cook Progress"),
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                mCookProgress.Visible = !mCookProgress.Visible;
+                                item.Selected = mCookProgress.Visible;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
                             MenuName = TtLocalization.Tr("CompileMacross"),
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
@@ -337,8 +368,15 @@ namespace EngineNS.Editor
                                 unsafe
                                 {
 #if PWindow
+                                    var targetWindow = GetRenderDocTargetWindow();
+                                    if (targetWindow == null)
+                                    {
+                                        Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Error,
+                                            "RenderDoc 抓帧失败：找不到可呈现的焦点视口。");
+                                        return;
+                                    }
                                     IRenderDocTool.GetInstance().SetGpuDevice(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject);
-                                    IRenderDocTool.GetInstance().SetActiveWindow(this.NativeWindow.HWindow.ToPointer());
+                                    IRenderDocTool.GetInstance().SetActiveWindow(targetWindow.HWindow.ToPointer());
 #endif
                                     var frameCount = Math.Max(1, TtEngine.Instance.EditorInstance.RenderDocCaptureFrameCount);
                                     TtEngine.Instance.GfxDevice.RenderQueue.RemainingCaptureFrames = frameCount - 1;
@@ -613,6 +651,33 @@ namespace EngineNS.Editor
         //public uint CenterDockId { get; private set; } = 0;
 
         public UInt32 ActiveViewportId = UInt32.MaxValue;
+        internal unsafe Graphics.Pipeline.TtPresentWindow GetRenderDocTargetWindow()
+        {
+            if (TtEngine.Instance.Config.SupportMultWindows == false)
+                return NativeWindow?.CanRender == true ? NativeWindow : null;
+            // MCP 调用时编辑器可能已失焦，此时使用最近活动的真实视口。
+            Graphics.Pipeline.TtPresentWindow activeWindow = null;
+            var platformIO = ImGuiAPI.GetPlatformIO();
+            var mainViewport = ImGuiAPI.GetMainViewport();
+            var count = ImGuiAPI.PlatformIO_Viewports_Size(platformIO);
+            for (int i = 0; i < count; i++)
+            {
+                var viewport = ImGuiAPI.PlatformIO_Viewports_Get(platformIO, i);
+                // 多窗口模式的 main viewport 是不 Present 的隐藏占位窗。
+                if (viewport == mainViewport || viewport->RendererUserData == IntPtr.Zero.ToPointer())
+                    continue;
+                var gcHandle = GCHandle.FromIntPtr((IntPtr)viewport->RendererUserData);
+                var viewportData = gcHandle.Target as TtDockWindowSDL.ViewportData;
+                var presentWindow = viewportData?.PresentWindow;
+                if (presentWindow?.CanRender != true)
+                    continue;
+                if (TtNativeWindow.IsInputFocus((IntPtr)viewport->PlatformHandle))
+                    return presentWindow;
+                if (viewport->ID == ActiveViewportId)
+                    activeWindow = presentWindow;
+            }
+            return activeWindow;
+        }
         protected unsafe override void OnDrawUI()
         {
             {

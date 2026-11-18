@@ -298,6 +298,7 @@ namespace EngineNS.Editor.Forms
 
         public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             if (CurrentPose == null)
                 return;
 

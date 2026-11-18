@@ -151,7 +151,17 @@ namespace EngineNS.Graphics.Pipeline.Common
             GpuSceneDescBuffer = new TtGpuBuffer<Shader.FGpuSceneDesc>();
             unsafe
             {
-                GpuSceneDescBuffer.SetSize(1, IntPtr.Zero.ToPointer(), NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+                var initialDesc = new Shader.FGpuSceneDesc
+                {
+                    ScreenAverageColorI = 0,
+                    AverageColorDivider = 0,
+                    ScreenAverageBrightness = 0.5f,
+                    PrevScreenAverageBrightness = 0.5f,
+                    EyeAdapterTime = 0.0f,
+                    EyeAdapter = 0.5f,
+                    FreeGroupNum = 0,
+                };
+                GpuSceneDescBuffer.SetSize(1, Unsafe.AsPointer(ref initialDesc), NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
             }
             PerGpuSceneCbv = rc.CreateCBV(TtCoreShaderBinder.TtPerGpuSceneCBufferVarIndexer.Instance.Binder.mCoreObject);
 

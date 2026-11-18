@@ -77,7 +77,8 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         {
             if (CBuffer == null)
             {
-                CBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
+                // DEFAULT: 下面 Tick 里带 cmd 更新, 走 staging 拷贝; DYNAMIC (upload heap) 不能作拷贝目标
+                CBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder, NxRHI.EGpuUsage.USAGE_DEFAULT);
             }
             CBuffer.SetValue("TextureWidth", TextureWidth);
             CBuffer.SetValue("TextureHeight", TextureHeight);
@@ -115,10 +116,10 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             using (new NxRHI.TtCmdListScope(mCmdList, "PCG.ErosionIncWater"))
             {
                 ShadingEnv.SetDrawcallDispatch(this, policy, mDrawcall, DispatchThread.X, DispatchThread.Y, DispatchThread.Z, true);
-                mCmdList.PushGpuDraw(mDrawcall);
-
+                // 拷贝须排在 dispatch 之前, 否则 dispatch 读到的是上一次的值
                 if (CBuffer != null)
                     CBuffer.FlushDirty(mCmdList.mCoreObject);
+                mCmdList.PushGpuDraw(mDrawcall);
                 mCmdList.FlushDraws();
             }
 

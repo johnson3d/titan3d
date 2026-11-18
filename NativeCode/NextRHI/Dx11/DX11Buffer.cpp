@@ -418,6 +418,7 @@ namespace NxRHI
 	{
 		mDeviceRef.FromObject(device);
 		Desc = desc;
+		InitLayoutTracker();
 		if (Desc.CpuAccess & ECpuAccess::CAS_READ)
 		{
 			ASSERT(Desc.Usage == EGpuUsage::USAGE_STAGING);
@@ -592,7 +593,7 @@ namespace NxRHI
 			mMappingCmdList = nullptr;
 		}
 	}
-	IGpuBufferData* DX11Texture::CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint)
+	IGpuBufferDataBase* DX11Texture::CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint)
 	{
 		FTextureDesc desc{};
 		desc.CpuAccess = cpuAccess;
@@ -767,6 +768,7 @@ namespace NxRHI
 			//bfDesc.StructureStride = ShaderBinder->;
 			//bfDesc.InitData = desc->InitData;
 			bfDesc.Type = EBufferType::BFT_CBuffer;
+			// DX11 忽略 desc.Usage 始终用 DYNAMIC: Map(WRITE_DISCARD) 由驱动做版本化, 本身不会与 in-flight 帧竞争
 			bfDesc.Usage = EGpuUsage::USAGE_DYNAMIC;
 			bfDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, __FILE__, __LINE__));
@@ -965,7 +967,7 @@ namespace NxRHI
 		}
 	}
 
-	bool DX11SrView::Init(DX11GpuDevice* device, IGpuBufferData* pBuffer, const FSrvDesc& desc)
+	bool DX11SrView::Init(DX11GpuDevice* device, IGpuBufferDataBase* pBuffer, const FSrvDesc& desc)
 	{
 		Desc = desc;
 		Buffer = pBuffer;
@@ -991,7 +993,7 @@ namespace NxRHI
 		//mView->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen("ShaderResource"), "ShaderResource");
 		return true;
 	}
-	bool DX11SrView::UpdateBuffer(IGpuDevice* device, IGpuBufferData* pBuffer)
+	bool DX11SrView::UpdateBuffer(IGpuDevice* device, IGpuBufferDataBase* pBuffer)
 	{
 		Buffer = pBuffer;
 		D3D11_SHADER_RESOURCE_VIEW_DESC		mDX11SRVDesc;
@@ -1098,7 +1100,7 @@ namespace NxRHI
 				break;
 		}
 	}
-	bool DX11UaView::Init(DX11GpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc)
+	bool DX11UaView::Init(DX11GpuDevice* device, IGpuBufferDataBase* pBuffer, const FUavDesc& desc)
 	{
 		Desc = desc;
 		Buffer = pBuffer;

@@ -192,6 +192,8 @@ namespace NxRHI
 	{
 		ASSERT(mCmdListState == ECmdListState::Recording);
 		ASSERT(mCurrentFrameBuffers == nullptr);
+		// BeginPass 前未 flush 的 draw 会排在本 pass 的 BeginBarriers 之前, 其转换却被收进 BeginBarriers (#527)
+		ASSERT(GetCmdRecorder()->HasPendingShaderDraws() == false);
 		//mDebugName = name;
 		BeginEvent((mDebugName + ":" + name).c_str());
 		mCurrentFrameBuffers = fb;
@@ -206,8 +208,7 @@ namespace NxRHI
 			if (rtv != nullptr)
 			{
 				//cry! ClearRenderTargetView & ClearDepthStencilView will change layout automatic!!!!
-				//pass->PushBeginBarrier(rtv->GpuResource, EGpuResourceState::GRS_RenderTarget);
-				FTransitionScope::TryAutoTransition(this, rtv->GpuResource, EGpuResourceState::GRS_RenderTarget, false);
+				FTransitionScope::TryAutoTransition(this, rtv, false);
 			}
 		}
 		if (fb->mDepthStencilView != nullptr)
@@ -215,7 +216,7 @@ namespace NxRHI
 			auto dsv = fb->mDepthStencilView.UnsafeConvertTo<DX12DepthStencilView>();
 			if (dsv != nullptr)
 			{
-				FTransitionScope::TryAutoTransition(this, dsv->GpuResource, EGpuResourceState::GRS_DepthStencil, false);
+				FTransitionScope::TryAutoTransition(this, dsv, false);
 			}
 		}
 		pass->BeginCopyDraws->OnBeginPass(this);
@@ -588,7 +589,7 @@ namespace NxRHI
 		auto dx12Buffer = (DX12Buffer*)indirectArg;
 		auto offset = (UINT)dx12Buffer->mGpuMemory->GpuMem->Offset + indirectArgOffset;
 		
-		FTransitionScope transition(this, dx12Buffer, EGpuResourceState::GRS_UavIndirect);
+		FTransitionScope transition(this, dx12Buffer, EGpuResourceState::GRS_Indirect);
 		mContext->ExecuteIndirect(mCurrentCmdSig, 1, (ID3D12Resource*)dx12Buffer->GetHWBuffer(), offset, nullptr, 0);
 	}
 	void DX12CommandList::DispatchMesh(UINT x, UINT y, UINT z)
@@ -609,7 +610,7 @@ namespace NxRHI
 		auto dx12Buffer = (DX12Buffer*)indirectArg;
 		auto offset = (UINT)dx12Buffer->mGpuMemory->GpuMem->Offset + indirectArgOffset;
 		
-		FTransitionScope transition(this, dx12Buffer, EGpuResourceState::GRS_UavIndirect);
+		FTransitionScope transition(this, dx12Buffer, EGpuResourceState::GRS_Indirect);
 		mContext->ExecuteIndirect(mCurrentCmdSig, 1, (ID3D12Resource*)dx12Buffer->GetHWBuffer(), offset, nullptr, 0);
 	}
 	void DX12CommandList::SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess)
@@ -642,7 +643,7 @@ namespace NxRHI
 			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
 		case EngineNS::NxRHI::GRS_Uav:
 			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-		case EngineNS::NxRHI::GRS_UavIndirect:
+		case EngineNS::NxRHI::GRS_Indirect:
 			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;// D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_UNORDERED_ACCESS;//D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT | 
 		case EngineNS::NxRHI::GRS_RenderTarget:
 			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -755,37 +756,43 @@ namespace NxRHI
 		tmp.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 		mContext->ResourceBarrier(1, &tmp);
 	}
-	void DX12CommandList::SetTextureBarrier(ITexture* pResource, UINT subResource, UINT levelCount, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess)
+	void DX12CommandList::SetTextureBarrier(ITexture* pResource, const FSubresourceRange& range, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess)
 	{
-		if (subResource == 0 && levelCount == pResource->Desc.MipLevels)
+		auto pTarGpuResource = (ID3D12Resource*)pResource->GetHWBuffer();
+		D3D12_RESOURCE_BARRIER tmp{};
+		tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		tmp.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		tmp.Transition.pResource = pTarGpuResource;
+		tmp.Transition.StateBefore = GpuStateToDX12(srcAccess);
+		tmp.Transition.StateAfter = GpuStateToDX12(dstAccess);
+		const UINT mipLevels = pResource->Desc.MipLevels > 0 ? pResource->Desc.MipLevels : 1;
+		const UINT arraySize = pResource->Desc.ArraySize > 0 ? pResource->Desc.ArraySize : 1;
+		if (range.Covers(mipLevels, arraySize))
 		{
-			D3D12_RESOURCE_BARRIER tmp{};
-			tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			tmp.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			auto pTarGpuResource = (ID3D12Resource*)pResource->GetHWBuffer();
-			tmp.Transition.pResource = pTarGpuResource;
 			tmp.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-			tmp.Transition.StateBefore = GpuStateToDX12(srcAccess);
-			tmp.Transition.StateAfter = GpuStateToDX12(dstAccess);
 			mContext->ResourceBarrier(1, &tmp);
 		}
 		else
 		{
+			// 子资源序号 = mip + layer * mipLevels + plane * mipLevels * arraySize; depth-stencil 格式的 stencil plane 须一起转换
+			const UINT planeCount = D3D12GetFormatPlaneCount(GetDX12Device()->mDevice.GetPtr(), pTarGpuResource->GetDesc().Format);
+			const UINT mipEnd = range.GetMipEnd(mipLevels);
+			const UINT layerEnd = range.GetLayerEnd(arraySize);
 			std::vector<D3D12_RESOURCE_BARRIER> barriers;
-			barriers.reserve(levelCount);
-			for (UINT i = 0; i < levelCount; i++)
+			barriers.reserve((mipEnd - range.BaseMip) * (layerEnd - range.BaseLayer) * planeCount);
+			for (UINT plane = 0; plane < planeCount; plane++)
 			{
-				D3D12_RESOURCE_BARRIER tmp{};
-				tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-				tmp.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				auto pTarGpuResource = (ID3D12Resource*)pResource->GetHWBuffer();
-				tmp.Transition.pResource = pTarGpuResource;
-				tmp.Transition.Subresource = subResource + i;
-				tmp.Transition.StateBefore = GpuStateToDX12(srcAccess);
-				tmp.Transition.StateAfter = GpuStateToDX12(dstAccess);
-				barriers.push_back(tmp);
+				for (UINT layer = range.BaseLayer; layer < layerEnd; layer++)
+				{
+					for (UINT mip = range.BaseMip; mip < mipEnd; mip++)
+					{
+						tmp.Transition.Subresource = mip + layer * mipLevels + plane * mipLevels * arraySize;
+						barriers.push_back(tmp);
+					}
+				}
 			}
-			mContext->ResourceBarrier((UINT)barriers.size(), barriers.data());
+			if (barriers.empty() == false)
+				mContext->ResourceBarrier((UINT)barriers.size(), barriers.data());
 		}
 		//D3D12_RESOURCE_BARRIER tmp{};
 		//tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -838,17 +845,26 @@ namespace NxRHI
 			return;
 		GetCmdRecorder()->UseResource(target);
 		GetCmdRecorder()->UseResource(src);
-		if (Size == 0 && DstOffset == 0 && SrcOffset == 0 && target->GetRtti() == src->GetRtti())
+		// buffer 可能是大资源上的子分配 (cbuffer 池 / staging 池), 偏移要叠加 GpuMem->Offset,
+		// 且只有两端都独占整个资源时才能走 CopyResource
+		auto targetRes = (ID3D12Resource*)target->GetHWBuffer();
+		auto srcRes = (ID3D12Resource*)src->GetHWBuffer();
+		auto dxTarget = (DX12Buffer*)target;
+		auto dxSrc = (DX12Buffer*)src;
+		UINT64 targetBase = dxTarget->mGpuMemory->GpuMem->Offset;
+		UINT64 srcBase = dxSrc->mGpuMemory->GpuMem->Offset;
+		if (Size == 0 && DstOffset == 0 && SrcOffset == 0 && targetBase == 0 && srcBase == 0 &&
+			targetRes->GetDesc().Width == srcRes->GetDesc().Width)
 		{
-			mContext->CopyResource((ID3D12Resource*)target->GetHWBuffer(), (ID3D12Resource*)src->GetHWBuffer());
+			mContext->CopyResource(targetRes, srcRes);
 		}
 		else
 		{
-			if (Size == 0 && target->GetRtti() == GetClassObject<IBuffer>())
+			if (Size == 0)
 			{
-				Size = ((DX12Buffer*)target)->Desc.Size;
+				Size = std::min((UINT64)dxTarget->Desc.Size - DstOffset, (UINT64)dxSrc->Desc.Size - SrcOffset);
 			}
-			mContext->CopyBufferRegion((ID3D12Resource*)target->GetHWBuffer(), DstOffset, (ID3D12Resource*)src->GetHWBuffer(), SrcOffset, Size);
+			mContext->CopyBufferRegion(targetRes, targetBase + DstOffset, srcRes, srcBase + SrcOffset, Size);
 		}
 	}
 	void DX12CommandList::CopyTextureRegion(ITexture* target, UINT tarSubRes, UINT DstX, UINT DstY, UINT DstZ, ITexture* source, UINT srcSubRes, const FSubresourceBox* box)

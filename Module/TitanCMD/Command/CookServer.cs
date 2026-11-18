@@ -12,7 +12,7 @@ namespace ProjectCooker.Command
     /// 进度/结果经协议行写回 stdout。设计见 Documents\editor\CookManager.md。
     ///
     /// 用法: TitanCMD.exe CookCfg=... ExeCmd=CookServer
-    ///        [WorkerIdleSec=300] [WorkerMaxJobs=200] [WorkerJobTimeout=1200] [WorkerBeatSec=10]
+    ///        [WorkerIdleSec=300] [WorkerMaxJobs=200] [WorkerJobTimeout=0] [WorkerStallSec=600] [WorkerBeatSec=10]
     /// stdin 每行一条指令 (其它行忽略并转 stderr), stdout 混有人读日志与协议行, 由提交侧按哨兵分流。
     ///
     /// 退出码: 0 = 优雅退出 (idle / restart / manual / pipe), 1 = 致命错误 (取消后 job 仍不收尾)。
@@ -23,8 +23,10 @@ namespace ProjectCooker.Command
         public const int DefaultIdleShutdownSec = 300;
         /// <summary>单进程处理多少个 job 后主动退出 (引擎长跑有内存/状态漂移风险, 由提交侧重新拉起)</summary>
         public const int DefaultMaxJobsPerWorker = 200;
-        /// <summary>单 job 超时; 与 TtTerrainNode.CookTerrainAsync(bakeTimeoutMs: 1200000) 对齐</summary>
-        public const int DefaultJobTimeoutSec = 1200;
+        /// <summary>单 job 总时长上限, 0 = 不限: 大地形全量 cook 可以合法地跑很久, 卡死由 <see cref="DefaultStallSec"/> 判定</summary>
+        public const int DefaultJobTimeoutSec = 0;
+        /// <summary>job 连续多少秒没有 stage/progress/artifact 上报就判定卡死; 须大于单个 PGC 节点的最长耗时</summary>
+        public const int DefaultStallSec = 600;
         /// <summary>心跳间隔 (秒)</summary>
         public const int DefaultBeatSec = 10;
         /// <summary>待跑队列容量上限, 超出则对 add 回 busy (提交侧应重投)</summary>
@@ -69,6 +71,7 @@ namespace ProjectCooker.Command
         private int mIdleShutdownSec = DefaultIdleShutdownSec;
         private int mMaxJobs = DefaultMaxJobsPerWorker;
         private int mJobTimeoutSec = DefaultJobTimeoutSec;
+        private int mStallSec = DefaultStallSec;
         private double mBeatSec = DefaultBeatSec;
 
         private long mNextJobId = 1;
@@ -90,6 +93,7 @@ namespace ProjectCooker.Command
             mIdleShutdownSec = FindIntArgument(args, Param_WorkerIdleSec, DefaultIdleShutdownSec);
             mMaxJobs = FindIntArgument(args, Param_WorkerMaxJobs, DefaultMaxJobsPerWorker);
             mJobTimeoutSec = FindIntArgument(args, Param_WorkerJobTimeout, DefaultJobTimeoutSec);
+            mStallSec = FindIntArgument(args, Param_WorkerStallSec, DefaultStallSec);
             mBeatSec = Math.Max(1, FindIntArgument(args, Param_WorkerBeatSec, DefaultBeatSec));
 
             var driver = TtCookDriver.Instance;
@@ -360,6 +364,11 @@ namespace ProjectCooker.Command
                 else
                     kept.Add(i);
             }
+            // 先把队列重建再写终态: 早退时漏掉重建会让同一个 id 既报 cancelled 又照常跑完,
+            // 一个 job 两个终态行 (实测: job.error 排在 job.begin 之前), 提交侧状态机会当成幽灵 job
+            mPending.Clear();
+            foreach (var i in kept)
+                mPending.Enqueue(i);
             if (matched)
             {
                 // 未开工就被取消: 不会走到 RunJobAsync, 这里直接给终态行替它关掉
@@ -371,9 +380,6 @@ namespace ProjectCooker.Command
                 // 队列/在飞都没这个 job (已结或从未提交): 同样要给终态, 不然提交侧挂住
                 WriteLine(TtCookProtocol.JobError(id, ECookErrorKind.Cancel, "job not found in worker", null, 0));
             }
-            mPending.Clear();
-            foreach (var i in kept)
-                mPending.Enqueue(i);
         }
         #endregion
 
@@ -387,21 +393,41 @@ namespace ProjectCooker.Command
             var task = driver.RunJobAsync(job.Asset, ctx);
             mBeatSeq = 0;
             var timedOut = false;
+            // 宽限期从取消生效那一刻起算, 不论取消来自超时/卡死判定还是提交侧 cancel:
+            // 只看超时的话, 外部 cancel 后 job 不收尾时 worker 会永远挂在这里
+            var cancelAtSec = -1.0;
             var deadlineSec = (double)mJobTimeoutSec;
             while (task.IsCompleted == false)
             {
                 DrainInbox();
-                if (ctx.IsCancellationRequested == false && deadlineSec > 0 && ctx.ElapsedSec >= deadlineSec)
+                if (ctx.IsCancellationRequested == false)
                 {
-                    ctx.RequestCancel();
-                    timedOut = true;
-                    WriteLine(TtCookProtocol.JobError(job.Id, ECookErrorKind.Timeout,
-                        $"job timeout after {ctx.ElapsedSec:F1}s (limit {mJobTimeoutSec}s)", null, ctx.ElapsedSec));
-                    mStatFailed++;
+                    // 总时长是可选上限; 无进展才是卡死判据 (重活都不占主线程, 这里每拍都能判到)
+                    string reason = null;
+                    if (deadlineSec > 0 && ctx.ElapsedSec >= deadlineSec)
+                        reason = $"job timeout after {ctx.ElapsedSec:F1}s (limit {mJobTimeoutSec}s)";
+                    else if (mStallSec > 0 && ctx.IdleSec >= mStallSec)
+                        reason = $"no progress for {ctx.IdleSec:F0}s (stall limit {mStallSec}s), last stage: {ctx.LastStage}";
+                    if (reason != null)
+                    {
+                        ctx.RequestCancel();
+                        timedOut = true;
+                        WriteLine(TtCookProtocol.JobError(job.Id, ECookErrorKind.Timeout, reason, null, ctx.ElapsedSec));
+                        mStatFailed++;
+                    }
                 }
-                if (timedOut && ctx.ElapsedSec >= deadlineSec + CancelGraceSec)
+                if (ctx.IsCancellationRequested && cancelAtSec < 0)
+                    cancelAtSec = ctx.ElapsedSec;
+                if (cancelAtSec >= 0 && ctx.ElapsedSec >= cancelAtSec + CancelGraceSec)
                 {
                     // 取消后仍不收尾: 引擎态已不可信, 继续跑下一个 job 只会污染产物, 直接退出让提交侧重启
+                    // 超时路径已写过终态行; 外部 cancel 的终态本该在 task 收尾后写, 这里不再 await 它, 由这里补上
+                    if (timedOut == false)
+                    {
+                        mStatSkipped++;
+                        WriteLine(TtCookProtocol.JobError(job.Id, ECookErrorKind.Cancel,
+                            $"cancel not honored within {CancelGraceSec}s, last stage: {ctx.LastStage}", null, ctx.ElapsedSec));
+                    }
                     mFatal = true;
                     break;
                 }

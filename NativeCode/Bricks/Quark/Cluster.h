@@ -61,6 +61,8 @@ public:
 
 	float		Simplify( UINT TargetNumTris, float TargetError = 0.0f, UINT LimitNumTris = 0, bool bForNaniteFallback = false );
 	FAdjacency	BuildAdjacency() const;
+	// Mark edges without a neighbor in Adjacency as external (open) edges
+	void		FindExternalEdges( const FAdjacency& Adjacency );
 	void		Split( FGraphPartitioner& Partitioner, const FAdjacency& Adjacency, UINT InClusterSize = ClusterSize ) const;
 	void		Bound();
 

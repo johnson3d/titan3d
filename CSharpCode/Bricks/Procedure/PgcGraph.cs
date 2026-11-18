@@ -174,6 +174,16 @@ namespace EngineNS.Bricks.Procedure
 
         public void Compile(TtPgcNodeBase root, TtPgcExecutionContext context, bool resetCache = true)
         {
+            Compile(root, context, resetCache, null, null);
+        }
+
+        /// <summary>
+        /// 可选阶段回调只观察节点执行, 不改变 PGC 的顺序或调度。
+        /// isCancelRequested 在每个节点开始前轮询, 返回 true 则抛 OperationCanceledException
+        /// (协作式, 单个节点内部不会被打断)。
+        /// </summary>
+        public void Compile(TtPgcNodeBase root, TtPgcExecutionContext context, bool resetCache, Action<string> reportStage, Func<bool> isCancelRequested)
+        {
             ExecutionContext = context;
             try
             {
@@ -193,8 +203,11 @@ namespace EngineNS.Bricks.Procedure
                     Layers[i] = new List<TtPgcNodeBase>();
                 }
 
+                int initialized = 0;
                 foreach (var i in nodes)
                 {
+                    ThrowIfCancelRequested(isCancelRequested);
+                    reportStage?.Invoke($"PGC 初始化节点 {++initialized}/{nodes.Count}: {i.Name} ({i.GetType().Name})");
                     i.InitProcedure(this);
                     Layers[i.RootDistance].Add(i);
                 }
@@ -203,14 +216,18 @@ namespace EngineNS.Bricks.Procedure
                     this.McProgram?.Get()?.OnNodeInitialized(this, i);
                 }
 
+                int processed = 0;
                 for (int i = Layers.Length - 1; i >= 0; i--)
                 {
                     foreach (var j in Layers[i])
                     {
+                        ThrowIfCancelRequested(isCancelRequested);
+                        reportStage?.Invoke($"PGC 执行节点 {processed + 1}/{nodes.Count}: {j.Name} ({j.GetType().Name})");
                         var t1 = Support.TtTime.HighPrecision_GetTickCount();
                         j.DoProcedure(this);
                         this.McProgram?.Get().OnNodeProcedureFinished(this, j);
                         var t2 = Support.TtTime.HighPrecision_GetTickCount();
+                        reportStage?.Invoke($"PGC 完成节点 {++processed}/{nodes.Count}: {j.Name}, {(t2 - t1) / 1000000.0:F1}s");
                         Profiler.Log.WriteLine<Profiler.TtPgcGategory>(Profiler.ELogTag.Info, $"Node:{j.Name} = {(t2 - t1) / 1000000.0f}");
                     }
                 }
@@ -219,6 +236,11 @@ namespace EngineNS.Bricks.Procedure
             {
                 ExecutionContext = null;
             }
+        }
+        static void ThrowIfCancelRequested(Func<bool> isCancelRequested)
+        {
+            if (isCancelRequested != null && isCancelRequested())
+                throw new OperationCanceledException("PGC compile cancelled");
         }
         public List<TtPgcNodeBase> CompileGraph(TtPgcNodeBase root)
         {

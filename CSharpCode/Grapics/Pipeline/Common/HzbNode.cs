@@ -216,6 +216,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             dsTexDesc.MipLevels = (uint)HzbMipsUAVs.Length;
             dsTexDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
             dsTexDesc.BindFlags = NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV;
+            // DownSample 链同一次 dispatch 内 mip[i-1] 作 SRV、mip[i] 作 UAV, 必须按子资源跟踪 layout
+            dsTexDesc.LayoutTrack = NxRHI.ELayoutTrackMode.LTM_PerSubresource;
 
             CoreSDK.DisposeObject(ref HzbSRV);
             CoreSDK.DisposeObject(ref HzbTexture);
@@ -335,17 +337,6 @@ namespace EngineNS.Graphics.Pipeline.Common
                 mSetup.SetDrawcallDispatch(this, policy, mSetupDrawcall, mMip0Width, mMip0Height, 1, true);
                 cmd.PushGpuDraw(mSetupDrawcall);
 
-                //cmd.PushAction((EngineNS.NxRHI.ICommandList cmd, void* arg1) =>
-                //{
-                //    HzbTexture.IsAutoTransition = false;
-                //    for (int i = 0; i < mMipsDrawcalls.Length; i++)
-                //    {
-                //        cmd.SetTextureBarrier(HzbTexture.mCoreObject, (uint)i, 1,
-                //            NxRHI.EPipelineStage.PPLS_ALL_COMMANDS, NxRHI.EPipelineStage.PPLS_ALL_COMMANDS,
-                //            NxRHI.EGpuResourceState.GRS_Uav, NxRHI.EGpuResourceState.GRS_Uav);
-                //    }
-                //}, (void*)IntPtr.Zero);
-
                 // ---------- DownSample chain: mip[i-1] -> mip[i] ----------
                 if (mMipsDrawcalls != null && mDownSample != null)
                 {
@@ -361,26 +352,9 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                         // 同 Setup pass: 传线程总数, 由引擎按 DispatchArg ceil 取整.
                         mDownSample.SetDrawcallDispatch(this, policy, mMipsDrawcalls[i], mipW, mipH, 1, true);
-                        //cmd.PushAction((EngineNS.NxRHI.ICommandList cmd, void* arg1) =>
-                        //{
-                        //    cmd.SetTextureBarrier(HzbTexture.mCoreObject, (uint)i, 1,
-                        //        NxRHI.EPipelineStage.PPLS_ALL_COMMANDS, NxRHI.EPipelineStage.PPLS_ALL_COMMANDS,
-                        //        NxRHI.EGpuResourceState.GRS_Uav, NxRHI.EGpuResourceState.GRS_GenericRead);
-                        //}, (void*)IntPtr.Zero);
                         cmd.PushGpuDraw(mMipsDrawcalls[i]);
                     }
                 }
-
-                //cmd.PushAction((EngineNS.NxRHI.ICommandList cmd, void* arg1) =>
-                //{
-                //    HzbTexture.IsAutoTransition = true;
-                //    for (int i = 0; i < mMipsDrawcalls.Length; i++)
-                //    {
-                //        cmd.SetTextureBarrier(HzbTexture.mCoreObject, (uint)i, 1,
-                //            NxRHI.EPipelineStage.PPLS_ALL_COMMANDS, NxRHI.EPipelineStage.PPLS_ALL_COMMANDS,
-                //            NxRHI.EGpuResourceState.GRS_GenericRead, NxRHI.EGpuResourceState.GRS_Uav);
-                //    }
-                //}, (void*)IntPtr.Zero);
 
                 cmd.FlushDraws();
             }

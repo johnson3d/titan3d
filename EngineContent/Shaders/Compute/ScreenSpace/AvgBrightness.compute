@@ -10,6 +10,11 @@ Texture2D<float4> TargetBuffer;
 groupshared float CachedGroupColors[GroupSize];
 groupshared uint NumOfInValidPixel = 0;
 
+bool IsValidAvgBrightnessValue(float value)
+{
+	return !isnan(value) && !isinf(value) && value >= 0.0f;
+}
+
 [numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_SetupAvgBrightness(uint3 id : SV_DispatchThreadID,
 	uint3 GroupId : SV_GroupID,
@@ -27,13 +32,29 @@ void CS_SetupAvgBrightness(uint3 id : SV_DispatchThreadID,
 		GpuSceneDesc[0].ScreenAverageBrightness = 0.5f;
 	}
 
-	GpuSceneDesc[0].EyeAdapterTime += ElapsedTime;
-	if (GpuSceneDesc[0].EyeAdapterTime >= EyeAdapterTimeRange)
+	if (!IsValidAvgBrightnessValue(GpuSceneDesc[0].ScreenAverageBrightness))
+		GpuSceneDesc[0].ScreenAverageBrightness = 0.5f;
+	if (!IsValidAvgBrightnessValue(GpuSceneDesc[0].PrevScreenAverageBrightness))
+		GpuSceneDesc[0].PrevScreenAverageBrightness = GpuSceneDesc[0].ScreenAverageBrightness;
+	if (!IsValidAvgBrightnessValue(GpuSceneDesc[0].EyeAdapterTime))
+		GpuSceneDesc[0].EyeAdapterTime = 0.0f;
+
+	float adapterTimeRange = EyeAdapterTimeRange;
+	if (!IsValidAvgBrightnessValue(adapterTimeRange) || adapterTimeRange <= 0.0f)
+		adapterTimeRange = 5.0f;
+	float elapsedTime = ElapsedTime;
+	if (!IsValidAvgBrightnessValue(elapsedTime))
+		elapsedTime = 0.0f;
+
+	GpuSceneDesc[0].EyeAdapterTime += elapsedTime;
+	if (GpuSceneDesc[0].EyeAdapterTime >= adapterTimeRange)
 	{
 		GpuSceneDesc[0].EyeAdapterTime = 0;
 		GpuSceneDesc[0].PrevScreenAverageBrightness = GpuSceneDesc[0].ScreenAverageBrightness;
 	}
-	GpuSceneDesc[0].EyeAdapter = lerp(GpuSceneDesc[0].PrevScreenAverageBrightness, GpuSceneDesc[0].ScreenAverageBrightness, GpuSceneDesc[0].EyeAdapterTime / EyeAdapterTimeRange);
+	GpuSceneDesc[0].EyeAdapter = lerp(GpuSceneDesc[0].PrevScreenAverageBrightness, GpuSceneDesc[0].ScreenAverageBrightness, GpuSceneDesc[0].EyeAdapterTime / adapterTimeRange);
+	if (!IsValidAvgBrightnessValue(GpuSceneDesc[0].EyeAdapter))
+		GpuSceneDesc[0].EyeAdapter = GpuSceneDesc[0].ScreenAverageBrightness;
 	GpuSceneDesc[0].ScreenAverageColorI = 0;
 	GpuSceneDesc[0].AverageColorDivider = 0;
 }

@@ -125,7 +125,20 @@ namespace EngineNS.Graphics.Mesh
         public Pipeline.Shader.TtMdfQueueBase MdfQueue { get; private set; }
         NxRHI.TtCbView mPerMeshCBuffer;
         
-        Graphics.Pipeline.Shader.TtMaterial.ERenderFlags MeshRenderFlags = 0;
+        private Graphics.Pipeline.Shader.TtMaterial.ERenderFlags mMeshRenderFlags = Graphics.Pipeline.Shader.TtMaterial.ERenderFlags.None;
+        [Browsable(false)]
+        public Graphics.Pipeline.Shader.TtMaterial.ERenderFlags MeshRenderFlags
+        {
+            get => mMeshRenderFlags;
+            set
+            {
+                if (mMeshRenderFlags == value)
+                    return;
+                mMeshRenderFlags = value;
+                // 未创建 CBV 时只缓存 CPU 状态，首次创建会完整填入所有 flags。
+                mPerMeshCBuffer?.SetValue(TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.MeshRenderFlags, in mMeshRenderFlags);
+            }
+        }
         public bool IsAcceptShadow
         {
             get
@@ -142,7 +155,6 @@ namespace EngineNS.Graphics.Mesh
                 {
                     MeshRenderFlags &= (~Graphics.Pipeline.Shader.TtMaterial.ERenderFlags.AcceptShadow);
                 }
-                PerMeshCBuffer?.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.MeshRenderFlags, in MeshRenderFlags);
             }
         }
         public NxRHI.TtCbView PerMeshCBuffer 
@@ -161,7 +173,19 @@ namespace EngineNS.Graphics.Mesh
             {
                 var binder = NxRHI.TtShader.TtCommonShaderResourceIndexer.Instance.cbPerMesh;
                 mPerMeshCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
-                SetWorldMatrixToCBuffer(in Matrix.Identity);
+                var indexer = TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance;
+                // 创建即完整初始化，包括当前 flags；PreWorldMatrix 不读取未初始化的 WorldMatrix。
+                mPerMeshCBuffer.SetMatrix(indexer.WorldMatrix, in Matrix.Identity);
+                mPerMeshCBuffer.SetMatrix(indexer.WorldMatrixInverse, in Matrix.Identity);
+                mPerMeshCBuffer.SetMatrix(indexer.PreWorldMatrix, in Matrix.Identity);
+                mPerMeshCBuffer.SetValue(indexer.HitProxyId, in Vector4.Zero);
+                mPerMeshCBuffer.SetValue(indexer.ActorId, in Vector4.Zero);
+                mPerMeshCBuffer.SetValue(indexer.CameraPositionInModel, in Vector3.Zero);
+                mPerMeshCBuffer.SetValue(indexer.PickedID, 0.0f);
+                mPerMeshCBuffer.SetValue(indexer.PointLightIndices, in Vector4.Zero);
+                mPerMeshCBuffer.SetValue(indexer.PointLightNum, 0u);
+                mPerMeshCBuffer.SetValue(indexer.MeshRenderFlags, in mMeshRenderFlags);
+                mPerMeshCBuffer.MarkDirty();
                 mPerMeshCBuffer.FlushDirty();
             }
             return mPerMeshCBuffer;

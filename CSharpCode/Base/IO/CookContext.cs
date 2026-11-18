@@ -34,6 +34,8 @@ namespace EngineNS.IO
         private readonly List<string> mArtifacts = new List<string>();
         private readonly System.Diagnostics.Stopwatch mStopwatch = new System.Diagnostics.Stopwatch();
         private float mLastFraction = -1.0f;
+        /// <summary>最近一次 stage/progress/artifact 上报时的 job 相对毫秒 (任意线程写)</summary>
+        private long mLastActivityMs;
 
         /// <summary>job id, 由提交侧分配; 非协议场景 (命令行批量) 为 0</summary>
         public long JobId { get; }
@@ -51,6 +53,11 @@ namespace EngineNS.IO
         public string LastStage { get; private set; }
         /// <summary>最近一次上报的子进度 (未上报过为 -1)</summary>
         public float LastFraction => mLastFraction;
+        /// <summary>
+        /// 距最近一次上报 (stage/progress/artifact, 含重复值) 的秒数; 从未上报则从 job 开始算。
+        /// worker 据此判定"长时间无进展", 区分慢任务与卡死。
+        /// </summary>
+        public double IdleSec => (mStopwatch.ElapsedMilliseconds - Interlocked.Read(ref mLastActivityMs)) / 1000.0;
 
         public TtCookContext(long jobId, string asset, string assetType, bool force, ITtCookProgressSink sink)
         {
@@ -81,6 +88,7 @@ namespace EngineNS.IO
         /// <summary>上报阶段文本 (如 "create" / "cook" / "bake pending=3")</summary>
         public void ReportStage(string stage)
         {
+            MarkActivity();
             LastStage = stage;
             try
             {
@@ -96,6 +104,7 @@ namespace EngineNS.IO
         /// <summary>上报子进度 0..1 (超出范围会被夹取; 与上次相同则忽略)</summary>
         public void ReportProgress(float fraction)
         {
+            MarkActivity();
             if (fraction < 0.0f)
                 fraction = 0.0f;
             else if (fraction > 1.0f)
@@ -122,6 +131,7 @@ namespace EngineNS.IO
         {
             if (string.IsNullOrEmpty(artifactPath))
                 return;
+            MarkActivity();
             var saved = ToRepositoryRelative(artifactPath);
             lock (mLock)
             {
@@ -138,6 +148,11 @@ namespace EngineNS.IO
                 Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Error,
                     $"Cook context sink failed on artifact '{saved}': {ex.Message}");
             }
+        }
+
+        void MarkActivity()
+        {
+            Interlocked.Exchange(ref mLastActivityMs, mStopwatch.ElapsedMilliseconds);
         }
 
         /// <summary>产物快照 (供 job.done 序列化)</summary>

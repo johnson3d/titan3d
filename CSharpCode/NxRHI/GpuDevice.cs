@@ -204,11 +204,11 @@ namespace EngineNS.NxRHI
                 return null;
             }
         }
-        public TtCbView CreateCBV(TtEffectBinder binder)
+        public TtCbView CreateCBV(TtEffectBinder binder, EGpuUsage usage = EGpuUsage.USAGE_DYNAMIC)
         {
             if (binder == null)
                 return null;
-            return CreateCBV(binder.mCoreObject.GetShaderBinder(EShaderType.SDT_Unknown));
+            return CreateCBV(binder.mCoreObject.GetShaderBinder(EShaderType.SDT_Unknown), usage);
         }
         public TtCbView CreateCBV(FEffectBinder binder)
         {
@@ -220,15 +220,19 @@ namespace EngineNS.NxRHI
                 return null;
             return CreateCBV(binder.mCoreObject);
         }
-        public TtCbView CreateCBV(FShaderBinder binder)
+        public TtCbView CreateCBV(FShaderBinder binder, EGpuUsage usage = EGpuUsage.USAGE_DYNAMIC)
         {
-            return CreateCBV(null, binder);
+            return CreateCBV(null, binder, usage);
         }
-        public TtCbView CreateCBV(TtBuffer buffer, FShaderBinder binder, [CallerFilePath] string filePath = "",
+        // usage 仅在自建 buffer (buffer == null) 时生效, 只接受 DYNAMIC / DEFAULT;
+        // 跨帧一致性敏感的常量 (如 cbPerCamera) 用 DEFAULT, 更新走队列内 staging 拷贝而非 CPU 原地覆盖
+        public TtCbView CreateCBV(TtBuffer buffer, FShaderBinder binder, EGpuUsage usage = EGpuUsage.USAGE_DYNAMIC, [CallerFilePath] string filePath = "",
         [CallerLineNumber] int lineNumber = 0)
         {
             var cbvDesc = new FCbvDesc();
             cbvDesc.ShaderBinder = binder;
+            // C# 结构体零初始化不走 native 默认值 (USAGE_DEFAULT == 0), 必须显式赋值
+            cbvDesc.Usage = usage;
             var result = new TtCbView();
             if (buffer == null)
             {
@@ -270,6 +274,17 @@ namespace EngineNS.NxRHI
             {
                 result.mCoreObject = mCoreObject.CreateIBV(buffer.mCoreObject, in desc, filePath, lineNumber);
             }
+            if (result.mCoreObject.IsValidPointer == false)
+                return null;
+            return result;
+        }
+        public TtIndirectArgBufferView CreateIAV(TtBuffer buffer, [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
+        {
+            if (buffer == null)
+                return null;
+            var result = new TtIndirectArgBufferView();
+            result.mCoreObject = mCoreObject.CreateIAV(buffer.mCoreObject, filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;

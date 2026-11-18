@@ -14,7 +14,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     public partial class TtTerrainNode : GamePlay.Scene.TtVisual
     {
         /// <summary>Dispose 与异步重建交叉保护: 置位后 BuildTerrainCore 不再发布新地形</summary>
-        bool mDisposed = false;
+        volatile bool mDisposed = false;
         public TtTerrainNode() 
         { 
             this.IsCastShadow = true;
@@ -105,19 +105,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             public int LevelSideX = 1024;
             public int LevelSideZ = 1024;
             /// <summary>
-            /// 远景 cluster DAG 每层 QEM 误差预算 (代价超过即停止简化)。
-            /// 量纲是 texel 距离平方, 取值过小 (如 5) 会导致零塌陷。
+            /// 远景 cluster DAG 叶子网格的降采样步长 (texel): 行列取 {0, s, 2s, …} ∪ {Size-1}。
+            /// 1 = 全分辨率叶子; 越大烘焙越快, 叶子误差由 M2 精确度量并单调传到祖先, 不会被低估。
             /// </summary>
             [Rtti.Meta("")]
             [System.ComponentModel.Category("VgDag")]
-            public float VgDagMaxErrorPerLevel = 1600f;
-            /// <summary>
-            /// 远景 DAG 叶子 cluster 边长 (quads), 必须与 VgDagDrawNode 的
-            /// dummy patch 拓扑 MakeGridForTerrain(VgDagLeafQuads) 一致。
-            /// </summary>
-            [Rtti.Meta("")]
-            [System.ComponentModel.Category("VgDag")]
-            public int VgDagLeafQuads = 16;
+            public int VgDagStep = 2;
         }
         
         /// <summary>
@@ -145,6 +138,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public float TexUVScale = 64.0f / 1024.0f;
         public float MaterialIdUVStep = 1.0f / 1024.0f;//TerrainMaterialIdManager
         public float DiffuseUVStep = 1.0f / 1024.0f;// (1.0f / 1024.0f) * 16.0f;//TerrainMaterialIdManager
+        // 所有 patch/LOD batch 共用节点的对象 flags；由节点状态派生，不重复存储。
+        // ShadingMode 等材质 flags 仍由共享材质提供。
+        [Browsable(false)]
+        public TtMaterial.ERenderFlags MeshRenderFlags
+        {
+            get => IsAcceptShadow ? TtMaterial.ERenderFlags.AcceptShadow : TtMaterial.ERenderFlags.None;
+        }
         public override bool IsAcceptShadow
         {
             get
@@ -361,16 +361,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public RName MaterialName { get => TerrainData?.MaterialName; set { var nd = TerrainData; if (nd == null) return; nd.MaterialName = value; } }
 
         /// <summary>
-        /// 远景 DAG 每层 QEM 误差预算 (texel²)。纯转发, 下次 level 生成/补烘时生效。
+        /// 远景 DAG 叶子降采样步长 (texel)。该值参与 DAG hash, 下次加载/离线 cook 自动判定是否重烘。
         /// </summary>
         [Category("VgDag")]
-        public float VgDagMaxErrorPerLevel { get => TerrainData?.VgDagMaxErrorPerLevel ?? 1600f; set { var nd = TerrainData; if (nd == null) return; nd.VgDagMaxErrorPerLevel = value; } }
-        /// <summary>
-        /// 远景 DAG 叶子 cluster 边长 (quads)。注意: .trvgdag 缓存 hash 不含此值, 改后需清掉
-        /// cache/terrain 下对应缓存才会重烘出新拓扑。
-        /// </summary>
-        [Category("VgDag")]
-        public int VgDagLeafQuads { get => TerrainData?.VgDagLeafQuads ?? 16; set { var nd = TerrainData; if (nd == null) return; nd.VgDagLeafQuads = value; } }
+        public int VgDagStep { get => TerrainData?.VgDagStep ?? 2; set { var nd = TerrainData; if (nd == null) return; nd.VgDagStep = value; } }
 
         /// <summary>
         /// 地形显示模式: Normal=实体 / WireFrame=线框 / Both=实体叠线框。
@@ -444,45 +438,125 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             _ = RebuildTerrainAsync();
         }
 
-        /// <summary>当前已构建地形使用的 PgcName.Address / .Name (用于检测换 PGC 时清旧缓存目录)</summary>
+        /// <summary>当前已构建地形使用的 PgcName.Address (用于检测换 PGC 时清缓存目录)</summary>
         string mBuiltPgcAddress;
-        string mBuiltPgcName;
+        readonly object mCacheWriteLock = new object();
+        internal object PgcBuildLock { get; } = new object();
+        int mCacheGeneration;
+        internal int CacheGeneration => System.Threading.Volatile.Read(ref mCacheGeneration);
+        /// <summary>缓存目录以 NodeId 命名看不出归属, 首次落盘时在目录里放一份说明; 清目录后重写</summary>
+        const string CacheInfoFileName = "_source.txt";
+        bool mCacheInfoWritten;
 
         /// <summary>
-        /// 与 UTerrainLevel.GetLevelCacheDir 同一套路径规则 (cache/terrain/{场景}/TerrainNode/{NodeId}/{pgcName}/
-        /// , 场景未保存时回退 pgc-only 路径)。换 PGC 时旧目录里的 .trlvl/.trvgdag 全部作废, 在这里删掉。
+        /// 本节点全部缓存产物的目录: cache/terrain/{NodeId}/, level 的 .trlvl / .trvgdag 直接平铺其下。
+        /// NodeId 创建即有、全局唯一, 一个节点同一时刻只用一个 PGC, 所以不需要再按场景名/pgc 名分层;
+        /// 缓存是否可用由文件内的 runtime hash 判定 (含 PGC 内容), 目录只负责隔离节点。
+        /// 注意: 整目录复制场景会连 NodeId 一起复制, 两个场景将共用同一目录 —— 该问题应在复制场景时
+        /// 重新生成 NodeId 解决, 不在缓存路径上防。
         /// </summary>
-        string GetPgcCacheDir(string pgcName)
+        public string GetCacheDir()
         {
             var root = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "terrain/";
-            var scene = ParentScene;
-            if (scene?.AssetName == null)
-                return IO.TtFileManager.CombinePath(root, pgcName);
-            var dir = IO.TtFileManager.CombinePath(root, scene.AssetName.Name);
-            dir = IO.TtFileManager.CombinePath(dir, "TerrainNode");
-            dir = IO.TtFileManager.CombinePath(dir, NodeId.ToString());
-            return IO.TtFileManager.CombinePath(dir, pgcName);
+            return IO.TtFileManager.CombinePath(root, NodeId.ToString());
         }
 
-        void DeletePgcCacheDir(string pgcAddress, string pgcName)
+        void DeleteCacheDir()
         {
-            if (string.IsNullOrEmpty(pgcName))
+            lock (mCacheWriteLock)
+            {
+                // 与最终落盘使用同一把锁: 清理前失效旧代次, 旧任务即便晚完成也不能再发布缓存。
+                System.Threading.Interlocked.Increment(ref mCacheGeneration);
+                mCacheInfoWritten = false;
+                if (Levels != null)
+                    foreach (var level in Levels)
+                        level?.CancelBakeTask();
+                try
+                {
+                    var dir = GetCacheDir();
+                    if (IO.TtFileManager.DirectoryExists(dir))
+                    {
+                        IO.TtFileManager.DeleteDirectory(dir);
+                        Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Info,
+                            $"TerrainNode pgc changed, removed stale cache dir: {dir}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // 其他进程正读取时可能无法删除; 旧文件仍受内容 hash 门禁, 旧代次也已失效。
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning,
+                        $"TerrainNode remove stale pgc cache dir failed: {ex.Message}");
+                }
+            }
+        }
+
+        /// <summary>独立临时文件写完再发布, 防编辑器与 worker 同时写出半截 XND; 旧代次禁止覆盖新缓存。</summary>
+        internal bool TryWriteCache(int generation, string file, Action<string> writer, Thread.Async.TtAsyncTaskToken cancelToken = null)
+        {
+            lock (mCacheWriteLock)
+            {
+                if (mDisposed || generation != CacheGeneration || cancelToken?.TaskState == Thread.Async.EAsyncTaskState.Canceled)
+                    return false;
+                // XND 约定小写路径, 临时文件与最终文件须保持同一约定 (含大小写敏感平台)。
+                file = file.ToLower();
+                var temporary = file + "." + Guid.NewGuid().ToString("N") + ".tmp";
+                try
+                {
+                    writer(temporary);
+                    if (!System.IO.File.Exists(temporary) || new System.IO.FileInfo(temporary).Length == 0)
+                        throw new System.IO.IOException($"Terrain cache write failed: {file}");
+                    if (cancelToken?.TaskState == Thread.Async.EAsyncTaskState.Canceled)
+                        return false;
+                    // SaveXnd 只刷新临时路径; 发布时也必须刷新正式路径的 F2M 映射。
+                    IO.TtRes2Memory.OnBeforeWriteFile(file);
+                    try
+                    {
+                        System.IO.File.Move(temporary, file, true);
+                    }
+                    finally
+                    {
+                        IO.TtRes2Memory.OnAfterWriteFile(file);
+                    }
+                    EnsureCacheInfo();
+                    return true;
+                }
+                finally
+                {
+                    if (System.IO.File.Exists(temporary))
+                        System.IO.File.Delete(temporary);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 写缓存目录说明 (所属场景/节点/PGC/level 规模), 只给人看, 加载不读它。
+        /// 调用方须持 mCacheWriteLock; 写失败只记日志, 不影响缓存本身。
+        /// </summary>
+        void EnsureCacheInfo()
+        {
+            if (mCacheInfoWritten)
                 return;
             try
             {
-                var dir = GetPgcCacheDir(pgcName);
-                if (IO.TtFileManager.DirectoryExists(dir))
-                {
-                    IO.TtFileManager.DeleteDirectory(dir);
-                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Info,
-                        $"TerrainNode pgc changed, removed stale cache dir: {dir}");
-                }
+                var scene = ParentScene?.AssetName;
+                var sceneText = scene != null ? $"{scene.Name} ({scene.RNameType})" : IO.TtCookContext.Current?.Asset ?? "(unknown)";
+                var nd = TerrainData;
+                var pgc = nd?.PgcName;
+                var text = "TitanEngine terrain cache: .trlvl / .trvgdag in this directory belong to the terrain node below.\n"
+                    + $"scene: {sceneText}\n"
+                    + $"node: {NodeName}\n"
+                    + $"nodeId: {NodeId}\n"
+                    + $"pgc: {(pgc != null ? $"{pgc.Name} ({pgc.RNameType})" : "(none)")}\n"
+                    + $"levels: {nd?.NumOfLevelX} x {nd?.NumOfLevelZ}\n"
+                    + $"written by: {System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name} pid {Environment.ProcessId} at {DateTime.Now:yyyy-MM-dd HH:mm:ss}\n";
+                System.IO.File.WriteAllText(IO.TtFileManager.CombinePath(GetCacheDir(), CacheInfoFileName), text);
+                mCacheInfoWritten = true;
             }
             catch (Exception ex)
             {
-                // 目录被在飞 bake 占用等情况: 跳过即可, 残留缓存不影响正确性 (下次换 PGC 再删)
+                // 编辑器与 worker 可能同时写; 下次落盘再试
                 Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning,
-                    $"TerrainNode remove stale pgc cache dir failed: {ex.Message}");
+                    $"TerrainNode write cache info failed: {ex.Message}");
             }
         }
 
@@ -499,8 +573,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 var oldLevels = Levels;
                 var oldStreaming = LevelStreaming;
                 var oldMgr = TerrainMaterialIdManager;
+
+                // 换了 PGC: 本节点缓存目录整体作废。新旧缓存同目录, 必须在新地形构建 (及其流式加载写缓存)
+                // 之前清 —— 构建完再删会把新生成的 .trlvl 一起删掉; 清理同时失效旧代次, 阻止旧任务回写。
                 var oldPgcAddress = mBuiltPgcAddress;
-                var oldPgcName = mBuiltPgcName;
+                var curPgcAddress = TerrainData?.PgcName?.Address;
+                if (oldPgcAddress != null && oldPgcAddress != curPgcAddress)
+                    DeleteCacheDir();
 
                 // 强制 EnsureMaterialTextures 在新 manager 上重建贴图数组 (签名可能相同而提前 return)
                 mBuiltTexDiffuse = null;
@@ -525,11 +604,6 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 }
                 oldTerrain?.Dispose();
                 oldMgr?.Cleanup();
-
-                // 换了 PGC: 旧 pgc 的 level 缓存目录已全部作废, 清掉
-                var curPgcAddress = TerrainData?.PgcName?.Address;
-                if (oldPgcAddress != null && oldPgcAddress != curPgcAddress)
-                    DeletePgcCacheDir(oldPgcAddress, oldPgcName);
             }
             catch (Exception ex)
             {
@@ -574,97 +648,160 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
 
         /// <summary>
-        /// 离线 cook 入口 (TitanCMD 的 Cook 命令): 确保地形按当前参数完整构建一遍
-        /// (PGC 高度场 → .trlvl 缓存, 构建过程会触发每个 level 的 VGDag bake 投递),
-        /// 然后等待全部 level 的 bake 落盘完成。已烘过的 level (缓存 hash 命中)
+        /// 离线 cook 入口 (仅 TitanCMD 的 Cook/CookServer): 对完整 level 表走两轮,
+        /// 第 1 轮逐块生成/校验 .trlvl, 第 2 轮再逐块校验/补烘 .trvgdag (每块后台实际结束后验证产物)。
+        /// DAG 再慢或失败, 第 1 轮落盘的 .trlvl 也已可供运行期流式加载。
+        /// 不依赖相机活动窗口或“已有任务”计数。已烘过的 level (缓存 hash 命中)
         /// 不会重复烘, 所以重复执行 cook 是幂等的。
         /// 各阶段与等待期间都会写进度日志 (每 10 秒一条心跳), 避免 cook 时无法判断是否卡死。
-        /// 返回 false 表示构建失败或等待 bake 超时。
+        /// 重活在 AsyncIO / TPools 上跑, 主线程只等待; 超时与卡死由 CookServer 按进度上报判定,
+        /// 这里只响应 context 的协作式取消。
+        /// 返回 false 表示构建失败、产物校验失败或已取消。
         /// </summary>
         /// <remarks>
         /// cook 期间 ForceBakeVgDag = true, 让 level 加载钩子里的 BakeVgDag 绕过
         /// 运行期自动 cook 开关 (editor.jscfg AutoCookTerrainVgDag, 默认关);
         /// finally 还原, 防止 cook 完成后运行期 bake 一直被强制打开。
         /// </remarks>
-        public System.Threading.Tasks.Task<bool> CookTerrainAsync(int bakeTimeoutMs = 1200000)
+        public async Thread.Async.TtTask<bool> CookTerrainAsync()
         {
+            // 编辑器只能提交给 worker; 即使误调节点 API, 也绝不在主编辑器全量加载地形。
+            var entryName = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name;
+            var context = IO.TtCookContext.Current;
+            if (!string.Equals(entryName, "TitanCMD", StringComparison.OrdinalIgnoreCase) || context == null)
+            {
+                Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Error,
+                    "Terrain cook requires TitanCMD Cook/CookServer and a CookDriver context.");
+                return false;
+            }
+            if (ForceBakeVgDag || mRebuilding || mDisposed || TerrainData == null)
+                return false;
             ForceBakeVgDag = true;
             try
             {
-                return CookTerrainCoreAsync(bakeTimeoutMs);
+                return await CookTerrainCoreAsync(context);
+            }
+            catch (OperationCanceledException)
+            {
+                Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Warning,
+                    $"TerrainNode cook cancelled: node={NodeId}, stage={context.LastStage}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Error,
+                    $"TerrainNode cook failed: node={NodeId}, {ex}");
+                return false;
             }
             finally
             {
+                // 取消/失败后等后台真正退出再结束 job, 不用 CancelTask 提前回池。
+                if (Levels != null)
+                {
+                    foreach (var level in Levels)
+                        level?.CancelBakeTask();
+                    while (HasRunningBake())
+                        await WaitCookTick();
+                }
                 ForceBakeVgDag = false;
             }
         }
-        async System.Threading.Tasks.Task<bool> CookTerrainCoreAsync(int bakeTimeoutMs)
+
+        bool HasRunningBake()
         {
-            if (TerrainData == null)
-            {
-                Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Error,
-                    $"TerrainNode cook: no TerrainData, node={NodeId}");
+            if (Levels != null)
+                foreach (var level in Levels)
+                    if (level?.IsBakeRunning == true)
+                        return true;
+            return false;
+        }
+
+        // 每拍一个引擎信号量, Timer 只唤醒; 续体回到引擎上下文, 不 await CLR Task.Delay。
+        static async Thread.Async.TtTask<bool> WaitCookTick()
+        {
+            var semaphore = Thread.TtSemaphore.CreateSemaphore(1);
+            using (var timer = new System.Threading.Timer(_ => semaphore.Release(), null, 100, System.Threading.Timeout.Infinite))
+                await semaphore.Await();
+            return true;
+        }
+
+        async Thread.Async.TtTask<bool> CookTerrainCoreAsync(IO.TtCookContext context)
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            if (Levels == null && !await BuildTerrainCore())
                 return false;
-            }
-            var sw = System.Diagnostics.Stopwatch.StartNew();
-            Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Info,
-                $"TerrainNode cook begin: node={NodeId}, pgc={TerrainData.PgcName}, levels={(Levels == null ? "null" : Levels.Length.ToString())}");
-
-            if (Levels == null)
+            if (Levels == null || Levels.Length == 0)
+                return false;
+            // 全缓存命中时不会有新的落盘, 这里先给已有目录补上归属说明
+            lock (mCacheWriteLock)
             {
-                // 节点初始化失败/未构建过: 这里强制构建一次 (与 RebuildTerrainAsync 同路径但更简单,
-                // cook 环境没有旧地形需要保留)
-                if (mRebuilding)
+                if (IO.TtFileManager.DirectoryExists(GetCacheDir()))
+                    EnsureCacheInfo();
+            }
+
+            // 全量遍历只在 TitanCMD 进程执行。一次仅持有一个 level 的临时数据, 不把全图 GPU 资源常驻。
+            // 两轮: 先让全图 .trlvl 就绪 (保证跑图流式加载), 再逐块烘 DAG; 进度按 2N 个产物步骤计, 非耗时估计。
+            int total = Levels.Length;
+            long lastBeatMs = 0;
+            for (int pass = 0; pass < 2; pass++)
+            {
+                bool vgDagPass = pass == 1;
+                string passName = vgDagPass ? ".trvgdag" : ".trlvl";
+                int completed = 0;
+                foreach (var level in Levels)
                 {
-                    Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Error,
-                        $"TerrainNode cook: rebuild in progress, skip, node={NodeId}");
-                    return false;
+                    if (level == null || context.IsCancellationRequested || mDisposed)
+                        return false;
+                    while (level.IsBakeRunning)
+                    {
+                        if (context.IsCancellationRequested)
+                            return false;
+                        await WaitCookTick();
+                    }
+                    context.ReportStage($"terrain 第 {pass + 1}/2 轮 {passName} level {completed + 1}/{total}: X{level.LevelX}_Y{level.LevelZ} | 开始");
+                    context.ReportProgress((float)(pass * total + completed) / (2 * total));
+                    using (var data = new TtTerrainLevelData())
+                    {
+                        await data.PrepareCookDataAsync(level, completed, total, vgDagPass);
+                        while (level.IsBakeRunning)
+                        {
+                            if (context.IsCancellationRequested || mDisposed)
+                            {
+                                Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Warning,
+                                    $"TerrainNode cook cancelled: node={NodeId}, level={level.LevelX},{level.LevelZ}");
+                                level.CancelBakeTask();
+                                return false;
+                            }
+                            if (watch.ElapsedMilliseconds - lastBeatMs >= 10000)
+                            {
+                                lastBeatMs = watch.ElapsedMilliseconds;
+                                Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Info,
+                                    $"TerrainNode cook: dag completed={completed}/{total}, baking={level.LevelX},{level.LevelZ}, elapsed={lastBeatMs / 1000.0:F1}s");
+                            }
+                            await WaitCookTick();
+                        }
+                        data.ReportCookStage(vgDagPass ? "校验已落盘的 .trlvl / .trvgdag 及各自 hash" : "校验已落盘的 .trlvl 及 hash");
+                        // 没有任务不等于成功: 本轮产物必须存在且 hash 对上, 否则 job 明确失败。
+                        if (!data.ValidateCookArtifacts())
+                        {
+                            Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Error,
+                                $"TerrainNode cook: missing/invalid {passName}, node={NodeId}, level={level.LevelX},{level.LevelZ}");
+                            return false;
+                        }
+                    }
+                    completed++;
+                    context.ReportStage($"terrain 第 {pass + 1}/2 轮 {passName} 已完成 {completed}/{total}: X{level.LevelX}_Y{level.LevelZ} 已验证");
+                    context.ReportProgress((float)(pass * total + completed) / (2 * total));
+                    // 即使全是缓存命中也让出主循环, 给 worker 处理 cancel/心跳的机会。
+                    await WaitCookTick();
                 }
-                mBuiltTerrainSignature = GetTerrainSignature();
                 Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Info,
-                    $"TerrainNode cook: build terrain (PGC -> .trlvl, triggers VGDag bake), node={NodeId}");
-                if (await BuildTerrainCore() == false)
-                {
-                    Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Error,
-                        $"TerrainNode cook: build terrain failed, node={NodeId}");
-                    return false;
-                }
-                Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Info,
-                    $"TerrainNode cook: build terrain done ({sw.ElapsedMilliseconds} ms), baking... node={NodeId}");
+                    $"TerrainNode cook pass {pass + 1}/2 ({passName}) done: node={NodeId}, verified={completed}/{total}, elapsed={watch.ElapsedMilliseconds} ms");
             }
-
-            // bake 任务在 level 构建/缓存加载时同步登记 (SetBakeTask); 多 level 天然并行,
-            // 这里统一等待, 每 10 秒打一条心跳
-            var pending = new System.Collections.Generic.List<TtTerrainLevel>();
-            foreach (var lv in Levels)
-            {
-                if (lv != null && lv.IsBakeRunning)
-                    pending.Add(lv);
-            }
+            if (context.IsCancellationRequested)
+                return false;
             Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Info,
-                $"TerrainNode cook: levels={Levels.Length}, bake pending={pending.Count}, node={NodeId}");
-            long lastBeatMs = sw.ElapsedMilliseconds;
-            while (pending.Count > 0)
-            {
-                await System.Threading.Tasks.Task.Delay(500);
-                pending.RemoveAll(static lv => lv.IsBakeRunning == false);
-                var nowMs = sw.ElapsedMilliseconds;
-                if (nowMs - lastBeatMs >= 10000)
-                {
-                    lastBeatMs = nowMs;
-                    Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Info,
-                        $"TerrainNode cook: still baking, pending={pending.Count} level(s), elapsed={nowMs / 1000.0:F1}s, node={NodeId}");
-                }
-                if (nowMs > bakeTimeoutMs)
-                {
-                    Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Error,
-                        $"TerrainNode cook: wait bake timeout ({bakeTimeoutMs} ms), pending={pending.Count} level(s), node={NodeId}");
-                    return false;
-                }
-            }
-
-            Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Info,
-                $"TerrainNode cook done: node={NodeId}, elapsed={sw.ElapsedMilliseconds} ms");
+                $"TerrainNode cook done: node={NodeId}, levels={total}, elapsed={watch.ElapsedMilliseconds} ms");
             return true;
         }
 
@@ -755,7 +892,6 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 GridSize = gridSize;
                 LevelSize = levelSize;
                 mBuiltPgcAddress = trData.PgcName?.Address;
-                mBuiltPgcName = trData.PgcName?.Name;
                 this.BoundVolume.mLocalAABB.Minimum.SetValue(bvSX, -0.5f, bvSZ);
                 this.BoundVolume.mLocalAABB.Maximum.SetValue(bvEX, 0.5f, bvEZ);
                 // 重置活动中心, 让下一帧 SetActiveCenter 用新数组重新填充 ActiveLevels
@@ -919,6 +1055,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
+            // worker 的离线 cook 独占 PGC 图; 不并行运行相机驱动的流式加载/重建。
+            if (ForceBakeVgDag)
+                return base.OnTickLogic(args);
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
                 // Details 里改了地形结构参数 (PgcName/尺寸/Patch*/MipLevels/MaterialName/ActiveLevel)
@@ -1009,6 +1148,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         public override void OnGatherVisibleMeshes_OnRenderThread(GamePlay.TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             // 渲染帧开头拍 LOD 快照: 之后整帧内选网格/打包 instance 读到的都是同一份,
             // 逻辑线程的重算 (可含哨兵中态) 对渲染侧不可见; 原子读+钳制保证单值合法
             if (ActiveLevels != null)

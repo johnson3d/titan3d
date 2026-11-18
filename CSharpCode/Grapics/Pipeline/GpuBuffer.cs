@@ -16,6 +16,7 @@ namespace EngineNS.Graphics.Pipeline
         public NxRHI.TtUaView Uav;
         public NxRHI.TtSrView Srv;
         public NxRHI.TtCbView Cbv;
+        public NxRHI.TtIndirectArgBufferView Iav;
         private bool Dirty = false;
         public bool Initialize(NxRHI.EBufferType types)
         {
@@ -42,6 +43,7 @@ namespace EngineNS.Graphics.Pipeline
                 CoreSDK.DisposeObject(ref Uav);
                 CoreSDK.DisposeObject(ref Srv);
                 CoreSDK.DisposeObject(ref Cbv);
+                CoreSDK.DisposeObject(ref Iav);
 
                 CoreSDK.DisposeObject(ref GpuBuffer);
             }
@@ -108,6 +110,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             if (DataArray.Count >= GpuCapacity)
             {
+                CoreSDK.DisposeObject(ref Iav);
                 GpuBuffer?.Dispose();
 
                 GpuCapacity = (uint)DataArray.Count + GpuCapacity / 2 + 1;
@@ -125,15 +128,17 @@ namespace EngineNS.Graphics.Pipeline
 
                 bfDesc.InitData = &initData;
                 bfDesc.Type = BufferTypes;
-                if ((BufferTypes & NxRHI.EBufferType.BFT_UAV) != 0)
-                {
-                    bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DEFAULT;
-                }
-                else
-                {
-                    bfDesc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
-                    bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
-                }
+                //尽量用Default，保证update的时候cmdlist保证顺序，还能提升gpu性能
+                bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DEFAULT;
+                //if ((BufferTypes & NxRHI.EBufferType.BFT_UAV) != 0)
+                //{
+                //    bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DEFAULT;
+                //}
+                //else
+                //{
+                //    bfDesc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
+                //    bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
+                //}
                 GpuBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
                 System.Diagnostics.Debug.Assert(GpuBuffer != null);
 
@@ -152,6 +157,10 @@ namespace EngineNS.Graphics.Pipeline
                     srvDesc.Buffer.NumElements = (uint)GpuCapacity;
                     srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
                     Srv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
+                }
+                if ((bfDesc.Type & NxRHI.EBufferType.BFT_IndirectArgs) != 0)
+                {
+                    Iav = TtEngine.Instance.GfxDevice.RenderContext.CreateIAV(GpuBuffer);
                 }
             }
             else
@@ -178,6 +187,7 @@ namespace EngineNS.Graphics.Pipeline
         public NxRHI.TtCbView Cbv;
         public NxRHI.TtRenderTargetView Rtv;
         public NxRHI.TtDepthStencilView Dsv;
+        public NxRHI.TtIndirectArgBufferView Iav;
 
         ~TtGpuBufferBase()
         {
@@ -190,6 +200,7 @@ namespace EngineNS.Graphics.Pipeline
             CoreSDK.DisposeObject(ref Cbv);
             CoreSDK.DisposeObject(ref Rtv);
             CoreSDK.DisposeObject(ref Dsv);
+            CoreSDK.DisposeObject(ref Iav);
 
             CoreSDK.DisposeObject(ref GpuResource);
         }
@@ -252,6 +263,12 @@ namespace EngineNS.Graphics.Pipeline
                     srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
                     Srv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
                     System.Diagnostics.Debug.Assert(Srv != null);
+                }
+
+                if ((bufferType & NxRHI.EBufferType.BFT_IndirectArgs) != 0)
+                {
+                    Iav = TtEngine.Instance.GfxDevice.RenderContext.CreateIAV(GpuBuffer);
+                    System.Diagnostics.Debug.Assert(Iav != null);
                 }
             }
         }

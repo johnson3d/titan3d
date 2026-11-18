@@ -1084,6 +1084,68 @@ namespace NxRHI
 		UINT							mAlignment = 1;
 		UINT							mMemTypeIndex = -1;
 	};
+
+	// UpdateGpuData 的 staging 拷贝源池: 每页一个常驻映射的 VkBuffer, 按 2 的幂分档切 chunk;
+	// chunk 随包装它的 VKBuffer 析构归还 (recorder 在 fence 完成后才放开引用), 与 DX12StagingMemAllocator 同构
+	class VKStagingMemAllocator;
+	struct VKStagingPage : public VIUnknown
+	{
+		~VKStagingPage();
+		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
+		VkBuffer					Buffer = nullptr;
+		VmaAllocation				Allocation = nullptr;
+		bool						IsCoherent = true;
+		BYTE*						pMapped = nullptr;
+		UINT64						ChunkSize = 0;
+		UINT						ChunkCount = 0;
+		std::vector<UINT>			FreeChunks;
+		UINT64						IdleSinceTick = 0;
+		UINT64 GetPageSize() const {
+			return ChunkSize * ChunkCount;
+		}
+		bool IsIdle() const {
+			return FreeChunks.size() == ChunkCount;
+		}
+	};
+	struct FVKStagingChunk : public VIUnknown
+	{
+		~FVKStagingChunk();
+		TWeakRefHandle<VKStagingMemAllocator>	HostAllocator;
+		AutoRef<VKStagingPage>	Page;
+		UINT					ChunkIndex = 0;
+		UINT64					Offset = 0;
+		UINT64					Size = 0;
+		BYTE* GetMappedPtr() {
+			return Page->pMapped + Offset;
+		}
+		//写入后调用: 非 coherent 内存需显式 flush 才对 GPU 可见
+		void FlushWrite(UINT64 size);
+	};
+	class VKStagingMemAllocator : public IWeakRefObject
+	{
+	public:
+		static const UINT NumOfSizeClass = 13;
+		static const UINT64 MinChunkSize = 256;
+		static const UINT64 MaxChunkSize = MinChunkSize << (NumOfSizeClass - 1);//1MB
+		static const UINT64 MinPageSize = 64 * 1024;
+		static const UINT64 MaxPageSize = 4 * 1024 * 1024;
+		static const UINT ChunksPerPage = 64;
+		UINT64				BudgetSize = 32 * 1024 * 1024;//页总量超出时立即回收空页 (在用页不动, 分配不受限)
+		UINT64				IdleReleaseTicks = 1800;
+
+		AutoRef<FVKStagingChunk> Alloc(VKGpuDevice* device, UINT64 size);
+		void Free(FVKStagingChunk* chunk);
+		void TickShrink();
+		UINT64 GetTotalPageSize() const {
+			return TotalPageSize;
+		}
+	private:
+		VKStagingPage* CreatePage(VKGpuDevice* device, UINT64 chunkSize);
+		VSLLock				mLocker;
+		std::vector<AutoRef<VKStagingPage>>	SizeClasses[NumOfSizeClass];
+		UINT64				TotalPageSize = 0;
+		UINT64				TickIndex = 0;
+	};
 }
 
 NS_END

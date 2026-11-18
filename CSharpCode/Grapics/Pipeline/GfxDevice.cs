@@ -143,6 +143,7 @@ namespace EngineNS.Graphics.Pipeline
         public bool IsRenderingFrame { get; private set; } = false;
         public void BeginFrame()
         {
+            CbvUpdater.UpdateCBVs();
             IsRenderingFrame = true;
             RenderContext?.BeginFrame();
         }
@@ -207,7 +208,8 @@ namespace EngineNS.Graphics.Pipeline
             TtEngine.Instance.GfxDevice.RenderContext.TickPostEvents();
 
             RenderQueue.TickSync(host.ElapsedSecond);
-            CbvUpdater.UpdateCBVs();
+            //cbv在结束后更新，会导致下一帧的渲染使用了上一帧的cbv数据，提前到帧开始操作
+            //CbvUpdater.UpdateCBVs();
         }
         public override void EndFrame(TtEngine engine)
         {
@@ -267,6 +269,20 @@ namespace EngineNS.Graphics.Pipeline
         public TtSlateApplication SlateApplication { get; set; }
         public NxRHI.TtGpuSystem RenderSystem { get; private set; }
         public NxRHI.TtGpuDevice RenderContext { get; private set; }
+        public static string GetRenderDocPath(TtEngine engine)
+        {
+#if PWindow
+            // 优先使用系统安装的 RenderDoc，没有安装时再使用引擎内置版本。
+            var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+            if (!string.IsNullOrEmpty(programFiles))
+            {
+                var systemRenderDoc = System.IO.Path.Combine(programFiles, "RenderDoc", "renderdoc.dll");
+                if (System.IO.File.Exists(systemRenderDoc))
+                    return systemRenderDoc;
+            }
+#endif
+            return engine.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + "3rd/native/renderdoc/bin/renderdoc.dll";
+        }
         protected async System.Threading.Tasks.Task<bool> InitGPU(TtEngine engine, int Adapter, NxRHI.ERhiType rhi, IntPtr window, bool bDebugLayer, bool useRenderDoc)
         {
             if (TtEngine.Instance.PlayMode != EPlayMode.Game)
@@ -285,9 +301,7 @@ namespace EngineNS.Graphics.Pipeline
                 gpuDesc.CreateDebugLayer = bDebugLayer ? 1 : 0;
                 gpuDesc.GpuBaseValidation = engine.Config.IsGpuBaseValidation ? 1 : 0;
                 gpuDesc.WindowHandle = window.ToPointer();
-                var renderDoc = engine.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
-                renderDoc += "3rd/native/renderdoc/bin/renderdoc.dll";
-                gpuDesc.RenderDocPath = VNameString.FromString(renderDoc);
+                gpuDesc.RenderDocPath = VNameString.FromString(GetRenderDocPath(engine));
                 RenderSystem = NxRHI.TtGpuSystem.CreateGpuSystem(rhi, in gpuDesc);
                 if (RenderSystem == null)
                     return false;
@@ -329,6 +343,8 @@ namespace EngineNS.Graphics.Pipeline
                 RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.GPU_BASED_VALIDATION_INCOMPATIBLE_RESOURCE_STATE, false);
                 RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CLEARDEPTHSTENCILVIEW_MISMATCHINGCLEARVALUE, false);
                 RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CORRUPTED_PARAMETER2, false);
+                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.COMMAND_LIST_DRAW_VERTEX_BUFFER_NOT_SET, false);
+                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.EMPTY_DISPATCH, false); 
                 //RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_COMMANDLIST12, false);
                 //RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.DESTROY_COMMANDLIST12, false);
                 //RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_RESOURCE, false);
@@ -342,7 +358,7 @@ namespace EngineNS.Graphics.Pipeline
                 //RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATEGRAPHICSPIPELINESTATE_RENDERTARGETVIEW_NOT_SET, false);
 
                 RenderContext.SetDX12BreakOnId(EDx12MessageId.COMMAND_LIST_OUTOFMEMORY, true);
-
+                
                 RenderContext.SetDX12BreakOnId(EDx12MessageId.COMMAND_ALLOCATOR_SYNC, true);
                 RenderContext.SetDX12BreakOnId(EDx12MessageId.COMMAND_LIST_CLOSED, true);
                 RenderContext.SetDX12BreakOnId(EDx12MessageId.COMMAND_ALLOCATOR_RESET, true);

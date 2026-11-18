@@ -492,7 +492,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             camera.SetMatrixStartPosition(in DVector3.Zero);
             camera.LookAtLH(eye, pageCenterWorld, in up);
             camera.DoOrthoProjectionForShadow(orthoSize, orthoSize, outNear, outFar, 0, 0);
-            camera.UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext, NxRHI.TtCbView.EUpdateMode.Immediately);
+            camera.UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext);
         }
 
         /// <summary>

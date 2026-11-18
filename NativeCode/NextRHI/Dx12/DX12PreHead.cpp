@@ -232,6 +232,208 @@ namespace NxRHI
 		return result;
 	}
 
+	/// DX12StagingMemAllocator-----------------------------------------------------------
+	DX12StagingPage::~DX12StagingPage()
+	{
+		if (pMapped != nullptr && mGpuResource != nullptr)
+		{
+			mGpuResource->Unmap(0, nullptr);
+			pMapped = nullptr;
+		}
+	}
+	void FDX12StagingGpuMemory::FreeMemory()
+	{
+		if (Page == nullptr)
+			return;
+		auto allocator = HostAllocator.GetPtr();
+		if (allocator != nullptr)
+		{
+			allocator->Free(this);
+		}
+		// 页已被 TickShrink 从池中移除时, 这里是最后一个引用, 资源随之释放
+		Page = nullptr;
+		GpuHeap = nullptr;
+	}
+	DX12StagingPage* DX12StagingMemAllocator::CreatePage(IGpuDevice* device, UINT64 chunkSize)
+	{
+		auto pageSize = chunkSize * ChunksPerPage;
+		if (pageSize < MinPageSize)
+			pageSize = MinPageSize;
+		if (pageSize > MaxPageSize)
+			pageSize = MaxPageSize;
+		if (pageSize < chunkSize)
+			pageSize = chunkSize;
+
+		D3D12_HEAP_PROPERTIES properties{};
+		properties.Type = D3D12_HEAP_TYPE_UPLOAD;
+		properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+		properties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+		D3D12_RESOURCE_DESC resDesc{};
+		resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		resDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+		resDesc.Width = pageSize;
+		resDesc.Height = 1;
+		resDesc.DepthOrArraySize = 1;
+		resDesc.MipLevels = 1;
+		resDesc.Format = DXGI_FORMAT_UNKNOWN;
+		resDesc.SampleDesc.Count = 1;
+		resDesc.SampleDesc.Quality = 0;
+		resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+		auto dxDevice = (DX12GpuDevice*)device;
+		auto page = new DX12StagingPage();
+		auto hr = dxDevice->mDevice->CreateCommittedResource(&properties, D3D12_HEAP_FLAG_NONE,
+			&resDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(page->mGpuResource.GetAddressOf()));
+		if (hr == DXGI_ERROR_DEVICE_REMOVED)
+		{
+			dxDevice->OnDeviceRemoved();
+		}
+		if (hr != S_OK)
+		{
+			page->Release();
+			return nullptr;
+		}
+		// UPLOAD heap 允许常驻映射, CPU 只写不读: readRange 为空
+		D3D12_RANGE readRange{ 0, 0 };
+		void* pData = nullptr;
+		if (page->mGpuResource->Map(0, &readRange, &pData) != S_OK)
+		{
+			page->Release();
+			return nullptr;
+		}
+		page->pMapped = (BYTE*)pData;
+		page->mGpuResource->SetName(L"StagingPool");
+		if (device->Desc.IsAftermath)
+		{
+			DX12ResourceDebugMapper::Get()->SetDebugMapper(page->mGpuResource, "StagingPool");
+		}
+
+		page->ChunkSize = chunkSize;
+		page->ChunkCount = (UINT)(pageSize / chunkSize);
+		page->FreeChunks.resize(page->ChunkCount);
+		for (UINT i = 0; i < page->ChunkCount; i++)
+		{//倒序压入, pop_back 从低地址取
+			page->FreeChunks[i] = page->ChunkCount - 1 - i;
+		}
+		page->IdleSinceTick = TickIndex;
+		TotalPageSize += pageSize;
+		return page;
+	}
+	AutoRef<FGpuMemory> DX12StagingMemAllocator::Alloc(IGpuDevice* device, UINT64 size, const char* name)
+	{
+		if (size == 0 || size > MaxChunkSize)
+			return nullptr;
+		UINT sizeClass = 0;
+		UINT64 chunkSize = MinChunkSize;
+		while (chunkSize < size)
+		{
+			chunkSize <<= 1;
+			sizeClass++;
+		}
+
+		VAutoVSLLock lk(mLocker);
+		auto& pages = SizeClasses[sizeClass];
+		DX12StagingPage* page = nullptr;
+		for (auto i = pages.rbegin(); i != pages.rend(); i++)
+		{
+			if ((*i)->FreeChunks.size() > 0)
+			{
+				page = (*i).GetPtr();
+				break;
+			}
+		}
+		if (page == nullptr)
+		{
+			page = CreatePage(device, chunkSize);
+			if (page == nullptr)
+				return nullptr;
+			pages.push_back(MakeWeakRef(page));
+		}
+
+		auto result = MakeWeakRef(new FDX12StagingGpuMemory());
+		result->HostAllocator.FromObject(this);
+		result->Page = page;
+		result->GpuHeap = page;
+		result->ChunkIndex = page->FreeChunks.back();
+		page->FreeChunks.pop_back();
+		result->Offset = result->ChunkIndex * chunkSize;
+		result->Size = chunkSize;
+		TotalAllocSize += chunkSize;
+		return result;
+	}
+	void DX12StagingMemAllocator::Free(FGpuMemory* memory)
+	{
+		auto mem = (FDX12StagingGpuMemory*)memory;
+		VAutoVSLLock lk(mLocker);
+		auto page = mem->Page.GetPtr();
+		ASSERT(page->FreeChunks.size() < page->ChunkCount);
+		page->FreeChunks.push_back(mem->ChunkIndex);
+		if (page->IsIdle())
+			page->IdleSinceTick = TickIndex;
+		TotalFreeSize += mem->Size;
+	}
+	FGpuMemHolder* DX12StagingMemAllocator::AllocGpuMem(IGpuDevice* device, UINT64 size, const char* name)
+	{
+		auto mem = Alloc(device, size, name);
+		if (mem == nullptr)
+			return nullptr;
+		auto result = new FGpuMemHolder();
+		// Allocator 留空: holder 可能活得比 allocator 久 (设备销毁时 recorder 尚未回收), 归还走 FreeMemory 的弱引用
+		result->GpuMem = mem;
+		return result;
+	}
+	void DX12StagingMemAllocator::TickShrink()
+	{
+		std::vector<AutoRef<DX12StagingPage>> released;//出锁后再释放资源
+		{
+			VAutoVSLLock lk(mLocker);
+			TickIndex++;
+
+			for (auto& pages : SizeClasses)
+			{
+				for (auto i = pages.begin(); i != pages.end(); )
+				{
+					if ((*i)->IsIdle() && TickIndex - (*i)->IdleSinceTick >= IdleReleaseTicks)
+					{
+						TotalPageSize -= (*i)->GetPageSize();
+						released.push_back(*i);
+						i = pages.erase(i);
+					}
+					else
+					{
+						i++;
+					}
+				}
+			}
+
+			while (TotalPageSize > BudgetSize)
+			{//超预算: 按闲置时长从久到新回收空页, 在用的页不动
+				std::vector<AutoRef<DX12StagingPage>>* oldestPages = nullptr;
+				size_t oldestIndex = 0;
+				for (auto& pages : SizeClasses)
+				{
+					for (size_t i = 0; i < pages.size(); i++)
+					{
+						if (pages[i]->IsIdle() == false)
+							continue;
+						if (oldestPages == nullptr || pages[i]->IdleSinceTick < (*oldestPages)[oldestIndex]->IdleSinceTick)
+						{
+							oldestPages = &pages;
+							oldestIndex = i;
+						}
+					}
+				}
+				if (oldestPages == nullptr)
+					break;
+				TotalPageSize -= (*oldestPages)[oldestIndex]->GetPageSize();
+				released.push_back((*oldestPages)[oldestIndex]);
+				oldestPages->erase(oldestPages->begin() + oldestIndex);
+			}
+		}
+		released.clear();
+	}
+
 	/// DX12DescriptorSetPagedObject-----------------------------------------------------------
 	void DX12PagedHeap::PushDescriptorCopy(FCopyDescriptors& descriptors, DX12PagedHeap* dest, UINT destIndex)
 	{

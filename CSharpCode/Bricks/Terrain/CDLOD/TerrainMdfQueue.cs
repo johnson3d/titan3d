@@ -17,6 +17,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
         public void ActiveRVTs_OnRenderThread()
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             Patch.ActiveRVTs_OnRenderThread();
         }
 

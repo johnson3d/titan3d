@@ -22,7 +22,7 @@ namespace NxRHI
 		virtual void Unmap(UINT index) override;
 		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
-		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) override;
+		virtual void EmitTransition(ICommandList* cmd, const FSubresourceRange& range, EGpuResourceState from, EGpuResourceState to) override;
 		virtual void SetDebugName(const char* name) override;
 		D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress()
 		{
@@ -46,9 +46,9 @@ namespace NxRHI
 		virtual void Unmap(UINT subRes) override;
 		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
-		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) override;
+		virtual void EmitTransition(ICommandList* cmd, const FSubresourceRange& range, EGpuResourceState from, EGpuResourceState to) override;
 		virtual void SetDebugName(const char* name) override;
-		virtual IGpuBufferData* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) override;
+		virtual IGpuBufferDataBase* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) override;
 		virtual bool GetFootprint(FSubResourceFootPrint* fp, UINT64* rowSize, UINT64* totalSize, UINT subRes, UINT64 offset) override;
 	public:
 		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
@@ -97,8 +97,8 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return mView->Heap;
 		}
-		bool Init(DX12GpuDevice* device, IGpuBufferData* pBffer, const FSrvDesc& desc, const char* file = nullptr, int line = 0);
-		virtual bool UpdateBuffer(IGpuDevice* device, IGpuBufferData* buffer) override;
+		bool Init(DX12GpuDevice* device, IGpuBufferDataBase* pBffer, const FSrvDesc& desc, const char* file = nullptr, int line = 0);
+		virtual bool UpdateBuffer(IGpuDevice* device, IGpuBufferDataBase* buffer) override;
 		virtual UINT GetFingerPrint() const override {
 			return mFingerPrint;
 		}
@@ -130,7 +130,7 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return mView->Heap;
 		}
-		bool Init(DX12GpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc, const char* file = nullptr, int line = 0);
+		bool Init(DX12GpuDevice* device, IGpuBufferDataBase* pBuffer, const FUavDesc& desc, const char* file = nullptr, int line = 0);
 	public:
 		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
 		AutoRef<DX12HeapHolder>		mView;

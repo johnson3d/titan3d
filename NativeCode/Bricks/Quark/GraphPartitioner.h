@@ -3,6 +3,7 @@
 
 #include "DisjointSet.h"
 #include "../../Math/v3dxBox3.h"
+#include <functional>
 
 NS_BEGIN
 
@@ -116,6 +117,8 @@ public:
 	std::vector< FRange >	Ranges;
 	std::vector< UINT >	Indexes;
 	std::vector< UINT >	SortedTo;
+	// 可选取消钩子: PartitionStrict 在每次二分前轮询, 返回 true 则放弃剩余划分 (Ranges 不完整, 调用方必须丢弃结果)。
+	std::function<bool()>	ShouldCancel;
 
 public:
 				FGraphPartitioner( UINT InNumElements );
@@ -300,16 +303,8 @@ public:
                             {
                                 if (AdjDist2 < ClosestDist2[k])
                                 {
-                                    //Swap( AdjIndex, ClosestIndex[k] );
-                                    //Swap( AdjDist2, ClosestDist2[k] );
-
-                                    UINT temp = AdjIndex;
-                                    AdjIndex = ClosestIndex[k];
-                                    ClosestIndex[k] = temp;
-
-                                    temp = UINT(AdjDist2);
-                                    AdjDist2 = ClosestDist2[k];
-                                    ClosestDist2[k] = AdjDist2;
+                                    std::swap(AdjIndex, ClosestIndex[k]);
+                                    std::swap(AdjDist2, ClosestDist2[k]);
                                 }
                             }
                         }

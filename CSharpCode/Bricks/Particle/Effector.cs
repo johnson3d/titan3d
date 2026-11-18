@@ -58,9 +58,6 @@ namespace EngineNS.Bricks.Particle
                 mParticleUpdateDrawcall.BindUav("bfFreeParticles", gpuResources.AllocatorBuffer.Uav);
 
                 mParticleUpdateDrawcall.BindUav("bfDrawArg", gpuResources.DrawArgUav);
-                mParticleUpdateDrawcall.BindUav("bfDispatchArg", gpuResources.DispatchArgUav);
-
-                mParticleUpdateDrawcall.BindIndirectDispatchArgsBuffer(gpuResources.DispatchArgBuffer);
             }
 
             CBuffer.SetValue(coreBinder.ParticleElapsedTime, TtEngine.Instance.ElapsedSecond);
@@ -84,6 +81,10 @@ namespace EngineNS.Bricks.Particle
 
             mParticleUpdateDrawcall.BindUav("bfCurAlives", gpuResources.CurAlivesBuffer.Uav);
             mParticleUpdateDrawcall.BindUav("bfBackendAlives", gpuResources.BackendAlivesBuffer.Uav);
+
+            // DispatchArg ping-pong: 读当前份做 indirect 参数, 写另一份给下一次 dispatch
+            mParticleUpdateDrawcall.BindUav("bfDispatchArg", gpuResources.NextDispatchArgUav);
+            mParticleUpdateDrawcall.BindIndirectDispatchArgsView(gpuResources.DispatchArgIav);
         }
         public string GetParametersDefine()
         {

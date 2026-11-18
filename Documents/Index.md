@@ -19,6 +19,7 @@
 - - **[LogWatcher&Command](editor/LogWatcher.md)**
 - - **[CpuProfiler](editor/CpuProfiler.md)**
 - - **[GpuProfiler](editor/GpuProfiler.md)**
+- - **[RenderDoc MCP 环境与项目配置](editor/RenderDocMCP.md)**
 - - **[MemProfiler](editor/MemProfiler.md)**
 - - **[ClrProfiler](editor/ClrProfiler.md)**
 - - **[PIEController](editor/PIEController.md)**

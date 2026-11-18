@@ -172,14 +172,14 @@ namespace EngineNS.NxRHI
         {
             var index = CurrentBackBuffer;
             var result = GetBackFrameBuffers(index);
-            result.mCoreObject.GetRtv(0).GetTexture().NativeSuper.TransitionTo(cmd, EGpuResourceState.GRS_RenderTarget);
+            mCoreObject.BeginBackFrameBuffers(cmd, result.mCoreObject);
             return result;
         }
         public void EndFrameBuffers(ICommandList cmd)
         {
             var index = CurrentBackBuffer;
             var result = GetBackFrameBuffers(index);
-            result.mCoreObject.GetRtv(0).GetTexture().NativeSuper.TransitionTo(cmd, EGpuResourceState.GRS_Present);
+            mCoreObject.EndBackFrameBuffers(cmd, result.mCoreObject);
         }
     }
 }

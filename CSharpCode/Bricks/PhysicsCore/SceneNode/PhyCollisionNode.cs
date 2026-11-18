@@ -118,6 +118,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         public override bool HashVisual => true;
         public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             if ((rp.CullFilters & GamePlay.TtWorld.TtVisParameter.EVisCullFilter.PhyxDebug) == 0)
                 return;
 

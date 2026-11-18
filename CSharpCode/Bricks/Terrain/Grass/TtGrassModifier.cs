@@ -200,8 +200,8 @@ namespace EngineNS.Bricks.Terrain.Grass
                 var bfDesc = new NxRHI.FBufferDesc();
                 bfDesc.SetDefault(false, NxRHI.EBufferType.BFT_SRV);
                 bfDesc.Type = NxRHI.EBufferType.BFT_SRV;
-                bfDesc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
-                bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
+                // DEFAULT: Flush2VB 带 cmd 更新, 走 staging 拷贝; DYNAMIC (upload heap) 不能作拷贝目标
+                bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DEFAULT;
                 bfDesc.StructureStride = (uint)sizeof(FVSGrassData);
                 bfDesc.Size = (uint)sizeof(FVSGrassData) * mdf.mMaxNumber;
 

@@ -46,6 +46,18 @@ namespace EngineNS.NxRHI
         /// 主循环里 EndFrameCapture 的返回值本来是被丢弃的, 存在这里好让发起方拿到结果。
         /// </summary>
         public string LastCaptureFile = null;
+        uint mCaptureStartCount;
+        bool mCaptureStarted;
+
+        void CancelRenderDocCapture(string reason)
+        {
+            CaptureRenderDocFrame = false;
+            RemainingCaptureFrames = 0;
+            mCaptureStarted = false;
+            LastCaptureFile = null;
+            Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Error, $"RenderDoc 抓帧失败：{reason}");
+        }
+
         public bool BeginFrameCapture()
         {
             if (CaptureRenderDocFrame == false)
@@ -57,30 +69,46 @@ namespace EngineNS.NxRHI
             {
                 return false;
             }
+            LastCaptureFile = null;
+            mCaptureStartCount = IRenderDocTool.GetInstance().GetNumCaptures();
             IRenderDocTool.GetInstance().StartFrameCapture();
-#endif
+            if (!IRenderDocTool.GetInstance().IsFrameCapturing())
+            {
+                CancelRenderDocCapture("未能开始抓帧，请检查 RenderDoc API 与 Vulkan capture layer 是否使用同一份 DLL，以及 layer 是否被禁用。");
+                return false;
+            }
+            mCaptureStarted = true;
             return true;
+#else
+            CancelRenderDocCapture("当前平台不支持此 RenderDoc 抓帧入口。");
+            return false;
+#endif
         }
         int CaptureId = 0;
         public string EndFrameCapture(string tagName = null, bool openRenderDoc = true)
         {
-            if (CaptureRenderDocFrame == false)
+            if (CaptureRenderDocFrame == false || !mCaptureStarted)
             {
                 return null;
             }
             //System.Diagnostics.Debug.Assert(IRenderDocTool.GetInstance().IsFrameCapturing());
             CaptureRenderDocFrame = false;
+            mCaptureStarted = false;
 #if PWindow
-            IRenderDocTool.GetInstance().EndFrameCapture();
-
-            if (RemainingCaptureFrames > 0)
+            if (IRenderDocTool.GetInstance().EndFrameCapture() == 0)
             {
-                RemainingCaptureFrames--;
-                CaptureRenderDocFrame = true;
+                CancelRenderDocCapture("EndFrameCapture 返回失败，未生成新的 rdc。");
+                return null;
+            }
+            var captureCount = IRenderDocTool.GetInstance().GetNumCaptures();
+            if (captureCount == 0 || captureCount <= mCaptureStartCount)
+            {
+                CancelRenderDocCapture("RenderDoc 未报告新增抓帧，拒绝读取旧文件。");
+                return null;
             }
 
             ulong timeStamp = 0;
-            var idx = IRenderDocTool.GetInstance().GetNumCaptures() - 1;
+            var idx = captureCount - 1;
             var file = IRenderDocTool.GetInstance().GetCapture(idx, ref timeStamp);
             if (!string.IsNullOrEmpty(file) && IO.TtFileManager.FileExists(file))
             {
@@ -89,26 +117,29 @@ namespace EngineNS.NxRHI
                 var absTarFile = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.RenderDoc) + tarFile;
                 try
                 {
+                    System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(absTarFile));
                     System.IO.File.Move(file, absTarFile, true);
                 }
                 catch (System.Exception e)
                 {
-                    if (openRenderDoc)
-                    {
-                        IRenderDocTool.GetInstance().OpenFile(file);
-                    }
                     Profiler.Log.WriteException(e);
-                }
-                finally
-                {
-                    if (openRenderDoc)
-                    {
-                        IRenderDocTool.GetInstance().OpenFile(absTarFile);
-                    }
+                    CancelRenderDocCapture($"rdc 已生成在 {file}，但移动到缓存目录失败。");
+                    return null;
                 }
                 LastCaptureFile = tarFile;
+                if (RemainingCaptureFrames > 0)
+                {
+                    RemainingCaptureFrames--;
+                    CaptureRenderDocFrame = true;
+                }
+                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, $"RenderDoc 抓帧已保存：{absTarFile}");
+                if (openRenderDoc)
+                {
+                    IRenderDocTool.GetInstance().OpenFile(absTarFile);
+                }
                 return tarFile;
             }
+            CancelRenderDocCapture("RenderDoc 报告的抓帧文件不存在。");
 #endif
             return null;
         }

@@ -311,6 +311,7 @@ namespace EngineNS.Bricks.FX.Water
         }
         public override void OnGatherVisibleMeshes_OnRenderThread(GamePlay.TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             if (mMesh == null)
                 return;
 

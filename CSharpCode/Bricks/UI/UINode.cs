@@ -124,6 +124,7 @@ namespace EngineNS.UI
         }
         public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             foreach (var i in mUIHost)
             {
                 i.GatherVisibleMeshes(rp);

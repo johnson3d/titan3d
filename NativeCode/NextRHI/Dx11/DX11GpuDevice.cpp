@@ -328,7 +328,7 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ISrView* DX11GpuDevice::CreateSRV(IGpuBufferData* pBuffer, const FSrvDesc* desc, const char* file, int line)
+	ISrView* DX11GpuDevice::CreateSRV(IGpuBufferDataBase* pBuffer, const FSrvDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<DX11SrView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc) == false)
@@ -338,7 +338,7 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IUaView* DX11GpuDevice::CreateUAV(IGpuBufferData* pBuffer, const FUavDesc* desc, const char* file, int line)
+	IUaView* DX11GpuDevice::CreateUAV(IGpuBufferDataBase* pBuffer, const FUavDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<DX11UaView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc) == false)

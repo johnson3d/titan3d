@@ -4,6 +4,7 @@
 #include "VKEvent.h"
 #include "VKDrawcall.h"
 #include "../NxGeomMesh.h"
+#include "../../Base/debug/vfxmemory.h"
 
 #define new VNEW
 
@@ -52,6 +53,13 @@ namespace NxRHI
 
 	VKBuffer::~VKBuffer()
 	{
+		if (mStagingChunk != nullptr)
+		{//mBuffer 属于 staging 页, 只归还 chunk
+			mBuffer = nullptr;
+			mAllocation = nullptr;
+			mStagingChunk = nullptr;
+			return;
+		}
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
@@ -191,7 +199,7 @@ namespace NxRHI
 		auto cmd = (VKCommandList*)tsCmd.GetCmdList();
 		if (Desc.Type & EBufferType::BFT_RTAS)
 		{
-			GpuState = EGpuResourceState::GRS_GenericRead;
+			SetGpuResourceState(EGpuResourceState::GRS_GenericRead);
 		}
 		else if (Desc.Type & EBufferType::BFT_SRV)
 		{
@@ -263,6 +271,47 @@ namespace NxRHI
 		return true;
 	}
 
+	// 小于等于 VKStagingMemAllocator::MaxChunkSize 时从池里切 chunk 做拷贝源, 否则回落独立创建;
+	// 池化路径不走 VKBuffer::Init, 省掉 vmaCreateBuffer 与 Init 内的 transient 状态切换命令
+	static AutoRef<IBuffer> CreateStagingCopySource(VKGpuDevice* device, const FBufferDesc& dstDesc, void* pData, UINT64 size)
+	{
+		auto copyDesc = dstDesc;
+		copyDesc.Usage = EGpuUsage::USAGE_STAGING;
+		copyDesc.Type = EBufferType::BFT_NONE;
+		copyDesc.Size = (UINT)size;
+		copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+		copyDesc.InitData = nullptr;
+		if (size <= VKStagingMemAllocator::MaxChunkSize && device->mStagingMemAllocator != nullptr)
+		{
+			auto chunk = device->mStagingMemAllocator->Alloc(device, size);
+			if (chunk != nullptr)
+			{
+				memcpy(chunk->GetMappedPtr(), pData, size);
+				chunk->FlushWrite(size);
+				auto result = MakeWeakRef(new VKBuffer());
+				result->mDeviceRef.FromObject(device);
+				copyDesc.RowPitch = (UINT)size;
+				copyDesc.DepthPitch = (UINT)size;
+				result->Desc = copyDesc;
+				// host 写入在 vkQueueSubmit 时即对 GPU 可见, 无需屏障; 直接标为拷贝源状态
+				result->SetGpuResourceState(EGpuResourceState::GRS_CopySrc);
+				result->mBuffer = chunk->Page->Buffer;
+				result->mBufferOffset = chunk->Offset;
+				result->mStagingChunk = chunk;
+				return AutoRef<IBuffer>(result.GetPtr());
+			}
+		}
+		FMappedSubResource initData{};
+		initData.pData = pData;
+		initData.RowPitch = (UINT)size;
+		copyDesc.InitData = &initData;
+		return MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
+	}
+	// 池化路径每次更新仍会 new 这几个小对象, 须留在引擎 small_alloc 范围内
+	static_assert(sizeof(FVKStagingChunk) <= VFX_Memory::__max_bytes, "FVKStagingChunk must stay in small_alloc");
+	static_assert(sizeof(VKBuffer) <= VFX_Memory::__max_bytes, "VKBuffer must stay in small_alloc");
+	static_assert(sizeof(ICopyDraw) <= VFX_Memory::__max_bytes, "ICopyDraw must stay in small_alloc");
+
 	UINT ShaderStagesToVKStage(EShaderType stages)
 	{
 		UINT result = (VkPipelineStageFlagBits)0;
@@ -275,14 +324,9 @@ namespace NxRHI
 		return result;
 	}
 	
-	void VKBuffer::TransitionTo(ICommandList* cmd, EGpuResourceState state)
+	void VKBuffer::EmitTransition(ICommandList* cmd, const FSubresourceRange& range, EGpuResourceState from, EGpuResourceState to)
 	{
-		//ASSERT(state != EGpuResourceState::GRS_Undefine);
-		if (state == GpuState)
-			return;
-		
-		cmd->SetBufferBarrier(this, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, GpuState, state);
-		GpuState = state;
+		cmd->SetBufferBarrier(this, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, from, to);
 	}
 	void VKBuffer::UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint)
 	{
@@ -290,17 +334,7 @@ namespace NxRHI
 		{
 			auto device = mDeviceRef.GetPtr();
 
-			auto copyDesc = this->Desc;
-			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
-			copyDesc.Type = EBufferType::BFT_NONE;
-			copyDesc.Size = footPrint->TotalSize;
-			FMappedSubResource initData{};
-			initData.pData = pData;
-			initData.RowPitch = footPrint->TotalSize;
-			copyDesc.InitData = &initData;
-			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
-
-			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
+			auto bf = CreateStagingCopySource(device, this->Desc, pData, footPrint->TotalSize);
 
 			FTransientCmd tsCmd(device, EQueueType::QU_Transfer, "UpdateGpuData");
 			auto cmd = tsCmd.GetCmdList();
@@ -340,17 +374,7 @@ namespace NxRHI
 		if (cmd != nullptr || Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
 			auto device = mDeviceRef.GetPtr();
-			auto copyDesc = this->Desc;
-			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
-			copyDesc.Type = EBufferType::BFT_NONE;
-			copyDesc.Size = footPrint->TotalSize;
-			FMappedSubResource initData{};
-			initData.pData = pData;
-			initData.RowPitch = copyDesc.Size;
-			copyDesc.InitData = &initData;
-			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
-
-			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
+			auto bf = CreateStagingCopySource(device, this->Desc, pData, footPrint->TotalSize);
 
 			//cmd->CopyBufferRegion(this, footPrint->GetOffset(), bf, 0, footPrint->TotalSize);
 			{
@@ -449,9 +473,11 @@ namespace NxRHI
 		}
 	}
 	
-	VkImageLayout VKTexture::GetImageLayout()
+	VkImageLayout VKTexture::GetImageLayout(UINT subRes)
 	{
-		return GpuStateToVKImageLayout(GpuState);
+		FSubresourceRange range;
+		range.SetSubresource(subRes, Desc.MipLevels);
+		return GpuStateToVKImageLayout(LayoutTracker.GetState(range));
 	}
 	VkImageAspectFlagBits VKTexture::GetImageAspect()
 	{
@@ -460,6 +486,7 @@ namespace NxRHI
 	bool VKTexture::Init(VKGpuDevice* device, const FTextureDesc& desc)
 	{
 		Desc = desc;
+		InitLayoutTracker();
 		mDeviceRef.FromObject(device);
 		
 		VkImageCreateInfo imageInfo = {};
@@ -606,7 +633,7 @@ namespace NxRHI
 
 		vkBindImageMemory(device->mDevice, mImage, (VkDeviceMemory)mGpuMemory->GetHWBuffer(), mGpuMemory->Offset);*/
 
-		GpuState = VKImageLayoutToGpuState(imageInfo.initialLayout);
+		SetGpuResourceState(VKImageLayoutToGpuState(imageInfo.initialLayout));
 		
 		if (desc.InitData != nullptr)
 		{
@@ -652,13 +679,22 @@ namespace NxRHI
 					copyDesc.Usage = EGpuUsage::USAGE_STAGING;
 					copyDesc.Type = EBufferType::BFT_NONE;
 					//3D texture: InitData.DepthPitch is the size of one slice, upload all slices(align with DX12 CreateUploadResource)
-					copyDesc.Size = desc.InitData[j].DepthPitch * d;
+					UINT64 sliceSize = desc.InitData[j].DepthPitch;
+					if (sliceSize == 0)
+					{//调用方只填 RowPitch 时 (2D 纹理常见) 按行数推算单片大小, 否则 Size=0 会被 vmaCreateBuffer 拒绝; 块压缩格式按块行数
+						unsigned int blockW = 1, blockH = 1;
+						GetCompressBlockDimensions(desc.Format, blockW, blockH);
+						sliceSize = (UINT64)desc.InitData[j].RowPitch * (((UINT64)std::max(h, 1u) + blockH - 1) / blockH);
+					}
+					copyDesc.Size = (UINT)(sliceSize * d);
 					FMappedSubResource sliceInitData = desc.InitData[j];
 					sliceInitData.DepthPitch = copyDesc.Size;
 					copyDesc.InitData = &sliceInitData;
 					copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 
 					auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
+					if (bf == nullptr)
+						return false;
 					FTransitionScope::TryAutoTransition(cmd, bf, EGpuResourceState::GRS_CopySrc, false);
 
 					AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
@@ -692,7 +728,7 @@ namespace NxRHI
 		}
 		else
 		{
-			if (GpuState == EGpuResourceState::GRS_Undefine)
+			if (GetGpuResourceState() == EGpuResourceState::GRS_Undefine)
 			{
 				FTransientCmd tsCmd(device, EQueueType::QU_Transfer, "Buffer.Update");
 				auto cmd = (VKCommandList*)tsCmd.GetCmdList();
@@ -719,11 +755,11 @@ namespace NxRHI
 			}
 		}
 
-		ASSERT(GpuState != EGpuResourceState::GRS_Undefine);
+		ASSERT(GetGpuResourceState() != EGpuResourceState::GRS_Undefine);
 			
 		return true;
 	}
-	IGpuBufferData* VKTexture::CreateBufferData(IGpuDevice* device1, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint)
+	IGpuBufferDataBase* VKTexture::CreateBufferData(IGpuDevice* device1, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint)
 	{
 		auto device = (VKGpuDevice*)device1;
 		VkMemoryRequirements memRequirements;
@@ -952,53 +988,10 @@ namespace NxRHI
 			}
 		}
 	}
-	void VKTexture::TransitionTo(ICommandList* cmd, EGpuResourceState state)
+	void VKTexture::EmitTransition(ICommandList* cmd, const FSubresourceRange& range, EGpuResourceState from, EGpuResourceState to)
 	{
-		ASSERT(state != EGpuResourceState::GRS_Undefine);
-		if (state == GpuState)
-			return;
-
-		cmd->SetTextureBarrier(this, 0, Desc.MipLevels, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, GpuState, state);
-		//VkImageMemoryBarrier barrier{};
-		//barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		//barrier.oldLayout = GpuStateToVKImageLayout(GpuState);
-		//barrier.newLayout = GpuStateToVKImageLayout(state);
-		////barrier.srcAccessMask
-		//
-		//if (barrier.oldLayout != barrier.newLayout)
-		//{
-		//	barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		//	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		//	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		//	barrier.image = mImage;
-
-		//	if (Desc.BindFlags & EBufferType::BFT_SRV)
-		//		barrier.subresourceRange.aspectMask = FormatToVKImageAspectFlags(Desc.Format, true, false);
-		//	else
-		//		barrier.subresourceRange.aspectMask = FormatToVKImageAspectFlags(Desc.Format, true, true);
-		//	barrier.subresourceRange.baseArrayLayer = 0;
-		//	barrier.subresourceRange.layerCount = Desc.ArraySize;
-		//	barrier.subresourceRange.baseMipLevel = 0;//All
-		//	barrier.subresourceRange.levelCount = Desc.MipLevels;
-
-		//	auto vkCmd = (VKCommandList*)cmd;
-
-		//	VkPipelineStageFlagBits srcStages, dstStages;
-		//	GpuResourceStateToVKAccessAndPipeline(GpuState, barrier.srcAccessMask, srcStages);
-		//	GpuResourceStateToVKAccessAndPipeline(state, barrier.dstAccessMask, dstStages);
-
-		//	vkCmdPipelineBarrier(
-		//		vkCmd->mCommandBuffer->RealObject,
-		//		srcStages, //VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-		//		dstStages, //VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,//VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-		//		0,
-		//		0, nullptr,
-		//		0, nullptr,
-		//		1, &barrier
-		//	);
-		//}
-
-		GpuState = state;
+		ASSERT(to != EGpuResourceState::GRS_Undefine);
+		cmd->SetTextureBarrier(this, range, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, from, to);
 	}
 
 	void VKTexture::SetDebugName(const char* name)
@@ -1045,8 +1038,18 @@ namespace NxRHI
 			bfDesc.StructureStride = 0;
 			bfDesc.InitData = nullptr;
 			bfDesc.Type = EBufferType::BFT_CBuffer;
-			bfDesc.Usage = EGpuUsage::USAGE_DYNAMIC;
-			bfDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+			ASSERT(desc.Usage == EGpuUsage::USAGE_DYNAMIC || desc.Usage == EGpuUsage::USAGE_DEFAULT);
+			if (desc.Usage == EGpuUsage::USAGE_DEFAULT)
+			{
+				// device local + TRANSFER_DST, 更新经 staging 拷贝在队列中排队
+				bfDesc.Usage = EGpuUsage::USAGE_DEFAULT;
+				bfDesc.CpuAccess = (ECpuAccess)0;
+			}
+			else
+			{
+				bfDesc.Usage = EGpuUsage::USAGE_DYNAMIC;
+				bfDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+			}
 
 			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, file ? file : __FILE__, line ? line : __LINE__));
 			ASSERT(Buffer != nullptr);
@@ -1218,7 +1221,7 @@ namespace NxRHI
 			VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_OBJECT_TYPE_IMAGE_VIEW, mView->mImageView, name);
 	}
 
-	bool VKSrView::Init(VKGpuDevice* device, IGpuBufferData* pBuffer, const FSrvDesc& desc, const char* file, int line)
+	bool VKSrView::Init(VKGpuDevice* device, IGpuBufferDataBase* pBuffer, const FSrvDesc& desc, const char* file, int line)
 	{
 		Desc = desc;
 		Buffer = pBuffer;
@@ -1319,7 +1322,7 @@ namespace NxRHI
 		
 		return true;
 	}
-	bool VKSrView::UpdateBuffer(IGpuDevice* device1, IGpuBufferData* pBuffer)
+	bool VKSrView::UpdateBuffer(IGpuDevice* device1, IGpuBufferDataBase* pBuffer)
 	{
 		if (Buffer == pBuffer)
 			return true;
@@ -1490,7 +1493,7 @@ namespace NxRHI
 	{
 		mView->SetDebugName(name);
 	}
-	bool VKUaView::Init(VKGpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc, const char* file, int line)
+	bool VKUaView::Init(VKGpuDevice* device, IGpuBufferDataBase* pBuffer, const FUavDesc& desc, const char* file, int line)
 	{
 		Desc = desc;
 		Buffer = pBuffer;

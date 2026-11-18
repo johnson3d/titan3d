@@ -641,6 +641,7 @@ namespace EngineNS.GamePlay.Scene
 
         public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             // Draw editor hitproxy billboard icon (UtilityEditor mode)
             if ((rp.CullFilters & GamePlay.TtWorld.TtVisParameter.EVisCullFilter.UtilityEditor) != 0)
             {

@@ -917,5 +917,136 @@ dotnet build Plugins\Game\<Game>\<Game>.LeanClrStub\<Game>.LeanClrStub.csproj -c
 不需要修改 `TtEngineConfig.LeanClrAssemblies`：引擎启动时会递归扫描 `content\LeanCLR` 自动注册。
 部署产物已被 `.gitignore` 忽略，不要提交。
 
+## 16.给资产增加 Cook (进度上报 + 协作式取消)
+
+> 架构与协议细节见 `Documents/editor/CookManager.md` 与 `Documents/editor/TitanCMD.md`。
+> 调度/进程/协议/进度窗都不用动, 新资产只写 cook 体。
+
+### 16.1 两级扩展点, 选一个重写
+
+| 你要 cook 的东西 | 重写哪个 | 范例 |
+|---|---|---|
+| 一类资产 (贴图/材质/网格/...) | 对应 AMeta 的 `IAssetMeta.CookAsset(IAsset asset, params object[] args)` | `TtSceneAMeta.CookAsset` (`GamePlay/Scene/Scene.cs`) |
+| 场景里的某种节点 | 节点类的 `TtNode.CookAsset()` (无参) | `TtTerrainNode.CookAsset` (`Bricks/Terrain/CDLOD/TerrainNode.cs`) |
+
+- 场景 cook = 快照整棵节点树后逐个 `await node.CookAsset()`, 给场景加新 cook 内容只重写节点, 不改场景。
+- 新 AMeta 子类被反射自动收集 (`TtCookDriver.CollectAssetTypes`), worker 的 hello 自动声明该类型, 无需注册。
+- 提交: 编辑器 `TtCookManager.Instance.SubmitBatch(paths, "<GetAssetTypeName()>")`;
+  命令行 `TitanCMD ExeCmd=Cook AssetType=<名字>` 或 `Asset=<相对路径>`。
+
+### 16.2 契约 (硬性)
+
+- 实例由驱动方 `CreateAsset` 物化后传入, **实现方负责释放** (场景用 `DisposeWithChildren`, 可释放资产 `Dispose`)。
+- **不调 `SaveAssetTo`**: cook 只产出派生数据, 不回写源资产。
+- 返回 `true` = 成功; `false` = 失败, 但若此时已被请求取消, 驱动方记为 **Cancelled**; 异常会被驱动方捕获记 Failed。
+- 重活 (全量加载/GPU 资源常驻) **只在 TitanCMD 的 Cook/CookServer 进程**执行, 不要回退到编辑器内。
+  可照地形入口做守卫: `GetEntryAssembly().GetName().Name == "TitanCMD" && TtCookContext.Current != null`。
+- 缓存命中应跳过 (重复 cook 幂等); `ctx.Force == true` 时跳过"已是最新"判定。
+- 产物先写独立临时文件再 `File.Move` 发布, 防编辑器与 worker 并发写出半截文件 (参考 `TtTerrainNode.TryWriteCache`)。
+- 产物落盘后要**校验存在且 hash 对得上**再算成功, "没有任务"不等于成功。
+
+### 16.3 进度与取消通道: `IO.TtCookContext`
+
+```
+MainEditor TtCookManager ──add / cancel──▶ TitanCMD CookServer (每 job 一个 TtCookContext, PushAmbient 后调 CookAsset)
+          ▲                                         │
+          └── job.stage / job.progress / job.artifact / beat (stdout 协议行) ──┘
+```
+
+- 取上下文: AMeta 层可从 `args` 取; 节点这类无参扩展点用 `IO.TtCookContext.Current`
+  (进程级静态 ambient, 跨 await / 跨线程都读得到; 不是 AsyncLocal)。
+- 上报 (线程安全, 任意线程可调):
+  - `ctx.ReportStage("文字")` → Cook Progress 窗 `stage:` 行
+  - `ctx.ReportProgress(0..1)` → "当前工作步骤"进度条 (按步骤计, 不是耗时估计)
+  - `ctx.ReportArtifact(path)` → 登记产物, 随 `job.done` 回传
+- **卡死判据**: 任何上报都刷新 `ctx.IdleSec`; 连续 `WorkerStallSec` (默认 600s) 无上报 → 按超时取消。
+  长步骤必须拆段上报, **任意两次上报间隔 < 600s**。总时长默认不限 (`WorkerJobTimeout=0`)。
+- **取消**: 编辑器 Cancel → `ctx.RequestCancel()`; 实现方在循环/分块边界轮询 `ctx.IsCancellationRequested`,
+  看到就**走正常收尾路径 `return false`**。
+  - ❌ 禁止 `task.CancelTask()`: 池化 `TtTaskData` 会提前回池, 后台晚写会污染别的任务 (CodingGuidelines §1.6.3)。
+  - 有后台任务时, `finally` 里等它**真正退出**再结束 job, 不要扔下运行中的后台写。
+  - 取消后 60s (`CancelGraceSec`) 仍不收尾, worker 判定引擎态不可信并退出 (码 1), 由编辑器重拉。
+- **线程**: 同步重活不要压在主线程 (会卡住 worker 主循环: 心跳/取消/判死全停)。
+  投 `EAsyncTarget.AsyncIO` 或 TPools, 主线程只 await; 等待后台时按 100ms 拍让出。
+
+### 16.4 最小写法 (AMeta 级)
+
+```csharp
+public override async Thread.Async.TtTask<bool> CookAsset(IO.IAsset asset, params object[] args)
+{
+    var ctx = IO.TtCookContext.Current;              // 或从 args 中取
+    var myAsset = asset as TtMyAsset;
+    if (myAsset == null)
+        return false;
+    try
+    {
+        for (int i = 0; i < chunkCount; i++)
+        {
+            if (ctx?.IsCancellationRequested == true)
+                return false;                        // 驱动方记 Cancelled
+            ctx?.ReportStage($"MyAsset chunk {i + 1}/{chunkCount}: 开始");
+            await CookChunkOffMainThreadAsync(myAsset, i, ctx);
+            ctx?.ReportProgress((i + 1f) / chunkCount);
+        }
+        ctx?.ReportArtifact(outputFile);
+        return true;
+    }
+    finally
+    {
+        // 契约: 实现方释放传入实例; 有后台任务先等它真正退出
+        myAsset.Dispose();
+    }
+}
+
+// 同步重活投 AsyncIO; TtTask 无泛型版会吞异常, 所以在 lambda 内捕获、回调用方重抛
+// 范例: TtTerrainLevelData.PrepareCookDataAsync (Bricks/Terrain/CDLOD/TerrainLevel.cs)
+async Thread.Async.TtTask<bool> CookChunkOffMainThreadAsync(TtMyAsset a, int i, IO.TtCookContext ctx)
+{
+    System.Runtime.ExceptionServices.ExceptionDispatchInfo error = null;
+    await TtEngine.Instance.EventPoster.Post((state) =>
+    {
+        try
+        {
+            ctx?.ReportStage($"MyAsset chunk {i + 1}: 计算");   // 后台线程也可上报
+            DoHeavyWork(a, i, () => ctx?.IsCancellationRequested == true);
+        }
+        catch (Exception ex)
+        {
+            error = System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(ex);
+        }
+        return true;
+    }, Thread.Async.EAsyncTarget.AsyncIO);
+    error?.Throw();
+    return true;
+}
+```
+
+节点级写法相同, 只是签名为 `public override async Thread.Async.TtTask<bool> CookAsset()`, 上下文一律取
+`IO.TtCookContext.Current`, 且不负责释放 (场景 cook 结束时统一 `DisposeWithChildren`)。
+
+重活内部是长循环/图执行时, 把 `Func<bool> isCancelRequested` 一路传进去, 在自然边界检查并
+`throw new OperationCanceledException()`, 外层 `catch (OperationCanceledException) { return false; }`
+(范例: `TtPgcGraph.Compile(root, ctx, resetCache, reportStage, isCancelRequested)` 每个节点前检查)。
+
+### 16.5 地形怎么做的 (完整范例)
+
+`TtTerrainNode.CookAsset()` → `CookTerrainAsync()` → `CookTerrainCoreAsync(ctx)`:
+
+| 环节 | 做法 |
+|---|---|
+| 入口守卫 | 进程必须是 TitanCMD 且 `TtCookContext.Current != null`, 否则直接 `false` |
+| 流程 | 两轮 `foreach level`: 第 1 轮确保全部 `.trlvl` (保证跑图), 第 2 轮逐块补烘 `.trvgdag`; 进度 `(pass*N+done)/(2N)` |
+| 阶段文字 | 每块开始/完成 `ReportStage`; 块内细节 `TtTerrainLevelData.ReportCookStage`, 格式 `terrain 第 x/2 轮 … level i/N: X_Y \| 细节` |
+| 不卡主线程 | PGC 经 `PrepareCookDataAsync` 投 AsyncIO; DAG 在 TPools 烘 (原生 `TtQuarkTerrainBaker`) 并经 `reportStage` 回调细报简化/组装阶段; 主线程 `WaitCookTick()` 每 100ms 让出 |
+| 取消 | 每块前与等待每拍查 `IsCancellationRequested`; PGC 节点间抛 `OperationCanceledException`; DAG 用 token 版 `CancelBakeTask()`, `finally` 等 `HasRunningBake()` 为 false 才返回 |
+| 校验 | 每块 `ValidateCookArtifacts()` 查文件/hash/代次 |
+| 落盘 | `TryWriteCache` 临时文件 + Move, 旧代次不覆盖新缓存; 目录 `cache/terrain/<NodeId>/` 内写 `_source.txt` 标明所属场景 |
+
+### 16.6 验证
+
+- 单元: `Tests/Titan.Tests.Cook/run.ps1` (状态机/协议/IdleSec 等)。
+- 实机: `binaries` 为工作目录跑 `TitanCMD ExeCmd=Cook Asset=<路径>`, 或编辑器 Cook Manager 勾选后 Cook Selected,
+  看 Cook Progress 窗的 stage 是否持续刷新、中途 Cancel 是否在下一个边界收尾。
+
 ## 这是没用的LaTex测试，请忽略
 $$\sum_{i=0}^{^9}{\left(\frac{a_i}{b_i}\right)}$$

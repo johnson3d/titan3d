@@ -469,6 +469,7 @@ namespace EngineNS.GamePlay.Scene
 
         public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             UpdateCameralOffset(rp.World);
 
             if (mMesh == null)

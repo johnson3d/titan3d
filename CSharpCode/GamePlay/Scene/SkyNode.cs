@@ -79,6 +79,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             base.OnGatherVisibleMeshes_OnRenderThread(rp);
 
             if (SunMesh != null)

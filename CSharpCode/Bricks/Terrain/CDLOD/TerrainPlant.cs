@@ -162,6 +162,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         public void OnGatherVisibleMeshes_OnRenderThread(GamePlay.TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             foreach (var i in PlantTypes.Values)
             {
                 if (i.CreateFinished == false)

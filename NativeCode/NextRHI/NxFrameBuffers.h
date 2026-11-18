@@ -177,7 +177,7 @@ namespace NxRHI
 		IRenderPass();
 		~IRenderPass();
 
-		void PushBeginBarrier(IGpuBufferData* buffer, EGpuResourceState state);
+		void PushBeginBarrier(IGpuBufferDataBase* buffer, const FSubresourceRange& range, EGpuResourceState state);
 		AutoRef<IBarriersDraw> BeginBarriers;
 
 		//Vulkan requires that the copy operation must be before beginrendering 
@@ -267,6 +267,9 @@ namespace NxRHI
 		virtual void BeginFrame() {}
 		virtual void Present(IGpuDevice* device, UINT SyncInterval, UINT Flags) = 0;
 		virtual bool Resize(IGpuDevice * device, UINT w, UINT h) = 0;
+		// back buffer 在 RenderTarget/Present 之间切换是 SwapChain 必然的转换, 外部不再直接调用 TransitionTo
+		void BeginBackFrameBuffers(ICommandList* cmd, IFrameBuffers* fb);
+		void EndBackFrameBuffers(ICommandList* cmd, IFrameBuffers* fb);
 	public:
 		FSwapChainDesc			Desc;
 	};

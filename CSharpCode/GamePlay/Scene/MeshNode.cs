@@ -509,6 +509,7 @@ namespace EngineNS.GamePlay.Scene
 
         public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             // If merged into an InstanceMeshNode, skip independent rendering
             if (mInstanceGroupNode != null)
                 return;

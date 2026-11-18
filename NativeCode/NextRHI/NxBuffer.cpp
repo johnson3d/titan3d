@@ -342,6 +342,124 @@ namespace NxRHI
 		return Buffer.As<IBuffer>();
 	}
 
+	// view desc 里的 count 为 0 或 -1 时都表示到末尾
+	static UINT ViewCountToRange(UINT count)
+	{
+		if (count == 0)
+			return SubresourceRemaining;
+		return count;
+	}
+	FViewLayout ISrView::GetViewLayout() const
+	{
+		FViewLayout result;
+		result.State = EGpuResourceState::GRS_GenericRead;
+		switch (Desc.Type)
+		{
+		case ESrvType::ST_Texture1D:
+			result.Range.SetRange(Desc.Texture1D.MostDetailedMip, ViewCountToRange(Desc.Texture1D.MipLevels), 0, SubresourceRemaining);
+			break;
+		case ESrvType::ST_Texture1DArray:
+			result.Range.SetRange(Desc.Texture1DArray.MostDetailedMip, ViewCountToRange(Desc.Texture1DArray.MipLevels),
+				Desc.Texture1DArray.FirstArraySlice, ViewCountToRange(Desc.Texture1DArray.ArraySize));
+			break;
+		case ESrvType::ST_Texture2D:
+			result.Range.SetRange(Desc.Texture2D.MostDetailedMip, ViewCountToRange(Desc.Texture2D.MipLevels), 0, SubresourceRemaining);
+			break;
+		case ESrvType::ST_Texture2DArray:
+			result.Range.SetRange(Desc.Texture2DArray.MostDetailedMip, ViewCountToRange(Desc.Texture2DArray.MipLevels),
+				Desc.Texture2DArray.FirstArraySlice, ViewCountToRange(Desc.Texture2DArray.ArraySize));
+			break;
+		case ESrvType::ST_Texture2DMSArray:
+			result.Range.SetRange(0, SubresourceRemaining, Desc.Texture2DMSArray.FirstArraySlice, ViewCountToRange(Desc.Texture2DMSArray.ArraySize));
+			break;
+		case ESrvType::ST_Texture3D:
+			result.Range.SetRange(Desc.Texture3D.MostDetailedMip, ViewCountToRange(Desc.Texture3D.MipLevels), 0, SubresourceRemaining);
+			break;
+		case ESrvType::ST_TextureCube:
+			result.Range.SetRange(Desc.TextureCube.MostDetailedMip, ViewCountToRange(Desc.TextureCube.MipLevels), 0, SubresourceRemaining);
+			break;
+		case ESrvType::ST_TextureCubeArray:
+			result.Range.SetRange(Desc.TextureCubeArray.MostDetailedMip, ViewCountToRange(Desc.TextureCubeArray.MipLevels),
+				Desc.TextureCubeArray.First2DArrayFace, Desc.TextureCubeArray.NumCubes == 0 ? SubresourceRemaining : Desc.TextureCubeArray.NumCubes * 6);
+			break;
+		default:
+			break;
+		}
+		return result;
+	}
+	FViewLayout IUaView::GetViewLayout() const
+	{
+		FViewLayout result;
+		result.State = EGpuResourceState::GRS_Uav;
+		switch (Desc.ViewDimension)
+		{
+		case EDimensionUAV::UAV_DIMENSION_TEXTURE1D:
+			result.Range.SetRange(Desc.Texture1D.MipSlice, 1, 0, SubresourceRemaining);
+			break;
+		case EDimensionUAV::UAV_DIMENSION_TEXTURE1DARRAY:
+			result.Range.SetRange(Desc.Texture1DArray.MipSlice, 1, Desc.Texture1DArray.FirstArraySlice, ViewCountToRange(Desc.Texture1DArray.ArraySize));
+			break;
+		case EDimensionUAV::UAV_DIMENSION_TEXTURE2D:
+			result.Range.SetRange(Desc.Texture2D.MipSlice, 1, 0, SubresourceRemaining);
+			break;
+		case EDimensionUAV::UAV_DIMENSION_TEXTURE2DARRAY:
+			result.Range.SetRange(Desc.Texture2DArray.MipSlice, 1, Desc.Texture2DArray.FirstArraySlice, ViewCountToRange(Desc.Texture2DArray.ArraySize));
+			break;
+		case EDimensionUAV::UAV_DIMENSION_TEXTURE3D:
+			result.Range.SetRange(Desc.Texture3D.MipSlice, 1, 0, SubresourceRemaining);
+			break;
+		default:
+			break;
+		}
+		return result;
+	}
+	FViewLayout IRenderTargetView::GetViewLayout() const
+	{
+		FViewLayout result;
+		result.State = EGpuResourceState::GRS_RenderTarget;
+		switch (Desc.Type)
+		{
+		case ERtvType::RTV_Texture1D:
+			result.Range.SetRange(Desc.Texture1D.MipSlice, 1, 0, SubresourceRemaining);
+			break;
+		case ERtvType::RTV_Texture1DArray:
+			result.Range.SetRange(Desc.Texture1DArray.MipSlice, 1, Desc.Texture1DArray.FirstArraySlice, ViewCountToRange(Desc.Texture1DArray.ArraySize));
+			break;
+		case ERtvType::RTV_Texture2D:
+			result.Range.SetRange(Desc.Texture2D.MipSlice, 1, 0, SubresourceRemaining);
+			break;
+		case ERtvType::RTV_Texture2DArray:
+			result.Range.SetRange(Desc.Texture2DArray.MipSlice, 1, Desc.Texture2DArray.FirstArraySlice, ViewCountToRange(Desc.Texture2DArray.ArraySize));
+			break;
+		case ERtvType::RTV_Texture2DMSArray:
+			result.Range.SetRange(0, SubresourceRemaining, Desc.Texture2DMSArray.FirstArraySlice, ViewCountToRange(Desc.Texture2DMSArray.ArraySize));
+			break;
+		case ERtvType::RTV_Texture3D:
+			result.Range.SetRange(Desc.Texture3D.MipSlice, 1, 0, SubresourceRemaining);
+			break;
+		default:
+			break;
+		}
+		return result;
+	}
+	FViewLayout IDepthStencilView::GetViewLayout() const
+	{
+		FViewLayout result;
+		result.State = EGpuResourceState::GRS_DepthStencil;
+		switch (Desc.Type)
+		{
+		case EDsvType::DSV_Texture2D:
+			result.Range.SetRange(Desc.MipLevel, 1, 0, SubresourceRemaining);
+			break;
+		case EDsvType::DSV_Texture2DArray:
+			result.Range.SetRange(Desc.MipLevel, 1, Desc.ArrayIndex, 1);
+			break;
+		default:
+			break;
+		}
+		return result;
+	}
+
 	void FCbvUpdater::UpdateCBVs()
 	{
 		VAutoVSLLock lk(mLocker);

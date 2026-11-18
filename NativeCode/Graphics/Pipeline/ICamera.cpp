@@ -72,6 +72,9 @@ void ICamera::Cleanup()
 
 void ICamera::UpdateConstBufferData(EngineNS::NxRHI::IGpuDevice* device, EngineNS::NxRHI::ICbView* buffer, bool bFlush, EngineNS::NxRHI::FCbvUpdater* pUpdater)
 {
+	EngineNS::NxRHI::FCbvUpdater tmp;
+	if (pUpdater == nullptr)
+		pUpdater = &tmp;
 	VAutoVSLLock lk(mLocker);
 	auto pBinder = buffer->GetShaderBinder();
 	// 在任何状态推进之前先镜像当前状态: 下面即将写入 cb 的每个字段 (矩阵/frustum/jitter/
@@ -165,6 +168,8 @@ void ICamera::UpdateConstBufferData(EngineNS::NxRHI::IGpuDevice* device, EngineN
 		auto cameraOffset = GetMatrixStartPosition().ToSingleVector();
 		buffer->SetValue(pBinder->FindField("CameraOffset"), cameraOffset, bFlush, pUpdater);
 	}
+
+	tmp.UpdateCBVs();
 }
 
 void ICamera::UpdateFrustum()

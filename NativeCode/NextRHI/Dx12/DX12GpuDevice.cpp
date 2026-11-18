@@ -148,6 +148,7 @@ namespace NxRHI
 		mDefaultBufferMemAllocator = nullptr;
 		mUploadBufferMemAllocator = nullptr;
 		mUavBufferMemAllocator = nullptr;
+		mStagingMemAllocator = nullptr;
 		mDescriptorPoolManager = nullptr;
 
 		mRtvAllocator = nullptr;
@@ -506,6 +507,8 @@ namespace NxRHI
 		mCBufferMemAllocator->mResDesc.Flags = D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE;
 		mCBufferMemAllocator->mResState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
 
+		mStagingMemAllocator = MakeWeakRef(new DX12StagingMemAllocator());
+
 		auto tRtv = new DX12HeapAllocator();
 		mRtvAllocator = MakeWeakRef(tRtv);
 		{
@@ -692,7 +695,7 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ISrView* DX12GpuDevice::CreateSRV(IGpuBufferData* pBuffer, const FSrvDesc* desc, const char* file, int line)
+	ISrView* DX12GpuDevice::CreateSRV(IGpuBufferDataBase* pBuffer, const FSrvDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<DX12SrView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc, file, line) == false)
@@ -702,7 +705,7 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IUaView* DX12GpuDevice::CreateUAV(IGpuBufferData* pBuffer, const FUavDesc* desc, const char* file, int line)
+	IUaView* DX12GpuDevice::CreateUAV(IGpuBufferDataBase* pBuffer, const FUavDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<DX12UaView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc, file, line) == false)
@@ -921,6 +924,9 @@ namespace NxRHI
 		if (mCmdQueue != nullptr)
 			mCmdQueue->TryRecycle();
 		mCmdAllocatorManager->TickRecycle();
+		// 放在 TickRecycle 之后: 本次 fence 完成释放的 staging chunk 已归还, 空页统计是最新的
+		if (mStagingMemAllocator != nullptr)
+			mStagingMemAllocator->TickShrink();
 
 		IGpuDevice::TickPostEvents();
 

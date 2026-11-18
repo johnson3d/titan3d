@@ -623,8 +623,7 @@ namespace NxRHI
 			vkGetSwapchainImagesKHR(((VKGpuDevice*)device)->mDevice, mSwapChain, &Desc.BufferCount, swapChainImages.data());
 		}
 
-		FTransientCmd tsCmd(device, QU_Default, "Transition");
-		auto cmd = tsCmd.GetCmdList();
+		// 交换链图像必须在 acquire 成功后才能提交使用, 首次渲染负责从 Undefined 转换
 		for (UINT i = 0; i < Desc.BufferCount; i++)
 		{
 			auto pDx12Texture = (VKTexture*)GetBackBuffer(i);
@@ -636,8 +635,7 @@ namespace NxRHI
 			//backbuffer 的 view 必须与 swapchain image 实际格式一致，否则撞 validation 且颜色通道错乱
 			pDx12Texture->Desc.Format = Desc.Format;
 			pDx12Texture->mImage = swapChainImages[i];
-			pDx12Texture->GpuState = EGpuResourceState::GRS_Undefine;
-			FTransitionScope::TryAutoTransition(cmd, pDx12Texture, EGpuResourceState::GRS_Present, false);
+			pDx12Texture->SetGpuResourceState(EGpuResourceState::GRS_Undefine);
 
 			BackBuffers[i].CreateRtvAndSrv(device, i, mCreateFile, mCreateLine);
 		}

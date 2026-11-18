@@ -160,6 +160,7 @@ namespace EngineNS.Bricks.GI.PRT
         }
         public unsafe override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             var ptr = mAtomDesc.mCoreObject.GetAtomDescPtr();
             ptr->m_StartIndex = 6 * 2 * (uint)ShowTetrahedronIndex;
             ptr->m_NumPrimitives = 6 * (uint)ShowTetrahedronCount; ;

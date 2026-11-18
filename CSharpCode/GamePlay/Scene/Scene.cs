@@ -874,6 +874,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             FHostNotify notify = new FHostNotify();
             notify.Info = "OnGatherVisibleMeshes_OnRenderThread";
             notify.Parameter = rp;

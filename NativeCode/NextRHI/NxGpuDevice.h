@@ -20,6 +20,7 @@ namespace NxRHI
 	class IVbView;
 	struct FIbvDesc;
 	class IIbView;
+	class IIndirectArgView;
 	struct FUavDesc;
 	class IUaView;
 	struct FSrvDesc;
@@ -61,7 +62,7 @@ namespace NxRHI
 	class ICmdQueue;
 	class IComputeEffect;
 	class IRayTracingEffect;
-	class IGpuBufferData;
+	class IGpuBufferDataBase;
 	class IGpuScope;
 	class FVertexArray;
 	class FGeomMesh;
@@ -1221,8 +1222,9 @@ namespace NxRHI
 		virtual ICbView* CreateCBV(IBuffer* pBuffer, const FCbvDesc * desc, const char* file, int line) = 0;
 		virtual IVbView* CreateVBV(IBuffer* pBuffer, const FVbvDesc * desc, const char* file, int line) = 0;
 		virtual IIbView* CreateIBV(IBuffer* pBuffer, const FIbvDesc * desc, const char* file, int line) = 0;
-		virtual ISrView* CreateSRV(IGpuBufferData * pBuffer, const FSrvDesc * desc, const char* file, int line) = 0;
-		virtual IUaView* CreateUAV(IGpuBufferData * pBuffer, const FUavDesc * desc, const char* file, int line) = 0;
+		IIndirectArgView* CreateIAV(IBuffer* pBuffer, const char* file, int line);
+		virtual ISrView* CreateSRV(IGpuBufferDataBase * pBuffer, const FSrvDesc * desc, const char* file, int line) = 0;
+		virtual IUaView* CreateUAV(IGpuBufferDataBase * pBuffer, const FUavDesc * desc, const char* file, int line) = 0;
 		virtual IRenderTargetView* CreateRTV(ITexture * pBuffer, const FRtvDesc* desc, const char* file, int line) = 0;
 		virtual IDepthStencilView* CreateDSV(ITexture * pBuffer, const FDsvDesc* desc, const char* file, int line) = 0;
 		virtual ISampler* CreateSampler(const FSamplerDesc * desc, const char* file, int line) = 0;

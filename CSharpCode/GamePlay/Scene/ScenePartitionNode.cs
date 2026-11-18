@@ -134,6 +134,7 @@ namespace EngineNS.GamePlay.Scene
 
         public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             foreach (var i in ActiveLevels)
             {
                 if (i == null)

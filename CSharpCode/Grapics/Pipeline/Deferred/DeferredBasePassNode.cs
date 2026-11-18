@@ -316,6 +316,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             if (GBuffers != null)
             {
                 GBuffers.SetSize(x, y);
+                GBuffersOpaque?.SetSize(x, y);
             }
 
             Rt0PinOut.Attachement.Height = (uint)y;
@@ -329,6 +330,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public TtDeferredOpaque mOpaqueShading;
         public TtDeferredOpaqueMeshlets mMeshletsOpaqueShading;
         public NxRHI.TtRenderPass RenderPass;
+        // RL_Opaque 与 RL_Background 共用同一批 RT, 但 LoadAction 需求不同: Opaque 必须保留 Background 写入的颜色/深度, 故单独使用 Load 语义的 RenderPass
+        public TtGraphicsBuffers GBuffersOpaque { get; protected set; } = new TtGraphicsBuffers();
 
         public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
         {
@@ -393,12 +396,41 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             GBuffers.SetDepthStencil(policy, DepthStencilPinOut);
             GBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
 
+            // RL_Opaque 的 loadOp 必须为 LOAD, 否则 Vulkan 上 Background 写入的颜色/深度会被丢弃(DONT_CARE 属未定义行为)
+            var opaquePassDesc = new NxRHI.FRenderPassDesc();
+            opaquePassDesc.NumOfMRT = PassDesc.NumOfMRT;
+            for (int i = 0; i < PassDesc.NumOfMRT; i++)
+            {
+                opaquePassDesc.AttachmentMRTs[i].Format = PassDesc.AttachmentMRTs[i].Format;
+                opaquePassDesc.AttachmentMRTs[i].Samples = 1;
+                opaquePassDesc.AttachmentMRTs[i].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
+                opaquePassDesc.AttachmentMRTs[i].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+            }
+            opaquePassDesc.m_AttachmentDepthStencil.Format = PassDesc.m_AttachmentDepthStencil.Format;
+            opaquePassDesc.m_AttachmentDepthStencil.Samples = 1;
+            opaquePassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
+            opaquePassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+            opaquePassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
+            opaquePassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+            var opaqueRenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in opaquePassDesc);
+
+            GBuffersOpaque.Initialize(policy, opaqueRenderPass);
+            GBuffersOpaque.SetRenderTarget(policy, 0, Rt0PinOut);
+            GBuffersOpaque.SetRenderTarget(policy, 1, Rt1PinOut);
+            GBuffersOpaque.SetRenderTarget(policy, 2, Rt2PinOut);
+            GBuffersOpaque.SetRenderTarget(policy, 3, Rt3PinOut);
+            GBuffersOpaque.SetDepthStencil(policy, DepthStencilPinOut);
+            GBuffersOpaque.TargetViewIdentifier = GBuffers.TargetViewIdentifier;
+            GBuffersOpaque.SetSize(GBuffers.Viewport.Width, GBuffers.Viewport.Height);
+
             return GBuffers;
         }
         public override void Dispose()
         {
             GBuffers?.Dispose();
             GBuffers = null;
+            GBuffersOpaque?.Dispose();
+            GBuffersOpaque = null;
 
             base.Dispose();
         }
@@ -466,11 +498,13 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         NxRHI.TtCmdRecorder mBasePassRecorder = new NxRHI.TtCmdRecorder();
         NxRHI.TtCmdRecorder mBackgroundPassRecorder = new NxRHI.TtCmdRecorder();
+        NxRHI.TtCmdRecorder mBatchRecorder = new NxRHI.TtCmdRecorder();
         public unsafe override void Tick(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             var cmdlist = NxRHI.TtCommandList.GetCmdList();
             mBasePassRecorder.ResetGpuDraws();
             mBackgroundPassRecorder.ResetGpuDraws();
+            mBatchRecorder.ResetGpuDraws();
 
             using (new NxRHI.TtCmdListScope(cmdlist, "DefferredBassPass"))
             {
@@ -478,7 +512,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 {
                     if (GpuCullNode != null)
                     {
-                        GpuCullNode.Commit(policy, cmdlist, GBuffers);
+                        GpuCullNode.Commit(policy, cmdlist, mBatchRecorder, GBuffers);
                     }
 
                     var visibleMeshes = CpuCullNode.VisParameter.VisibleMeshes;
@@ -533,6 +567,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                     passClears.SetClearColor(3, new Color4f(0, 0.5f, 0.5f, 0));
 
                 GBuffers.BuildFrameBuffers(policy);
+                GBuffersOpaque.BuildFrameBuffers(policy);
 
                 using (new Profiler.TimeScopeHelper(ScopeFlushDraw))
                 {
@@ -551,7 +586,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                     cmdlist.SetViewport(in GBuffers.Viewport);
                     cmdlist.SetScissor(in scissor);
                     passClears.ClearFlags = (NxRHI.ERenderPassClearFlags)0;
-                    cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, "RL_Opaque");
+                    cmdlist.BeginPass(GBuffersOpaque.FrameBuffers, in passClears, "RL_Opaque");
+                    cmdlist.AppendDraws(mBatchRecorder); 
                     cmdlist.AppendDraws(mBasePassRecorder);
                     cmdlist.FlushDraws();
                     cmdlist.EndPass();
@@ -560,6 +596,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             policy.CommitCommandList(cmdlist, "DefferredBassPass");
 
+            mBatchRecorder.ResetGpuDraws();
             mBasePassRecorder.ResetGpuDraws();
             mBackgroundPassRecorder.ResetGpuDraws();
         }

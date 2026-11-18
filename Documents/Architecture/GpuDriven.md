@@ -177,12 +177,20 @@ CDLOD 顶点 morph（MorphRange 在 cbPerTerrain，TerrainNode 级）照常工�
 
 ### 5.1 远景地形 VGDag (cluster DAG)
 
-`CSharpCode/Bricks/Terrain/CDLOD/VGDag/`：独立迷你 RenderPolicy + 乒乓双缓冲，
-`VgDagCull.compute` 做 LOD 选择 + 视锥剔除 + `InterlockedAdd` 压缩写
-DrawClusters 与 indirect args，一次 `DrawIndexedInstancedIndirect` 绘制全部可见
-cluster；VS 端 `VgDagDrawModifier.cginc` 用 `vInstanceId` 拉 per-instance
-cluster 数据、`vVertexID` 按行主序 patch 拓扑拉顶点池，超槽位 `w=0` 退化剔除。
+`CSharpCode/Bricks/Terrain/CDLOD/VGDag/`：独立迷你 RenderPolicy + 乒乓双缓冲（原型，未接入主渲染）。
+资产由原生 Quark 烘焙（`TtQuarkTerrainBaker`，误差为精确竖直 L∞，单位米）。
+`VgDagCull.compute` 按 group 一致规则做 LOD 选择（`VgDagLod.cginc`：
+`Proj(G_gen) <= tau < Proj(G_par)`，tau 为像素阈值）+ 视锥剔除 + `InterlockedAdd`
+压缩写 DrawClusters 与 indirect args，一次 `DrawIndexedInstancedIndirect` 绘制全部可见
+cluster；VS 端 `VgDagDrawModifier.cginc` 用 `vInstanceId` 拉 per-instance cluster、
+`vVertexID` 读 cluster 自带索引（每 cluster ≤128 三角，dummy patch 384 顶点），
+超出 IndexCount 的顶点塌缩为零面积三角形。
+注意：`TtGpuBuffer<uint/int/float>` 一律按 raw 创建，HLSL 端必须用 `ByteAddressBuffer`。
 主图里远景只是一个普通 opaque mesh 走正规 gbuffer 采集。
+迷你 policy 的 prepare 节点必须经输出 pin `AddLinker` 到 ending 节点并设 `RootNode`
+（否则 `BuildGraph` 直接返回、`NodeLayers` 为 null，Tick 时 NRE），单测
+`UTest_TtQuarkTerrainDag` 用 `BuildPrepareGraph` 校验这一点并离线编译 4 个 VGDag compute shader。
+未验证项：GPU 上实际运行、`VgDagDrawModifier.cginc` 的编译、迷你 policy 独立命令队列与主图之间没有显式 fence。
 
 ### 5.2 草地 (Grass)
 

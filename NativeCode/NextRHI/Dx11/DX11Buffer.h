@@ -45,7 +45,7 @@ namespace NxRHI
 		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void SetDebugName(const char* name) override;
-		virtual IGpuBufferData* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) override;
+		virtual IGpuBufferDataBase* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) override;
 	public:
 		union
 		{
@@ -83,8 +83,8 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return mView;
 		}
-		bool Init(DX11GpuDevice* device, IGpuBufferData* pBffer, const FSrvDesc& desc);
-		virtual bool UpdateBuffer(IGpuDevice* device, IGpuBufferData* buffer) override;
+		bool Init(DX11GpuDevice* device, IGpuBufferDataBase* pBffer, const FSrvDesc& desc);
+		virtual bool UpdateBuffer(IGpuDevice* device, IGpuBufferDataBase* buffer) override;
 	public:
 		ID3D11ShaderResourceView* mView = nullptr;
 	};
@@ -97,7 +97,7 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return mView;
 		}
-		bool Init(DX11GpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc);
+		bool Init(DX11GpuDevice* device, IGpuBufferDataBase* pBuffer, const FUavDesc& desc);
 	public:
 		ID3D11UnorderedAccessView* mView = nullptr;
 	};

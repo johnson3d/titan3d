@@ -1,3 +1,4 @@
+using EngineNS.ECS;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -94,6 +95,9 @@ namespace EngineNS
         [Rtti.Meta("")]
         [System.ComponentModel.Category("Option")]
         public bool Feature_UseGpuCulling { get; set; } = true;
+        [Rtti.Meta("")]
+        [System.ComponentModel.Category("Option")]
+        public bool Feature_UseCpuCulling { get; set; } = true;
         public string ConfigName;
         [Rtti.Meta("")]
         [System.ComponentModel.Category("Option")]

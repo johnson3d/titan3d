@@ -564,6 +564,7 @@ namespace EngineNS.Bricks.FX.Water
         Graphics.Mesh.TtMeshDataProvider mMeshBuilder = null;
         public override void OnGatherVisibleMeshes_OnRenderThread(GamePlay.TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             //因为TtFftWaterNode在OnTickLogic动态创建Mesh，会产生和RenderThread的线程安全问题，暂时注释，后续这里改成Gpu操作读取Texture就好了，或者做成双缓冲
             return;
 

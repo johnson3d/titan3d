@@ -66,71 +66,6 @@ namespace NxRHI
 		}
 	}
 
-	static void CommitResource(DX12CommandList* cmdlist, EShaderType shaderType, const FShaderBinder* binder, IGpuResource* resource)
-	{
-		if (resource == nullptr)
-			return;
-		//1 Sured TransitionTo Layout
-		//2 Update AccessTime for Texture SRV(streaming need)
-		bool bBindless = binder->IsBindless();
-		if (bBindless)
-		{
-			auto bl = (IBindless*)resource;
-			switch (binder->Type)
-			{
-				case SBT_SRV:
-				{
-					for (auto& i : bl->mResources)
-					{
-						if (i.Resource == nullptr)
-							continue;
-
-						cmdlist->SetSrv(shaderType, binder, i.Resource.UnsafeConvertTo<DX12SrView>());
-					}
-				}
-				break;
-				case SBT_UAV:
-				{
-					for (auto& i : bl->mResources)
-					{
-						if (i.Resource == nullptr)
-							continue;
-
-						cmdlist->SetUav(shaderType, binder, i.Resource.UnsafeConvertTo<DX12UaView>());
-					}
-				}
-				break;
-			}
-			return;
-		}
-		
-		switch (binder->Type)
-		{
-			case SBT_CBV:
-			{
-				cmdlist->SetCBV(shaderType, binder, (ICbView*)resource);
-			}
-			break;
-			case SBT_SRV:
-			{
-				cmdlist->SetSrv(shaderType, binder, (DX12SrView*)resource);
-			}
-			break;
-			case SBT_UAV:
-			{
-				cmdlist->SetUav(shaderType, binder, (IUaView*)resource);
-			}
-			break;
-			case SBT_Sampler:
-			{
-				cmdlist->SetSampler(shaderType, binder, (ISampler*)resource);
-			}
-			break;
-			default:
-				break;
-		}
-	}
-
 	static bool GDX12ForceCopyDiscriptor = true;
 	DX12GraphicDraw::DX12GraphicDraw()
 	{
@@ -282,12 +217,7 @@ namespace NxRHI
 	}
 	void DX12GraphicDraw::BuildDrawcall(ICommandList* cmdlist)
 	{
-		for (auto& i : BindResources)
-		{
-			CommitResource((DX12CommandList*)cmdlist, EShaderType::SDT_Unknown, i.first->GetValidShaderBinder(), i.second.Resource);
-		}
-		if (IndirectDrawArgsBuffer)
-			FTransitionScope::TryAutoTransition(cmdlist, IndirectDrawArgsBuffer, GRS_UavIndirect, true);
+		TransitionBindResources(cmdlist);
 	}
 	void DX12GraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
@@ -348,7 +278,7 @@ namespace NxRHI
 				pDrawDesc = &AtomDesc->AtomDesc;
 
 			ASSERT(pDrawDesc);
-			if (IndirectDrawArgsBuffer)
+			if (IndirectDrawArgsView)
 			{	
 				if (pDrawDesc->IsDispatchMesh())
 				{
@@ -359,7 +289,7 @@ namespace NxRHI
 					auto effect = this->ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>();
 					dx12Cmd->mCurrentCmdSig = effect->GetIndirectDrawIndexCmdSig(device, dx12Cmd);
 					dx12Cmd->mCurrentIndirectOffset = effect->mIndirectOffset;
-					cmdlist->IndirectDrawIndexed(pDrawDesc->PrimitiveType, IndirectDrawArgsBuffer, IndirectDrawOffsetForArgs);
+					cmdlist->IndirectDrawIndexed(pDrawDesc->PrimitiveType, IndirectDrawArgsView->GetBuffer(), IndirectDrawOffsetForArgs);
 					dx12Cmd->mCurrentCmdSig = nullptr;
 					dx12Cmd->mCurrentIndirectOffset = 0;
 				}
@@ -533,18 +463,19 @@ namespace NxRHI
 		
 		BindDescriptorHeaps(device, dx12Cmd);
 
+		FBindLayoutValidator validator;
 		for (auto& i : BindResources)
 		{
-			CommitResource((DX12CommandList*)cmdlist, EShaderType::SDT_ComputeShader, i.first, i.second.Resource);
+			TransitionBindResource(cmdlist, i.first, i.second.Resource, true, &validator);
 		}
 
-		if (IndirectDispatchArgsBuffer != nullptr)
+		if (IndirectDispatchArgsView != nullptr)
 		{
-			FTransitionScope::TryAutoTransition(cmdlist, IndirectDispatchArgsBuffer, GRS_UavIndirect, true);
+			FTransitionScope::TryAutoTransition(cmdlist, IndirectDispatchArgsView.GetPtr(), true);
 			auto effect = this->mEffect.UnsafeConvertTo<DX12ComputeEffect>();
 			dx12Cmd->mCurrentCmdSig = effect->GetIndirectDispatchCmdSig(device, dx12Cmd);
 			dx12Cmd->mCurrentIndirectOffset = effect->mIndirectOffset;
-			cmdlist->IndirectDispatch(IndirectDispatchArgsBuffer, 0);
+			cmdlist->IndirectDispatch(IndirectDispatchArgsView->GetBuffer(), 0);
 			dx12Cmd->mCurrentCmdSig = nullptr;
 			dx12Cmd->mCurrentIndirectOffset = 0;
 		}
@@ -765,9 +696,10 @@ namespace NxRHI
 
 		BindDescriptorHeaps(device, dx12Cmd, effect, mCbvSrvUavHeap, mSamplerHeap);
 
+		FBindLayoutValidator validator;
 		for (auto& i : BindResources)
 		{
-			CommitResource((DX12CommandList*)cmdlist, EShaderType::SDT_RayTracing, i.first, i.second.Resource);
+			TransitionBindResource(cmdlist, i.first, i.second.Resource, true, &validator);
 		}
 
 		D3D12_DISPATCH_RAYS_DESC dispatchDesc = {};

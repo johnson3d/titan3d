@@ -283,40 +283,7 @@ namespace NxRHI
 	}
 	void VKGraphicDraw::BuildDrawcall(ICommandList* cmdlist)
 	{
-		auto vkCmd = (VKCommandList*)cmdlist;
-		for (auto& i : BindResources)
-		{
-			auto binder = i.first;
-			auto resource = i.second.Resource;
-			auto shaderBinder = binder->GetShaderBinder();
-			switch (binder->BindType)
-			{
-				case SBT_CBV:
-				{
-					vkCmd->SetCBV(EShaderType::SDT_Unknown, shaderBinder, (ICbView*)resource);
-				}
-				break;
-				case SBT_SRV:
-				{
-					vkCmd->SetSrv(EShaderType::SDT_Unknown, shaderBinder, (ISrView*)resource);
-				}
-				break;
-				case SBT_UAV:
-				{
-					vkCmd->SetUav(EShaderType::SDT_Unknown, shaderBinder, (IUaView*)resource);
-				}
-				break;
-				case SBT_Sampler:
-				{
-					vkCmd->SetSampler(EShaderType::SDT_Unknown, shaderBinder, (ISampler*)resource);
-				}
-				break;
-				default:
-					break;
-			}
-		}
-		if (IndirectDrawArgsBuffer)
-			FTransitionScope::TryAutoTransition(cmdlist, IndirectDrawArgsBuffer, GRS_UavIndirect, true);
+		TransitionBindResources(cmdlist);
 	}
 	void VKGraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
@@ -370,9 +337,9 @@ namespace NxRHI
 		else
 			pDrawDesc = &AtomDesc->AtomDesc;
 		ASSERT(pDrawDesc);
-		if (IndirectDrawArgsBuffer)
+		if (IndirectDrawArgsView)
 		{
-			cmdlist->IndirectDrawIndexed(pDrawDesc->PrimitiveType, IndirectDrawArgsBuffer, IndirectDrawOffsetForArgs);
+			cmdlist->IndirectDrawIndexed(pDrawDesc->PrimitiveType, IndirectDrawArgsView->GetBuffer(), IndirectDrawOffsetForArgs);
 		}
 		else
 		{
@@ -458,9 +425,18 @@ namespace NxRHI
 		
 		UpdateDescriptorSets(vkCmd);
 
-		if (IndirectDispatchArgsBuffer != nullptr)
+		// 与 DX12ComputeDraw::Commit 一致: 逐 dispatch 按 view 的 FViewLayout 转换, 必须在 Commit 而非 BuildDrawcall,
+		// 否则同一批 dispatch 之间的子资源转换(如 HZB mip 链 UAV->SRV)会全部提前到首个 dispatch 之前
+		FBindLayoutValidator validator;
+		for (auto& i : BindResources)
 		{
-			cmdlist->IndirectDispatch(IndirectDispatchArgsBuffer, 0);
+			TransitionBindResource(cmdlist, i.first, i.second.Resource, true, &validator);
+		}
+
+		if (IndirectDispatchArgsView != nullptr)
+		{
+			FTransitionScope::TryAutoTransition(cmdlist, IndirectDispatchArgsView.GetPtr(), true);
+			cmdlist->IndirectDispatch(IndirectDispatchArgsView->GetBuffer(), 0);
 		}
 		else
 		{

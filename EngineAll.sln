@@ -413,6 +413,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "editor", "editor", "{8E8463
 		Documents\editor\PGCEditor.md = Documents\editor\PGCEditor.md
 		Documents\editor\PIEController.md = Documents\editor\PIEController.md
 		Documents\editor\RendPolicyEditor.md = Documents\editor\RendPolicyEditor.md
+		Documents\editor\RenderDocMCP.md = Documents\editor\RenderDocMCP.md
 		Documents\editor\SceneEditor.md = Documents\editor\SceneEditor.md
 		Documents\editor\TextureEditor.md = Documents\editor\TextureEditor.md
 		Documents\editor\TitanCMD.md = Documents\editor\TitanCMD.md

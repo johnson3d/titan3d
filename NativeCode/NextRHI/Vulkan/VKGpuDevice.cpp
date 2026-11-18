@@ -214,6 +214,22 @@ namespace NxRHI
 			{
 				mValidationLayers.push_back("VK_LAYER_KHRONOS_validation");
 			}
+			else
+			{
+				// 原生日志由托管侧按 ANSI 解码, 此处使用 ASCII 避免诊断信息乱码
+				VFX_LTRACE(ELTT_Error, "Vulkan: CreateDebugLayer requested, but VK_LAYER_KHRONOS_validation was not found; validation is DISABLED. Install Vulkan SDK Validation Layers or check VK_LAYER_PATH and layer registration.\r\n");
+#if defined(PLATFORM_WIN) && !defined(FINAL_SHIPPING)
+				// 托管 Release 的 Debug.Assert 不会断停, 附加调试器时直接停在缺层位置
+				if (::IsDebuggerPresent())
+				{
+					__debugbreak();
+				}
+				else
+#endif
+				{
+					ASSERT(pLayer != nullptr && "VK_LAYER_KHRONOS_validation was not found");
+				}
+			}
 
 			populateDebugMessengerCreateInfo(debugCreateInfo);
 			debugCreateInfo.pUserData = this;
@@ -233,6 +249,10 @@ namespace NxRHI
 		if (vkCreateInstance(&createInfo, nullptr, &mVKInstance) != VK_SUCCESS) 
 		{
 			return false;
+		}
+		if (desc->CreateDebugLayer && !mValidationLayers.empty())
+		{
+			VFX_LTRACE(ELTT_info, "Vulkan: VK_LAYER_KHRONOS_validation is ENABLED.\r\n");
 		}
 
 		UINT						mDeviceNumber = 0;
@@ -339,6 +359,7 @@ namespace NxRHI
 		
 		mCBufferAllocator = nullptr;
 		mDefaultBufferAllocator = nullptr;
+		mStagingMemAllocator = nullptr;//须在 vmaDestroyAllocator 之前释放 staging 页
 		mPipelineManager = nullptr;
 		mFrameFence = nullptr;
 		mDescriptorPoolManager = nullptr;
@@ -921,6 +942,7 @@ namespace NxRHI
 		vkGetPhysicalDeviceMemoryProperties(mPhysicalDevice, &mMemProperties);
 
 		mDefaultBufferAllocator = MakeWeakRef(new VKGpuDefaultMemAllocator());
+		mStagingMemAllocator = MakeWeakRef(new VKStagingMemAllocator());
 
 		mDescriptorPoolManager = MakeWeakRef(new VKDesriptorPoolManager());
 		mDescriptorPoolManager->Initialize(this);
@@ -1069,7 +1091,7 @@ namespace NxRHI
 		}
 		return result;
 	}
-	ISrView* VKGpuDevice::CreateSRV(IGpuBufferData* pBuffer, const FSrvDesc* desc, const char* file, int line)
+	ISrView* VKGpuDevice::CreateSRV(IGpuBufferDataBase* pBuffer, const FSrvDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<VKSrView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc, file, line) == false)
@@ -1079,7 +1101,7 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IUaView* VKGpuDevice::CreateUAV(IGpuBufferData* pBuffer, const FUavDesc* desc, const char* file, int line)
+	IUaView* VKGpuDevice::CreateUAV(IGpuBufferDataBase* pBuffer, const FUavDesc* desc, const char* file, int line)
 	{
 		auto result = NewObjectWithInfo<VKUaView>(file ? file : __FILE__, line);
 		if (result->Init(this, pBuffer, *desc, file, line) == false)
@@ -1277,6 +1299,9 @@ namespace NxRHI
 		if (mCmdQueue != nullptr)
 			mCmdQueue->TryRecycle();
 		mCmdAllocatorManager->TickRecycle();
+		// TickRecycle 后已完成的 chunk 都已归还, 此时做闲置与预算回收
+		if (mStagingMemAllocator != nullptr)
+			mStagingMemAllocator->TickShrink();
 
 		IGpuDevice::TickPostEvents();
 		

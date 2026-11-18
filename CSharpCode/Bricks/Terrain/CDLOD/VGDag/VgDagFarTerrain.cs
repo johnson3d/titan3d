@@ -10,12 +10,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
 {
     /// <summary>
     /// 远景 cluster DAG 的 GPU 数据准备系统(独立迷你 RenderPolicy, 不进主 RDG):
-    /// cull pass(compute) 做 LOD 选择 + 视锥剔除, 可见 cluster 压缩写入 DrawClusters
-    /// 并以 InterlockedAdd 生成 DrawIndexedInstancedIndirect 参数。
+    /// cull pass(compute) 做组一致 LOD 选择(VgDagLod.cginc) + 视锥剔除, 可见 cluster
+    /// 下标压缩写入 DrawClusters 并以 InterlockedAdd 生成 DrawIndexedInstancedIndirect 参数。
     /// 组织方式与 TtSWEWaterNode / TtSceneCapture 同款: new TtRenderPolicy() +
     /// 独立 TtRCmdQueue, 在主 policy Tick 内驱动、与主图 cmdlist 解耦。
-    /// 双缓冲乒乓: prepare 写写侧, 主图远景 mesh(gbuffer opaque)读上一帧读侧,
-    /// 主图对"本帧正在被绘制的数据"零写竞争。
+    /// 双缓冲乒乓: prepare 写写侧, 每次 TickPrepare 末尾交换, 主图远景 mesh(gbuffer
+    /// opaque)读交换后的读侧; cull 永远不写主图正在读的那一份。
     /// </summary>
     [Rtti.Meta("")]
     public class TtVgDagFarTerrain : IDisposable
@@ -60,6 +60,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
 
                 var host = node.Host;
                 drawcall.BindSrv("VisClusterBuffer", host.VisClusters.Srv);
+                drawcall.BindSrv("VisGroupBuffer", host.VisGroups.Srv);
                 drawcall.BindUav("DrawClusters", host.WriteClusters.Uav);
                 drawcall.BindUav("DrawArgs", host.WriteArgs.Uav);
 
@@ -93,9 +94,21 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
             private TtVgDagCullShading mCullShading;
             private TtComputeDraw mCullDrawcall;
 
+            /// <summary>
+            /// 排序用途的输出 pin(不携带资源): 迷你图靠 RootNode 回溯决定节点是否 Tick,
+            /// 必须经它连到 ending 节点(GpuCullingNode.GpuCullOut 同款)。
+            /// </summary>
+            public TtRenderGraphPin PreparedPinOut = TtRenderGraphPin.CreateOutput("Prepared", false, EPixelFormat.PXF_UNKNOWN, EBufferType.BFT_NONE);
+
             public TtVgDagPrepareNode()
             {
                 Name = "VgDagPrepareNode";
+            }
+
+            public override void InitNodePins()
+            {
+                AddOutput(PreparedPinOut);
+                base.InitNodePins();
             }
 
             public override async Thread.Async.TtTask Initialize(TtRenderPolicy policy, string debugName)
@@ -150,17 +163,21 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
 
         /// <summary>bake 顶点池(SRV, draw 端 VS 拉取; 单份, bake 后不变)。</summary>
         public TtCpu2GpuBuffer<FVgVisVertex> VisVertices = new TtCpu2GpuBuffer<FVgVisVertex>();
-        /// <summary>原始 cluster 表(cull 端读; 单份, bake 后不变)。</summary>
+        /// <summary>cluster 局部索引(相对 BaseVertex, draw 端 VS 拉取)。</summary>
+        public TtCpu2GpuBuffer<uint> VisIndices = new TtCpu2GpuBuffer<uint>();
+        /// <summary>原始 cluster 表(cull 与 draw 端共读; 单份, bake 后不变)。</summary>
         public TtCpu2GpuBuffer<FVgVisCluster> VisClusters = new TtCpu2GpuBuffer<FVgVisCluster>();
-        /// <summary>乒乓: cull 输出的压缩可见 cluster(容量 = cluster 总数上界)。</summary>
-        public TtGpuBuffer<FVgVisCluster>[] ClustersBuffer = new TtGpuBuffer<FVgVisCluster>[2];
+        /// <summary>group 表(cull 端 LOD 选择)。</summary>
+        public TtCpu2GpuBuffer<FVgVisGroup> VisGroups = new TtCpu2GpuBuffer<FVgVisGroup>();
+        /// <summary>乒乓: cull 输出的压缩可见 cluster 下标(容量 = cluster 总数)。</summary>
+        public TtGpuBuffer<uint>[] ClustersBuffer = new TtGpuBuffer<uint>[2];
         /// <summary>乒乓: DrawIndexedInstancedIndirect 参数(5 uint)。</summary>
         public TtGpuBuffer<uint>[] ArgsBuffer = new TtGpuBuffer<uint>[2];
 
-        public TtGpuBuffer<FVgVisCluster> WriteClusters => ClustersBuffer[mWriteIndex];
+        public TtGpuBuffer<uint> WriteClusters => ClustersBuffer[mWriteIndex];
         public TtGpuBuffer<uint> WriteArgs => ArgsBuffer[mWriteIndex];
         /// <summary>主图绘制读的"上一帧"产物。</summary>
-        public TtGpuBuffer<FVgVisCluster> ReadClusters => ClustersBuffer[mWriteIndex ^ 1];
+        public TtGpuBuffer<uint> ReadClusters => ClustersBuffer[mWriteIndex ^ 1];
         public TtGpuBuffer<uint> ReadArgs => ArgsBuffer[mWriteIndex ^ 1];
         private int mWriteIndex = 0;
 
@@ -168,8 +185,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
         public bool HasAsset => ClusterCount > 0;
         #endregion
 
-        /// <summary>LOD 选择阈值(QEM 代价, 量纲 texel²)。</summary>
-        public float ErrorThreshold = 1600.0f;
+        /// <summary>LOD 选择阈值: 屏幕空间竖直误差(像素)。</summary>
+        public float PixelErrorThreshold = 1.0f;
+        /// <summary>主视口像素高度(像素误差换算用), 由绘制节点 OnResize 同步。</summary>
+        public float ViewportHeight = 1080.0f;
 
         private TtRenderPolicy mPreparePolicy;
         private TtRCmdQueue mCmdQueue;
@@ -178,16 +197,19 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
 
         public void Dispose()
         {
+            // 先拆图(节点持有的 drawcall 可能引用下面的 buffer), 再释放 buffer
+            CoreSDK.DisposeObject(ref mPreparePolicy);
+            mPrepareNode = null;
             CoreSDK.DisposeObject(ref CBVisParams);
             CoreSDK.DisposeObject(ref VisVertices);
+            CoreSDK.DisposeObject(ref VisIndices);
             CoreSDK.DisposeObject(ref VisClusters);
+            CoreSDK.DisposeObject(ref VisGroups);
             CoreSDK.DisposeObject(ref ClustersBuffer[0]);
             CoreSDK.DisposeObject(ref ClustersBuffer[1]);
             CoreSDK.DisposeObject(ref ArgsBuffer[0]);
             CoreSDK.DisposeObject(ref ArgsBuffer[1]);
-            CoreSDK.DisposeObject(ref mPreparePolicy);
             CoreSDK.DisposeObject(ref mCmdQueue);
-            mPrepareNode = null;
         }
 
         /// <summary>
@@ -196,86 +218,54 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
         /// </summary>
         public unsafe void UploadDagAsset(TtVgDagAsset asset, Vector3 origin, float texelWorldSize)
         {
-            if (asset == null || asset.Clusters == null || asset.Clusters.Length == 0)
+            if (VisVertices == null)
+                return; // 已 Dispose
+            if (!TtVgDagGpuData.Build(asset, out var visClusters, out var visGroups, out var visVerts, out var visIndices))
                 return;
+            int clusterCount = visClusters.Length;
 
-            var clusters = asset.Clusters;
-            int clusterCount = clusters.Length;
-
-            // 父链映射: 供 shader 做可见性判定(自身误差 <= 阈值 && 父误差 > 阈值)
-            var parentOf = new int[clusterCount];
-            for (int i = 0; i < clusterCount; i++)
-                parentOf[i] = -1;
-            for (int i = 0; i < clusterCount; i++)
-            {
-                var c = clusters[i];
-                if (c.IsLeaf)
-                    continue;
-                for (int k = 0; k < 4; k++)
-                {
-                    int child = c.FirstChild + k;
-                    if (child >= 0 && child < clusterCount)
-                        parentOf[child] = i;
-                }
-            }
-
-            var visClusters = new FVgVisCluster[clusterCount];
-            for (int i = 0; i < clusterCount; i++)
-            {
-                var c = clusters[i];
-                ref var g = ref visClusters[i];
-                g.mMinTexelX = (uint)c.MinTexelX;
-                g.mMinTexelZ = (uint)c.MinTexelZ;
-                g.mExtentTexel = (uint)c.ExtentTexel;
-                g.mLevel = (uint)c.Level;
-                g.mBaseVertex = (uint)c.BaseVertex;
-                g.mIndexStart = (uint)c.IndexStart;
-                g.mIndexCount = (uint)c.IndexCount;
-                g.mMaxError = c.MaxError;
-                g.mParent = parentOf[i];
-                g.mParentMaxError = parentOf[i] >= 0 ? clusters[parentOf[i]].MaxError : 0.0f;
-                g.mHeightfieldSize = (uint)asset.HeightfieldSize;
-                // 显式层 cluster 的顶点数可由索引数反推: 规则 grid 三角数 = (side-1)^2 * 2
-                g.mVertCount = 0;
-                if (c.IndexCount > 0)
-                {
-                    int quads = (int)System.Math.Sqrt(c.IndexCount / 6.0);
-                    g.mVertCount = (uint)(quads + 1);
-                }
-            }
-
-            var visVerts = new FVgVisVertex[asset.Vertices.Length];
-            for (int i = 0; i < asset.Vertices.Length; i++)
-            {
-                visVerts[i].mTexelX = asset.Vertices[i].TexelX;
-                visVerts[i].mTexelZ = asset.Vertices[i].TexelZ;
-                visVerts[i].mY = asset.Vertices[i].Y;
-            }
+            // Initialize 会释放旧 GPU buffer 并重建 CPU 数组, 重复上传安全
+            VisClusters.Initialize(EBufferType.BFT_SRV);
+            VisGroups.Initialize(EBufferType.BFT_SRV);
+            VisVertices.Initialize(EBufferType.BFT_SRV);
+            VisIndices.Initialize(EBufferType.BFT_SRV);
 
             VisClusters.SetSize(clusterCount);
             fixed (FVgVisCluster* pC = &visClusters[0])
             {
                 VisClusters.UpdateData(0, pC, clusterCount * sizeof(FVgVisCluster));
             }
+            VisGroups.SetSize(visGroups.Length);
+            fixed (FVgVisGroup* pG = &visGroups[0])
+            {
+                VisGroups.UpdateData(0, pG, visGroups.Length * sizeof(FVgVisGroup));
+            }
             VisVertices.SetSize(visVerts.Length);
             fixed (FVgVisVertex* pV = &visVerts[0])
             {
                 VisVertices.UpdateData(0, pV, visVerts.Length * sizeof(FVgVisVertex));
             }
+            VisIndices.SetSize(visIndices.Length);
+            fixed (uint* pI = &visIndices[0])
+            {
+                VisIndices.UpdateData(0, pI, visIndices.Length * sizeof(uint));
+            }
 
             mVisParams.mOriginAndTexel = new Vector4(origin.X, origin.Y, origin.Z, texelWorldSize);
-            mVisParams.mVis = new Vector4(ErrorThreshold, clusterCount, asset.HeightMax, 0);
+            // z/w 在 TickPrepare 里按相机重算; 先填非 0 值避免除零
+            mVisParams.mVis = new Vector4(PixelErrorThreshold, clusterCount, 1, 1);
 
+            // 显式初值全 0(InstanceCount=0): 首帧 ExecuteIndirect 执行 0 个 draw, 天然安全
+            uint* zeroArgs = stackalloc uint[5] { 0, 0, 0, 0, 0 };
             for (int i = 0; i < 2; i++)
             {
                 CoreSDK.DisposeObject(ref ClustersBuffer[i]);
-                ClustersBuffer[i] = new TtGpuBuffer<FVgVisCluster>();
+                ClustersBuffer[i] = new TtGpuBuffer<uint>();
                 ClustersBuffer[i].SetSize((uint)clusterCount, (void*)0,
                     EBufferType.BFT_SRV | EBufferType.BFT_UAV);
                 CoreSDK.DisposeObject(ref ArgsBuffer[i]);
                 ArgsBuffer[i] = new TtGpuBuffer<uint>();
-                // 初始全 0(InstanceCount=0): 首帧 ExecuteIndirect 执行 0 个 draw, 天然安全
-                ArgsBuffer[i].SetSize(5, (void*)0,
+                ArgsBuffer[i].SetSize(5, zeroArgs,
                     EBufferType.BFT_UAV | EBufferType.BFT_IndirectArgs);
             }
             mWriteIndex = 0;
@@ -294,9 +284,25 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
             if (mPreparePolicy != null)
                 return;
 
-            mPreparePolicy = new TtRenderPolicy();
+            BuildPrepareGraph(out var hasInputError);
+            if (hasInputError)
+                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, "VgDagFarTerrain: prepare graph has unlinked inputs");
             mCmdQueue = new TtRCmdQueue();
             mPreparePolicy.CmdQueue = mCmdQueue;
+
+            foreach (var kvp in mPreparePolicy.GraphNodes)
+            {
+                await kvp.Value.Initialize(mPreparePolicy, kvp.Value.Name);
+            }
+        }
+
+        /// <summary>
+        /// 只建图不建 GPU 资源(不创建命令队列、不 Initialize 节点), 单测可直接验证
+        /// prepare 节点能从 RootNode 回溯到(IsUsed)、NodeLayers 已建立。
+        /// </summary>
+        internal TtRenderPolicy BuildPrepareGraph(out bool hasInputError)
+        {
+            mPreparePolicy = new TtRenderPolicy();
 
             mPrepareNode = new TtVgDagPrepareNode();
             mPrepareNode.Host = this;
@@ -309,21 +315,22 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
 
             mPreparePolicy.RegRenderNode2("VgDagPrepare", mPrepareNode);
             mPreparePolicy.RegRenderNode2("VgDagPrepareEnding", endingNode);
+            mPreparePolicy.AddLinker(mPrepareNode.PreparedPinOut, endingNode.SrcPinIn);
+            mPreparePolicy.RootNode = endingNode;
 
-            bool hasInputError = false;
+            hasInputError = false;
             mPreparePolicy.BuildGraph(ref hasInputError);
-
-            foreach (var kvp in mPreparePolicy.GraphNodes)
-            {
-                await kvp.Value.Initialize(mPreparePolicy, kvp.Value.Name);
-            }
+            return mPreparePolicy;
         }
+
+        internal TtVgDagPrepareNode PrepareNode => mPrepareNode;
 
         /// <summary>
         /// 每帧驱动一次(渲染线程, 主 policy Tick 早期调用; 须先 InitializeAsync 完成):
         /// 同步主相机 -> 写侧 clear+cull -> 提交独立命令队列 -> 乒乓交换。
-        /// 写侧变成本帧读侧, 主图 gbuffer 里远景 mesh 读到的是刚完成的剔除结果
-        /// (若后续把驱动点移到更早/独立线程, 读侧天然退回"上一帧"语义, 无需改动)。
+        /// 写侧变成本帧读侧, 主图 gbuffer 里远景 mesh 读到的是刚提交的剔除结果。
+        /// 注意: 迷你 policy 走独立 TtRCmdQueue, 与主图之间目前没有显式 fence,
+        /// 依赖两者最终提交到同一硬件队列的提交顺序(未经 GPU 运行验证)。
         /// </summary>
         public void TickPrepare(TtRenderPolicy mainPolicy)
         {
@@ -336,11 +343,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
             // 会与渲染错位, 大幅快转时屏幕边缘错误裁剪。从未上传过 cb 时退回实时相机。
             if (mainPolicy != null)
             {
-                var vp = mainPolicy.DefaultCamera.TryGetGpuViewProjection(out var gpuVP)
-                    ? gpuVP : mainPolicy.DefaultCamera.GetViewProjection();
+                var camera = mainPolicy.DefaultCamera;
+                var vp = camera.TryGetGpuViewProjection(out var gpuVP)
+                    ? gpuVP : camera.GetViewProjection();
                 vp.Transpose();
                 mVisParams.mViewProj = vp;
-                mVisParams.mVis.X = ErrorThreshold;
+                mVisParams.mVis = TtVgDagGpuData.MakeLodParams(camera, ViewportHeight, PixelErrorThreshold, ClusterCount);
             }
 
             if (mDataDirty)
@@ -348,7 +356,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD.VGDag
                 using (var tsCmd = new FTransientCmd(EQueueType.QU_Default, "VgDagPrepare.FlushBuffers"))
                 {
                     VisClusters.Flush2GPU(tsCmd.CmdList);
+                    VisGroups.Flush2GPU(tsCmd.CmdList);
                     VisVertices.Flush2GPU(tsCmd.CmdList);
+                    VisIndices.Flush2GPU(tsCmd.CmdList);
                 }
                 mDataDirty = false;
             }

@@ -302,7 +302,7 @@ namespace EngineNS.Graphics.Pipeline
                 // 相机 cbv 更新已提前到渲染帧开头 (render action 内, 剔影之前);
                 // 这里保留兜底调用, 由 UpdateCameraAttachements 的帧内守卫去重,
                 // 避免给 PreFrameViewPrjMtx 造成双重推进。
-                UpdateCameraAttachements(NxRHI.TtCbView.EUpdateMode.Immediately);
+                UpdateCameraAttachements(NxRHI.TtCbView.EUpdateMode.Auto);
                 base.TickSync();
             }
             PolicyOptionData.Clear();

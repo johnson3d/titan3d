@@ -45,8 +45,8 @@ namespace NxRHI
 		virtual ICbView* CreateCBV(IBuffer* pBuffer, const FCbvDesc* desc, const char* file, int line) override;
 		virtual IVbView* CreateVBV(IBuffer* pBuffer, const FVbvDesc* desc, const char* file, int line) override;
 		virtual IIbView* CreateIBV(IBuffer* pBuffer, const FIbvDesc* desc, const char* file, int line) override;
-		virtual ISrView* CreateSRV(IGpuBufferData* pBuffer, const FSrvDesc* desc, const char* file, int line) override;
-		virtual IUaView* CreateUAV(IGpuBufferData* pBuffer, const FUavDesc* desc, const char* file, int line) override;
+		virtual ISrView* CreateSRV(IGpuBufferDataBase* pBuffer, const FSrvDesc* desc, const char* file, int line) override;
+		virtual IUaView* CreateUAV(IGpuBufferDataBase* pBuffer, const FUavDesc* desc, const char* file, int line) override;
 		virtual IRenderTargetView* CreateRTV(ITexture* pBuffer, const FRtvDesc* desc, const char* file, int line) override;
 		virtual IDepthStencilView* CreateDSV(ITexture* pBuffer, const FDsvDesc* desc, const char* file, int line) override;
 		virtual ISampler* CreateSampler(const FSamplerDesc* desc, const char* file, int line) override;
@@ -97,6 +97,9 @@ namespace NxRHI
 		DX12DefaultGpuMemAllocator* GetUavBufferMemAllocator() {
 			return mUavBufferMemAllocator;
 		}
+		DX12StagingMemAllocator* GetStagingMemAllocator() {
+			return mStagingMemAllocator;
+		}
 		DX12HeapAllocator* GetRtvAllocator() {
 			return mRtvAllocator;
 		}
@@ -133,6 +136,7 @@ namespace NxRHI
 		AutoRef<DX12DefaultGpuMemAllocator>		mDefaultBufferMemAllocator;
 		AutoRef<DX12DefaultGpuMemAllocator>		mUploadBufferMemAllocator;
 		AutoRef<DX12DefaultGpuMemAllocator>		mUavBufferMemAllocator;
+		AutoRef<DX12StagingMemAllocator>		mStagingMemAllocator;
 
 		AutoRef<ID3D12CommandSignature>		CmdSigForIndirectDraw;
 		AutoRef<ID3D12CommandSignature>		CmdSigForIndirectDrawIndex;

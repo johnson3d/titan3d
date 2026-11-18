@@ -96,21 +96,30 @@ namespace EngineNS.Editor
 
         static bool mRenderDocInited = false;
         /// <summary>
-        /// 初始化 in-app API。renderdoc.dll 已由外部注入时, 传注入实例的模块路径
-        /// (LoadLibrary 命中已加载模块, GetModuleHandle 才能拿到句柄)。
+        /// 使用启动期初始化的 in-app API；外部注入时由 native 复用已加载模块。
+        /// Vulkan capture layer 必须在 instance 创建前启用，不能依靠此处的延迟加载。
         /// </summary>
         static unsafe bool EnsureRenderDocInited()
         {
-            if (mRenderDocInited)
-                return true;
 #if PWindow
+            var targetWindow = GetMainEditor()?.GetRenderDocTargetWindow();
+            if (targetWindow == null)
+                return false;
+
             var doc = IRenderDocTool.GetInstance();
-            doc.InitRenderDoc("C:\\Program Files\\RenderDoc\\renderdoc.dll");
+            if (mRenderDocInited == false)
+            {
+                var renderDocPath = Graphics.Pipeline.TtGfxDevice.GetRenderDocPath(TtEngine.Instance);
+                doc.InitRenderDoc(renderDocPath);
+                mRenderDocInited = true;
+            }
+            // 每次抓帧都重新绑定，避免复用上一次焦点 viewport 的 HWND。
             doc.SetGpuDevice(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject);
-            doc.SetActiveWindow(GetMainEditor().NativeWindow.HWindow.ToPointer());
-#endif
-            mRenderDocInited = true;
+            doc.SetActiveWindow(targetWindow.HWindow.ToPointer());
             return true;
+#else
+            return false;
+#endif
         }
 
         static string ToolRenderDocCapture(JsonElement args)
@@ -130,7 +139,8 @@ namespace EngineNS.Editor
             {
                 try
                 {
-                    EnsureRenderDocInited();
+                    if (EnsureRenderDocInited() == false)
+                        throw new InvalidOperationException("no focused or recently active renderable viewport for RenderDoc capture");
                     var q = TtEngine.Instance.GfxDevice.RenderQueue;
                     q.OpenRenderDocAfterCapture = false; // 自动化抓帧不弹 UI
                     q.CaptureTagName = tag;

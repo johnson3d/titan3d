@@ -366,7 +366,9 @@ namespace NxRHI
 		mRasterState.frontFace = desc.Rasterizer.FrontCounterClockwise ? VK_FRONT_FACE_COUNTER_CLOCKWISE : VK_FRONT_FACE_CLOCKWISE;
 
 		mRasterState.depthClampEnable = desc.Rasterizer.DepthBiasClamp == 0 ? FALSE : TRUE;
-		mRasterState.depthBiasEnable = desc.Rasterizer.DepthBias;
+		// DepthBias 是 INT 偏移量 (可为负), 不能直接当 VkBool32 用; 常量偏移走 depthBiasConstantFactor
+		mRasterState.depthBiasEnable = (desc.Rasterizer.DepthBias != 0 || desc.Rasterizer.SlopeScaledDepthBias != 0) ? VK_TRUE : VK_FALSE;
+		mRasterState.depthBiasConstantFactor = (float)desc.Rasterizer.DepthBias;
 		mRasterState.depthBiasClamp = desc.Rasterizer.DepthBiasClamp;
 		mRasterState.depthBiasSlopeFactor = desc.Rasterizer.SlopeScaledDepthBias;
 		mRasterState.rasterizerDiscardEnable = VK_FALSE;

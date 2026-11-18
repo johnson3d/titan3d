@@ -27,8 +27,7 @@ namespace EngineNS.Thread
         private System.Threading.AutoResetEvent Waiter;
         private int mCount = -1;
         private bool ContinueEnqueued = false;
-        public object Tag1;
-        public object Tag2;
+        public object Tag;
         public bool IsValid
         {
             get => mCount > 0;
@@ -128,10 +127,12 @@ namespace EngineNS.Thread
         public bool IsAlloc { get; set; }
         public TtSemaphore Semaphore;
         public System.Threading.AutoResetEvent WaitEvent;
+        public object Tag;
         public void Reset(int num)
         {
             Semaphore.Reset(num);
             WaitEvent.Reset();
+            Tag = 0;
         }
         public void Wait(bool bFast)
         {

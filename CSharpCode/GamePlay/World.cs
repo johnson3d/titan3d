@@ -293,6 +293,7 @@ namespace EngineNS.GamePlay
         }
         public virtual void GatherVisibleMeshes(TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             rp.ClearVisibles();
             if (rp.IsUseECS)
             {
@@ -310,6 +311,7 @@ namespace EngineNS.GamePlay
         }
         public virtual void GatherVisibleMeshes(TtVisParameter rp, TtNode rootNode)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             rootNode.IterateNodes(static (node, arg) =>
             {
                 var rp = arg as TtVisParameter;

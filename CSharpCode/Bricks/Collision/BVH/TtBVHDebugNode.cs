@@ -631,6 +631,7 @@ namespace EngineNS.Bricks.Collision.BVH
 
         public override void OnGatherVisibleMeshes_OnRenderThread(GamePlay.TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             base.OnGatherVisibleMeshes_OnRenderThread(rp);
             if (mBvh == null || mBvh.ProxyCount == 0)
                 return;

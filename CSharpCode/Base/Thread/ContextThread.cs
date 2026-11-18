@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.ECS;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
@@ -603,18 +604,40 @@ namespace EngineNS.Thread
 
         public virtual bool IsThisThread()
         {
-            if (this.ThreadId == System.Threading.Thread.CurrentThread.ManagedThreadId)
-                return true;
-            //if (WaitingThread!=null)
-            //{
-            //    if (TtContextThread.CurrentContext.ThreadId == WaitingThread.ThreadId)
-            //    {
-            //        return true;
-            //    }
-            //}
-            return false;
+            return this.ThreadId == System.Threading.Thread.CurrentThread.ManagedThreadId;
+            //if (this.ThreadId == System.Threading.Thread.CurrentThread.ManagedThreadId)
+            //    return true;
+            ////if (WaitingThread!=null)
+            ////{
+            ////    if (TtContextThread.CurrentContext.ThreadId == WaitingThread.ThreadId)
+            ////    {
+            ////        return true;
+            ////    }
+            ////}
+            //return false;
         }
-
+        public virtual TtContextThread NestThread
+        {
+            get
+            {
+                return this;
+            }
+        }
+        public static void CheckOnRenderThread()
+        {
+#if DEBUG
+            var engine = TtEngine.Instance;
+            // 未启用渲染线程时 QueueRenderAction 在调用线程就地执行, 不做线程归属检查
+            if (engine == null || engine.Config?.UseRenderThread != true)
+                return;
+            // 非引擎线程 CurrentContext 为 null; Pool 线程不在 ParallelFor 内时 NestThread 为 null
+            var nest = TtContextThread.CurrentContext?.NestThread;
+            if (nest == null || nest.ThreadId != engine.ThreadRender.ThreadId)
+            {
+                System.Diagnostics.Debug.Fail($"CheckOnRenderThread failed: current={TtContextThread.CurrentContext?.Name ?? System.Threading.Thread.CurrentThread.Name}, nest={nest?.Name}");
+            }
+#endif
+        }
         #region Payload
         #endregion
     }

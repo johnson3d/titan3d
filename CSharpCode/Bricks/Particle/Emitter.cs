@@ -142,11 +142,16 @@ namespace EngineNS.Bricks.Particle
             CoreSDK.DisposeObject(ref CurAlivesBuffer);
             CoreSDK.DisposeObject(ref BackendAlivesBuffer);
 
-            CoreSDK.DisposeObject(ref DispatchArgBuffer);
-            CoreSDK.DisposeObject(ref DispatchArgUav);
+            for (int i = 0; i < DispatchArgBuffers.Length; i++)
+            {
+                CoreSDK.DisposeObject(ref DispatchArgUavs[i]);
+                CoreSDK.DisposeObject(ref DispatchArgIavs[i]);
+                CoreSDK.DisposeObject(ref DispatchArgBuffers[i]);
+            }
 
-            CoreSDK.DisposeObject(ref DrawArgBuffer);
             CoreSDK.DisposeObject(ref DrawArgUav);
+            CoreSDK.DisposeObject(ref DrawArgIav);
+            CoreSDK.DisposeObject(ref DrawArgBuffer);
         }
         
         public Graphics.Pipeline.TtGpuBuffer<FParticleEmitter> SystemDataBuffer = new Graphics.Pipeline.TtGpuBuffer<FParticleEmitter>();
@@ -155,11 +160,18 @@ namespace EngineNS.Bricks.Particle
         public Graphics.Pipeline.TtGpuBuffer<uint> CurAlivesBuffer = new Graphics.Pipeline.TtGpuBuffer<uint>();
         public Graphics.Pipeline.TtGpuBuffer<uint> BackendAlivesBuffer = new Graphics.Pipeline.TtGpuBuffer<uint>();
         
-        public NxRHI.TtBuffer DispatchArgBuffer;
-        public NxRHI.TtUaView DispatchArgUav;
+        // self-dispatch 的 DispatchArg 用 ping-pong: 本次 indirect dispatch 只读 [DispatchArgIndex] (GRS_Indirect),
+        // shader 只写另一份 (GRS_Uav) 作为下一次的参数, 避免同一 buffer 在一次 dispatch 中既是 INDIRECT 又是 UAV
+        public NxRHI.TtBuffer[] DispatchArgBuffers = new NxRHI.TtBuffer[2];
+        public NxRHI.TtUaView[] DispatchArgUavs = new NxRHI.TtUaView[2];
+        public NxRHI.TtIndirectArgBufferView[] DispatchArgIavs = new NxRHI.TtIndirectArgBufferView[2];
+        public int DispatchArgIndex = 0;
+        public NxRHI.TtIndirectArgBufferView DispatchArgIav => DispatchArgIavs[DispatchArgIndex];
+        public NxRHI.TtUaView NextDispatchArgUav => DispatchArgUavs[1 - DispatchArgIndex];
 
         public NxRHI.TtBuffer DrawArgBuffer;
         public NxRHI.TtUaView DrawArgUav;
+        public NxRHI.TtIndirectArgBufferView DrawArgIav;
         public unsafe void Initialize(TtEmitter emitter, in FParticleEmitter sysData) 
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
@@ -223,11 +235,18 @@ namespace EngineNS.Bricks.Particle
                 initData.RowPitch = (uint)sizeof(NxRHI.FIndirectDispatchArgument);
 
                 bfDesc.InitData = &initData;
-                DispatchArgBuffer = rc.CreateBuffer(in bfDesc);
+                // 两份都填初值: 首帧读 [0], 之后每次 dispatch 都会完整写出下一份
+                for (int i = 0; i < DispatchArgBuffers.Length; i++)
+                {
+                    DispatchArgBuffers[i] = rc.CreateBuffer(in bfDesc);
+                    DispatchArgBuffers[i].SetDebugName($"ParticleDispatchArg{i}");
+                    DispatchArgIavs[i] = rc.CreateIAV(DispatchArgBuffers[i]);
+                }
                 
                 bfDesc.Size = (uint)sizeof(NxRHI.FIndirectDrawIndexArgument) * NumOfArgument;
                 bfDesc.InitData = (NxRHI.FMappedSubResource*)IntPtr.Zero.ToPointer();
                 DrawArgBuffer = rc.CreateBuffer(in bfDesc);
+                DrawArgIav = rc.CreateIAV(DrawArgBuffer);
 
                 NxRHI.FUavDesc uavDesc = new NxRHI.FUavDesc();
                 uavDesc.SetBuffer(true);
@@ -236,7 +255,10 @@ namespace EngineNS.Bricks.Particle
                 uavDesc.Buffer.FirstElement = 0;
                 uavDesc.Buffer.NumElements = (uint)(sizeof(NxRHI.FIndirectDispatchArgument) / sizeof(int)) * NumOfArgument;
                 uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
-                DispatchArgUav = rc.CreateUAV(DispatchArgBuffer, in uavDesc);
+                for (int i = 0; i < DispatchArgBuffers.Length; i++)
+                {
+                    DispatchArgUavs[i] = rc.CreateUAV(DispatchArgBuffers[i], in uavDesc);
+                }
                 uavDesc.Buffer.NumElements = (uint)(sizeof(NxRHI.FIndirectDrawIndexArgument) / sizeof(int)) * NumOfArgument;
                 DrawArgUav = rc.CreateUAV(DrawArgBuffer, in uavDesc);                
             }
@@ -244,6 +266,7 @@ namespace EngineNS.Bricks.Particle
         public void SwapBuffer()
         {
             MathHelper.Swap(ref CurAlivesBuffer, ref BackendAlivesBuffer);
+            DispatchArgIndex = 1 - DispatchArgIndex;
         }
     }
 

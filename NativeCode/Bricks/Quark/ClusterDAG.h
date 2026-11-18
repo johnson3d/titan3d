@@ -129,6 +129,13 @@ public:
 	UINT MinGroupSize = 8;
 	UINT MaxGroupSize = 32;
 	UINT ClusterSize = 128; // Max triangles per cluster (UE Nanite default: 128)
+	// meshopt target error passed to QuarkCluster::Simplify (<= 0: legacy 5% relative tolerance).
+	// Large values (FLT_MAX) always reach the triangle target like Nanite; the error is still recorded.
+	float SimplifyTargetError = 0.0f;
+	// 可选的离线适配器；普通网格仍使用原始 meshopt 路径。
+	std::function<float(QuarkCluster&, UINT, float)> SimplifyOverride;
+	// 可选的取消轮询：每层与每个 group 前检查，返回 true 时 BuildDAG 立即返回（结果不完整，调用方必须丢弃）。
+	std::function<bool()> ShouldCancel;
 
 private:
 	// Internal: Group clusters at the current frontier level

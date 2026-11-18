@@ -260,17 +260,13 @@ struct FAdjacency
 
 	void InsertToExtends(INT32 k, INT32 v)
 	{
-        auto keyIter = Extended.find(k);
-        if (keyIter != Extended.end())
-        {
-            auto values = keyIter->second;
-            for (int i = 0; i < values.size(); i++)
-            {
-				if (values[i] == v)
-					return;
-            }
-			values.push_back(v);
-        }
+		auto& values = Extended[k];
+		for (size_t i = 0; i < values.size(); i++)
+		{
+			if (values[i] == v)
+				return;
+		}
+		values.push_back(v);
 	}
 
 	void	Link( INT32 EdgeIndex0, INT32 EdgeIndex1 )
@@ -303,7 +299,7 @@ struct FAdjacency
 		auto keyIter = Extended.find(EdgeIndex);
 		if (keyIter != Extended.end())
 		{
-			auto values = keyIter->second;
+			const auto& values = keyIter->second;
 			for (UINT i = 0; i < (UINT)values.size(); i++)
 			{
 				Function(EdgeIndex, values[i]);

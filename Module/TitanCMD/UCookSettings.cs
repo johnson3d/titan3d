@@ -65,8 +65,10 @@ namespace ProjectCooker
         public const string Param_WorkerIdleSec = "WorkerIdleSec=";
         /// <summary>CookServer: 单进程跑多少个 job 后在批次边界主动退出</summary>
         public const string Param_WorkerMaxJobs = "WorkerMaxJobs=";
-        /// <summary>CookServer: 单 job 超时秒数, <=0 不限</summary>
+        /// <summary>CookServer: 单 job 总时长上限秒数, <=0 不限 (默认)</summary>
         public const string Param_WorkerJobTimeout = "WorkerJobTimeout=";
+        /// <summary>CookServer: job 连续多少秒无进度上报判定卡死, <=0 禁用</summary>
+        public const string Param_WorkerStallSec = "WorkerStallSec=";
         /// <summary>CookServer: 心跳间隔秒数</summary>
         public const string Param_WorkerBeatSec = "WorkerBeatSec=";
 

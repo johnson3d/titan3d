@@ -461,7 +461,7 @@ namespace EngineNS.NxRHI
 
         public void SetDebugName(string name)
         {
-            mCoreObject.NativeSuper.SetDebugName(name);
+            mCoreObject.NativeSuper.NativeSuper.SetDebugName(name);
         }
 
         public class ImportAttribute : IO.IAssetCreateAttribute
@@ -1396,7 +1396,7 @@ namespace EngineNS.NxRHI
             set
             {
                 mAssetName = value;
-                mCoreObject.NativeSuper.SetDebugName(value.ToString());
+                mCoreObject.NativeSuper.NativeSuper.SetDebugName(value.ToString());
                 var tex = mCoreObject.GetBufferAsTexture();
                 if (tex.IsValidPointer)
                 {
@@ -3781,7 +3781,7 @@ namespace EngineNS.NxRHI
         public TtRenderTargetView(IRenderTargetView ptr)
         {
             mCoreObject = ptr;
-            mCoreObject.NativeSuper.AddRef();
+            mCoreObject.NativeSuper.NativeSuper.AddRef();
         }
         public TtRenderTargetView()
         {

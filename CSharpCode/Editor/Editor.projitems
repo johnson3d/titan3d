@@ -35,6 +35,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidToolchainDocument.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidContentSpec.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidBuildRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Cook\CookWorker.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Cook\CookManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\CookForms.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidBuildCommandLine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidBuildLogParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidBuildSession.cs" />

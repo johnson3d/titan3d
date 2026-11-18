@@ -34,6 +34,12 @@ namespace NxRHI
 	AutoRef<VKCmdRecorder> VKThreadCmdBufferManager::Alloc(VKCommandList* cmdlist)
 	{
 		VAutoVSLLock lk(mLocker);
+		// 本线程是 mCmdPool 的唯一使用者, 在这里释放 TickRecycle 裁掉的 recorder
+		for (auto& i : PendingFrees)
+		{
+			i->FinalCleanup(this);
+		}
+		PendingFrees.clear();
 		if (CmdAllocators.size() == 0)
 		{
 			for (int i = 0; i < 10; i++)
@@ -123,8 +129,8 @@ namespace NxRHI
 			auto rmv = (CmdAllocators.size() - nRecycle * 2);
 			for (size_t i = 0; i < rmv; i++)
 			{
-				auto cmd = CmdAllocators.front();
-				cmd->FinalCleanup(this);
+				// 此处可能在主线程, 不能调 FinalCleanup 碰其他线程的 mCmdPool, 交给 pool 所属线程的 Alloc
+				PendingFrees.push_back(CmdAllocators.front());
 				CmdAllocators.pop();
 			}
 		}
@@ -149,6 +155,11 @@ namespace NxRHI
 				i++;
 			}
 		}
+		for (auto& i : PendingFrees)
+		{
+			i->FinalCleanup(this);
+		}
+		PendingFrees.clear();
 		//ASSERT(Recycles.size() == 0);
 		while (CmdAllocators.size() > 0)
 		{
@@ -173,6 +184,7 @@ namespace NxRHI
 			mThreadManager = new VKThreadCmdBufferManager();
 			mThreadManager->Initialize(mDevice);
 			mThreadManager->mThreadStaticAddr = &mThreadManager;
+			VAutoVSLLock lk(mManagersLocker);
 			mAllManagers.push_back(mThreadManager);
 		}
 		return mThreadManager->Alloc(cmdlist);
@@ -183,6 +195,7 @@ namespace NxRHI
 	}
 	void VKCmdBufferManager::TickRecycle()
 	{
+		VAutoVSLLock lk(mManagersLocker);
 		for (auto i : mAllManagers)
 		{
 			i->TickRecycle();
@@ -190,6 +203,7 @@ namespace NxRHI
 	}
 	bool VKCmdBufferManager::FinalCleanup()
 	{
+		VAutoVSLLock lk(mManagersLocker);
 		int remain = 0;
 		for (auto i : mAllManagers)
 		{
@@ -375,6 +389,8 @@ namespace NxRHI
 	bool VKCommandList::BeginRendering(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
 	{
 		ASSERT(mCurrentFrameBuffers == nullptr);
+		// pass 外压入未 flush 的 draw 会排在本 pass BeginBarriers 之前, 其转换却被收进 BeginBarriers
+		ASSERT(GetCmdRecorder()->HasPendingShaderDraws() == false);
 		mCurrentFrameBuffers = fb;
 
 		AutoRef<VKCmdBeginRenderingDraw>	mBeginRenderingDraw;
@@ -396,14 +412,13 @@ namespace NxRHI
 		pass->BeginBarriers->OnBeginPass(this);
 		for (UINT i = 0; i < fb->mRenderPass->Desc.NumOfMRT; i++)
 		{
-			UINT flags = ((UINT)passClears->ClearFlags) & (1 << (i + 2));
 			VkRenderingAttachmentInfo colorAttachment = {};
 			colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
 			auto rtv = fb->mRenderTargets[i].UnsafeConvertTo<VKRenderTargetView>();
-			mCurRtvs[i] = std::make_pair(rtv->GpuResource->GpuState, rtv);
+			mCurRtvs[i] = std::make_pair(rtv->GpuResource->GetGpuResourceState(), rtv);
 			if (rtv != nullptr)
 			{
-				FTransitionScope::TryAutoTransition(this, rtv->GpuResource, EGpuResourceState::GRS_RenderTarget, false);
+				FTransitionScope::TryAutoTransition(this, rtv, false);
 				colorAttachment.imageView = rtv->mView->mImageView;
 			}
 			else
@@ -411,14 +426,8 @@ namespace NxRHI
 				colorAttachment.imageView = nullptr;
 			}
 			colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-			if (flags == 0)
-			{
-				colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-			}
-			else
-			{
-				colorAttachment.loadOp = FrameBufferLoadAction2VK(fb->mRenderPass->Desc.AttachmentMRTs[i].LoadAction);
-			}
+			// loadOp 只由 RenderPass Desc 决定, ClearFlags 不参与: LOAD/CLEAR/DONT_CARE 语义与 VKFrameBuffers 传统路径一致
+			colorAttachment.loadOp = FrameBufferLoadAction2VK(fb->mRenderPass->Desc.AttachmentMRTs[i].LoadAction);
 			
 			colorAttachment.storeOp = FrameBufferStoreAction2VK(fb->mRenderPass->Desc.AttachmentMRTs[i].StoreAction);
 			memcpy(colorAttachment.clearValue.color.float32, &passClears->ClearColor[i], sizeof(float)*4);
@@ -435,29 +444,15 @@ namespace NxRHI
 			auto dsv = fb->mDepthStencilView.UnsafeConvertTo<VKDepthStencilView>();
 			if (dsv != nullptr)
 			{
-				FTransitionScope::TryAutoTransition(this, dsv->GpuResource, EGpuResourceState::GRS_DepthStencil, false);
+				FTransitionScope::TryAutoTransition(this, dsv, false);
 				depthAttachment.imageView = dsv->mView->mImageView;
 			}
 			depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-			if (passClears->ClearFlags & (ERenderPassClearFlags::CLEAR_DEPTH))
-			{
-				depthAttachment.loadOp = FrameBufferLoadAction2VK(fb->mRenderPass->Desc.AttachmentDepthStencil.LoadAction);
-			}
-			else
-			{
-				depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-			}
+			depthAttachment.loadOp = FrameBufferLoadAction2VK(fb->mRenderPass->Desc.AttachmentDepthStencil.LoadAction);
 			depthAttachment.storeOp = FrameBufferStoreAction2VK(fb->mRenderPass->Desc.AttachmentDepthStencil.StoreAction);
 
 			stencilAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-			if (passClears->ClearFlags & (ERenderPassClearFlags::CLEAR_STENCIL))
-			{
-				stencilAttachment.loadOp = FrameBufferLoadAction2VK(fb->mRenderPass->Desc.AttachmentDepthStencil.LoadAction);
-			}
-			else
-			{
-				stencilAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-			}
+			stencilAttachment.loadOp = FrameBufferLoadAction2VK(fb->mRenderPass->Desc.AttachmentDepthStencil.StencilLoadAction);
 			stencilAttachment.storeOp = FrameBufferStoreAction2VK(fb->mRenderPass->Desc.AttachmentDepthStencil.StoreAction);
 		}
 		else
@@ -531,6 +526,7 @@ namespace NxRHI
 		{
 			ASSERT(mCmdListState == ECmdListState::Recording);
 			ASSERT(mCurrentFrameBuffers == nullptr);
+			ASSERT(GetCmdRecorder()->HasPendingShaderDraws() == false);
 			this->BeginEvent(name);
 			mDebugName = name;
 			mCurRtvs.clear();
@@ -544,10 +540,10 @@ namespace NxRHI
 			for (UINT i = 0; i < fb->mRenderPass->Desc.NumOfMRT; i++)
 			{
 				auto rtv = fb->mRenderTargets[i].UnsafeConvertTo<VKRenderTargetView>();
-				mCurRtvs[i] = std::make_pair(rtv->GpuResource->GpuState, rtv);
+				mCurRtvs[i] = std::make_pair(rtv->GpuResource->GetGpuResourceState(), rtv);
 				if (rtv != nullptr)
 				{
-					FTransitionScope::TryAutoTransition(this, rtv->GpuResource, EGpuResourceState::GRS_RenderTarget, false);
+					FTransitionScope::TryAutoTransition(this, rtv, false);
 				}
 			}
 			if (fb->mDepthStencilView != nullptr)
@@ -555,7 +551,7 @@ namespace NxRHI
 				auto dsv = fb->mDepthStencilView.UnsafeConvertTo<VKDepthStencilView>();
 				if (dsv != nullptr)
 				{
-					FTransitionScope::TryAutoTransition(this, dsv->GpuResource, EGpuResourceState::GRS_DepthStencil, false);
+					FTransitionScope::TryAutoTransition(this, dsv, false);
 				}
 			}
 			
@@ -963,7 +959,7 @@ namespace NxRHI
 			return;
 		}
 		GetCmdRecorder()->UseResource(indirectArg);
-		FTransitionScope::TryAutoTransition(this, indirectArg, EGpuResourceState::GRS_UavIndirect, false);
+		FTransitionScope::TryAutoTransition(this, indirectArg, EGpuResourceState::GRS_Indirect, false);
 		device->fn_vkCmdDrawMeshTasksIndirectEXT(GetVKCmdRecorder()->mCommandBuffer, (VkBuffer)indirectArg->GetHWBuffer(), indirectArgOffset, 1, sizeof(VkDrawMeshTasksIndirectCommandEXT));
 	}
 	VkAccessFlags BarrierAccessToVK(EBarrierAccess flags)
@@ -1082,7 +1078,7 @@ namespace NxRHI
 			outAccessFlags = (VkAccessFlagBits)(VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT);
 			outPipelineStages = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
 			return;
-		case EngineNS::NxRHI::GRS_UavIndirect:
+		case EngineNS::NxRHI::GRS_Indirect:
 			outAccessFlags = (VkAccessFlagBits)(VkAccessFlagBits::VK_ACCESS_INDIRECT_COMMAND_READ_BIT);
 			outPipelineStages = VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT;
 			return;
@@ -1136,7 +1132,7 @@ namespace NxRHI
 			outAccessFlags = (VK_ACCESS_2_SHADER_READ_BIT | VK_ACCESS_2_SHADER_WRITE_BIT);
 			outPipelineStages = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
 			return;
-		case EngineNS::NxRHI::GRS_UavIndirect:
+		case EngineNS::NxRHI::GRS_Indirect:
 			outAccessFlags = (VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT);
 			outPipelineStages = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
 			return;
@@ -1193,12 +1189,14 @@ namespace NxRHI
 	}
 	void VKCommandList::SetBufferBarrier(IBuffer* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess)
 	{
+		// barrier 也引用 GPU 资源, 必须由 recorder 持有直到提交 fence 完成
+		GetCmdRecorder()->UseResource(pResource);
 		VkBufferMemoryBarrier barrier{};
 		barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
 		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		barrier.buffer = (VkBuffer)pResource->GetHWBuffer();
-		barrier.offset = 0;
+		barrier.offset = ((VKBuffer*)pResource)->mBufferOffset;
 		barrier.size = pResource->Desc.Size;
 
 		VkPipelineStageFlagBits srcStages, dstStages;
@@ -1215,8 +1213,10 @@ namespace NxRHI
 			0, nullptr
 		);
 	}
-	void VKCommandList::SetTextureBarrier(ITexture* pResource, UINT subResource, UINT levelCount, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess)
+	void VKCommandList::SetTextureBarrier(ITexture* pResource, const FSubresourceRange& range, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess)
 	{
+		// 布局转换单独提交时也必须保持图像存活, 不能只依赖 draw/copy 的引用
+		GetCmdRecorder()->UseResource(pResource);
 		auto oldLayout = GpuStateToVKImageLayout(srcAccess);
 		auto newLayout = GpuStateToVKImageLayout(dstAccess);
 		{
@@ -1230,28 +1230,18 @@ namespace NxRHI
 				barrier2.image = (VkImage)pResource->GetHWBuffer();
 				UINT mipLevels = pResource->Desc.MipLevels > 0 ? pResource->Desc.MipLevels : 1;
 				UINT arraySize = pResource->Desc.ArraySize > 0 ? pResource->Desc.ArraySize : 1;
-				if (subResource == 0 && levelCount == mipLevels)
-				{
-					//All subresources, keep the same semantic as DX12CommandList::SetTextureBarrier
-					barrier2.subresourceRange.baseArrayLayer = 0;
-					barrier2.subresourceRange.layerCount = arraySize;
-					barrier2.subresourceRange.baseMipLevel = 0;
-					barrier2.subresourceRange.levelCount = mipLevels;
-				}
-				else
-				{
-					//subresource = arrayLayer * mipLevels + mipLevel
-					UINT baseMip = subResource % mipLevels;
-					barrier2.subresourceRange.baseArrayLayer = subResource / mipLevels;
-					barrier2.subresourceRange.layerCount = 1;
-					barrier2.subresourceRange.baseMipLevel = baseMip;
-					barrier2.subresourceRange.levelCount = std::min(levelCount, mipLevels - baseMip);
-				}
+				//Remaining 按纹理实际 mip / layer 数解析, 整资源时与 DX12 ALL_SUBRESOURCES 语义一致
+				barrier2.subresourceRange.baseMipLevel = range.BaseMip;
+				barrier2.subresourceRange.levelCount = range.GetMipEnd(mipLevels) - range.BaseMip;
+				barrier2.subresourceRange.baseArrayLayer = range.BaseLayer;
+				barrier2.subresourceRange.layerCount = range.GetLayerEnd(arraySize) - range.BaseLayer;
 
-				if (pResource->Desc.BindFlags & EBufferType::BFT_SRV)
+				//没有启动separateDepthStencilLayouts 特性，那么就depth,stencil是必须同时启动 
+				barrier2.subresourceRange.aspectMask = FormatToVKImageAspectFlags(pResource->Desc.Format, true, true);
+				/*if (pResource->Desc.BindFlags & EBufferType::BFT_SRV)
 					barrier2.subresourceRange.aspectMask = FormatToVKImageAspectFlags(pResource->Desc.Format, true, false);
 				else
-					barrier2.subresourceRange.aspectMask = FormatToVKImageAspectFlags(pResource->Desc.Format, true, true);
+					barrier2.subresourceRange.aspectMask = FormatToVKImageAspectFlags(pResource->Desc.Format, true, true);*/
 
 				GpuResourceStateToVKAccessAndPipeline2(srcAccess, barrier2.srcAccessMask, barrier2.srcStageMask);
 				GpuResourceStateToVKAccessAndPipeline2(dstAccess, barrier2.dstAccessMask, barrier2.dstStageMask);
@@ -1309,8 +1299,9 @@ namespace NxRHI
 			Size = std::min(target->Desc.Size - DstOffset, src->Desc.Size - SrcOffset);
 		}
 		VkBufferCopy copyRegion{};
-		copyRegion.srcOffset = SrcOffset;
-		copyRegion.dstOffset = DstOffset;
+		// 池化 staging 共用一个 VkBuffer, 须加上各自的 mBufferOffset
+		copyRegion.srcOffset = ((VKBuffer*)src)->mBufferOffset + SrcOffset;
+		copyRegion.dstOffset = ((VKBuffer*)target)->mBufferOffset + DstOffset;
 		copyRegion.size = Size;
 
 		vkCmdCopyBuffer(GetVKCmdRecorder()->mCommandBuffer, (VkBuffer)src->GetHWBuffer(), (VkBuffer)target->GetHWBuffer(), 1, &copyRegion);
@@ -1351,7 +1342,7 @@ namespace NxRHI
 		region.dstSubresource.mipLevel = tarSubRes % tarMipLevels;
 		region.dstOffset = { (int)DstX, (int)DstY, (int)DstZ };
 
-		vkCmdCopyImage(GetVKCmdRecorder()->mCommandBuffer, (VkImage)source->GetHWBuffer(), ((VKTexture*)source)->GetImageLayout(), (VkImage)target->GetHWBuffer(), ((VKTexture*)target)->GetImageLayout(), 1, &region);
+		vkCmdCopyImage(GetVKCmdRecorder()->mCommandBuffer, (VkImage)source->GetHWBuffer(), ((VKTexture*)source)->GetImageLayout(srcSubRes), (VkImage)target->GetHWBuffer(), ((VKTexture*)target)->GetImageLayout(tarSubRes), 1, &region);
 	}
 	void VKCommandList::CopyBufferToTexture(ITexture* target, UINT subRes, IBuffer* src, const FSubResourceFootPrint* footprint)
 	{
@@ -1363,7 +1354,7 @@ namespace NxRHI
 		VkBufferImageCopy region{};
 		region.imageSubresource.baseArrayLayer = (UINT)subRes / target->Desc.MipLevels;
 		region.imageSubresource.mipLevel = (UINT)subRes % target->Desc.MipLevels;
-		region.bufferOffset = 0;
+		region.bufferOffset = ((VKBuffer*)src)->mBufferOffset;
 		auto pixelWidth = GetPixelByteWidth(footprint->Format);
 		if (pixelWidth > 0)
 			region.bufferRowLength = footprint->RowPitch / pixelWidth;
@@ -1388,7 +1379,7 @@ namespace NxRHI
 		VkBufferImageCopy region{};
 		region.imageSubresource.baseArrayLayer = (UINT)subRes / source->Desc.MipLevels;
 		region.imageSubresource.mipLevel = (UINT)subRes % source->Desc.MipLevels;
-		region.bufferOffset = 0;
+		region.bufferOffset = ((VKBuffer*)target)->mBufferOffset;
 		auto pixelWidth = GetPixelByteWidth(footprint->Format);
 		if (pixelWidth > 0)
 			region.bufferRowLength = footprint->RowPitch / pixelWidth;
@@ -1404,7 +1395,7 @@ namespace NxRHI
 		/*VkMemoryRequirements memRequirements;
 		auto device = (VKGpuDevice*)mDevice.GetPtr();
 		vkGetImageMemoryRequirements(device->mDevice, vkSource->mImage, &memRequirements);*/
-		vkCmdCopyImageToBuffer(GetVKCmdRecorder()->mCommandBuffer, vkSource->mImage, vkSource->GetImageLayout(), (VkBuffer)target->GetHWBuffer(), 1, &region);
+		vkCmdCopyImageToBuffer(GetVKCmdRecorder()->mCommandBuffer, vkSource->mImage, vkSource->GetImageLayout(subRes), (VkBuffer)target->GetHWBuffer(), 1, &region);
 	}
 
 	void VKCommandList::WriteBufferUINT32(UINT Count, FBufferWriter* BufferWriters)

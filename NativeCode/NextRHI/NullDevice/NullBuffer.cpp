@@ -72,7 +72,7 @@ namespace NxRHI
 	bool NullTexture::Init(NullGpuDevice* device, const FTextureDesc* desc)
 	{
 		Desc = *desc;
-		
+		InitLayoutTracker();
 		return true;
 	}
 	bool NullTexture::Map(UINT subRes, FMappedSubResource* res, bool forRead)
@@ -87,7 +87,7 @@ namespace NxRHI
 	{
 		
 	}
-	IGpuBufferData* NullTexture::CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint)
+	IGpuBufferDataBase* NullTexture::CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint)
 	{
 		return nullptr;
 	}
@@ -176,13 +176,13 @@ namespace NxRHI
 		
 	}
 
-	bool NullSrView::Init(NullGpuDevice* device, IGpuBufferData* pBuffer, const FSrvDesc* desc)
+	bool NullSrView::Init(NullGpuDevice* device, IGpuBufferDataBase* pBuffer, const FSrvDesc* desc)
 	{
 		Desc = *desc;
 		
 		return true;
 	}
-	bool NullSrView::UpdateBuffer(IGpuDevice* device, IGpuBufferData* pBuffer)
+	bool NullSrView::UpdateBuffer(IGpuDevice* device, IGpuBufferDataBase* pBuffer)
 	{
 		return true;
 	}

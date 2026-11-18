@@ -1140,6 +1140,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public virtual void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             rp.AddVisibleNode(this);
         }
         public virtual void GatherFollowVisibleMeshes(TtWorld.TtVisParameter rp)

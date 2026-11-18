@@ -134,9 +134,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         // 幂等: ActiveRVT 内部会对 UniqueTexID 去重, 同一 level 的多个 patch 重复调用无副作用。
         public void ActiveRVTs_OnRenderThread()
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             var terrain = TerrainNode.Terrain;
             terrain.HeightmapRVT.ActiveRVT(Level.HeightMapSRV);
-            terrain.HeightmapRVT.ActiveRVT(Level.WaterHMapSRV);
+            terrain.HeightmapRVT.ActiveRVT(Level.WaterHMapSRV); 
             terrain.NormalmapRVT.ActiveRVT(Level.NormalMapSRV);
             terrain.MaterialIdRVT.ActiveRVT(Level.MaterialIdMapSRV);
         }
@@ -162,6 +163,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// <summary>发布点: 逻辑线程把当前 LOD (含哨兵钳制) 快照给渲染线程</summary>
         internal void PublishRenderLOD_OnRenderThread()
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             int lod = mLogicLOD;
             if (TerrainMesh != null && lod >= TerrainMesh.Length)
             {
@@ -445,7 +447,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 var mMesh = TerrainMesh[i];
                 if (mMesh == null)
-                    return;
+                    continue;
 
                 //var saved = mMesh.MdfQueue.MdfDatas;
                 //Rtti.TtTypeDesc mdfQueueType;
@@ -526,6 +528,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         public void OnGatherVisibleMeshes_OnRenderThread(GamePlay.TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             // 读渲染侧快照; 钳制保留作防御 (新 patch 首帧等), 不再依赖它挡哨兵
             int lod = RenderLOD;
             if (lod >= TerrainMesh.Length)

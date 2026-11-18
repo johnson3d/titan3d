@@ -111,9 +111,9 @@ namespace NxRHI
 			else
 				pDrawDesc = &AtomDesc->AtomDesc;
 			ASSERT(pDrawDesc);
-			if (IndirectDrawArgsBuffer)
+			if (IndirectDrawArgsView)
 			{
-				cmdlist->IndirectDrawIndexed(pDrawDesc->PrimitiveType, IndirectDrawArgsBuffer, IndirectDrawOffsetForArgs);
+				cmdlist->IndirectDrawIndexed(pDrawDesc->PrimitiveType, IndirectDrawArgsView->GetBuffer(), IndirectDrawOffsetForArgs);
 			}
 			else
 			{

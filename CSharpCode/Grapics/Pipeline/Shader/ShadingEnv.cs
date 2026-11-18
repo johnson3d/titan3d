@@ -397,11 +397,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             this.OnDrawCall(drawcall, policy);
         }
-        public void SetDrawcallIndirectDispatch(object tagObject, TtRenderPolicy policy, NxRHI.TtComputeDraw drawcall, NxRHI.TtBuffer indirectBuffer)
+        public void SetDrawcallIndirectDispatch(object tagObject, TtRenderPolicy policy, NxRHI.TtComputeDraw drawcall, NxRHI.TtIndirectArgBufferView indirectView)
         {
             drawcall.TagObject = tagObject;
             drawcall.BindShaderEffect(CurrentEffect);
-            drawcall.BindIndirectDispatchArgsBuffer(indirectBuffer);
+            drawcall.BindIndirectDispatchArgsView(indirectView);
 
             this.OnDrawCall(drawcall, policy);
         }

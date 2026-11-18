@@ -128,6 +128,7 @@ namespace EngineNS.GamePlay.Scene
         // 纯控制器节点, 不产生可见 mesh
         public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
         }
 
         public override bool OnTickLogic(TtNodeTickParameters args)

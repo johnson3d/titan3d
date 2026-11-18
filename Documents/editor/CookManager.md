@@ -79,7 +79,8 @@
 | `WorkerCount` | —（编辑器侧设置） | 1 | 并行 worker 数；单 worker 内 job 严格串行 |
 | `IdleShutdownSec` | `WorkerIdleSec=` | 300 | 空闲超时后优雅退出（队列空且无在飞 job 才退），下次提交再拉起 |
 | `MaxJobsPerWorker` | `WorkerMaxJobs=` | 200 | 达到即在**批次边界**优雅重启，防长跑导致的内存增长与状态漂移 |
-| `JobTimeoutSec` | `WorkerJobTimeout=` | 按类型，Scene 1200 | 与 `TtTerrainNode.CookTerrainAsync(bakeTimeoutMs: 1200000)` 的既有超时对齐；判活依据是心跳而非墙钟 |
+| `JobTimeoutSec` | `WorkerJobTimeout=` | 0（不限） | 可选的单 job 总时长上限；大地形全量 cook 可以合法地跑很久，不再用墙钟判死 |
+| `StallSec` | `WorkerStallSec=` | 600 | 判死依据：job 连续这么久没有 stage/progress/artifact 上报即按超时取消。地形 PGC 在 AsyncIO、DAG 在 TPools 执行，worker 主循环不被阻塞，心跳/取消/判死每拍都能进行 |
 | `BeatSec` | `WorkerBeatSec=` | 10 | 心跳间隔；空闲期 `beat` 的 `elapsed` 是开机相对时间，在飞时是 job 相对时间 |
 | `CrashRestartLimit` | —（编辑器侧设置） | 2 | 进程异常退出后自动重启次数上限；超限则该 worker 标 `Disabled` 并在面板报错 |
 | `JobRetryLimit` | —（编辑器侧设置） | 1 | 单 job 因 worker 崩溃失败时的重新入队次数 |
@@ -164,7 +165,7 @@ v1 实现 `TtProcTransport`（`Process` + `RedirectStandardInput/Output/Error` +
 - **去重与互斥**：同一 asset key 同时只允许一个在飞 job；已在队列或已在飞的重复提交合并（面板显示 `merged` 计数）。
 - **黑名单只在入队侧生效**（策略集中一处），worker 只接收具体资产路径。
 - **跳过判定**：新增 `IAssetMeta.NeedsCook(IAsset)` virtual，默认返回 `true`（保守重烘）。已有可包装的先例：`TtTextureCookManager.IsCookValid`（AssetId + 源时间戳）。面板 `Force` 开关绕过它。
-- **取消**：`cancel` 只置位 `TtCookContext.IsCancellationRequested`，cook 实现在资产/level 边界轮询后**正常返回** `Cancelled`；不使用 `task.CancelTask()`。地形侧 bake 的 QEM/重采样循环已有检查点，可直接对接。
+- **取消**：`cancel` 只置位 `TtCookContext.IsCancellationRequested`，cook 实现在资产/level 边界轮询后**正常返回** `Cancelled`；不使用 `task.CancelTask()`。地形侧 DAG bake 由原生 Quark 在每个 group 处轮询取消（`TtQuarkTerrainBaker.RequestCancel`），可直接对接。
 - **前置校验（硬约束）**：cook 以**磁盘上的源文件**为唯一真相。入队时若资产在编辑器里是 dirty（存在未保存内存态），拒绝入队并在面板提示"先保存"。否则会 cook 出比编辑器更旧的数据，且失败是静默的。
 
 ## 共享 cache 目录下的一致性规则
@@ -225,11 +226,11 @@ v1 实现 `TtProcTransport`（`Process` + `RedirectStandardInput/Output/Error` +
 | `CSharpCode\Base\IO\IAssetMeta.cs` | `CookAsset` 契约注释补 `TtCookContext` 用法与禁止事项 | M0 |
 | `CSharpCode\Base\IO\CookContext.cs` | `TtCookArtifactWriter`（原子写 + hash 台账） | M2 |
 | `CSharpCode\Base\IO\IAssetMeta.cs` | 新增 `NeedsCook` virtual（默认 true） | M2 |
-| `CSharpCode\Editor\Cook\CookManager.cs` | `TtCookManager : TtModule<TtEngine>`（队列/批次/状态机/`TickModule` 排空）+ `TtEngine` partial property | M1 |
-| `CSharpCode\Editor\Cook\CookWorker.cs` | `TtCookWorker`、`ITtCookTransport`、`TtProcTransport`、`ITtCookProcessLauncher`/`Host` | M1 |
-| `CSharpCode\Editor\Cook\CookJob.cs` | `TtCookJob` 状态枚举与台账结构 | M1 |
-| `CSharpCode\Editor\Forms\CookManagerPanel.cs` | `TtCookManagerPanel : IRootForm` | M2 |
-| `CSharpCode\Editor\MainEditorApplication.cs` | 菜单入口 + 面板创建与 Initialize（照 `mAndroidBuildPanel` 的三处接法） | M1/M2 |
+| `CSharpCode\Editor\Cook\CookManager.cs` | `TtCookManager : ITickable`（队列/批次/状态机；静态 `Instance` 自注册进 `TickableManager`，`TickLogic` 调 `Pump`） | M1 已交付 |
+| `CSharpCode\Editor\Cook\CookWorker.cs` | `ITtCookWorkerChannel`（单测注入点）、`TtCookWorker`（子进程 + 哨兵分流 + 线程池只入队） | M1 已交付 |
+| `CSharpCode\Editor\Forms\CookForms.cs` | `TtCookManagerPanel`（扫场景/勾选提交/job 列表/通知/worker 日志）+ `TtCookProgressForm`（UE 风格顶部进度浮窗） | M1/M2 已交付 |
+| `CSharpCode\Editor\MainEditorApplication.cs` | `Tools ▸ Cook Manager / Cook Progress` 菜单 + 两窗体 RegRootForm + `Cleanup` 收 worker | M1/M2 已交付 |
+| `Tests\Titan.Tests.Cook\` | 状态机纯逻辑测试（假通道，21 用例）；`run.ps1` 一键编译运行。刻意不进 `EngineAll.sln`（无 ProjectReference，干净构建会先于 Engine.Window） | M1 已交付 |
 | `Module\TitanCMD\Command\CookAsset.cs` | 改薄壳，调 `TtCookDriver` | M0 |
 | `Module\TitanCMD\Command\CookServer.cs` | `TtCookServer : TtCookCommand`，常驻 worker 主循环 | M0 |
 | `Module\TitanCMD\Program.cs` | `case "CookServer"` | M0 |
@@ -261,18 +262,54 @@ TitanCMD 工程是 SDK-style 且未关闭 `EnableDefaultCompileItems`，新增 `
 - 协议行齐全且与引擎人读日志混排不互于干扰；一次性灌入的 stdin（读完即关）不会抢在收件箱排空前退出。
 - 不存在的资产得到 `job.error kind=Asset`；每 job 终态行后的 `ready`/`idle` 分档正确。
 
-跑这一步探出的两个缺陷（已修，但需重新构建 Engine 后才能复验）：
+跑这一步探出的两个缺陷（已修并经真进程复验）：
 
 1. **`TtCookMessage.IsVersionSupported` 被序列化进每一行** —— 它是本地判定用的计算属性，不在线上字段表里；已加 `[JsonIgnore]`。提交侧解析器必须对未知字段宽容，但 worker 不该往线上抹冗余。
 2. **单资产定位判据错** —— 原用“主文件是否存在”，但 `Scene` 类资产的名字是个**目录**（`File.Exists` 恒 `false`），导致合法资产被误报。已改为以 `.ameta` 存在为权威判据，与批量扫描、`AssetMetaManager` 资产表键同源。
 
-待复验项：真资产 `job.done`（含 `artifacts`）、`job.stage` 序列、terrain 长 job 的 `beat` 与取消、`ExeCmd=Cook Asset=` 单资产通路。
+##### M0 收尾实测记录（2026-11-12）
+
+全部复验项已在真实 `TitanCMD.exe ExeCmd=CookServer` 上跑通：
+
+- 上述两个缺陷已消除：协议行不再有 `IsVersionSupported`；`utest/emptyscene.scene` 得到 `job.begin → job.stage "resolve meta" → job.stage "create asset" → job.done`（0.58s）。
+- 真地形场景 `tutorials/terrain/terrain_scene.scene`：`create asset` 2.96s、`job.done`、`stats done=1 failed=0`、`quit reason=manual`、退出码 0。引擎侧 `TerrainNode cook: levels=16, bake pending=0` 说明 16 个 level 缓存全命中、本次未重烘。
+- `beat`：`WorkerBeatSec=1` 下按拍打出 `seq=1 (1.02s)`、`seq=2 (2.12s)`；默认 10s 间隔下秒级 job 无 beat —— 两者均符合设计。
+- `ExeCmd=Cook Asset=` 单资产通路回归通过（与 CookServer 共用同一套 `TtCookDriver`）。
+
+这一轮又修出一个协议层真缺陷（已修）：
+
+**`HandleCancel` 取消未开工 job 时会给出双终态行** —— `matched` 分支先 `WriteLine(job.error Cancel)` 再 `return`，跳过了队列重建，于是被“取消”的 job 仍会照常执行并再发一次 `job.done`；实测输出里 `job.error` 甚至排在 `job.begin` 之前。提交侧按此写状态机会把它当成幽灵 job。现改为先重建 `mPending` 再写终态，保证一个 id 只对应一个终态行。重编后实测：`ready → job.error kind=Cancel "cancelled before start" → stats done=0 failed=0 skipped=1 → quit manual`，全程无 `job.begin`/`job.done`。
+
+##### M0 遗留缺口（需在 M1 前或 M1 一并关掉）
+
+1. **`artifacts` 无生产者** —— `TtCookContext.ReportArtifact` 全仓零调用点，所以上面所有 `job.done` 的 `artifacts` 都是空数组。接线点在 `CSharpCode\Bricks\Terrain\CDLOD\TerrainLevel.cs` 的 `SaveLevelToCache`（`.trlvl`）与 `SaveVgDagFile`（`.trvgdag`）；注意 bake 落盘在 TPools 线程池执行，收集表必须线程安全，且语义定为“只报本次新生成的”（缓存命中不报）。
+2. **`force` 无消费者** —— `TtCookContext.Force` 只存不用，driver 不把它传给 cook，hash 命中就跳过。M1 的“强制重烘”按钮在不接线的情下会静默无效。
+3. **在飞 job 的取消没验到** —— 本轮只能走到“未开工”分支（地形 `bake pending=0`）。而且 `TtTerrainNode.CookTerrainAsync` 并不轮询 `ctx.IsCancellationRequested`，所以目前对不查取消位的资产，cancel 只能保证“终态行只一个”，不能让它提前停下。要真验到得制造一个在烘的 level。
+
+复验脚本：`binaries\temp\cook_smoke.ps1`（参数 `-Assets/-JobTimeout/-BeatSec/-CancelFirst`）、`cook_one.ps1`（单通路对比，判定“卡住”属于 cook 本身还是 worker）、`gate2.ps1`（免构建 csc 语义门）。
 
 ### M1 —— 编辑器队列与本机 worker
 
 `TtCookManager` + `TtCookWorker`，`Tools ▸ Cook All` 提交、跑完、失败自动重启 worker。此阶段**可以先不做面板**，进度写引擎日志即可。
 
 验收：提交 50 个 job；期间编辑器主循环帧率无可测下降；杀掉 worker 进程 → 在飞 job 标 `Crash`、自动重试、批次最终状态正确；关闭 Cook 面板后进度继续推进（这是与 AndroidBuild 面板行为的关键差异）。
+
+#### M1 实现要点与单测记录（2026-11-12）
+
+实现与上文设想的差异：驱动用 `ITickable` 而非 `TtModule`（后者默认 `FullStyles` 会让 cook worker 进程也 tick 它，且要改 `Engine.cs`）；传输抽象只留一个 `ITtCookWorkerChannel`。第一版只提交场景（`*.scene.ameta`，`AssetType=Scene`）。
+
+调度规则（均有用例锁定）：
+
+- 节流窗口 128 条未确认 add；`busy` 退回 Queued **并暂停派发**，直到 `ready`/`idle`。
+- 崩溃归因：只有退出时处于 `Running` 的 job 消耗重试次数（上限 2）；已发未开工/排队中的重投不计数。worker 用 `quit` 行自报原因（非 `fatal`）的退出是计划内的（如 `WorkerMaxJobs` 到点的 `restart`），不算崩溃。
+- 归因不到 job 的异常退出（握手前就崩、native 集不对等）连续 3 次 → 整批判失败，不无限重启；任一 job 了结即清零。协议版本不符直接整批判失败。
+- 退出事件必须等 stdout EOF 且协议队列排空才派发（`Process.Exited` 可能早于最后几行，兜底 2s）；旧 worker 的退出收敛完之前绝不起新 worker。
+- `CancelAll`：未发出的本地判 Cancelled；在飞的每个只发一次 `cancel`，若 worker 先退出则按取消收敛而非重投。`Stop Worker` = CancelAll + `quit manual`，退出后不重启，期间拒绝新提交。
+- 取消计入"已了结"（否则进度到不了 100%、浮窗不自动隐藏）；批次未全部终态时 `Clear Batch` 被拒。
+
+单测：`Tests\Titan.Tests.Cook\run.ps1`，21 用例 / 62 断言全绿。本轮由用例与 review 揭出并修掉的实现缺陷：busy 同帧重投、计划内重启误扣重试（>400 资产的批次会整段误判失败）、握手前崩溃无限重启、退出事件早到导致新 worker 被旧退出事件冲掉、工厂注入时仍校验 exe、面板须等 `hello.Root` 才能扫资产（而 worker 要提交后才起，死锁）、浮窗坐标误用像素当归一化、stage 文本未接线、日志到上限后面板冻结。
+
+尚未真机验证：编辑器内的全链路（菜单→扫描→提交→真 worker→浮窗）、杀 worker 重投、帧率影响。
 
 ### M2 —— 面板与体验
 

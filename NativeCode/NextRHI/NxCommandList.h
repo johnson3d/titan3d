@@ -136,6 +136,8 @@ namespace NxRHI
 		void PushGpuDraw(IRayTracingDraw* draw);
 		void PushGpuDraw(ICopyDraw* draw);
 		void AppendRecorder(ICmdRecorder* recorder);
+		// [mFlushStart, end) 中是否有未 flush 的 Graphic/Compute/RayTracing draw
+		bool HasPendingShaderDraws() const;
 		virtual void ResetGpuDraws();
 		void FlushDraws(ICommandList* cmdlist);
 	};
@@ -193,7 +195,7 @@ namespace NxRHI
 		virtual void IndirectDispatchMesh (IBuffer* indirectArg, UINT indirectArgOffset = 0) = 0;
 		virtual void SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess) = 0;
 		virtual void SetBufferBarrier(IBuffer* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess) = 0;
-		virtual void SetTextureBarrier(ITexture* pResource, UINT subResource, UINT levelCount, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess) = 0;
+		virtual void SetTextureBarrier(ITexture* pResource, const FSubresourceRange& range, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess) = 0;
 
 		/*virtual UINT64 SignalFence(IFence * fence, UINT64 value, IEvent* evt = nullptr) = 0;
 		virtual void WaitGpuFence(IFence * fence, UINT64 value) = 0;*/
@@ -325,14 +327,30 @@ namespace NxRHI
 	struct FTransitionScope
 	{
 	private:
-		bool bNeedTransition;
-		EGpuResourceState SaveState;
-		IGpuBufferData* Resource;
+		struct FSaveSegment
+		{
+			FSubresourceRange Range;
+			EGpuResourceState State;
+		};
+		std::vector<FSaveSegment> SaveSegments;
+		IGpuBufferDataBase* Resource;
 		ICommandList* CmdList;
 	public:
-		FTransitionScope(ICommandList* cmd, IGpuBufferData* resource, EGpuResourceState toState);
+		FTransitionScope(ICommandList* cmd, IGpuBufferDataBase* resource, EGpuResourceState toState)
+			: FTransitionScope(cmd, resource, FSubresourceRange{}, toState)
+		{
+		}
+		// 构造时把 range 转到 toState, 析构时逐段还原
+		FTransitionScope(ICommandList* cmd, IGpuBufferDataBase* resource, const FSubresourceRange& range, EGpuResourceState toState);
 		~FTransitionScope();
-		static EGpuResourceState TryAutoTransition(ICommandList* cmd, IGpuBufferData* resource, EGpuResourceState toState, bool bTryRenderPass);
+		// 返回转换前 range 内的状态, 不一致时为 GRS_Undefine
+		static EGpuResourceState TryAutoTransition(ICommandList* cmd, IGpuBufferDataBase* resource, EGpuResourceState toState, bool bTryRenderPass)
+		{
+			return TryAutoTransition(cmd, resource, FSubresourceRange{}, toState, bTryRenderPass);
+		}
+		static EGpuResourceState TryAutoTransition(ICommandList* cmd, IGpuBufferDataBase* resource, const FSubresourceRange& range, EGpuResourceState toState, bool bTryRenderPass);
+		// 按 view->GetViewLayout() 转换其底层资源的对应子资源, State 为 GRS_Undefine 时不转换
+		static EGpuResourceState TryAutoTransition(ICommandList* cmd, IGpuViewBase* view, bool bTryRenderPass);
 	};
 }
 

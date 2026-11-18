@@ -150,7 +150,6 @@ namespace EngineNS.Graphics.Mesh.Modifier
                     }
 
                     DrawArgsBuffer.Flush2GPU(tsCmd.CmdList);
-                    DrawArgsBuffer.GpuBuffer.TransitionTo(tsCmd.CmdList, NxRHI.EGpuResourceState.GRS_UavIndirect);
 
                     if (instanceModifier.InstanceBuffers.NumOfInstance > 0)
                         CullingBuffer.SetSize((uint)instanceModifier.InstanceBuffers.NumOfInstance, IntPtr.Zero.ToPointer(), NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
@@ -185,14 +184,25 @@ namespace EngineNS.Graphics.Mesh.Modifier
 
             int NumOfIndirectDraw = DrawArgsOffsetDict.Count;
             GpuCullSetupShading.SetDrawcallDispatch(this, policy, GpuCullSetupDrawcall, 1, 1, 1, true);
+            if (GPUCullingCBV == null)
+            {
+                // DEFAULT: 下面带 cmd 更新, 走 staging 拷贝; BindCBV(ref) 懒创建的是 DYNAMIC (upload heap) 不能作拷贝目标
+                var cbBinder = GpuCullSetupDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbGPUCulling");
+                if (cbBinder.IsValidPointer)
+                    GPUCullingCBV = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(cbBinder, NxRHI.EGpuUsage.USAGE_DEFAULT);
+            }
             GpuCullSetupDrawcall.BindCBV("cbGPUCulling", ref GPUCullingCBV);
             {
-                GPUCullingCBV.SetValue("BoundCenter", mdf.MeshAABB.GetCenter());
-                GPUCullingCBV.SetValue("BoundExtent", mdf.MeshAABB.GetSize() * 0.5f);
-                GPUCullingCBV.SetValue("MaxInstance", mdf.InstanceBuffers.InstanceBuffer.DataArray.Count);
-                GPUCullingCBV.SetValue("IndirectArgsOffset", 0);
-                GPUCullingCBV.SetValue("NumOfIndirectDraw", NumOfIndirectDraw);
-                GPUCullingCBV.SetValue("UseInstanceBounding", mdf.InstanceBuffers.InstanceBoundingBuffer != null ? (int)1 : (int)0);
+                // bFlush=false: 只写 MapBuffer 标脏, 不登记 CbvUpdater (Auto 要到下一帧 BeginFrame 才上传,
+                // 剔除会读到上一帧的 MaxInstance, 视野边缘新进/退出的 instance 被漏剔或残留)
+                GPUCullingCBV.SetValue("BoundCenter", mdf.MeshAABB.GetCenter(), false);
+                GPUCullingCBV.SetValue("BoundExtent", mdf.MeshAABB.GetSize() * 0.5f, false);
+                GPUCullingCBV.SetValue("MaxInstance", mdf.InstanceBuffers.InstanceBuffer.DataArray.Count, false);
+                GPUCullingCBV.SetValue("IndirectArgsOffset", 0, false);
+                GPUCullingCBV.SetValue("NumOfIndirectDraw", NumOfIndirectDraw, false);
+                GPUCullingCBV.SetValue("UseInstanceBounding", mdf.InstanceBuffers.InstanceBoundingBuffer != null ? (int)1 : (int)0, false);
+                // 拷贝进 cmd, 排在下面 Setup/Cull/Flush 三个 dispatch 之前, 三者共用这一份本帧值
+                GPUCullingCBV.FlushDirty(cmd);
             }
             GpuCullSetupDrawcall.BindUav("IndirectArgsBuffer", DrawArgsBuffer.Uav);
             //GpuCullSetupDrawcall.SetDebugName("InstanceCulling.Setup");
@@ -226,11 +236,11 @@ namespace EngineNS.Graphics.Mesh.Modifier
             if (DrawArgsOffsetDict.TryGetValue(key, out drawArgs))
             {
                 drawcall.BindSRV(TtNameTable.VSInstanceDataArray, CullingBuffer.Srv);//mdf.InstanceBuffers.InstanceBuffer.Srv);// 
-                drawcall.BindIndirectDrawArgsBuffer(DrawArgsBuffer.GpuBuffer, drawArgs.Offset * sizeof(int));
+                drawcall.BindIndirectDrawArgsView(DrawArgsBuffer.Iav, drawArgs.Offset * sizeof(int));
                 //if (bIndirect)
-                //    drawcall.BindIndirectDrawArgsBuffer(DrawArgsBuffer.GpuBuffer, drawArgs.Offset * sizeof(int));
+                //    drawcall.BindIndirectDrawArgsView(DrawArgsBuffer.Iav, drawArgs.Offset * sizeof(int));
                 //else
-                //    drawcall.BindIndirectDrawArgsBuffer(new NxRHI.UBuffer(), drawArgs.Offset * sizeof(int));
+                //    drawcall.BindIndirectDrawArgsView(null, drawArgs.Offset * sizeof(int));
             }
         }
     }

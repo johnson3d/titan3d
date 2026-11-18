@@ -288,6 +288,8 @@ float QuarkCluster::Simplify( UINT TargetNumTris, float TargetError, UINT LimitN
 
 	std::vector<unsigned int> destination(Indexes.size()); // worst case: same as input
 
+	// TargetError <= 0 keeps the legacy 5% relative tolerance; DAG builds that must always
+	// reach the triangle target (Nanite style) pass a large value (e.g. FLT_MAX).
 	size_t result_index_count = meshopt_simplify(
 		destination.data(),
 		Indexes.data(),
@@ -296,7 +298,7 @@ float QuarkCluster::Simplify( UINT TargetNumTris, float TargetError, UINT LimitN
 		(size_t)NumVerts,
 		VertSize * sizeof(float),
 		target_index_count,
-		0.05f,  // 5% relative error tolerance
+		TargetError > 0.0f ? TargetError : 0.05f,
 		meshopt_SimplifyLockBorder,  // Lock border vertices to prevent gaps at open edges
 		&meshopt_error);
 
@@ -341,10 +343,9 @@ float QuarkCluster::Simplify( UINT TargetNumTris, float TargetError, UINT LimitN
 	NumVerts = NewNumVerts;
 	NumTris = NewNumTris;
 
-	// Rebuild external edges (mark all as potentially external after simplification)
-	ExternalEdges.clear();
-	ExternalEdges.resize(NumTris * 3, 1);
-	NumExternalEdges = NumTris * 3;
+	// Rebuild external edges: only edges without a matching neighbor inside the simplified
+	// group are open (group boundary + true mesh border), the same rule LockBorder used.
+	FindExternalEdges(BuildAdjacency());
 
 	// Rebuild material indices
 	MaterialIndexes.clear();
@@ -354,6 +355,26 @@ float QuarkCluster::Simplify( UINT TargetNumTris, float TargetError, UINT LimitN
 	Bound();
 
 	return meshopt_error * scale;
+}
+
+void QuarkCluster::FindExternalEdges( const FAdjacency& Adjacency )
+{
+	ExternalEdges.assign( Indexes.size(), 0 );
+	NumExternalEdges = 0;
+	for( INT32 EdgeIndex = 0; EdgeIndex < (INT32)Indexes.size(); EdgeIndex++ )
+	{
+		INT32 AdjCount = 0;
+		Adjacency.ForAll( EdgeIndex,
+			[ &AdjCount ]( INT32, INT32 )
+			{
+				AdjCount++;
+			} );
+		if( AdjCount == 0 )
+		{
+			ExternalEdges[ EdgeIndex ] = 1;
+			NumExternalEdges++;
+		}
+	}
 }
 
 void QuarkCluster::Split( FGraphPartitioner& Partitioner, const FAdjacency& Adjacency, UINT InClusterSize ) const

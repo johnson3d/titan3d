@@ -31,9 +31,24 @@ namespace NxRHI
 	{
 		BeginCopyDraws->PushCopyDraw(draw);
 	}
-	void IRenderPass::PushBeginBarrier(IGpuBufferData* buffer, EGpuResourceState state)
+	void IRenderPass::PushBeginBarrier(IGpuBufferDataBase* buffer, const FSubresourceRange& range, EGpuResourceState state)
 	{
-		BeginBarriers->PushBarrier(buffer, state);
+		BeginBarriers->PushBarrier(buffer, range, state);
+	}
+
+	void ISwapChain::BeginBackFrameBuffers(ICommandList* cmd, IFrameBuffers* fb)
+	{
+		auto rtv = fb ? fb->GetRtv(0) : nullptr;
+		if (rtv == nullptr || rtv->GetTexture() == nullptr)
+			return;
+		rtv->GetTexture()->TransitionTo(cmd, EGpuResourceState::GRS_RenderTarget);
+	}
+	void ISwapChain::EndBackFrameBuffers(ICommandList* cmd, IFrameBuffers* fb)
+	{
+		auto rtv = fb ? fb->GetRtv(0) : nullptr;
+		if (rtv == nullptr || rtv->GetTexture() == nullptr)
+			return;
+		rtv->GetTexture()->TransitionTo(cmd, EGpuResourceState::GRS_Present);
 	}
 }
 

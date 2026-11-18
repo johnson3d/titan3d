@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.ECS;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,6 +16,14 @@ namespace EngineNS.Thread
         {
             return Async.EAsyncTarget.TPools;
         }
+        public override TtContextThread NestThread
+        {
+            get
+            {
+                return DispatchThread;
+            }
+        }
+        public Thread.TtContextThread DispatchThread = null;
         public override bool IsTaskPoolThread() { return true; }
         public int PoolIndex { get; private set; } = -1;
         public TtThreadPool(int index)

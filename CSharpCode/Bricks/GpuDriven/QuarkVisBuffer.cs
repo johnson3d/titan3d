@@ -1094,7 +1094,7 @@ namespace EngineNS.Bricks.GpuDriven
                         else
                         {
                             mLODSelectShading.SetDrawcallIndirectDispatch(this, policy, mLODSelectDrawcalls[pass],
-                                LODIndirectArgs.GpuBuffer);
+                                LODIndirectArgs.Iav);
                         }
                         cmd.PushGpuDraw(mLODSelectDrawcalls[pass]);
 
@@ -1128,7 +1128,7 @@ namespace EngineNS.Bricks.GpuDriven
 
                     // Rasterize with indirect dispatch via SelectedClusters
                     mRasterizeShading.SetDrawcallIndirectDispatch(this, policy, mRasterizeDrawcall,
-                        LODIndirectArgs.GpuBuffer);
+                        LODIndirectArgs.Iav);
                     cmd.PushGpuDraw(mRasterizeDrawcall);
                 }
                 else

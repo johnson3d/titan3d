@@ -41,7 +41,7 @@ void FGraphPartitioner::AddLocalityLinks(FGraphData* Graph, UINT Index, INT32 Co
     auto Iter = LocalityLinks.find(Index);
     if (Iter != LocalityLinks.end())
     {
-        auto values = Iter->second;
+        const auto& values = Iter->second;
         for (int i = 0; i < values.size(); ++i)
         {
             UINT AdjIndex = values[i];
@@ -54,17 +54,13 @@ void FGraphPartitioner::AddLocalityLinks(FGraphData* Graph, UINT Index, INT32 Co
 
 void FGraphPartitioner::InsertToLocalityLinks(UINT k, UINT v)
 {
-    auto keyIter = LocalityLinks.find(k);
-    if (keyIter != LocalityLinks.end())
+    auto& values = LocalityLinks[k];
+    for (size_t i = 0; i < values.size(); i++)
     {
-        auto values = keyIter->second;
-        for (int i = 0; i < values.size(); i++)
-        {
-            if (values[i] == v)
-                return;
-        }
-        values.push_back(v);
+        if (values[i] == v)
+            return;
     }
+    values.push_back(v);
 }
 
 FGraphPartitioner::FGraphData* FGraphPartitioner::NewGraph( UINT NumAdjacency ) const
@@ -240,6 +236,11 @@ void FGraphPartitioner::BisectGraph( FGraphData* Graph, FGraphData* ChildGraphs[
 
 void FGraphPartitioner::RecursiveBisectGraph( FGraphData* Graph )
 {
+	if( ShouldCancel && ShouldCancel() )
+	{
+		delete Graph;
+		return;
+	}
 	FGraphData* ChildGraphs[2];
 	BisectGraph( Graph, ChildGraphs );
 	delete Graph;

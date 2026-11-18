@@ -56,7 +56,7 @@ namespace EngineNS.Bricks.VXGI
             }
             var binder = drawcall.FindBinder("VxDebugInstanceSRV");
             drawcall.BindSRV(binder, vxNode.VoxelDebugger.Srv);
-            drawcall.BindIndirectDrawArgsBuffer(vxNode.VxIndirectDebugDraws.GpuBuffer, 5 * 4);
+            drawcall.BindIndirectDrawArgsView(vxNode.VxIndirectDebugDraws.Iav, 5 * 4);
         }
     }
     public class UMdfVoxelDebugMesh : Graphics.Pipeline.Shader.TtMdfQueue1<TtVoxelDebugModifier>

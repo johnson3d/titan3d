@@ -161,6 +161,7 @@ namespace EngineNS.GamePlay.Scene
 
         public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             rp.AddVisibleNode(this);
 
             if ((rp.CullFilters & GamePlay.TtWorld.TtVisParameter.EVisCullFilter.LightDebug) == 0)

@@ -223,6 +223,7 @@ namespace EngineNS.GamePlay.Scene
         public override bool HashVisual => true;
         public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             if ((rp.CullFilters & TtWorld.TtVisParameter.EVisCullFilter.UtilityEditor) == 0)
             {
                 return;

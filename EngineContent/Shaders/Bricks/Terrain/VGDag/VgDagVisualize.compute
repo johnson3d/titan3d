@@ -1,8 +1,8 @@
 #include "../../../Inc/GlobalDefine.cginc"
 
-// 地形 cluster DAG 调试可视化(M2 第一片)
+// 地形 cluster DAG 调试可视化
 // Pass 1: CS_ClearVisTexture   - 清空颜色/深度 UAV
-// Pass 2: CS_VisualizeClusters - 每 cluster 一线程: LOD 误差选择 + 软光栅(atomic depth)
+// Pass 2: CS_VisualizeClusters - 每 cluster 一线程: 组一致 LOD 选择(VgDagLod.cginc) + 软光栅(atomic depth)
 
 cbuffer cbVgVisParams
 {
@@ -10,11 +10,14 @@ cbuffer cbVgVisParams
 };
 
 StructuredBuffer<FVgVisCluster> VisClusterBuffer;
+StructuredBuffer<FVgVisGroup>   VisGroupBuffer;
 StructuredBuffer<FVgVisVertex>  VisVertexBuffer;
-StructuredBuffer<uint>          VisIndexBuffer;
+ByteAddressBuffer               VisIndexBuffer;   // cluster 局部索引(相对 BaseVertex), raw uint
 
 RWTexture2D<float4> VisColorTexture;
 RWTexture2D<uint>   VisDepthTexture;
+
+#include "VgDagLod.cginc"
 
 [numthreads(8, 8, 1)]
 void CS_ClearVisTexture(uint3 tid : SV_DispatchThreadID)
@@ -43,14 +46,14 @@ float3 VertexWorld(uint vi)
 void RasterCluster(FVgVisCluster c)
 {
     float2 rtSize = VgVisParams.RTSize.xy;
-    float3 color = LevelColor(c.Level);
+    float3 color = LevelColor(c.MipLevel);
 
     uint triCount = c.IndexCount / 3;
     for (uint t = 0; t < triCount; t++)
     {
-        uint i0 = VisIndexBuffer[c.IndexStart + t * 3 + 0];
-        uint i1 = VisIndexBuffer[c.IndexStart + t * 3 + 1];
-        uint i2 = VisIndexBuffer[c.IndexStart + t * 3 + 2];
+        uint i0 = c.BaseVertex + VisIndexBuffer.Load((c.IndexStart + t * 3 + 0) * 4);
+        uint i1 = c.BaseVertex + VisIndexBuffer.Load((c.IndexStart + t * 3 + 1) * 4);
+        uint i2 = c.BaseVertex + VisIndexBuffer.Load((c.IndexStart + t * 3 + 2) * 4);
 
         float3 w0 = VertexWorld(i0);
         float3 w1 = VertexWorld(i1);
@@ -123,12 +126,8 @@ void CS_VisualizeClusters(uint tid : SV_DispatchThreadID)
     if (c.IndexCount == 0)
         return;
 
-    // Nanite 式 LOD 选择: 自身误差 <= 阈值 且 (无父 或 父误差 > 阈值)
-    // 误差单调(ParentLODError >= 子误差)保证每片区域恰选中一层
-    float threshold = VgVisParams.Vis.x;
-    if (c.MaxError > threshold)
-        return;
-    if (c.Parent >= 0 && c.ParentMaxError <= threshold)
+    // 组一致 LOD 选择: 与远景 cull 同一套判定, 保证无缝无重叠
+    if (VgClusterSelected(c) == false)
         return;
 
     RasterCluster(c);

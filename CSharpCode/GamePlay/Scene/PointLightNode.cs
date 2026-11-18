@@ -164,6 +164,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             //灯光比较特殊，无论是否debug都要加入visnode列表，否则Tiling过程得不到可见灯光集
             rp.AddVisibleNode(this);
 

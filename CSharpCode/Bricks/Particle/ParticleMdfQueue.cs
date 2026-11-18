@@ -152,7 +152,7 @@ namespace EngineNS.Bricks.Particle
 
                 if (Emitter.IsGpuDriven)
                 {
-                    drawcall.BindIndirectDrawArgsBuffer(Emitter.GpuResources.DrawArgBuffer, 0);
+                    drawcall.BindIndirectDrawArgsView(Emitter.GpuResources.DrawArgIav, 0);
                 }
                 else
                 {

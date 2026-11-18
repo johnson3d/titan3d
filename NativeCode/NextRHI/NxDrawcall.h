@@ -21,6 +21,25 @@ namespace NxRHI
 	class IGpuDrawState;
 	class IBindless;
 
+	// 一次 draw/dispatch 内同一资源的不同 view 要求不同 layout 且子资源重叠时, 自动转换无法同时满足;
+	// Whole 模式任何范围都算重叠, 需在创建期声明 FTextureDesc::LayoutTrack = LTM_PerSubresource
+	class FBindLayoutValidator
+	{
+	public:
+		void Check(IGpuBufferDataBase* resource, const FViewLayout& layout);
+	private:
+		struct FItem
+		{
+			IGpuBufferDataBase* Resource;
+			FViewLayout Layout;
+		};
+		std::vector<FItem> Items;
+	};
+
+	// 按绑定 view 的 GetViewLayout() 自动转换底层资源, 并登记 cmd 资源引用与访问帧; bindless 逐项处理, sampler 跳过
+	// validator 非空时检查同一次 draw 内的 layout 冲突
+	void TransitionBindResource(ICommandList* cmdlist, const FShaderBinder* binder, IGpuResource* resource, bool bTryRenderPass, FBindLayoutValidator* validator = nullptr);
+
 	class TR_CLASS()
 		TMeshAtomDesc : public VIUnknown
 	{
@@ -112,10 +131,10 @@ namespace NxRHI
 		{
 			AttachVB = va;
 		}
-		IBuffer* GetIndirectDrawArgsBuffer() {
-			return IndirectDrawArgsBuffer;
+		IIndirectArgView* GetIndirectDrawArgsView() {
+			return IndirectDrawArgsView;
 		}
-		void BindIndirectDrawArgsBuffer(IBuffer* buffer, UINT offset);
+		void BindIndirectDrawArgsView(IIndirectArgView* view, UINT offset);
 		const FMeshAtomDesc* GetMeshAtomDesc() {
 			if (AtomDesc != nullptr)
 				return AtomDesc->GetAtomDescPtr();
@@ -149,6 +168,9 @@ namespace NxRHI
 		}
 		void SetMeshAtomDesc(const FMeshAtomDesc* desc);
 		void SetScissorRect(const FScissorRect* rect);
+	protected:
+		// Build 期按各 view 的 layout 自动转换绑定资源与 IndirectDrawArgsView (pass 内收进 BeginBarriers)
+		void TransitionBindResources(ICommandList* cmdlist);
 	public:
 		static std::atomic<int>		NumOfInstance;
 		std::map<const FEffectBinder*, FBindResource>	BindResources;
@@ -156,7 +178,7 @@ namespace NxRHI
 		AutoRef<IGpuPipeline>		Pipeline;
 		AutoRef<FGeomMesh>			Mesh;
 		AutoRef<FVertexArray>		AttachVB;
-		AutoRef<IBuffer>			IndirectDrawArgsBuffer;
+		AutoRef<IIndirectArgView>	IndirectDrawArgsView;
 		
 		UINT						IndirectDrawOffsetForArgs = 0;
 		USHORT						DrawInstance = 1;
@@ -197,8 +219,8 @@ namespace NxRHI
 			mDispatchY = y;
 			mDispatchZ = z;
 		}
-		void BindIndirectDispatchArgsBuffer(IBuffer* buffer) {
-			IndirectDispatchArgsBuffer = buffer;
+		void BindIndirectDispatchArgsView(IIndirectArgView* view) {
+			IndirectDispatchArgsView = view;
 		}
 		const FShaderBinder* FindBinder(EShaderBindType type, const char* name) const;
 		const FShaderBinder* FindBinder(const char* name) const;
@@ -237,7 +259,7 @@ namespace NxRHI
 		UINT					mDispatchY = 0;
 		UINT					mDispatchZ = 0;
 		AutoRef<IComputeEffect>	mEffect;
-		AutoRef<IBuffer>		IndirectDispatchArgsBuffer;
+		AutoRef<IIndirectArgView>	IndirectDispatchArgsView;
 		std::map<const FShaderBinder*, FBindResource>	BindResources;
 	protected:
 		virtual void OnBindResource(const FShaderBinder* binder, FBindResource& resource) {}
@@ -333,8 +355,8 @@ namespace NxRHI
 		}
 		static std::atomic<int>		NumOfInstance;
 		ECopyDrawMode Mode = ECopyDrawMode::CDM_Buffer2Buffer;
-		AutoRef<IGpuBufferData>	mSrc;
-		AutoRef<IGpuBufferData>	mDest;
+		AutoRef<IGpuBufferDataBase>	mSrc;
+		AutoRef<IGpuBufferDataBase>	mDest;
 		UINT SrcSubResource = 0;
 		UINT DestSubResource = 0;
 
@@ -366,17 +388,18 @@ namespace NxRHI
 		virtual UINT GetPrimitiveNum() override { return 0; }
 	};
 
+	// PushBarrier 时 tracker 已记账到 ToState, Commit 时按记下的各段源状态发 barrier
 	struct FBarrierDesc
 	{
-		FBarrierDesc(IGpuBufferData* bf, EGpuResourceState state) {
-			Buffer = bf;
-			FromState = bf->GpuState;
-			ToState = state;
-			bf->GpuState = state;
-		}
-		AutoRef<IGpuBufferData> Buffer;
-		EGpuResourceState FromState = EGpuResourceState::GRS_Undefine;
+		struct FSegment
+		{
+			FSubresourceRange Range;
+			EGpuResourceState FromState;
+		};
+		AutoRef<IGpuBufferDataBase> Buffer;
+		FSubresourceRange Range;
 		EGpuResourceState ToState = EGpuResourceState::GRS_Undefine;
+		std::vector<FSegment> Segments;
 	};
 
 	class IBarriersDraw : public IGpuDraw
@@ -384,7 +407,7 @@ namespace NxRHI
 	public:
 		VSLLock mLocker;
 		std::vector<FBarrierDesc> Barriers;
-		void PushBarrier(IGpuBufferData* buffer, EGpuResourceState state);
+		void PushBarrier(IGpuBufferDataBase* buffer, const FSubresourceRange& range, EGpuResourceState state);
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 		virtual UINT GetPrimitiveNum() override
 		{

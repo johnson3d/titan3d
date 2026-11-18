@@ -92,11 +92,14 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
         /// <summary>当前在飞的 bake 任务与取消 token (CancelBakeTask 用); 无在飞任务时为 default/null。
         /// 放在 level (而非 LevelData) 上: LevelData 可能被流式卸载, 取消状态不能跟着丢</summary>
-        Thread.Async.TtTask<TtVgDagAsset> mBakeTask;
         Thread.Async.TtAsyncTaskToken mBakeCancelToken;
+        volatile bool mBakePending;
+        /// <summary>后台正在执行的原生 DAG 烘焙器 (仅工作线程登记/注销), 取消时转发到原生原子标志。</summary>
+        VGDag.TtQuarkTerrainBaker mActiveDagBaker;
+        internal bool BakeSucceeded { get; private set; }
 
-        /// <summary>是否有 DAG bake 正在后台执行 (含已被请求取消但后台还没退出的)</summary>
-        public bool IsBakeRunning => mBakeTask.TaskState == Thread.Async.ETaskStatus.Pending;
+        /// <summary>直到 collector 收到真实完成回调才结束, 不读取已回池的 TtTaskData。</summary>
+        public bool IsBakeRunning => mBakePending;
 
         /// <summary>
         /// 请求取消在飞的 DAG bake (关地图/卸载 level 时调):
@@ -109,15 +112,45 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// </summary>
         public void CancelBakeTask()
         {
-            if (mBakeCancelToken != null)
-                mBakeCancelToken.TaskState = Thread.Async.EAsyncTaskState.Canceled;
+            var token = System.Threading.Volatile.Read(ref mBakeCancelToken);
+            if (token != null)
+                token.TaskState = Thread.Async.EAsyncTaskState.Canceled;
+            // 先发布 token 状态再读烘焙器: 工作线程是先登记烘焙器再检查 token,
+            // 两侧至少有一方看到对方, 不会出现"已取消但原生烘焙继续跑完"的漏网。
+            System.Threading.Thread.MemoryBarrier();
+            System.Threading.Volatile.Read(ref mActiveDagBaker)?.RequestCancel();
         }
 
-        /// <summary>bake 发起方 (UTerrainLevelData.BakeVgDag) 在任务创建后登记任务与 token</summary>
-        internal void SetBakeTask(Thread.Async.TtTask<TtVgDagAsset> task, Thread.Async.TtAsyncTaskToken token)
+        internal void RegisterDagBaker(VGDag.TtQuarkTerrainBaker baker)
         {
-            mBakeTask = task;
+            System.Threading.Interlocked.Exchange(ref mActiveDagBaker, baker);
+        }
+
+        internal void UnregisterDagBaker(VGDag.TtQuarkTerrainBaker baker)
+        {
+            System.Threading.Interlocked.CompareExchange(ref mActiveDagBaker, null, baker);
+        }
+
+        /// <summary>在投递任务前登记, 防同步完成回调先于状态初始化。</summary>
+        internal void BeginBake(Thread.Async.TtAsyncTaskToken token)
+        {
             mBakeCancelToken = token;
+            BakeSucceeded = false;
+            mBakePending = true;
+        }
+
+        internal void CompleteBake(Thread.Async.TtAsyncTaskToken token, bool succeeded)
+        {
+            if (!ReferenceEquals(token, mBakeCancelToken))
+                return;
+            BakeSucceeded = succeeded;
+            mBakeCancelToken = null;
+            mBakePending = false;
+        }
+
+        internal void MarkBakeCacheHit()
+        {
+            BakeSucceeded = true;
         }
     }
 
@@ -201,10 +234,136 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             return Level.Node;
         }
+
+        IO.TtCookContext mCookContext;
+        int mCacheGeneration;
+        string mLevelCacheFile;
+        string mVgDagCacheFile;
+        Hash160 mLevelCacheHash;
+        Hash160 mVgDagCacheHash;
+        bool mHasCacheHash;
+        int mCookCompletedLevels;
+        int mCookTotalLevels;
+        bool mCookVgDagPass;
+
+        /// <summary>
+        /// TitanCMD 离线入口使用临时 LevelData, 不挂入编辑器活动窗口或流式队列。
+        /// 第 1 轮 (vgDagPass=false) 只确保 .trlvl 就绪, 不碰 DAG;
+        /// 第 2 轮只读取第 1 轮已验证的 .trlvl 高度, 叠加手绘高度后校验/补烘 .trvgdag, 不重跑 PGC。
+        /// PGC / 读高度 / 算 hash 都是同步重活, 投到 AsyncIO (与运行期流式 CreateLevelData 同一线程),
+        /// 让 worker 主循环继续发心跳、收取消、判超时。异常回到调用方线程再抛。
+        /// </summary>
+        internal async Thread.Async.TtTask<bool> PrepareCookDataAsync(TtTerrainLevel level, int completedLevels, int totalLevels, bool vgDagPass)
+        {
+            Level = level;
+            mCacheGeneration = level.Node.CacheGeneration;
+            mCookContext = IO.TtCookContext.Current;
+            mCookCompletedLevels = completedLevels;
+            mCookTotalLevels = totalLevels;
+            mCookVgDagPass = vgDagPass;
+            ReportCookStage("投递到 AsyncIO 线程");
+            System.Runtime.ExceptionServices.ExceptionDispatchInfo error = null;
+            await TtEngine.Instance.EventPoster.Post((state) =>
+            {
+                try
+                {
+                    ReportCookStage("检查 .trlvl 缓存");
+                    BuildLevelDataFromPGC(level.Node.TerrainData);
+                }
+                catch (Exception ex)
+                {
+                    error = System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(ex);
+                }
+                return true;
+            }, Thread.Async.EAsyncTarget.AsyncIO);
+            error?.Throw();
+            return true;
+        }
+
+        internal void ReportCookStage(string detail)
+        {
+            mCookContext?.ReportStage($"terrain 第 {(mCookVgDagPass ? 2 : 1)}/2 轮 {(mCookVgDagPass ? ".trvgdag" : ".trlvl")} level {mCookCompletedLevels + 1}/{mCookTotalLevels}: X{Level.LevelX}_Y{Level.LevelZ} | {detail}");
+        }
+
+        void PrepareCookHeightfield(string vgFile, Hash160 hash, Procedure.TtBufferComponent hMap)
+        {
+            ReportCookStage(".trlvl 已就绪; 叠加手绘高度");
+            var overlaid = ApplyHeightOverlayIfAny(hMap, null);
+            try
+            {
+                // 离线只需最终高度, 不创建纹理、PhysX、植被或活动窗口 patch。
+                BakeVgDag(vgFile, hash, overlaid ?? hMap);
+            }
+            finally
+            {
+                CoreSDK.DisposeObject(ref overlaid);
+            }
+        }
+
+        bool LoadCookLevelFromCache(string file, Hash160 hash, string vgFile)
+        {
+            if (!CacheHasHash(file, hash, false))
+                return false;
+            if (!mCookVgDagPass)
+            {
+                ReportCookStage(".trlvl 缓存命中 (hash 一致), 跳过 PGC");
+                return true;
+            }
+            ReportCookStage("读取 .trlvl 高度场");
+            using (var xnd = IO.TtXndHolder.LoadXnd(file))
+            using (var hMap = Procedure.TtBufferComponent.CreateInstance(Procedure.TtBufferCreator.CreateInstance<Procedure.TtSuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1)))
+            {
+                if (xnd == null || !hMap.LoadXnd(xnd.RootNode.TryGetChildNode("HeightMap"), Hash160.Emtpy))
+                    return false;
+                PrepareCookHeightfield(vgFile, hash, hMap);
+            }
+            return true;
+        }
+
+        internal bool ValidateCookArtifacts()
+        {
+            if (!mHasCacheHash || mCacheGeneration != Level.Node.CacheGeneration ||
+                !CacheHasHash(mLevelCacheFile, mLevelCacheHash, false))
+                return false;
+            if (!mCookVgDagPass)
+                return true;
+            return Level.BakeSucceeded && CacheHasHash(mVgDagCacheFile, mVgDagCacheHash, true);
+        }
+
+        static bool CacheHasHash(string file, Hash160 expected, bool isVgDag)
+        {
+            if (!System.IO.File.Exists(file))
+                return false;
+            try
+            {
+                using (var xnd = IO.TtXndHolder.LoadXnd(file))
+                {
+                    if (xnd == null)
+                        return false;
+                    var attribute = xnd.RootNode.TryGetAttribute("Desc");
+                    if (!attribute.IsValidPointer)
+                        return false;
+                    using (var reader = attribute.GetReader(null))
+                    {
+                        reader.Read(out Hash160 actual);
+                        if (actual != expected)
+                            return false;
+                    }
+                    return isVgDag ? xnd.RootNode.TryGetAttribute("VgDagData").IsValidPointer :
+                        xnd.RootNode.TryGetChildNode("HeightMap").IsValidPointer;
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         public async System.Threading.Tasks.Task CreateLevelData(TtTerrainLevel level, bool bForce)
         {
             Level = level;
-            
+            // 在 AsyncIO 入队前捕获代次, 不能等执行时再取 (换 PGC 之后会把旧任务误认成新代次)。
+            mCacheGeneration = level.Node.CacheGeneration;
             if (bForce)
             {
                 BuildLevelDataFromPGC(Level.Node.GetNodeData<TtTerrainNode.TtTerrainData>());
@@ -223,6 +382,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         //bool bTryLoad = false;
         protected bool LoadLevelFromCache(string file, in Hash160 testHash)
         {
+            if (!System.IO.File.Exists(file))
+                return false;
             //if (bTryLoad == false)
             //    return false;
             var patchSide = Level.PatchSide;
@@ -292,17 +453,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 }
                 
 
-                // 先尝试加载 .trvgdag (与 .trlvl 同目录同 hash): 已就绪则下方 bake 钩子
-                // 会因 CachedVgDag != null 跳过, 避免重复烘
+                // DAG hash 必须在 overlay 叠加后计算, 不能提前用 PGC 基底 hash 认定命中。
                 var vgFile = file.Substring(0, file.Length - ".trlvl".Length) + ".trvgdag";
-                CachedVgDag = LoadVgDagFile(vgFile, testHash);
-                
                 var hashLocal = testHash;
                 CreateFromBuffer(hMap, norMap, waterMap, idMap, transform, plants, (finalHMap) =>
                 {
-                    // 缓存命中路径同样触发补烘: 旧缓存 (目录变更/首版无 DAG) 的 .trlvl 命中时
-                    // 没有经过 BuildLevelDataFromPGC, 必须在这里给 DAG 一次机会;
-                    // .trvgdag 已存在且 hash 匹配时上面已加载, BakeVgDag 内部会跳过。                    
                     BakeVgDag(vgFile, hashLocal, finalHMap);
                 });
 
@@ -664,97 +819,117 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         //    }
         //}
         /// <summary>本 level bake 出的远景 cluster DAG (未加载/未 bake 时为 null)。
-        /// 与 .trlvl 同 hash 缓存; 将来由远景绘制节点消费 (TODO M3: 接入 TtVgDagFarTerrain)。</summary>
+        /// DAG hash 包含 PGC hash、最终高度场及烘焙参数, 与 .trlvl 基底 hash 分开。</summary>
         public TtVgDagAsset CachedVgDag;
 
-        /// <summary>
-        /// level 缓存目录: cache/terrain/场景AssetName/TerrainNode/&lt;NodeId&gt;/&lt;pgcName&gt;/
-        /// 同一个 pgc 被不同场景/不同 TerrainNode 使用时各自独立, 不会互相覆盖。
-        /// 场景未保存 (AssetName 为空) 时回退到旧的 pgc-only 路径, 仅编译期兼容,
-        /// 此时保存的缓存会在场景保存后失效 (hash 相同但目录不同, 最多浪费一次生成)。
-        /// </summary>
-        protected string GetLevelCacheDir(RName terrainName)
+        /// <summary>level 缓存目录统一由节点提供: cache/terrain/{NodeId}/</summary>
+        protected string GetLevelCacheDir()
         {
-            var root = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "terrain/";
-            var scene = Level.Node.ParentScene;
-            if (scene?.AssetName == null)
-                return IO.TtFileManager.CombinePath(root, terrainName.Name);
-            var dir = IO.TtFileManager.CombinePath(root, scene.AssetName.Name);
-            dir = IO.TtFileManager.CombinePath(dir, "TerrainNode");
-            dir = IO.TtFileManager.CombinePath(dir, Level.Node.NodeId.ToString());
-            return IO.TtFileManager.CombinePath(dir, terrainName.Name);
+            return Level.Node.GetCacheDir();
+        }
+
+        /// <summary>DAG 的独立缓存键: 版本 + PGC + 最终高度 + 烘焙参数, 手绘不污染 .trlvl 基底。
+        /// v3: QEM 四叉树烘焙器退役, 改为 Quark + 精确竖直误差, 资产格式同步升级, 旧 v2 缓存自动失效。</summary>
+        internal static unsafe Hash160 BuildVgDagHash(Hash160 pgcHash, float[] heights, int size, int step)
+        {
+            Hash160 heightHash;
+            fixed (float* pointer = heights)
+                heightHash = Hash160.CreateHash160(pointer, checked((uint)heights.Length * sizeof(float)));
+            return Hash160.CreateHash160(FormattableString.Invariant(
+                $"terrain-vgdag-v3|{pgcHash}|{heightHash}|{size}|{step}|{TtQuarkTerrainBaker.MaxGroupSize}|{TtQuarkTerrainBaker.ClusterSize}|{BitConverter.SingleToInt32Bits(TtQuarkTerrainBaker.SimplifyTargetError)}|fmt{TtVgDagAsset.FormatVersion}"));
         }
 
         /// <summary>
         /// 烘焙远景 DAG (异步 TtTask): 在 CreateFromBuffer 钩子线程同步拷出"叠加 overlay 后最终高度场"
-        /// (随后该副本会被 Dispose), 真正的 QEM bake + .trvgdag 落盘在 TPools 线程池执行,
+        /// (随后该副本会被 Dispose), 真正的 Quark bake (TtQuarkTerrainBaker) + .trvgdag 落盘在 TPools 线程池执行,
         /// 完成后经 AddWaitTask 回调 (引擎主循环) 把产物挂到 CachedVgDag。
         /// 地形打开不依赖 DAG 就绪: 消费端以 CachedVgDag == null 作为"远景尚未启动"的条件。
         /// </summary>
         protected void BakeVgDag(string vgFile, in Hash160 hash, Procedure.TtBufferComponent finalHMap)
         {
-            if (CachedVgDag != null)
-                return; // 已就绪 (缓存命中或重复触发), 不重复烘
             var nodeData = Level.Node.TerrainData;
-            if (nodeData == null)
+            if (nodeData == null || Level.IsBakeRunning)
                 return;
-            // 运行期自动 cook DAG 开关 (editor.jscfg AutoCookTerrainVgDag, 默认关):
-            // 单 level bake 可达秒级且占死线程池线程, 全图加载会拖垮运行期。
-            // 离线 cook (TitanCMD Cook 命令 / 节点 CookAsset) 经 ForceBakeVgDag 绕过本开关
-            if (Level.Node.ForceBakeVgDag == false)
-            {
-                var editorCfg = TtEngine.Instance.ConfigManager.GetConfig<EngineNS.Editor.TtEditorConfig>();
-                if (editorCfg == null || editorCfg.AutoCookTerrainVgDag == false)
-                    return;
-            }
             int size = (int)finalHMap.Width;
-            if ((int)finalHMap.Height != size)
-                return; // 非方形高度场暂不支持 DAG bake
-            int leafQuads = nodeData.VgDagLeafQuads;
-            if (leafQuads < 1 || (leafQuads & (leafQuads - 1)) != 0)
-                return; // 配置了非法的 VgDagLeafQuads (必须是 2 的幂), 跳过 bake 避免 bake 内 throw 打断 level 生成
+            int step = nodeData.VgDagStep;
+            if (size < 2 || size > 65536 || (int)finalHMap.Height != size || step < 1 || step >= size)
+                return;
 
-            // 钩子线程同步拷贝: finalHMap 离开 CreateFromBuffer 后会被 Dispose,
-            // 后台任务只能依赖这份副本。
-            var hf = new float[size * size];
+            ReportCookStage($"拷贝最终高度 {size}×{size}, 计算 DAG hash");
+            // 缓存命中判定也必须使用最终高度, 先拷贝再计算 hash; 后台只使用这份自足副本。
+            var hf = new float[checked(size * size)];
             for (int z = 0; z < size; z++)
-            {
                 for (int x = 0; x < size; x++)
                     hf[z * size + x] = finalHMap.GetPixel<float>(x, z);
-            }
-
-            // token 在这里创建并登记到 Level (取消状态跟 level 走, LevelData 卸载也不丢)
-            var cancelToken = new Thread.Async.TtAsyncTaskToken();
-            var bakeTaskLocal = BakeVgDagAsync(vgFile, hash, hf, size, leafQuads, nodeData.VgDagMaxErrorPerLevel, cancelToken);
-            Level.SetBakeTask(bakeTaskLocal, cancelToken);
-            // bake 完成后的挂接在 collector 回调统一处理 (引擎主循环线程):
-            // level 可能在 bake 期间被流式卸载 (本对象被 task/闭包持有不会回收),
-            // 赋值本身无害; 下次加载时从独立缓存文件读到。
-            // 取消时 DirectResult 为 null (Cancelling 态), 天然跳过赋值。
-            // 闭包捕获局部副本而非 Level 上的字段: 取消/重建会把字段覆盖,
-            // 回调若读字段会在取消场景下 NRE; struct 副本持有同一 TtTaskData 引用, 安全。
-            bakeTaskLocal.AddWaitTask((tsk) =>
+            mVgDagCacheHash = BuildVgDagHash(hash, hf, size, step);
+            ReportCookStage("检查 .trvgdag 缓存");
+            CachedVgDag = mCookContext?.Force == true ? null : LoadVgDagFile(vgFile, mVgDagCacheHash);
+            if (CachedVgDag != null)
             {
-                if (bakeTaskLocal.DirectResult != null)
+                Level.MarkBakeCacheHit();
+                ReportCookStage(".trvgdag 缓存命中, 等待校验");
+                return;
+            }
+            // 开关只禁止自动生成, 不禁止加载 hash 已验证的已有 DAG。
+            if (!Level.Node.ForceBakeVgDag)
+            {
+                var config = TtEngine.Instance.ConfigManager.GetConfig<EngineNS.Editor.TtEditorConfig>();
+                if (config == null || !config.AutoCookTerrainVgDag)
+                    return;
+            }
+            var cancelToken = new Thread.Async.TtAsyncTaskToken();
+            Level.BeginBake(cancelToken);
+            ReportCookStage("等待 DAG 后台烘焙开始");
+            var bakeTaskLocal = BakeVgDagAsync(vgFile, mVgDagCacheHash, hf, size, step, cancelToken);
+            bakeTaskLocal.AddWaitTask((task) =>
+            {
+                // 仅在 collector Dispose 之前读取 task; 完成后 level 不再持有池化 task 引用。
+                bool succeeded = bakeTaskLocal.TaskState == Thread.Async.ETaskStatus.Success &&
+                    bakeTaskLocal.DirectResult != null && cancelToken.TaskState != Thread.Async.EAsyncTaskState.Canceled &&
+                    mCacheGeneration == Level.Node.CacheGeneration;
+                if (succeeded)
                     CachedVgDag = bakeTaskLocal.DirectResult;
+                if (bakeTaskLocal.Exception != null)
+                    Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Error,
+                        $"Terrain VGDag bake failed: {vgFile}, {bakeTaskLocal.Exception}");
+                ReportCookStage(succeeded ? ".trvgdag 已落盘, 后台任务已完成" : "DAG 烘焙失败或已取消");
+                Level.CompleteBake(cancelToken, succeeded);
             });
         }
 
-        private async Thread.Async.TtTask<TtVgDagAsset> BakeVgDagAsync(string vgFile, Hash160 hash, float[] hf, int size, int leafQuads, float maxError, Thread.Async.TtAsyncTaskToken cancelToken)
+        private async Thread.Async.TtTask<TtVgDagAsset> BakeVgDagAsync(string vgFile, Hash160 hash, float[] hf, int size, int step, Thread.Async.TtAsyncTaskToken cancelToken)
         {
             // bake + 落盘同在 TPools 线程池完成 (不阻塞 level 生成/主线程);
-            // token 关联到后台任务: CancelBakeTask 置 Canceled 后, bake 在下一个检查点返回 null,
+            // token 关联到后台任务: CancelBakeTask 置 Canceled 并转发到原生烘焙器, bake 在下一个 group 检查点返回 null,
             // 此时跳过落盘直接结束 (TrySetResult 对已 Cancelling 的 task 返回 false, 不会复活状态)。
             var asset = await TtEngine.Instance.EventPoster.Post((state) =>
             {
-                // preStep=2: 整层网格先结构化降采样 (面数 ÷4), 远景 LOD 无需全分辨率 QEM;
-                // 引入的偏差 ≤ 1 texel 高度, 相对 maxError (默认 1600) 可忽略
-                var result = TtVgClusterBaker.BakeFromLevel(hf, size, leafQuads, maxError, state, 2);
-                if (result == null)
-                    return null; // 被取消: 不落盘
-                SaveVgDagFile(vgFile, hash, result);
+                TtVgDagAsset result;
+                using (var baker = new TtQuarkTerrainBaker())
+                {
+                    // 先登记再检查 token, 与 CancelBakeTask 的"先置 token 再读烘焙器"配对, 取消不会漏网。
+                    Level.RegisterDagBaker(baker);
+                    try
+                    {
+                        if (state.IsCancelRequested)
+                            return null;
+                        result = baker.Bake(hf, size, step, mCookContext == null ? null : ReportCookStage);
+                    }
+                    finally
+                    {
+                        Level.UnregisterDagBaker(baker);
+                    }
+                }
+                if (result == null || state.IsCancelRequested)
+                    return null;
+                ReportCookStage($"写入 .trvgdag, clusters={result.Clusters.Length}, groups={result.Groups.Length}, vertices={result.Vertices.Length}");
+                if (!Level.Node.TryWriteCache(mCacheGeneration, vgFile, temporary => SaveVgDagFile(temporary, hash, result), cancelToken))
+                    return null;
+                mCookContext?.ReportArtifact(vgFile);
+                if (mCookContext != null)
+                    ReportCookStage($"已落盘: {System.IO.Path.GetFileName(vgFile)} ({new System.IO.FileInfo(vgFile).Length / 1048576.0:F1} MB)");
                 return result;
-            }, Thread.Async.EAsyncTarget.TPools).WithToken(cancelToken); // QEM bake 单个可能耗时秒级, 不能占 AsyncIO 专用线程, 抛线程池并行执行 (bake 任务相互无依赖)
+            }, Thread.Async.EAsyncTarget.TPools).WithToken(cancelToken); // 单个 bake 可能耗时秒级, 不能占 AsyncIO 专用线程, 抛线程池并行执行 (bake 任务相互无依赖)
             return asset;
         }
 
@@ -781,6 +956,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 int len = 0;
                 ar.ReadPtr(&len, sizeof(int));
+                if (len < 0)
+                    throw new System.IO.InvalidDataException($"negative attribute byte length {len}");
                 var bytes = new byte[len];
                 if (len > 0)
                 {
@@ -793,7 +970,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
         }
 
-        protected unsafe void SaveVgDagFile(string file, in Hash160 hash, TtVgDagAsset asset)
+        protected unsafe void SaveVgDagFile(string file, Hash160 hash, TtVgDagAsset asset)
         {
             using (var xnd = new IO.TtXndHolder("VgDag", 0, 0))
             {
@@ -812,11 +989,15 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 }
                 xnd.SaveXnd(file);
             }
+            if (!CacheHasHash(file, hash, true))
+                throw new System.IO.IOException($"Terrain VGDag cache validation failed: {file}");
         }
 
-        /// <summary>DAG 未生成/hash 不匹配时返回 null —— 远景渲染以此判定未就绪。</summary>
+        /// <summary>DAG 未生成/hash 不匹配/格式非法时返回 null —— 远景渲染以此判定未就绪, 非法缓存视为未命中并重烘。</summary>
         protected TtVgDagAsset LoadVgDagFile(string file, in Hash160 testHash)
         {
+            if (!CacheHasHash(file, testHash, true))
+                return null;
             using (var xnd = IO.TtXndHolder.LoadXnd(file))
             {
                 if (xnd == null)
@@ -834,13 +1015,21 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 attr = xnd.RootNode.TryGetAttribute("VgDagData");
                 if (attr.IsValidPointer == false)
                     return null;
-                return TtVgDagAsset.FromBytes(ReadBytesFromAttribute(attr));
+                try
+                {
+                    return TtVgDagAsset.FromBytes(ReadBytesFromAttribute(attr));
+                }
+                catch (Exception ex) when (ex is System.IO.InvalidDataException || ex is System.IO.EndOfStreamException)
+                {
+                    Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Warning,
+                        $"Terrain VGDag cache rejected, will rebake: {file}, {ex.Message}");
+                    return null;
+                }
             }
         }
 
-        protected unsafe void SaveLevelToCache(string file, in Hash160 hash)
+        protected unsafe void SaveLevelToCache(string file, in Hash160 hash, Procedure.TtPgcAsset terrainGen)
         {
-            var terrainGen = Level.Node.TerrainGen;
             var hMap = terrainGen.AssetGraph.Root.GetResultBuffer("Height");
             var norMap = terrainGen.AssetGraph.Root.GetResultBuffer("Normal");
             var idMap = terrainGen.AssetGraph.Root.GetResultBuffer("MatId");
@@ -949,7 +1138,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 }
 
                 xnd.SaveXnd(file);
-            }   
+            }
+            if (!CacheHasHash(file, hash, false))
+                throw new System.IO.IOException($"Terrain level cache validation failed: {file}");
         }
         static Hash160 BuildPgcRuntimeHash(Hash160 baseHash, Procedure.TtPgcGraph graph,
             Procedure.TtPgcExecutionContext context)
@@ -1007,6 +1198,18 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
         protected void BuildLevelDataFromPGC(TtTerrainNode.TtTerrainData nodeData)
         {
+            // 同节点共享一个有可变 BufferCache 的 PGC 图, 生成与清 BufferCache 不能并发。
+            // 锁顺序固定为 PgcBuildLock → 缓存写锁; 清缓存只拿写锁, 不反向等待此锁。
+            lock (Level.Node.PgcBuildLock)
+            {
+                if (mCacheGeneration != Level.Node.CacheGeneration)
+                    return;
+                BuildLevelDataFromPGCCore(nodeData);
+            }
+        }
+
+        void BuildLevelDataFromPGCCore(TtTerrainNode.TtTerrainData nodeData)
+        {
             RName terrainName = nodeData.PgcName;
             if (terrainName == null)
             {
@@ -1018,20 +1221,34 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var worldOrigin = Level.StartPosition;
             var pgcContext = new Procedure.TtPgcExecutionContext(Level.Node.GetWorld(),
                 in worldOrigin, Level.Node.GridSize);
+            ReportCookStage("计算 PGC 缓存 hash");
             var runtimeHash = BuildPgcRuntimeHash(Level.Node.TerrainGenHash,
                 terrainGen.AssetGraph, pgcContext);
 
-            var dir = GetLevelCacheDir(terrainName);
+            var dir = GetLevelCacheDir();
             IO.TtFileManager.SureDirectory(dir);
-            var lvlFile = $"{dir}/X{Level.LevelX}_Y{Level.LevelZ}.trlvl";
-            var vgFile = $"{dir}/X{Level.LevelX}_Y{Level.LevelZ}.trvgdag";
-            if (terrainName != null)
+            var lvlFile = $"{dir}/x{Level.LevelX}_y{Level.LevelZ}.trlvl";
+            var vgFile = $"{dir}/x{Level.LevelX}_y{Level.LevelZ}.trvgdag";
+            mLevelCacheFile = lvlFile;
+            mVgDagCacheFile = vgFile;
+            mLevelCacheHash = runtimeHash;
+            mHasCacheHash = true;
+            // cook 第 2 轮即使 Force 也只读第 1 轮刚写好的 .trlvl, 不再重跑 PGC。
+            if (mCookContext == null || mCookVgDagPass || !mCookContext.Force)
             {
-                if (LoadLevelFromCache(lvlFile, runtimeHash) == true)
+                if (mCookContext != null ? LoadCookLevelFromCache(lvlFile, runtimeHash, vgFile) : LoadLevelFromCache(lvlFile, runtimeHash))
                 {
                     // .trvgdag 加载与缺失时的补烘触发都已在 LoadLevelFromCache 内完成
                     return;
                 }
+            }
+            if (mCookContext != null && mCookVgDagPass)
+            {
+                // 第 1 轮已验证过, 这里读不到只可能是期间被改/删; 不补跑 PGC, 由产物校验判 job 失败。
+                ReportCookStage(".trlvl 缺失或 hash 不符, 无法烘焙 DAG");
+                Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Error,
+                    $"Terrain cook: level cache missing/invalid in DAG pass: {lvlFile}");
+                return;
             }
             
             var IdMapNode = terrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.TtMaterialIdMapNode;
@@ -1062,6 +1279,30 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
 
             var root = terrainGen.AssetGraph.Root;
+            if (mCookContext != null)
+            {
+                try
+                {
+                    ReportCookStage(".trlvl 未命中或强制重建; 执行 PGC");
+                    terrainGen.Compile(root, pgcContext, true, ReportCookStage, () => mCookContext.IsCancellationRequested);
+                    if (mCookContext.IsCancellationRequested)
+                        throw new OperationCanceledException("Terrain cook cancelled after PGC");
+                    var cookHeight = root.GetResultBuffer("Height");
+                    if (cookHeight == null)
+                        throw new InvalidOperationException("Terrain PGC did not produce a heightfield");
+                    ReportCookStage($"写入 .trlvl, 高度场 {cookHeight.Width}×{cookHeight.Height}");
+                    if (!Level.Node.TryWriteCache(mCacheGeneration, lvlFile, temporary => SaveLevelToCache(temporary, runtimeHash, terrainGen)))
+                        throw new System.IO.IOException($"Terrain level cache publication rejected: {lvlFile}");
+                    mCookContext.ReportArtifact(lvlFile);
+                    // DAG 留到第 2 轮: 先让全图 .trlvl 就绪, 运行期流式加载不必等 DAG。
+                    ReportCookStage($"已落盘: {System.IO.Path.GetFileName(lvlFile)} ({new System.IO.FileInfo(lvlFile).Length / 1048576.0:F1} MB)");
+                }
+                finally
+                {
+                    terrainGen.AssetGraph.BufferCache.ResetCache();
+                }
+                return;
+            }
             terrainGen.Compile(root, pgcContext);
             var hMap = root.GetResultBuffer("Height");
             var norMap = root.GetResultBuffer("Normal") as Procedure.TtSuperBuffer<Vector3, Procedure.FFloat3Operator>;
@@ -1092,7 +1333,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     UpdateGrass(tagNode);
             }
             
-            SaveLevelToCache(lvlFile, runtimeHash);
+            if (Level.Node.TryWriteCache(mCacheGeneration, lvlFile, temporary => SaveLevelToCache(temporary, runtimeHash, terrainGen)))
+                mCookContext?.ReportArtifact(lvlFile);
             terrainGen.AssetGraph.BufferCache.ResetCache();
         }
         protected void BuildEmptyLevelData(int xSize, int ySize)
@@ -1189,6 +1431,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         public unsafe void OnGatherVisibleMeshes_OnRenderThread(GamePlay.TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             foreach (var i in TiledPatch)
             {
                 if (i==null)
@@ -1210,6 +1453,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         /// <summary>发布点: LOD 分配完成后, 逻辑线程一次性把快照交给渲染线程</summary>
         public void PublishRenderLOD_OnRenderThread()
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             foreach (var i in TiledPatch)
             {
                 if (i==null)

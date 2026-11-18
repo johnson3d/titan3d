@@ -159,13 +159,83 @@ namespace NxRHI
 			OnBindResource(binder, bs);
 		}
 	}
-	void IGraphicDraw::BindIndirectDrawArgsBuffer(IBuffer* buffer, UINT offset)
+	void IGraphicDraw::BindIndirectDrawArgsView(IIndirectArgView* view, UINT offset)
 	{
-		IndirectDrawArgsBuffer = buffer;
+		IndirectDrawArgsView = view;
 		IndirectDrawOffsetForArgs = offset;
 		FBindResource bs{};
-		bs.SetResource(buffer);
+		bs.SetResource(view);
 		OnBindResource(nullptr, bs);
+	}
+#if defined(FINAL_SHIPPING)
+	void FBindLayoutValidator::Check(IGpuBufferDataBase* resource, const FViewLayout& layout)
+	{
+	}
+#else
+	void FBindLayoutValidator::Check(IGpuBufferDataBase* resource, const FViewLayout& layout)
+	{
+		const auto& tracker = resource->LayoutTracker;
+		for (const auto& i : Items)
+		{
+			if (i.Resource != resource || i.Layout.State == layout.State)
+				continue;
+			if (tracker.IsPerSubresource() == false || i.Layout.Range.Overlaps(layout.Range, tracker.GetMipLevels(), tracker.GetArraySize()))
+			{
+				VFX_LTRACE(ELTT_Graphics, "BindLayout conflict: resource bound as layout %d and %d in one draw, create it with LTM_PerSubresource or split the draw\r\n",
+					(int)i.Layout.State, (int)layout.State);
+				bool bNoLayoutConflict = false;
+				ASSERT(bNoLayoutConflict);
+			}
+		}
+		Items.push_back(FItem{ resource, layout });
+	}
+#endif
+	static void UseBindView(ICommandList* cmdlist, IGpuViewBase* view, bool bTryRenderPass, FBindLayoutValidator* validator)
+	{
+		if (view == nullptr)
+			return;
+		// 纹理 streaming 依赖 SRV 的访问帧
+		auto state = view->GetResourceState();
+		if (state != nullptr)
+			state->SetAccessFrame(IWeakRefObject::EngineCurrentFrame);
+		auto buffer = view->GetBufferDataBase();
+		if (buffer != nullptr)
+		{
+			cmdlist->GetCmdRecorder()->UseResource(buffer);
+			if (validator != nullptr)
+			{
+				auto layout = view->GetViewLayout();
+				if (layout.State != EGpuResourceState::GRS_Undefine)
+					validator->Check(buffer, layout);
+			}
+		}
+		FTransitionScope::TryAutoTransition(cmdlist, view, bTryRenderPass);
+	}
+	void TransitionBindResource(ICommandList* cmdlist, const FShaderBinder* binder, IGpuResource* resource, bool bTryRenderPass, FBindLayoutValidator* validator)
+	{
+		if (resource == nullptr || binder == nullptr || binder->Type == EShaderBindType::SBT_Sampler)
+			return;
+		if (binder->IsBindless())
+		{
+			auto bl = (IBindless*)resource;
+			for (auto& i : bl->mResources)
+			{
+				UseBindView(cmdlist, (IGpuViewBase*)i.Resource.GetPtr(), bTryRenderPass, validator);
+			}
+		}
+		else
+		{
+			UseBindView(cmdlist, (IGpuViewBase*)resource, bTryRenderPass, validator);
+		}
+	}
+	void IGraphicDraw::TransitionBindResources(ICommandList* cmdlist)
+	{
+		FBindLayoutValidator validator;
+		for (auto& i : BindResources)
+		{
+			TransitionBindResource(cmdlist, i.first->GetValidShaderBinder(), i.second.Resource, true, &validator);
+		}
+		UseBindView(cmdlist, IndirectDrawArgsView.GetPtr(), true, &validator);
 	}
 	void IGraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
@@ -234,9 +304,9 @@ namespace NxRHI
 		else
 			pDrawDesc = &AtomDesc->AtomDesc;
 		ASSERT(pDrawDesc);
-		if (IndirectDrawArgsBuffer)
+		if (IndirectDrawArgsView)
 		{
-			cmdlist->IndirectDrawIndexed(pDrawDesc->PrimitiveType, IndirectDrawArgsBuffer, IndirectDrawOffsetForArgs);
+			cmdlist->IndirectDrawIndexed(pDrawDesc->PrimitiveType, IndirectDrawArgsView->GetBuffer(), IndirectDrawOffsetForArgs);
 		}
 		else
 		{
@@ -378,9 +448,9 @@ namespace NxRHI
 			}
 		}
 
-		if (IndirectDispatchArgsBuffer != nullptr)
+		if (IndirectDispatchArgsView != nullptr)
 		{
-			cmdlist->IndirectDispatch(IndirectDispatchArgsBuffer, 0);
+			cmdlist->IndirectDispatch(IndirectDispatchArgsView->GetBuffer(), 0);
 		}
 		else
 		{
@@ -424,8 +494,15 @@ namespace NxRHI
 		auto device = cmdlist->GetGpuDevice();
 		device->CheckDeviceThread();
 		
-		FTransitionScope targetTransition(cmdlist, mDest, EGpuResourceState::GRS_CopyDst);
-		FTransitionScope sourceTransition(cmdlist, mSrc, EGpuResourceState::GRS_CopySrc);
+		// 纹理拷贝只转涉及的子资源, PerSubresource 下不打扰其它 mip / layer 的 layout
+		FSubresourceRange destRange;
+		FSubresourceRange srcRange;
+		if (Mode == ECopyDrawMode::CDM_Texture2Texture || Mode == ECopyDrawMode::CDM_Buffer2Texture)
+			destRange.SetSubresource(DestSubResource, mDest->LayoutTracker.GetMipLevels());
+		if (Mode == ECopyDrawMode::CDM_Texture2Texture || Mode == ECopyDrawMode::CDM_Texture2Buffer)
+			srcRange.SetSubresource(SrcSubResource, mSrc->LayoutTracker.GetMipLevels());
+		FTransitionScope targetTransition(cmdlist, mDest, destRange, EGpuResourceState::GRS_CopyDst);
+		FTransitionScope sourceTransition(cmdlist, mSrc, srcRange, EGpuResourceState::GRS_CopySrc);
 
 		cmdlist->BeginEvent("CopyDraw");
 		switch (Mode)
@@ -550,27 +627,32 @@ namespace NxRHI
 		}
 	}
 	
-	void IBarriersDraw::PushBarrier(IGpuBufferData* buffer, EGpuResourceState state)
+	void IBarriersDraw::PushBarrier(IGpuBufferDataBase* buffer, const FSubresourceRange& range, EGpuResourceState state)
 	{
 		VAutoVSLLock lk(mLocker);
 		ASSERT(Step == 1);
 		//ASSERT(state != EGpuResourceState::GRS_CopyDst);
-		FBarrierDesc tmp(buffer, state);
+		const auto& tracker = buffer->LayoutTracker;
 		for (const auto& i : Barriers)
 		{
-			if (i.Buffer == buffer)
+			if (i.Buffer.GetPtr() != buffer || i.ToState == state)
+				continue;
+			// 同一 pass 内同一子资源不能要求两种 layout; Whole 模式任何范围都算重叠
+			if (tracker.IsPerSubresource() == false || i.Range.Overlaps(range, tracker.GetMipLevels(), tracker.GetArraySize()))
 			{
-				if (i.ToState != state)
-				{
-					ASSERT(false);
-				}
-				else
-				{
-					return;
-				}
+				ASSERT(false);
 			}
 		}
-		Barriers.push_back(tmp);
+		// 已被前面的 barrier 转过的子资源不会再产生段
+		FBarrierDesc tmp;
+		tmp.Buffer = buffer;
+		tmp.Range = range;
+		tmp.ToState = state;
+		buffer->LayoutTracker.Transition(range, state, [&](const FSubresourceRange& seg, EGpuResourceState from) {
+			tmp.Segments.push_back(FBarrierDesc::FSegment{ seg, from });
+		});
+		if (tmp.Segments.empty() == false)
+			Barriers.push_back(std::move(tmp));
 	}
 	void IBarriersDraw::OnBeginPass(ICommandList* cmdlist)
 	{
@@ -587,12 +669,12 @@ namespace NxRHI
 	{
 		ASSERT(Step == 1);
 		cmdlist->BeginEvent("RenderPassBarriers");
-		for (UINT i = 0; i < (UINT)Barriers.size(); i++)
+		for (const auto& i : Barriers)
 		{
-			auto save = Barriers[i].Buffer->GpuState;
-			Barriers[i].Buffer->GpuState = Barriers[i].FromState;
-			Barriers[i].Buffer->TransitionTo(cmdlist, Barriers[i].ToState);
-			Barriers[i].Buffer->GpuState = save;
+			for (const auto& seg : i.Segments)
+			{
+				i.Buffer->EmitTransition(cmdlist, seg.Range, seg.FromState, i.ToState);
+			}
 		}
 		cmdlist->EndEvent();
 		Barriers.clear();

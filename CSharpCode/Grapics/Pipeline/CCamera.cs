@@ -22,7 +22,9 @@ namespace EngineNS.Graphics.Pipeline
             {
                 if (mPerCameraCBuffer == null)
                 {
-                    mPerCameraCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(NxRHI.TtShader.TtCommonShaderResourceIndexer.Instance.cbPerCamera);
+                    // DEFAULT: 更新经 staging 拷贝在 GPU 队列中排队, 避免 CPU 原地覆盖 in-flight 帧正在读的相机数据
+                    // (否则旧帧按旧视锥剔除却按新矩阵绘制, 转动时边缘出现缺口). 约束: 每帧在录制前更新一次
+                    mPerCameraCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(NxRHI.TtShader.TtCommonShaderResourceIndexer.Instance.cbPerCamera, NxRHI.EGpuUsage.USAGE_DEFAULT);
                     mPerCameraCBuffer.SetDebugName($"Camera");
                     //mCoreObject.BindConstBuffer(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, mPerCameraCBuffer.mCoreObject);
                 }
@@ -207,6 +209,8 @@ namespace EngineNS.Graphics.Pipeline
         
         public unsafe CONTAIN_TYPE WhichContainTypeFast(GamePlay.TtWorld world, in EngineNS.DBoundingBox dAabb, bool testInner)
         {
+            if (TtEngine.Instance.Config.Feature_UseCpuCulling == false)
+                return CONTAIN_TYPE.CONTAIN_TEST_INNER;
             using (new Profiler.TimeScopeHelper(ScopeWhichContainTypeFast))
             {
                 // 用 GPU 状态镜像的视锥 (与最近一次 cbPerCamera 写入逐字段一致) ——

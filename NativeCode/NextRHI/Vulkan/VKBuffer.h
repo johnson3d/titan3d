@@ -28,7 +28,7 @@ namespace NxRHI
 			mBuffer = buffer;
 		}
 		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
-		AutoRef<IGpuBufferData> mBuffer;
+		AutoRef<IGpuBufferDataBase> mBuffer;
 		bool mIsBufferView = false;
 		union
 		{
@@ -64,7 +64,7 @@ namespace NxRHI
 		virtual void Unmap(UINT index) override;
 		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
-		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) override;
+		virtual void EmitTransition(ICommandList* cmd, const FSubresourceRange& range, EGpuResourceState from, EGpuResourceState to) override;
 		virtual void SetDebugName(const char* name) override;
 
 		UINT64 GetGPUVirtualAddress();
@@ -73,6 +73,9 @@ namespace NxRHI
 		VkBuffer mBuffer = nullptr;
 		VmaAllocation mAllocation = nullptr;
 		VmaAllocationInfo mAllocationInfo{};
+		//池化 staging: mBuffer 借用 VKStagingPage 的 VkBuffer, 数据从 mBufferOffset 开始; 析构时归还 chunk 而不销毁 mBuffer
+		UINT64 mBufferOffset = 0;
+		AutoRef<FVKStagingChunk> mStagingChunk;
 		//valid when this buffer is the storage of a BLAS/TLAS(BFT_RTAS)
 		VkAccelerationStructureKHR mAccelerationStructure = VK_NULL_HANDLE;
 	};
@@ -90,12 +93,13 @@ namespace NxRHI
 		virtual void Unmap(UINT subRes) override;
 		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
 		virtual void UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* footPrint) override;
-		virtual void TransitionTo(ICommandList* cmd, EGpuResourceState state) override;
+		virtual void EmitTransition(ICommandList* cmd, const FSubresourceRange& range, EGpuResourceState from, EGpuResourceState to) override;
 		virtual void SetDebugName(const char* name) override;
-		virtual IGpuBufferData* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) override;
+		virtual IGpuBufferDataBase* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) override;
 		virtual bool GetFootprint(FSubResourceFootPrint* fp, UINT64* rowSize, UINT64* totalSize, UINT subRes, UINT64 offset) override;
 
-		VkImageLayout GetImageLayout();
+		// subRes 内状态; PerSubresource 下整资源状态可能不一致, 拷贝等单子资源操作须传 subRes
+		VkImageLayout GetImageLayout(UINT subRes);
 		VkImageAspectFlagBits GetImageAspect();
 	public:
 		TWeakRefHandle<VKGpuDevice>	mDeviceRef;
@@ -150,8 +154,8 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return mView->GetHWBuffer();
 		}
-		bool Init(VKGpuDevice* device, IGpuBufferData* pBffer, const FSrvDesc& desc, const char* file = nullptr, int line = 0);
-		virtual bool UpdateBuffer(IGpuDevice* device, IGpuBufferData* buffer) override;
+		bool Init(VKGpuDevice* device, IGpuBufferDataBase* pBffer, const FSrvDesc& desc, const char* file = nullptr, int line = 0);
+		virtual bool UpdateBuffer(IGpuDevice* device, IGpuBufferDataBase* buffer) override;
 		virtual UINT GetFingerPrint() const override {
 			return 0;
 		}
@@ -170,7 +174,7 @@ namespace NxRHI
 		virtual void* GetHWBuffer() override {
 			return mView->GetHWBuffer();
 		}
-		bool Init(VKGpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc, const char* file = nullptr, int line = 0);
+		bool Init(VKGpuDevice* device, IGpuBufferDataBase* pBuffer, const FUavDesc& desc, const char* file = nullptr, int line = 0);
 		virtual void SetDebugName(const char* name) override;
 	public:
 		TWeakRefHandle<VKGpuDevice>	mDeviceRef;

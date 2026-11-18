@@ -138,6 +138,72 @@ namespace NxRHI
 	};
 
 	///-----------------------------------------------------------
+	///staging(UPLOAD heap) 池: UpdateGpuData 的一次性拷贝源从这里子分配, 免去每次 CreateCommittedResource/Release.
+	///尺寸按 2 的幂分档, 每档若干页, 一页一个常驻 Map 的 committed 资源.
+	///chunk 由持有它的 staging buffer 析构时归还 (recorder 引用到 fence 完成后才释放, 故归还即 GPU 已用完);
+	///空页超出预算或长期闲置时在 TickShrink 中释放.
+	class DX12StagingMemAllocator;
+	struct DX12StagingPage : public DX12GpuHeap
+	{
+		~DX12StagingPage();
+		UINT64				ChunkSize = 0;
+		UINT				ChunkCount = 0;
+		std::vector<UINT>	FreeChunks;
+		BYTE*				pMapped = nullptr;
+		UINT64				IdleSinceTick = 0;
+		UINT64 GetPageSize() const {
+			return ChunkSize * ChunkCount;
+		}
+		bool IsIdle() const {
+			return FreeChunks.size() == ChunkCount;
+		}
+	};
+	struct FDX12StagingGpuMemory : public FGpuMemory
+	{
+		TWeakRefHandle<DX12StagingMemAllocator>	HostAllocator;
+		AutoRef<DX12StagingPage>				Page;
+		UINT									ChunkIndex = 0;
+		BYTE* GetMappedPtr() {
+			return Page->pMapped + Offset;
+		}
+		virtual void FreeMemory() override;
+	};
+	class DX12StagingMemAllocator : public IGpuMemAllocator
+	{
+	public:
+		static const UINT		NumOfSizeClass = 13;
+		static const UINT64		MinChunkSize = 256;
+		static const UINT64		MaxChunkSize = MinChunkSize << (NumOfSizeClass - 1);//1MB, 超过走一次性 committed
+		static const UINT64		MinPageSize = 64 * 1024;
+		static const UINT64		MaxPageSize = 4 * 1024 * 1024;
+		static const UINT		ChunksPerPage = 64;
+
+		UINT64					BudgetSize = 32 * 1024 * 1024;//页总量超出时立即回收空页 (在用页不动, 分配不受限)
+		UINT64					IdleReleaseTicks = 1800;//预算内的空页闲置这么多 tick 后回收
+
+		virtual AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT64 size, const char* name) override;
+		virtual void Free(FGpuMemory* memory) override;
+		FGpuMemHolder* AllocGpuMem(IGpuDevice* device, UINT64 size, const char* name);
+		void TickShrink();
+
+		UINT64 GetTotalPageSize() const {
+			return TotalPageSize;
+		}
+		UINT GetNumOfPages() const {
+			UINT num = 0;
+			for (auto& i : SizeClasses)
+				num += (UINT)i.size();
+			return num;
+		}
+	private:
+		DX12StagingPage* CreatePage(IGpuDevice* device, UINT64 chunkSize);
+		VSLLock										mLocker;
+		std::vector<AutoRef<DX12StagingPage>>		SizeClasses[NumOfSizeClass];
+		UINT64										TotalPageSize = 0;
+		UINT64										TickIndex = 0;
+	};
+
+	///-----------------------------------------------------------
 	///DX12DescriptorSetPagedObject
 	struct FDX12DescriptorHeap;
 	struct FCopyDescriptors

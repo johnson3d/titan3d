@@ -4,6 +4,8 @@
 #include "../../../3rd/native/metis/5.1.0/include/metis.h"
 #include <algorithm>
 #include <cstdio>
+#include <cstring>
+#include <unordered_map>
 
 NS_BEGIN
 
@@ -35,6 +37,8 @@ UINT FClusterDAG::AddMesh(
 
 	for (INT32 EdgeIndex = 0; EdgeIndex < (INT32)Indexes.size(); EdgeIndex++)
 	{
+		if ((EdgeIndex & 0xFFFF) == 0 && ShouldCancel && ShouldCancel())
+			return 0;
 		Adjacency.Direct[EdgeIndex] = -1;
 
 		EdgeHash.ForAllMatching(EdgeIndex, true,
@@ -55,6 +59,7 @@ UINT FClusterDAG::AddMesh(
 
 	// Step 2: Partition triangles into clusters using METIS
 	FGraphPartitioner Partitioner(NumTris);
+	Partitioner.ShouldCancel = ShouldCancel;
 
 	// Build disjoint set for locality links
 	FDisjointSet DisjointSet(NumTris);
@@ -94,6 +99,8 @@ UINT FClusterDAG::AddMesh(
 
 	std::vector<INT32> EmptyGroupIndexes;
 	Partitioner.BuildLocalityLinks(DisjointSet, MeshBounds, EmptyGroupIndexes, GetCenter);
+	if (ShouldCancel && ShouldCancel())
+		return 0;
 
 	// Build graph for partitioning
 	auto Graph = Partitioner.NewGraph(NumTris * 3);
@@ -116,6 +123,9 @@ UINT FClusterDAG::AddMesh(
 
 	// Partition into clusters of ~ClusterSize triangles
 	Partitioner.PartitionStrict(Graph, ClusterSize - 4, ClusterSize, false);
+	// 划分被取消时 Ranges 不完整, 不能生成 cluster
+	if (ShouldCancel && ShouldCancel())
+		return 0;
 
 	// Step 3: Create cluster objects from partition result
 	UINT ClusterStartIndex = (UINT)Clusters.size();
@@ -154,6 +164,9 @@ void FClusterDAG::BuildDAG()
 
 	while (true)
 	{
+		if (ShouldCancel && ShouldCancel())
+			return;
+
 		// Get clusters at current level
 		std::vector<UINT> LevelClusters = GetClustersAtLevel(CurrentLevel);
 
@@ -188,6 +201,8 @@ void FClusterDAG::BuildDAG()
 		// Reduce each group to produce parent clusters
 		for (auto& Group : LevelGroups)
 		{
+			if (ShouldCancel && ShouldCancel())
+				return;
 			ReduceGroup(Group);
 			Groups.push_back(Group);
 		}
@@ -209,6 +224,15 @@ void FClusterDAG::BuildDAG()
 
 		VFX_LTRACE(ELTT_info, "[ClusterDAG] Level %d: %u clusters -> %u parent clusters\n",
 			CurrentLevel - 1, (UINT)LevelClusters.size(), (UINT)ParentIndices.size());
+
+		// Locked borders can stop simplification from reducing the cluster count;
+		// without progress the loop would never converge, so the current level becomes the root.
+		if (ParentIndices.size() >= LevelClusters.size())
+		{
+			VFX_LTRACE(ELTT_Warning, "[ClusterDAG] Level %d made no progress (%u -> %u clusters), stop\n",
+				CurrentLevel - 1, (UINT)LevelClusters.size(), (UINT)ParentIndices.size());
+			break;
+		}
 	}
 }
 
@@ -358,7 +382,8 @@ void FClusterDAG::ReduceGroup(FClusterGroup& Group)
 
 	// Step 2: Simplify to ~50% triangle count
 	UINT TargetTris = std::max(ClusterSize, MergedCluster->NumTris / 2);
-	float SimplifyError = MergedCluster->Simplify(TargetTris);
+	float SimplifyError = SimplifyOverride ? SimplifyOverride(*MergedCluster, TargetTris, SimplifyTargetError)
+		: MergedCluster->Simplify(TargetTris, SimplifyTargetError);
 
 	// Step 3: Compute ParentLODError = max(SimplifyError, max child LODError)
 	float MaxChildError = 0.0f;
@@ -415,68 +440,76 @@ void FClusterDAG::ReduceGroup(FClusterGroup& Group)
 
 void FClusterDAG::BuildClusterAdjacency(const std::vector<UINT>& ClusterIndices)
 {
-	// Build a position-based hash to find shared edges between clusters
-	// Two clusters are adjacent if they share vertex positions on their boundaries
-
-	struct FVertexKey
+	// Two clusters are adjacent if they share mesh edges (matched by exact endpoint positions).
+	// Every edge is hashed once by its undirected position key: O(total edges) per level
+	// instead of comparing all cluster pairs. Interior edges map back to the same cluster and
+	// are ignored, so the result does not depend on ExternalEdges being exact.
+	struct FEdgeKey
 	{
-		v3dxVector3 Position;
-		UINT ClusterIndex;
+		UINT Bits[6];
+		bool operator==(const FEdgeKey& Other) const { return memcmp(Bits, Other.Bits, sizeof(Bits)) == 0; }
+	};
+	struct FEdgeKeyHash
+	{
+		size_t operator()(const FEdgeKey& Key) const
+		{
+			return Murmur32({ Key.Bits[0], Key.Bits[1], Key.Bits[2], Key.Bits[3], Key.Bits[4], Key.Bits[5] });
+		}
+	};
+	auto PositionBits = [](const v3dxVector3& P, UINT* Out)
+	{
+		// +0/-0 must weld like HashPosition does
+		const float F[3] = { P.X == 0.0f ? 0.0f : P.X, P.Y == 0.0f ? 0.0f : P.Y, P.Z == 0.0f ? 0.0f : P.Z };
+		memcpy(Out, F, sizeof(F));
 	};
 
-	// Collect all external edge vertices from each cluster
-	std::map<UINT, std::vector<v3dxVector3>> ClusterBoundaryVerts;
+	size_t TotalEdges = 0;
+	for (UINT ClusterIdx : ClusterIndices)
+		TotalEdges += Clusters[ClusterIdx]->Indexes.size();
+
+	// Value: owning cluster of the first occurrence
+	std::unordered_map<FEdgeKey, UINT, FEdgeKeyHash> EdgeOwner;
+	EdgeOwner.reserve(TotalEdges);
+	std::map<std::pair<UINT, UINT>, UINT> SharedEdges;
+
 	for (UINT ClusterIdx : ClusterIndices)
 	{
 		QuarkCluster* Cluster = Clusters[ClusterIdx];
-		std::vector<v3dxVector3> BoundaryVerts;
-
-		for (UINT i = 0; i < (UINT)Cluster->ExternalEdges.size(); i++)
+		for (UINT i = 0; i < (UINT)Cluster->Indexes.size(); i++)
 		{
-			if (Cluster->ExternalEdges[i] != 0)
+			UINT V0 = Cluster->Indexes[i];
+			UINT V1 = Cluster->Indexes[Cycle3(i)];
+			if (V0 >= Cluster->NumVerts || V1 >= Cluster->NumVerts)
+				continue;
+
+			UINT A[3], B[3];
+			PositionBits(Cluster->GetPosition(V0), A);
+			PositionBits(Cluster->GetPosition(V1), B);
+			FEdgeKey Key;
+			if (memcmp(A, B, sizeof(A)) <= 0)
 			{
-				UINT VertIdx = Cluster->Indexes[i];
-				if (VertIdx < Cluster->NumVerts)
-				{
-					BoundaryVerts.push_back(Cluster->GetPosition(VertIdx));
-				}
+				memcpy(Key.Bits, A, sizeof(A));
+				memcpy(Key.Bits + 3, B, sizeof(B));
+			}
+			else
+			{
+				memcpy(Key.Bits, B, sizeof(B));
+				memcpy(Key.Bits + 3, A, sizeof(A));
+			}
+
+			auto Inserted = EdgeOwner.emplace(Key, ClusterIdx);
+			if (!Inserted.second && Inserted.first->second != ClusterIdx)
+			{
+				UINT Other = Inserted.first->second;
+				SharedEdges[std::make_pair(std::min(Other, ClusterIdx), std::max(Other, ClusterIdx))]++;
 			}
 		}
-		ClusterBoundaryVerts[ClusterIdx] = BoundaryVerts;
 	}
 
-	// For each pair of clusters, check if they share boundary vertices
-	for (UINT i = 0; i < (UINT)ClusterIndices.size(); i++)
+	for (const auto& Pair : SharedEdges)
 	{
-		UINT ClusterA = ClusterIndices[i];
-		const auto& VertsA = ClusterBoundaryVerts[ClusterA];
-
-		for (UINT j = i + 1; j < (UINT)ClusterIndices.size(); j++)
-		{
-			UINT ClusterB = ClusterIndices[j];
-			const auto& VertsB = ClusterBoundaryVerts[ClusterB];
-
-			// Count shared vertices (using position comparison)
-			UINT SharedCount = 0;
-			for (const auto& VA : VertsA)
-			{
-				for (const auto& VB : VertsB)
-				{
-					if (VA == VB)
-					{
-						SharedCount++;
-						if (SharedCount >= 2) // At least one shared edge
-							goto FoundAdjacency;
-					}
-				}
-			}
-			continue;
-
-		FoundAdjacency:
-			// Mark as adjacent
-			Clusters[ClusterA]->AdjacentClusters[ClusterB] = SharedCount;
-			Clusters[ClusterB]->AdjacentClusters[ClusterA] = SharedCount;
-		}
+		Clusters[Pair.first.first]->AdjacentClusters[Pair.first.second] = Pair.second;
+		Clusters[Pair.first.second]->AdjacentClusters[Pair.first.first] = Pair.second;
 	}
 }
 

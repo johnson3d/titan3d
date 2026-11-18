@@ -5,6 +5,7 @@
 #include "DX12Effect.h"
 #include "DX12Drawcall.h"
 #include "DX12FrameBuffers.h"
+#include "../../Base/debug/vfxmemory.h"
 
 #define new VNEW
 
@@ -83,7 +84,7 @@ namespace NxRHI
 		uploadBuffer->Desc.RowPitch = (UINT)totalSize;
 		uploadBuffer->Desc.Size = size;
 		uploadBuffer->mGpuMemory = MakeWeakRef(device->GetUploadBufferMemAllocator()->AllocGpuMem(file, line, device, &resDesc, &properties, D3D12_RESOURCE_STATE_GENERIC_READ, name));
-		uploadBuffer->GpuState = GRS_CopySrc;
+		uploadBuffer->LayoutTracker.LockState(GRS_CopySrc);
 		FMappedSubResource mapped;
 		
 		if (uploadBuffer->Map(0, &mapped, false))
@@ -97,6 +98,44 @@ namespace NxRHI
 
 		return uploadBuffer;
 	}
+	// UpdateGpuData 的一次性拷贝源: 小尺寸从 staging 池子分配 (常驻映射, 直接 memcpy), 超过池上限的回落一次性 committed.
+	// 生命期不变: CopyDraw/recorder 引用到 fence 完成, buffer 析构时 chunk 归还池
+	static AutoRef<IBuffer> CreateStagingCopySource(const char* file, int line, DX12GpuDevice* device, const FBufferDesc& dstDesc, void* pData, UINT64 size)
+	{
+		auto copyDesc = dstDesc;
+		copyDesc.Usage = EGpuUsage::USAGE_STAGING;
+		copyDesc.Type = EBufferType::BFT_NONE;
+		copyDesc.Size = (UINT)size;
+		copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+		copyDesc.InitData = nullptr;
+
+		if (size <= DX12StagingMemAllocator::MaxChunkSize)
+		{
+			auto holder = MakeWeakRef(device->GetStagingMemAllocator()->AllocGpuMem(device, size, "Staging"));
+			if (holder != nullptr)
+			{
+				memcpy(((FDX12StagingGpuMemory*)holder->GpuMem.GetPtr())->GetMappedPtr(), pData, size);
+
+				auto result = MakeWeakRef(new DX12Buffer());
+				result->mDeviceRef.FromObject(device);
+				result->Desc = copyDesc;
+				result->LayoutTracker.LockState(GRS_CopySrc);
+				result->mGpuMemory = holder;
+				return AutoRef<IBuffer>(result.GetPtr());
+			}
+		}
+
+		FMappedSubResource initData{};
+		initData.pData = pData;
+		initData.RowPitch = (UINT)size;
+		copyDesc.InitData = &initData;
+		return MakeWeakRef(device->CreateBuffer(&copyDesc, file, line));
+	}
+	// 池化路径每次更新仍会 new 这几个小对象, 须留在引擎 small_alloc 范围内
+	static_assert(sizeof(FDX12StagingGpuMemory) <= VFX_Memory::__max_bytes, "FDX12StagingGpuMemory must stay in small_alloc");
+	static_assert(sizeof(FGpuMemHolder) <= VFX_Memory::__max_bytes, "FGpuMemHolder must stay in small_alloc");
+	static_assert(sizeof(DX12Buffer) <= VFX_Memory::__max_bytes, "DX12Buffer must stay in small_alloc");
+	static_assert(sizeof(ICopyDraw) <= VFX_Memory::__max_bytes, "ICopyDraw must stay in small_alloc");
 	bool DX12Buffer::Init(const char* file, int line, DX12GpuDevice* device, const FBufferDesc& desc)
 	{
 		Desc = desc;
@@ -104,7 +143,7 @@ namespace NxRHI
 		mDeviceRef.FromObject(device);
 		
 		D3D12_RESOURCE_STATES resState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
-		GpuState = EGpuResourceState::GRS_GenericRead;
+		SetGpuResourceState(EGpuResourceState::GRS_GenericRead);
 		D3D12_HEAP_PROPERTIES properties{};
 		properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY::D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
 		switch (desc.Usage)
@@ -116,7 +155,7 @@ namespace NxRHI
 			case USAGE_DYNAMIC:
 				properties.Type = D3D12_HEAP_TYPE_UPLOAD;
 				resState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
-				GpuState = EGpuResourceState::GRS_GenericRead;
+				SetGpuResourceState(EGpuResourceState::GRS_GenericRead);
 				break;
 			case USAGE_STAGING:
 				{
@@ -128,7 +167,7 @@ namespace NxRHI
 					{
 						properties.Type = D3D12_HEAP_TYPE_UPLOAD;
 						resState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
-						GpuState = EGpuResourceState::GRS_CopySrc;
+						SetGpuResourceState(EGpuResourceState::GRS_CopySrc);
 					}
 				}
 				break;
@@ -156,13 +195,17 @@ namespace NxRHI
 				resDesc.Width = (resDesc.Width / pAlignment->CBufferAlignment + 1) * pAlignment->CBufferAlignment;
 			}
 			
-			properties.Type = D3D12_HEAP_TYPE_UPLOAD;
-			resState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
-			GpuState = EGpuResourceState::GRS_GenericRead;
+			// DEFAULT cbuffer 留在显存, 走下面的通用 default 分配; 其余走 upload heap 的 cbuffer 分配器
+			if (desc.Usage != EGpuUsage::USAGE_DEFAULT)
+			{
+				properties.Type = D3D12_HEAP_TYPE_UPLOAD;
+				resState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+				SetGpuResourceState(EGpuResourceState::GRS_GenericRead);
 
-			auto allocInfo = device->mDevice->GetResourceAllocationInfo(0, 1, &resDesc);
-			//allocator = device->mCBufferMemAllocator;
-			mGpuMemory = MakeWeakRef(device->mCBufferMemAllocator->AllocGpuMem(device, desc.Size, "CBuffer"));
+				auto allocInfo = device->mDevice->GetResourceAllocationInfo(0, 1, &resDesc);
+				//allocator = device->mCBufferMemAllocator;
+				mGpuMemory = MakeWeakRef(device->mCBufferMemAllocator->AllocGpuMem(device, desc.Size, "CBuffer"));
+			}
 		}
 		if (desc.Type & EBufferType::BFT_RTV)
 		{
@@ -213,20 +256,23 @@ namespace NxRHI
 		if (desc.Type & EBufferType::BFT_IndirectArgs)
 		{
 			resState |= D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
-			GpuState = EGpuResourceState::GRS_UavIndirect;
+			SetGpuResourceState(EGpuResourceState::GRS_Indirect);
 		}
 		if (desc.Type & EBufferType::BFT_RTAS)
 		{
 			resState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE;
-			GpuState = EGpuResourceState::GRS_GenericRead;
+			SetGpuResourceState(EGpuResourceState::GRS_GenericRead);
 		}
 		if (desc.CpuAccess == ECpuAccess::CAS_READ)
 		{
 			resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 			resState = D3D12_RESOURCE_STATE_COPY_DEST;
-			GpuState = EGpuResourceState::GRS_CopyDst;
+			SetGpuResourceState(EGpuResourceState::GRS_CopyDst);
 			//properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY::D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
 		}
+		// UPLOAD / READBACK heap 按 D3D12 规范状态不可切换 (UPLOAD 常驻 GENERIC_READ, READBACK 常驻 COPY_DEST), 锁定后转换请求一律忽略
+		if (properties.Type == D3D12_HEAP_TYPE_UPLOAD || properties.Type == D3D12_HEAP_TYPE_READBACK)
+			LayoutTracker.LockState(GetGpuResourceState());
 		if (mGpuMemory == nullptr)
 		{
 			/*if (desc.Usage == USAGE_STAGING)
@@ -300,29 +346,13 @@ namespace NxRHI
 		return true;
 	}
 
-	void DX12Buffer::TransitionTo(ICommandList* cmd, EGpuResourceState state)
+	void DX12Buffer::EmitTransition(ICommandList* cmd, const FSubresourceRange& range, EGpuResourceState from, EGpuResourceState to)
 	{
-		/*if (state == GpuState)
-			return;*/
-
-		if (Desc.Usage == EGpuUsage::USAGE_DYNAMIC)
-		{
-			// DYNAMIC buffer 常驻 GENERIC_READ(已包含 COPY_DEST/COPY_SRC 与全部读状态),
-			// 任意目标状态都无需 barrier
-			ASSERT(GpuState == EGpuResourceState::GRS_GenericRead);
-			return;
-		}
-		else if (Desc.Usage == EGpuUsage::USAGE_STAGING)
-		{
-			ASSERT(GpuState == EGpuResourceState::GRS_CopyDst || GpuState == EGpuResourceState::GRS_CopySrc);
-			ASSERT(state == GpuState);
-			return;
-		}
-
+		// DYNAMIC / STAGING 位于 UPLOAD / READBACK heap, 创建时已 LockState, 不会走到这里
+		// (UPLOAD 的 GENERIC_READ = 全部读状态 + COPY_SOURCE, 可作 GPU 拷贝源, 但不是合法的 GPU 拷贝目标)
+		ASSERT(Desc.Usage != EGpuUsage::USAGE_DYNAMIC && Desc.Usage != EGpuUsage::USAGE_STAGING);
 		cmd->GetCmdRecorder()->UseResource(this);
-		cmd->SetBufferBarrier(this, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, GpuState, state);
-
-		GpuState = state;
+		cmd->SetBufferBarrier(this, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, from, to);
 	}
 
 	void DX12Buffer::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* pFootPrint)
@@ -331,19 +361,12 @@ namespace NxRHI
 		// 无 cmd 则开 transient 队列排队执行 -- 不能直接 Map 填入正在被 GPU 使用的 buffer
 		if (cmd != nullptr || Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
+			// DYNAMIC 位于 UPLOAD heap, 常驻 GENERIC_READ (不含 COPY_DEST), 不是合法的 GPU 拷贝目标:
+			// 带 cmd 更新 DYNAMIC 是调用方契约错误, 应改为 DEFAULT 或不传 cmd 由 CPU 直写
+			ASSERT(Desc.Usage != EGpuUsage::USAGE_DYNAMIC);
 			auto device = mDeviceRef.GetPtr();
 
-			auto copyDesc = this->Desc;
-			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
-			copyDesc.Type = EBufferType::BFT_NONE;
-			copyDesc.Size = pFootPrint->TotalSize;
-			FMappedSubResource initData{};
-			initData.pData = pData;
-			initData.RowPitch = copyDesc.Size;
-			copyDesc.InitData = &initData;
-			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
-
-			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
+			auto bf = CreateStagingCopySource(__FILE__, __LINE__, device, this->Desc, pData, pFootPrint->TotalSize);
 
 			{
 				AutoRef<ICopyDraw> cpDraw = MakeWeakRef(device->CreateCopyDraw(__FILE__, __LINE__));
@@ -374,7 +397,6 @@ namespace NxRHI
 		}
 		else
 		{
-			ASSERT(cmd == nullptr);
 			FMappedSubResource mapped{};
 			if (this->Map(subRes, &mapped, false))
 			{
@@ -392,62 +414,11 @@ namespace NxRHI
 		if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
 			auto device = mDeviceRef.GetPtr();
-			//D3D12_RESOURCE_DESC resDesc{};
-			//resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-			////resDesc.Width = desc.Size;
-			//resDesc.Width = Desc.Size;
-			//resDesc.Height = 1;
-			//resDesc.DepthOrArraySize = 1;
-			//resDesc.MipLevels = 1;
-			//resDesc.SampleDesc.Count = 1;
-			//resDesc.SampleDesc.Quality = 0;
-			//resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-			//resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-			//resDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
 
-			//auto pAlignment = device->GetGpuResourceAlignment();
-			//if (Desc.Type & EBufferType::BFT_CBuffer)
-			//{
-			//	//resDesc.Alignment = pAlignment->CBufferAlignment;
-			//	if (resDesc.Width % pAlignment->CBufferAlignment)
-			//	{
-			//		resDesc.Width = (resDesc.Width / pAlignment->CBufferAlignment + 1) * pAlignment->CBufferAlignment;
-			//	}
-			//}
-			//if (Desc.Type & EBufferType::BFT_RTV)
-			//{
-			//	ASSERT(false);
-			//	resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-			//}
-			//if (Desc.Type & EBufferType::BFT_DSV)
-			//{
-			//	ASSERT(false);
-			//	resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-			//}
-			//if (Desc.Type & EBufferType::BFT_UAV)
-			//{
-			//	resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-			//}
+			auto bf = CreateStagingCopySource(__FILE__, __LINE__, device, this->Desc, pData, pFootPrint->TotalSize);
 
-			//D3D12_PLACED_SUBRESOURCE_FOOTPRINT footPrint{};
-			//UINT numX = 0;
-			//UINT64 rowSize = 0, totalSize = 0;
-			//device->mDevice->GetCopyableFootprints(&resDesc, 0, 1, 0, &footPrint, &numX, &rowSize, &totalSize);
-
-			//auto bf = CreateUploadBuffer(device, pData, totalSize, pFootPrint->RowPitch, "Upload Buffer 2");//.Size);
-
-			auto copyDesc = this->Desc;
-			copyDesc.Usage = EGpuUsage::USAGE_STAGING;
-			copyDesc.Type = EBufferType::BFT_NONE;
-			copyDesc.Size = pFootPrint->TotalSize;
-			FMappedSubResource initData{};
-			initData.pData = pData;
-			initData.RowPitch = copyDesc.Size;
-			copyDesc.InitData = &initData;
-			copyDesc.CpuAccess = ECpuAccess::CAS_WRITE;
-
-			auto bf = MakeWeakRef(device->CreateBuffer(&copyDesc, __FILE__, __LINE__));
-
+			// 顺序保证依赖现状: FTransientCmd 析构时立即提交, 且 DX12 只有一条硬件队列 (QU_Transfer 实际未生效),
+			// 故拷贝排在"已提交的上一帧"之后、"尚未提交的本帧"之前. 若启用独立 copy 队列须补跨队列 fence 等待
 			FTransientCmd tsCmd(device, EQueueType::QU_Transfer, "UpdateGpuData");
 			auto cmd = tsCmd.GetCmdList();
 			{
@@ -590,7 +561,7 @@ namespace NxRHI
 		uploadBuffer->Desc.DepthPitch = (UINT)rowPitch * numOfRows;
 		uploadBuffer->Desc.Size = (UINT)uploadSize;
 		uploadBuffer->mGpuMemory = MakeWeakRef(device->GetUploadBufferMemAllocator()->AllocGpuMem(file, line, device, &resDesc, &properties, D3D12_RESOURCE_STATE_GENERIC_READ, name));
-		uploadBuffer->GpuState = GRS_CopySrc;
+		uploadBuffer->LayoutTracker.LockState(GRS_CopySrc);
 
 		if (uploadBuffer != nullptr)
 		{
@@ -654,10 +625,11 @@ namespace NxRHI
 	bool DX12Texture::Init(DX12GpuDevice* device, const FTextureDesc& desc)
 	{
 		Desc = desc;
+		InitLayoutTracker();
 		mDeviceRef.FromObject(device);
 		
 		D3D12_RESOURCE_STATES resState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
-		GpuState = EGpuResourceState::GRS_GenericRead;
+		SetGpuResourceState(EGpuResourceState::GRS_GenericRead);
 		D3D12_HEAP_PROPERTIES properties{};
 		properties.Type = D3D12_HEAP_TYPE_DEFAULT;
 		D3D12_RESOURCE_DESC& resDesc = mDX12ResourceDesc;
@@ -878,7 +850,7 @@ namespace NxRHI
 		return true;
 	}
 
-	IGpuBufferData* DX12Texture::CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint)
+	IGpuBufferDataBase* DX12Texture::CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint)
 	{
 		FBufferDesc desc{};
 		desc.CpuAccess = cpuAccess;
@@ -1127,23 +1099,10 @@ namespace NxRHI
 		}
 	}
 
-	void DX12Texture::TransitionTo(ICommandList* cmd, EGpuResourceState state)
+	void DX12Texture::EmitTransition(ICommandList* cmd, const FSubresourceRange& range, EGpuResourceState from, EGpuResourceState to)
 	{
-		/*if (state == GpuState)
-			return;*/
-		/*if (state == EGpuResourceState::GRS_DepthStencil)
-		{
-			int xx = 0;
-		}
-		if (GpuState == EGpuResourceState::GRS_DepthStencil)
-		{
-			int xx = 0;
-		}*/
 		cmd->GetCmdRecorder()->UseResource(this);
-
-		cmd->SetTextureBarrier(this, 0, Desc.MipLevels, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, GpuState, state);
-
-		GpuState = state;
+		cmd->SetTextureBarrier(this, range, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, from, to);
 	}
 
 	void DX12Texture::SetDebugName(const char* name)
@@ -1208,8 +1167,17 @@ namespace NxRHI
 			bfDesc.StructureStride = 0;
 			bfDesc.InitData = nullptr;
 			bfDesc.Type = EBufferType::BFT_CBuffer;
-			bfDesc.Usage = EGpuUsage::USAGE_DYNAMIC;
-			bfDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+			ASSERT(desc.Usage == EGpuUsage::USAGE_DYNAMIC || desc.Usage == EGpuUsage::USAGE_DEFAULT);
+			if (desc.Usage == EGpuUsage::USAGE_DEFAULT)
+			{
+				bfDesc.Usage = EGpuUsage::USAGE_DEFAULT;
+				bfDesc.CpuAccess = (ECpuAccess)0;
+			}
+			else
+			{
+				bfDesc.Usage = EGpuUsage::USAGE_DYNAMIC;
+				bfDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+			}
 
 			Buffer = MakeWeakRef(device->CreateBuffer(&bfDesc, file ? file : __FILE__, line ? line : __LINE__));
 			ASSERT(Buffer != nullptr);
@@ -1457,7 +1425,7 @@ namespace NxRHI
 		}
 	}
 
-	bool DX12SrView::Init(DX12GpuDevice* device, IGpuBufferData* pBuffer, const FSrvDesc& desc, const char* file, int line)
+	bool DX12SrView::Init(DX12GpuDevice* device, IGpuBufferDataBase* pBuffer, const FSrvDesc& desc, const char* file, int line)
 	{
 		mDeviceRef.FromObject(device);
 		Desc = desc;
@@ -1492,7 +1460,7 @@ namespace NxRHI
 		
 		return true;
 	}
-	bool DX12SrView::UpdateBuffer(IGpuDevice* device, IGpuBufferData* pBuffer)
+	bool DX12SrView::UpdateBuffer(IGpuDevice* device, IGpuBufferDataBase* pBuffer)
 	{
 		ASSERT(Buffer);
 		device->DelayDestroy(Buffer);
@@ -1619,7 +1587,7 @@ namespace NxRHI
 				break;
 		}
 	}
-	bool DX12UaView::Init(DX12GpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc, const char* file, int line)
+	bool DX12UaView::Init(DX12GpuDevice* device, IGpuBufferDataBase* pBuffer, const FUavDesc& desc, const char* file, int line)
 	{
 		mDeviceRef.FromObject(device);
 		Desc = desc;

@@ -125,7 +125,7 @@ ExeCmd=Cook Asset=<相对路径>
   逐节点调用 `TtNode.CookAsset()` 虚方法。默认实现直接返回 true；
   `TtTerrainNode` 重写后执行完整地形 cook：
   - PGC 程序化节点图 → 高度场 → `.trlvl` level 缓存
-  - 每个 level 的 cluster DAG QEM 烘焙 → `.trvgdag` 落盘（缓存 hash 命中则跳过，重复 cook 幂等）
+  - 每个 level 的地形 cluster DAG 烘焙（原生 Quark + 精确竖直误差，`TtQuarkTerrainBaker`）→ `.trvgdag` 落盘（缓存 hash 命中则跳过，重复 cook 幂等）
   - 等待期间每 10 秒输出一条进度心跳日志，避免无输出难以判断是否存活
 
 返回码：0 全部成功；1 有失败（未知类型、`GetAssetMeta`/`CreateAsset`/`CookAsset` 失败）。
@@ -155,7 +155,8 @@ TitanCMD.exe CookCfg=..\..\content\config\<cook 配置>.jscfg ExeCmd=CookServer 
 |---|---|---|
 | `WorkerIdleSec=` | 300 | 空闲（队列空且无在飞 job）多久后优雅退出；`<=0` 禁用 |
 | `WorkerMaxJobs=` | 200 | 本进程跑多少个 job 后在批次边界主动退出，由提交侧重新拉起；`<=0` 不限 |
-| `WorkerJobTimeout=` | 1200 | 单 job 超时秒数（与地形 bake 的 `bakeTimeoutMs=1200000` 对齐）；`<=0` 不限 |
+| `WorkerJobTimeout=` | 0 | 单 job 总时长上限秒数；`<=0` 不限（大地形全量 cook 可以合法地跑很久） |
+| `WorkerStallSec=` | 600 | job 连续多少秒没有 stage/progress/artifact 上报就判定卡死并按超时取消；`<=0` 禁用。须大于单个 PGC 节点的最长耗时。`ExeCmd=Cook` 也认这个参数（计时器看门，判定后协作式取消） |
 | `WorkerBeatSec=` | 10 | 心跳间隔秒数 |
 | `CookCfg=` | — | 只用于算 `hello` 里的 `cfgHash`（配置内容 RIPEMD160），供提交侧拒绝不同配置共写 cache |
 
@@ -172,7 +173,7 @@ TitanCMD.exe CookCfg=..\..\content\config\<cook 配置>.jscfg ExeCmd=CookServer 
   **队列里未开工的 job 作废**。两种情形下提交侧都需按"没收到终态行的 job 重投"处理。
 - **同一资产已在队/在飞则合并**，不重复跑；队列超 `512` 条则对该 `add` 回 `busy`。
 - **取消是协作式的**：`cancel` 只置 `TtCookContext.RequestCancel()`，不使用 `CancelTask()`；
-  超时后先置取消位，再给 `60s` 收尾宽限期，仍不收尾则判定引擎态不可信，以退出码 `1` 退场。
+  超时或收到提交侧 cancel 后先置取消位，再给 `60s` 收尾宽限期，仍不收尾则判定引擎态不可信，补写终态行后以退出码 `1` 退场。
 - **黑名单不参与**：黑名单是入队侧策略，worker 只接具体资产路径。
 
 返回码：0 = 优雅退出（`idle` / `restart` / `manual` / `pipe`），1 = 致命错误（取消后 job 仍不收尾）。

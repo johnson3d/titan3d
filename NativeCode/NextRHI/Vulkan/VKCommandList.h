@@ -49,11 +49,15 @@ namespace NxRHI
 			int								WaitFrameCount = 0;
 		};
 		std::vector<FWaitRecycle>	Recycles;
+		// TickRecycle 由主线程跨线程调用, 不能在那里碰 mCmdPool; 裁掉的 recorder 先放这里, 由本线程下次 Alloc 时释放
+		std::vector<AutoRef<VKCmdRecorder>>	PendingFrees;
 	};
 
 	class VKCmdBufferManager : public VIUnknown
 	{
 		thread_local static VKThreadCmdBufferManager* mThreadManager;
+		// 新线程首次 Alloc 的 push_back 与主线程 TickRecycle 的遍历并发
+		VSLLock mManagersLocker;
 		std::vector<VKThreadCmdBufferManager*> mAllManagers;
 	public:
 		void Initialize(VKGpuDevice* device)
@@ -128,7 +132,7 @@ namespace NxRHI
 		virtual void IndirectDispatchMesh(IBuffer* indirectArg, UINT indirectArgOffset = 0) override;
 		virtual void SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess) override;
 		virtual void SetBufferBarrier(IBuffer* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess) override;
-		virtual void SetTextureBarrier(ITexture* pResource, UINT subResource, UINT levelCount, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess) override;
+		virtual void SetTextureBarrier(ITexture* pResource, const FSubresourceRange& range, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess) override;
 
 		/*virtual UINT64 SignalFence(IFence* fence, UINT64 value, IEvent* evt = nullptr) override;
 		virtual void WaitGpuFence(IFence* fence, UINT64 value) override;*/

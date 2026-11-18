@@ -21,6 +21,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)HashTable.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)HierarchyBuilder.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NxQuarkMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)QuarkDAGBuilder.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)TerrainError.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)TerrainSimplifier.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)TriangleUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -31,6 +34,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)HashTable.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)HierarchyBuilder.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NxQuarkMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)QuarkDAGBuilder.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)TerrainError.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)TerrainSimplifier.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)TriangleUtil.h" />
   </ItemGroup>
 </Project>

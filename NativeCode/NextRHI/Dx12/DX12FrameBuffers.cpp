@@ -103,7 +103,7 @@ namespace NxRHI
 				pDx12Texture->Desc.Width = Desc.Width;
 				pDx12Texture->Desc.Height = Desc.Height;
 				pDx12Texture->mGpuResource = MakeWeakRef(pBackBuffer);
-				pDx12Texture->GpuState = EGpuResourceState::GRS_Present;
+				pDx12Texture->SetGpuResourceState(EGpuResourceState::GRS_Present);
 			}
 			else
 			{
@@ -172,7 +172,7 @@ namespace NxRHI
 				pDx12Texture->Desc.Width = Desc.Width;
 				pDx12Texture->Desc.Height = Desc.Height;
 				pDx12Texture->mGpuResource = MakeWeakRef(pBackBuffer);
-				pDx12Texture->GpuState = EGpuResourceState::GRS_Present;
+				pDx12Texture->SetGpuResourceState(EGpuResourceState::GRS_Present);
 			}
 			else
 			{

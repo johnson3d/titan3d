@@ -46,6 +46,12 @@ namespace EngineNS.IO
         private readonly Dictionary<string, Type> mAssetTypes = new Dictionary<string, Type>();
         private readonly List<string> mBlacklistEntries = new List<string>();
 
+        /// <summary>
+        /// 命令行入口 (ExeCmd=Cook) 的无进展判死秒数, &lt;=0 禁用。CookServer 传入自己的 ctx,
+        /// 由其主循环判定 (含宽限期后退出), 不经这里。
+        /// </summary>
+        public int StandaloneStallSec = 600;
+
         #region 类型表 / 黑名单
         /// <summary>
         /// 反射枚举全部 IAssetMeta 子类, 建立 "类型名 → meta 类型" 表。
@@ -151,6 +157,7 @@ namespace EngineNS.IO
                 return FCookJobResult.Failed($"asset not found in Game/Engine root: {assetPath}");
             }
 
+            var standalone = ctx == null;
             ctx = ctx ?? new TtCookContext(0, rn.ToString(), null, false, TtCookLogSink.Instance);
             Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Info, $"Cook single asset begin: {rn}");
 
@@ -158,7 +165,8 @@ namespace EngineNS.IO
             await world.InitWorld();
             try
             {
-                return await CookResolvedAsset(rn, world, ctx);
+                using (standalone ? StartStallWatchdog(ctx) : null)
+                    return await CookResolvedAsset(rn, world, ctx);
             }
             finally
             {
@@ -257,6 +265,25 @@ namespace EngineNS.IO
         }
 
         /// <summary>
+        /// 命令行入口没有 CookServer 主循环看门, 用线程池计时器代判: 连续无上报超限即协作式取消。
+        /// 计时器不依赖主线程, 主线程被同步重活卡住时也照判; 返回 null 表示禁用。
+        /// </summary>
+        System.Threading.Timer StartStallWatchdog(TtCookContext ctx)
+        {
+            var limit = StandaloneStallSec;
+            if (limit <= 0)
+                return null;
+            return new System.Threading.Timer(_ =>
+            {
+                if (ctx.IsCancellationRequested || ctx.IdleSec < limit)
+                    return;
+                Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Error,
+                    $"Cook {ctx.Asset}: no progress for {ctx.IdleSec:F0}s (stall limit {limit}s), last stage: {ctx.LastStage}; cancelling");
+                ctx.RequestCancel();
+            }, null, 1000, 1000);
+        }
+
+        /// <summary>
         /// 取消发生在 CookAsset 之前时的释放入口。正常路径下实例由 CookAsset 实现方释放
         /// (见 IAssetMeta.CookAsset 契约), 只有那种情况下没人接手, 才由驱动方自己收尾。
         /// </summary>
@@ -331,6 +358,7 @@ namespace EngineNS.IO
                     }
                     var rn = RName.GetRName(rp, rnType);
                     var ctx = new TtCookContext(0, rp, typeName, false, TtCookLogSink.Instance);
+                    using (StartStallWatchdog(ctx))
                     try
                     {
                         var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(rn);

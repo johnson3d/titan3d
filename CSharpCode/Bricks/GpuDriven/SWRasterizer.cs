@@ -475,7 +475,7 @@ namespace EngineNS.Bricks.GpuDriven
 
                 // do rasterization
                 //SWRasterizer.SetDrawcallDispatch(this, policy, SWRasterizerDrawcall, 1, 1, 1, false);
-                SWRasterizer.SetDrawcallIndirectDispatch(this, policy, SWRasterizerDrawcall, IndirectArgBuffer.GpuBuffer);
+                SWRasterizer.SetDrawcallIndirectDispatch(this, policy, SWRasterizerDrawcall, IndirectArgBuffer.Iav);
                 cmd.PushGpuDraw(SWRasterizerDrawcall);
 
                 cmd.BeginEvent(Name);

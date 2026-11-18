@@ -105,6 +105,7 @@ namespace EngineNS.NxPhysics
         }
         public override void OnGatherVisibleMeshes_OnRenderThread(GamePlay.TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             foreach (var i in mScene.mRigidBodies)
             {
                 foreach (var j in i.Shapes)

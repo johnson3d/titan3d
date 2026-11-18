@@ -35,6 +35,7 @@ namespace EngineNS.GamePlay.Player
         }
         public override void OnGatherVisibleMeshes_OnRenderThread(TtWorld.TtVisParameter rp)
         {
+            Thread.TtContextThread.CheckOnRenderThread();
             base.OnGatherVisibleMeshes_OnRenderThread(rp);
         }
         protected override void OnParentSceneChanged(TtScene prev, TtScene cur)

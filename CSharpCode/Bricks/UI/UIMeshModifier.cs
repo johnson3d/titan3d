@@ -123,7 +123,7 @@ namespace EngineNS.UI
                     var srv = brush.GetSrv();
                     if (srv.IsValidPointer)
                     {
-                        drawcall.mCoreObject.BindResource(TtNameTable.FontTexture, srv.NativeSuper);
+                        drawcall.mCoreObject.BindResource(TtNameTable.FontTexture, srv.NativeSuper.NativeSuper);
                     }
                     unsafe
                     {
@@ -150,7 +150,7 @@ namespace EngineNS.UI
                     var srv = brush.GetSrv();
                     if (srv.IsValidPointer)
                     {
-                        drawcall.mCoreObject.BindResource(TtNameTable.UITexture, srv.NativeSuper);
+                        drawcall.mCoreObject.BindResource(TtNameTable.UITexture, srv.NativeSuper.NativeSuper);
                         //var matIns = mesh.Atoms[atom].Material as UMaterialInstance;
                     }
                     unsafe
