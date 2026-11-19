@@ -1267,6 +1267,14 @@ namespace NxRHI
 			createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
 			createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
 			createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+			if (pTexture->Desc.Format == EPixelFormat::PXF_A8_UNORM)
+			{
+				// Match A8_UNORM sampling: (0, 0, 0, storedAlpha).
+				createInfo.components.r = VK_COMPONENT_SWIZZLE_ZERO;
+				createInfo.components.g = VK_COMPONENT_SWIZZLE_ZERO;
+				createInfo.components.b = VK_COMPONENT_SWIZZLE_ZERO;
+				createInfo.components.a = VK_COMPONENT_SWIZZLE_R;
+			}
 			createInfo.subresourceRange.aspectMask = FormatToVKImageAspectFlags(desc.Format, true, false);
 			createInfo.subresourceRange.baseArrayLayer = 0;
 			switch (desc.Type)
@@ -1322,54 +1330,52 @@ namespace NxRHI
 		
 		return true;
 	}
-	bool VKSrView::UpdateBuffer(IGpuDevice* device1, IGpuBufferDataBase* pBuffer)
+	bool VKSrView::UpdateBuffer_OnRenderThread(IGpuDevice* device1, IGpuBufferDataBase* pBuffer)
 	{
 		if (Buffer == pBuffer)
 			return true;
 
 		auto device = (VKGpuDevice*)device1;
 
-		//device->DelayDestroy(mView);
-		Buffer = pBuffer;
+		//build the new view completely in locals and publish Desc/Buffer/mView only after it is valid
+		auto view = MakeWeakRef(new VKMemoryViewWrapper());
+		view->Initialize(device);
 
-		mView = MakeWeakRef(new VKMemoryViewWrapper());
-		mView->Initialize(device);
-
-		switch (Desc.Type)
+		FSrvDesc desc = Desc;
+		switch (desc.Type)
 		{
 			case ESrvType::ST_Texture1D:
-				Desc.Texture1D.MipLevels = Buffer.UnsafeConvertTo<ITexture>()->Desc.MipLevels;
+				desc.Texture1D.MipLevels = ((ITexture*)pBuffer)->Desc.MipLevels;
 				break;
 			case ESrvType::ST_Texture1DArray:
-				Desc.Texture1DArray.MipLevels = Buffer.UnsafeConvertTo<ITexture>()->Desc.MipLevels;
+				desc.Texture1DArray.MipLevels = ((ITexture*)pBuffer)->Desc.MipLevels;
 				break;
 			case ESrvType::ST_Texture2D:
-				Desc.Texture2D.MipLevels = Buffer.UnsafeConvertTo<ITexture>()->Desc.MipLevels;
+				desc.Texture2D.MipLevels = ((ITexture*)pBuffer)->Desc.MipLevels;
 				break;
 			case ESrvType::ST_Texture2DArray:
-				Desc.Texture2DArray.MipLevels = Buffer.UnsafeConvertTo<ITexture>()->Desc.MipLevels;
+				desc.Texture2DArray.MipLevels = ((ITexture*)pBuffer)->Desc.MipLevels;
 				break;
 			case ESrvType::ST_Texture3D:
-				Desc.Texture3D.MipLevels = Buffer.UnsafeConvertTo<ITexture>()->Desc.MipLevels;
+				desc.Texture3D.MipLevels = ((ITexture*)pBuffer)->Desc.MipLevels;
 				break;
 			case ESrvType::ST_TextureCube:
-				Desc.TextureCube.MipLevels = Buffer.UnsafeConvertTo<ITexture>()->Desc.MipLevels;
+				desc.TextureCube.MipLevels = ((ITexture*)pBuffer)->Desc.MipLevels;
 				break;
 			case ESrvType::ST_TextureCubeArray:
-				Desc.TextureCubeArray.MipLevels = Buffer.UnsafeConvertTo<ITexture>()->Desc.MipLevels;
+				desc.TextureCubeArray.MipLevels = ((ITexture*)pBuffer)->Desc.MipLevels;
 				break;
 			default:
 				break;
 		}
 
-		auto& desc = Desc;
-		if (Desc.Type == ESrvType::ST_BufferSRV)
+		if (desc.Type == ESrvType::ST_BufferSRV)
 		{
-			mView->AsBufferView((VKBuffer*)pBuffer);
+			view->AsBufferView((VKBuffer*)pBuffer);
 			UINT alignedSize = ((VKBuffer*)pBuffer)->Desc.Size;
 			VkBufferViewCreateInfo createInfo = {};
 			createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO;
-			createInfo.buffer = (VkBuffer)Buffer->GetHWBuffer();
+			createInfo.buffer = (VkBuffer)pBuffer->GetHWBuffer();
 
 			createInfo.offset = desc.Buffer.FirstElement;// bf->mGpuMemory->Offset;
 			createInfo.range = alignedSize;//VK_WHOLE_SIZE;//desc->Buffer.ElementWidth;
@@ -1380,15 +1386,15 @@ namespace NxRHI
 			}
 			else
 			{
-				createInfo.format = Format2VKFormat(Desc.Format);
+				createInfo.format = Format2VKFormat(desc.Format);
 				//createInfo.flags = VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT;
-				if (VK_SUCCESS != vkCreateBufferView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mView->mBufferView))
+				if (VK_SUCCESS != vkCreateBufferView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &view->mBufferView))
 					return false;
 			}
 		}
 		else
 		{
-			mView->AsTextureView((VKTexture*)pBuffer);
+			view->AsTextureView((VKTexture*)pBuffer);
 			auto pTexture = (VKTexture*)pBuffer;
 			auto pImage = pTexture->mImage;
 			VkImageViewCreateInfo createInfo = {};
@@ -1400,6 +1406,14 @@ namespace NxRHI
 			createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
 			createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
 			createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+			if (pTexture->Desc.Format == EPixelFormat::PXF_A8_UNORM)
+			{
+				// Match A8_UNORM sampling: (0, 0, 0, storedAlpha).
+				createInfo.components.r = VK_COMPONENT_SWIZZLE_ZERO;
+				createInfo.components.g = VK_COMPONENT_SWIZZLE_ZERO;
+				createInfo.components.b = VK_COMPONENT_SWIZZLE_ZERO;
+				createInfo.components.a = VK_COMPONENT_SWIZZLE_R;
+			}
 			createInfo.subresourceRange.aspectMask = FormatToVKImageAspectFlags(desc.Format, true, false);
 			createInfo.subresourceRange.baseArrayLayer = 0;
 			switch (desc.Type)
@@ -1447,11 +1461,15 @@ namespace NxRHI
 				createInfo.subresourceRange.layerCount = desc.Texture2DMSArray.ArraySize;
 				break;
 			}
-			if (vkCreateImageView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &mView->mImageView) != VK_SUCCESS)
+			if (vkCreateImageView(device->mDevice, &createInfo, device->GetVkAllocCallBacks(), &view->mImageView) != VK_SUCCESS)
 			{
 				return false;
 			}
 		}
+
+		Desc = desc;
+		Buffer = pBuffer;
+		mView = view;
 		return true;
 	}
 
@@ -1616,10 +1634,45 @@ namespace NxRHI
 		createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
 		createInfo.subresourceRange.aspectMask = FormatToVKImageAspectFlags(desc->Format, true, true);
 
-		createInfo.subresourceRange.baseMipLevel = 0;
 		createInfo.subresourceRange.levelCount = 1;
-		createInfo.subresourceRange.baseArrayLayer = 0;
 		createInfo.subresourceRange.layerCount = 1;
+		switch (desc->Type)
+		{
+			case ERtvType::RTV_Texture1D:
+				createInfo.viewType = VK_IMAGE_VIEW_TYPE_1D;
+				createInfo.subresourceRange.baseMipLevel = desc->Texture1D.MipSlice;
+				break;
+			case ERtvType::RTV_Texture1DArray:
+				createInfo.viewType = desc->Texture1DArray.ArraySize > 1 ? VK_IMAGE_VIEW_TYPE_1D_ARRAY : VK_IMAGE_VIEW_TYPE_1D;
+				createInfo.subresourceRange.baseMipLevel = desc->Texture1DArray.MipSlice;
+				createInfo.subresourceRange.baseArrayLayer = desc->Texture1DArray.FirstArraySlice;
+				createInfo.subresourceRange.layerCount = desc->Texture1DArray.ArraySize;
+				break;
+			case ERtvType::RTV_Texture2D:
+				createInfo.subresourceRange.baseMipLevel = desc->Texture2D.MipSlice;
+				break;
+			case ERtvType::RTV_Texture2DArray:
+				createInfo.viewType = desc->Texture2DArray.ArraySize > 1 ? VK_IMAGE_VIEW_TYPE_2D_ARRAY : VK_IMAGE_VIEW_TYPE_2D;
+				createInfo.subresourceRange.baseMipLevel = desc->Texture2DArray.MipSlice;
+				createInfo.subresourceRange.baseArrayLayer = desc->Texture2DArray.FirstArraySlice;
+				createInfo.subresourceRange.layerCount = desc->Texture2DArray.ArraySize;
+				break;
+			case ERtvType::RTV_Texture2DMS:
+				break;
+			case ERtvType::RTV_Texture2DMSArray:
+				createInfo.viewType = desc->Texture2DMSArray.ArraySize > 1 ? VK_IMAGE_VIEW_TYPE_2D_ARRAY : VK_IMAGE_VIEW_TYPE_2D;
+				createInfo.subresourceRange.baseArrayLayer = desc->Texture2DMSArray.FirstArraySlice;
+				createInfo.subresourceRange.layerCount = desc->Texture2DMSArray.ArraySize;
+				break;
+			case ERtvType::RTV_Texture3D:
+				createInfo.viewType = VK_IMAGE_VIEW_TYPE_3D;
+				createInfo.subresourceRange.baseMipLevel = desc->Texture3D.MipSlice;
+				break;
+			case ERtvType::RTV_Buffer:
+			default:
+				ASSERT(false && "Unsupported RTV type");
+				break;
+		}
 		
 		mView = MakeWeakRef(new VKMemoryViewWrapper());
 		mView->Initialize(device);

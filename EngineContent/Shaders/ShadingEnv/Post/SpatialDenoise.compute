@@ -32,6 +32,7 @@ Texture2D<float>  DepthBuffer;
 
 SamplerState Samp_PointClamp;
 
+VK_IMAGE(rgba16f)
 RWTexture2D<float4> DenoiseOutput;
 
 // 5x5 à-trous kernel 权重 (对称, 归一化)

@@ -185,8 +185,7 @@ namespace NxRHI
 
 		VkValidationFeaturesEXT validationFeatures{};
 		validationFeatures.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
-		VkValidationFeatureEnableEXT enableFeatures[] = { VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT,
-			VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_RESERVE_BINDING_SLOT_EXT ,
+		VkValidationFeatureEnableEXT enableFeatures[] = {
 			//VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT ,
 			VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT ,
 			VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT };
@@ -1445,7 +1444,26 @@ namespace NxRHI
 	}
 	UINT64 VKCmdQueue::Flush(EQueueType type)
 	{
-		return mFlushFence->WaitToExpect();
+		mFlushFence->IncreaseExpect(this, 1, type);
+		mFlushFence->WaitToExpect();
+		return mFlushFence->GetExpectValue();
+	}
+	void VKCmdQueue::WaitIdle()
+	{
+		VkResult hr = VK_SUCCESS;
+		{
+			VAutoVSLLock locker(mQueueLocker);
+			if (mGraphicsQueue != nullptr)
+				hr = vkQueueWaitIdle(mGraphicsQueue);
+			if (hr == VK_SUCCESS && mPresentQueue != nullptr && mPresentQueue != mGraphicsQueue)
+				hr = vkQueueWaitIdle(mPresentQueue);
+		}
+		if (hr == VK_ERROR_DEVICE_LOST)
+		{
+			mDevice->OnDeviceRemoved();
+			return;
+		}
+		ASSERT(hr == VK_SUCCESS);
 	}
 	void VKCmdQueue::BeginEvent(const char* info, DWORD color)
 	{

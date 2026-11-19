@@ -63,6 +63,7 @@ SamplerState Samp_HzbTexture DX_AUTOBIND;
 #include "../../Inc/HzbRayCast.cginc"
 #endif
 
+VK_IMAGE(rgba16f)
 RWTexture2D<float4> SSRTraceOutput DX_AUTOBIND;
 
 // A spatial pattern, not temporal noise. There is no SSR history/reprojection

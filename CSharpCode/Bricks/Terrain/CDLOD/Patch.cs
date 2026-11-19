@@ -116,8 +116,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
             if (TerrainNode.TerrainCBuffer == null)
             {
-                coreBinder.UpdateFieldVar(shaderProg, "cbPerTerrain");
-                TerrainNode.TerrainCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.Binder.mCoreObject);
+                // 必须用 cbPerTerrain 自己的索引器: UpdateFieldVar 在 mBinder 已设时直接返回,
+                // 复用上面的 patch 索引器会按 cbPerPatch 布局建出 256B 的 CBV, 且 UpdateCBuffer
+                // 用的 TtPerTerrainCBufferVarIndexer 从未绑定, 写入全部落空 → PatchSize=0 顶点坍缩
+                var terrainBinder = Graphics.Pipeline.TtCoreShaderBinder.TtPerTerrainCBufferVarIndexer.Instance;
+                terrainBinder.UpdateFieldVar(shaderProg, "cbPerTerrain");
+                TerrainNode.TerrainCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(terrainBinder.Binder.mCoreObject);
 
                 // Defensive init: trigger TerrainNode's own cbuffer fill logic right away so that
                 // the very first frame after creation never binds an uninitialized TerrainCBuffer.

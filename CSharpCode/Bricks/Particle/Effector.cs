@@ -20,12 +20,19 @@ namespace EngineNS.Bricks.Particle
 
         public unsafe void UpdateComputeDrawcall(NxRHI.TtGpuDevice rc, TtEmitter emitter)
         {
+            if (Shader == null || Shader.Particle_Update == null)
+                return;
+
             TtGpuParticleResources gpuResources = emitter.GpuResources;
 
             var coreBinder = Graphics.Pipeline.TtCoreShaderBinder.TtPerParticleCBufferVarIndexer.Instance;
-            if (mParticleUpdateDrawcall == null)
-            {
+            bool drawcallCreated = mParticleUpdateDrawcall == null;
+            if (drawcallCreated)
                 mParticleUpdateDrawcall = rc.CreateComputeDraw();
+
+            bool cBufferCreated = CBuffer == null;
+            if (cBufferCreated)
+            {
                 var cbvIndexer = Graphics.Pipeline.TtCoreShaderBinder.TtPerParticleCBufferVarIndexer.Instance;
                 cbvIndexer.UpdateFieldVar(Shader.Particle_Update.mComputeShader, "cbParticleDesc");
                 CBuffer = rc.CreateCBV(coreBinder.Binder.mCoreObject);
@@ -42,15 +49,13 @@ namespace EngineNS.Bricks.Particle
                 CBuffer.SetValue(cbvIndexer.CurAliveCapacity, emitter.MaxParticle);
                 CBuffer.SetValue(cbvIndexer.BackendAliveCapacity, emitter.MaxParticle);
                 CBuffer.SetValue(cbvIndexer.ParticleCapacity, emitter.MaxParticle);
-                // First-time creation: force flush so the GPU sees the initial values on the very
-                // first frame this CBuffer is bound. Subsequent frames only need SetValue, the
-                // engine will flush at frame end. See Documents/Coding/CodingGuidelines.md 1.1.
-                CBuffer.MarkDirty();
-                CBuffer.FlushDirty();
+                CBuffer.SetValue(coreBinder.ParticleStartSecond, 0.0f);
+                CBuffer.SetValue(coreBinder.OnTimerState, 0u);
+            }
 
+            if (drawcallCreated)
+            {
                 mParticleUpdateDrawcall.BindShaderEffect(Shader.Particle_Update);
-
-                mParticleUpdateDrawcall.BindCBV("cbParticleDesc", CBuffer);
                 mParticleUpdateDrawcall.BindSrv("bfRandomPool", TtEngine.Instance.NebulaTemplateManager.RandomPoolSrv);
 
                 mParticleUpdateDrawcall.BindUav("bfParticles", gpuResources.ParticlesBuffer.Uav);
@@ -59,6 +64,8 @@ namespace EngineNS.Bricks.Particle
 
                 mParticleUpdateDrawcall.BindUav("bfDrawArg", gpuResources.DrawArgUav);
             }
+            if (drawcallCreated || cBufferCreated)
+                mParticleUpdateDrawcall.BindCBV("cbParticleDesc", CBuffer);
 
             CBuffer.SetValue(coreBinder.ParticleElapsedTime, TtEngine.Instance.ElapsedSecond);
             CBuffer.SetValue(coreBinder.ParticleRandomSeed, TtEngine.Instance.NebulaTemplateManager.mRandom.Next());
@@ -77,6 +84,13 @@ namespace EngineNS.Bricks.Particle
             {
                 i.SetCBuffer(index, CBuffer);
                 index++;
+            }
+
+            if (cBufferCreated)
+            {
+                // Flush only after every field has its initial value, before the first GPU use.
+                CBuffer.MarkDirty();
+                CBuffer.FlushDirty();
             }
 
             mParticleUpdateDrawcall.BindUav("bfCurAlives", gpuResources.CurAlivesBuffer.Uav);

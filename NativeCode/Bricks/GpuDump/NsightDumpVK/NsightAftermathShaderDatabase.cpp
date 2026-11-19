@@ -80,13 +80,32 @@ void VKShaderDatabase::AddShaderBinary(const char* name, std::vector<uint8_t>& d
     // same configurable root specified by NvAftermath::SetOutputRoot at engine init time.
     const std::string& outputRoot = EngineNS::GpuDump::NvAftermath::GetOutputRoot();
     const std::string shaderDir = outputRoot + "aftermath-shaders";
-    std::filesystem::create_directories(shaderDir);
+    std::error_code ec;
+    std::filesystem::create_directories(shaderDir, ec);
     const std::string shaderFileName = shaderDir + "/" + std::to_string(shaderHash) + (IsSpirV ? ".spv" : ".dxil");
-    std::ofstream shaderFile(shaderFileName, std::ios::out | std::ios::binary);
-    if (shaderFile)
+    // File name is the content hash, so an existing file with the same size already holds this bytecode.
+    const auto existSize = std::filesystem::file_size(shaderFileName, ec);
+    if (!ec && existSize == data.size())
+        return;
+
+    // Write to a per-process temp file then rename, so readers and other processes never see a partial file.
+    const std::string tmpFileName = shaderFileName + "." + std::to_string(::GetCurrentProcessId()) + ".tmp";
     {
+        std::ofstream shaderFile(tmpFileName, std::ios::out | std::ios::binary | std::ios::trunc);
+        if (!shaderFile)
+            return;
         shaderFile.write(reinterpret_cast<const char*>(data.data()), data.size());
+        if (!shaderFile)
+        {
+            shaderFile.close();
+            std::filesystem::remove(tmpFileName, ec);
+            return;
+        }
     }
+    std::filesystem::rename(tmpFileName, shaderFileName, ec);
+    // Rename fails when another process holds the target; its content is identical, so just drop ours.
+    if (ec)
+        std::filesystem::remove(tmpFileName, ec);
 }
 
 void VKShaderDatabase::AddShaderBinaryWithDebugInfo(const char* name, std::vector<uint8_t>& strippedData, std::vector<uint8_t>& data)

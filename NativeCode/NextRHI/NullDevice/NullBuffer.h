@@ -68,7 +68,7 @@ namespace NxRHI
 			return nullptr;
 		}
 		bool Init(NullGpuDevice* device, IGpuBufferDataBase* pBffer, const FSrvDesc* desc);
-		virtual bool UpdateBuffer(IGpuDevice* device, IGpuBufferDataBase* buffer) override;
+		virtual bool UpdateBuffer_OnRenderThread(IGpuDevice* device, IGpuBufferDataBase* buffer) override;
 	public:
 	};
 

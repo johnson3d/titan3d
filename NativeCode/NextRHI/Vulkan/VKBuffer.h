@@ -155,7 +155,7 @@ namespace NxRHI
 			return mView->GetHWBuffer();
 		}
 		bool Init(VKGpuDevice* device, IGpuBufferDataBase* pBffer, const FSrvDesc& desc, const char* file = nullptr, int line = 0);
-		virtual bool UpdateBuffer(IGpuDevice* device, IGpuBufferDataBase* buffer) override;
+		virtual bool UpdateBuffer_OnRenderThread(IGpuDevice* device, IGpuBufferDataBase* buffer) override;
 		virtual UINT GetFingerPrint() const override {
 			return 0;
 		}

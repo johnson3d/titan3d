@@ -1460,7 +1460,7 @@ namespace NxRHI
 		
 		return true;
 	}
-	bool DX12SrView::UpdateBuffer(IGpuDevice* device, IGpuBufferDataBase* pBuffer)
+	bool DX12SrView::UpdateBuffer_OnRenderThread(IGpuDevice* device, IGpuBufferDataBase* pBuffer)
 	{
 		ASSERT(Buffer);
 		device->DelayDestroy(Buffer);

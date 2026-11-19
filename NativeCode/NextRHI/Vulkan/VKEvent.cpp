@@ -85,6 +85,8 @@ namespace NxRHI
 			return 0;
 		}
 		auto hr = VKGpuSystem::vkGetSemaphoreCounterValue(device->mDevice, mSemaphore, &count);
+		if (hr == VK_ERROR_DEVICE_LOST)
+			device->OnDeviceRemoved();
 		if (count == UINT64_MAX)
 		{
 			ASSERT(false);
@@ -99,7 +101,10 @@ namespace NxRHI
 		info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO;
 		info.semaphore = mSemaphore;
 		info.value = value;
-		VKGpuSystem::vkSignalSemaphore(device->mDevice, &info);
+		auto hr = VKGpuSystem::vkSignalSemaphore(device->mDevice, &info);
+		if (hr == VK_ERROR_DEVICE_LOST)
+			device->OnDeviceRemoved();
+		ASSERT(hr == VK_SUCCESS);
 	}
 	void VKFence::Signal(ICmdQueue* queue1, UINT64 value, EQueueType type)
 	{
@@ -150,6 +155,8 @@ namespace NxRHI
 		info.pSemaphores = &mSemaphore;
 		info.pValues = &value;
 		auto hr = VKGpuSystem::vkWaitSemaphores(device->mDevice, &info, UINT64_MAX);
+		if (hr == VK_ERROR_DEVICE_LOST)
+			device->OnDeviceRemoved();
 		ASSERT(hr == VK_SUCCESS);
 		return hr == VK_SUCCESS;
 		//auto completed = GetCompletedValue();
@@ -228,6 +235,8 @@ namespace NxRHI
 		auto hr = vkResetFences(device->mDevice, 1, &mFence);
 		if (hr != VK_SUCCESS)
 		{
+			if (hr == VK_ERROR_DEVICE_LOST)
+				device->OnDeviceRemoved();
 			ASSERT(false);
 		}
 	}
@@ -237,6 +246,8 @@ namespace NxRHI
 		if (device == nullptr)
 			return false;
 		auto hr = vkGetFenceStatus(device->mDevice, mFence);
+		if (hr == VK_ERROR_DEVICE_LOST)
+			device->OnDeviceRemoved();
 		return hr == VK_SUCCESS;
 	}
 	void VKGpuToHostFence::Wait()
@@ -247,6 +258,8 @@ namespace NxRHI
 		auto hr = vkWaitForFences(device->mDevice, 1, &mFence, VK_TRUE, UINT64_MAX);
 		if (hr != VK_SUCCESS)
 		{
+			if (hr == VK_ERROR_DEVICE_LOST)
+				device->OnDeviceRemoved();
 			ASSERT(false);
 		}
 	}

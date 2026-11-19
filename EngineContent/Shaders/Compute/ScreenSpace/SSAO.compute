@@ -38,6 +38,7 @@ SamplerState Samp_DepthBuffer DX_AUTOBIND;
 Texture2D GBufferRT1 DX_AUTOBIND;
 SamplerState Samp_GBufferRT1 DX_AUTOBIND;
 
+VK_IMAGE(r8)
 RWTexture2D<float> AOOutput DX_AUTOBIND;
 
 // Reconstruct view-space position from screen UV + depth

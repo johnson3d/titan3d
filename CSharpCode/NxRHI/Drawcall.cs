@@ -80,17 +80,27 @@ namespace EngineNS.NxRHI
         }
         public bool BindCBV(VNameString name, TtCbView buffer)
         {
+            if (buffer == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return false;
+            }
             return mCoreObject.BindResource(name, buffer.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindCBV(FEffectBinder binder, TtCbView buffer)
         {
-            if (binder.IsValidPointer == false || buffer == null || binder.BindType != EShaderBindType.SBT_CBV)
+            if (binder.IsValidPointer == false || binder.BindType != EShaderBindType.SBT_CBV)
                 return;
+            if (buffer == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
             mCoreObject.BindResource(binder, buffer.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindCBV(TtEffectBinder binder, TtCbView buffer)
         {
-            if (binder == null || buffer == null)
+            if (binder == null)
                 return;
             BindCBV(binder.mCoreObject, buffer);
         }
@@ -101,15 +111,22 @@ namespace EngineNS.NxRHI
         public bool BindSRV(VNameString name, TtSrView srv)
         {
             if (srv == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
                 return false;
+            }
             return mCoreObject.BindResource(name, srv.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindSRV(FEffectBinder binder, TtSrView srv)
         {
             if (binder.IsValidPointer == false || binder.BindType != EShaderBindType.SBT_SRV)
                 return;
-            var res = (srv == null) ? new IGpuResource() : srv.mCoreObject.NativeSuper.NativeSuper;
-            mCoreObject.BindResource(binder, res);
+            if (srv == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
+            mCoreObject.BindResource(binder, srv.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindSRV(NxRHI.TtEffectBinder binder, TtSrView srv)
         {
@@ -119,35 +136,53 @@ namespace EngineNS.NxRHI
         }
         public bool BindUAV(VNameString name, TtUaView uav)
         {
+            if (uav == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return false;
+            }
             return mCoreObject.BindResource(name, uav.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindUAV(FEffectBinder binder, TtUaView uav)
         {
-            if (binder.IsValidPointer == false || uav == null || binder.BindType != EShaderBindType.SBT_UAV)
+            if (binder.IsValidPointer == false || binder.BindType != EShaderBindType.SBT_UAV)
                 return;
+            if (uav == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
             mCoreObject.BindResource(binder, uav.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindUAV(TtEffectBinder binder, TtUaView uav)
         {
-            if (binder == null || uav == null)
+            if (binder == null)
                 return;
             BindUAV(binder.mCoreObject, uav);
         }
         public bool BindSampler(VNameString name, TtSampler sampler)
         {
             if (sampler == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
                 return false;
+            }
             return mCoreObject.BindResource(name, sampler.mCoreObject.NativeSuper);
         }
         public void BindSampler(FEffectBinder binder, TtSampler sampler)
         {
-            if (binder.IsValidPointer == false || sampler == null || binder.BindType != EShaderBindType.SBT_Sampler)
+            if (binder.IsValidPointer == false || binder.BindType != EShaderBindType.SBT_Sampler)
                 return;
+            if (sampler == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
             mCoreObject.BindResource(binder, sampler.mCoreObject.NativeSuper);
         }
         public void BindSampler(TtEffectBinder binder, TtSampler sampler)
         {
-            if (binder == null || sampler == null )
+            if (binder == null)
                 return;
             BindSampler(binder.mCoreObject, sampler);
         }
@@ -226,8 +261,13 @@ namespace EngineNS.NxRHI
         }
         public void BindCBV(FShaderBinder binder, TtCbView resource)
         {
-            if (resource == null || binder.IsValidPointer == false)
+            if (binder.IsValidPointer == false)
                 return;
+            if (resource == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper.NativeSuper);
         }
         // RHI 直通重载: 接受底层 ICbView (核心对象), 用于已经持有 mCoreObject 句柄
@@ -236,6 +276,11 @@ namespace EngineNS.NxRHI
         {
             if (binder.IsValidPointer == false)
                 return;
+            if (resource.IsValidPointer == false)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
             mCoreObject.BindResource(binder, resource.NativeSuper.NativeSuper);
         }
         public void BindCBV(string name, TtCbView resource)
@@ -253,12 +298,17 @@ namespace EngineNS.NxRHI
             {
                 resource = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
             }
-            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper.NativeSuper);
+            BindCBV(binder, resource);
         }
         public void BindSrv(FShaderBinder binder, TtSrView resource)
         {
-            if (resource == null || binder.IsValidPointer == false)
+            if (binder.IsValidPointer == false)
                 return;
+            if (resource == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper.NativeSuper);
         }
         // RHI 直通重载: 接受底层 ISrView, 主要用于绑定 acceleration structure 的 SRV
@@ -268,6 +318,11 @@ namespace EngineNS.NxRHI
         {
             if (binder.IsValidPointer == false)
                 return;
+            if (resource.IsValidPointer == false)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
             mCoreObject.BindResource(binder, resource.NativeSuper.NativeSuper);
         }
         public void BindSrv(string name, TtSrView resource)
@@ -278,8 +333,13 @@ namespace EngineNS.NxRHI
         }
         public void BindUav(FShaderBinder binder, TtUaView resource)
         {
-            if (resource == null || binder.IsValidPointer == false)
+            if (binder.IsValidPointer == false)
                 return;
+            if (resource == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper.NativeSuper);
         }
         // RHI 直通重载: 接受底层 IUaView, 与 BindSrv(FShaderBinder, ISrView) 对称完整.
@@ -287,6 +347,11 @@ namespace EngineNS.NxRHI
         {
             if (binder.IsValidPointer == false)
                 return;
+            if (resource.IsValidPointer == false)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
             mCoreObject.BindResource(binder, resource.NativeSuper.NativeSuper);
         }
         public void BindUav(string name, TtUaView resource)
@@ -297,8 +362,13 @@ namespace EngineNS.NxRHI
         }
         public void BindSampler(FShaderBinder binder, TtSampler resource)
         {
-            if (resource == null || binder.IsValidPointer == false)
+            if (binder.IsValidPointer == false)
                 return;
+            if (resource == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }
         public void BindSampler(string name, TtSampler resource)
@@ -359,14 +429,24 @@ namespace EngineNS.NxRHI
         }
         public void BindCBV(FShaderBinder binder, TtCbView resource)
         {
-            if (resource == null || binder.IsValidPointer == false)
+            if (binder.IsValidPointer == false)
                 return;
+            if (resource == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindCBV(FShaderBinder binder, ICbView resource)
         {
             if (binder.IsValidPointer == false)
                 return;
+            if (resource.IsValidPointer == false)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
             mCoreObject.BindResource(binder, resource.NativeSuper.NativeSuper);
         }
         public void BindCBV(string name, TtCbView resource)
@@ -384,18 +464,28 @@ namespace EngineNS.NxRHI
             {
                 resource = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
             }
-            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper.NativeSuper);
+            BindCBV(binder, resource);
         }
         public void BindSrv(FShaderBinder binder, TtSrView resource)
         {
-            if (resource == null || binder.IsValidPointer == false)
+            if (binder.IsValidPointer == false)
                 return;
+            if (resource == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindSrv(FShaderBinder binder, ISrView resource)
         {
             if (binder.IsValidPointer == false)
                 return;
+            if (resource.IsValidPointer == false)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
             mCoreObject.BindResource(binder, resource.NativeSuper.NativeSuper);
         }
         public void BindSrv(string name, TtSrView resource)
@@ -406,14 +496,24 @@ namespace EngineNS.NxRHI
         }
         public void BindUav(FShaderBinder binder, TtUaView resource)
         {
-            if (resource == null || binder.IsValidPointer == false)
+            if (binder.IsValidPointer == false)
                 return;
+            if (resource == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper.NativeSuper);
         }
         public void BindUav(FShaderBinder binder, IUaView resource)
         {
             if (binder.IsValidPointer == false)
                 return;
+            if (resource.IsValidPointer == false)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
             mCoreObject.BindResource(binder, resource.NativeSuper.NativeSuper);
         }
         public void BindUav(string name, TtUaView resource)
@@ -424,8 +524,13 @@ namespace EngineNS.NxRHI
         }
         public void BindSampler(FShaderBinder binder, TtSampler resource)
         {
-            if (resource == null || binder.IsValidPointer == false)
+            if (binder.IsValidPointer == false)
                 return;
+            if (resource == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }
         public void BindSampler(string name, TtSampler resource)

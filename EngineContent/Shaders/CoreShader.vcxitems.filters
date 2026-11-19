@@ -662,6 +662,12 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\Quark\QuarkLODSelect.compute">
       <Filter>Bricks\GpuDriven\Quark</Filter>
     </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\SSR.compute">
+      <Filter>Compute\ScreenSpace</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\SSRResolve.compute">
+      <Filter>Compute\ScreenSpace</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\FSR1\ffx_a.h">

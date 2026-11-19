@@ -1241,7 +1241,8 @@ namespace NxRHI
 				return true;
 			return false;
 		}
-		virtual bool UpdateBuffer(IGpuDevice* device, IGpuBufferDataBase* buffer)  = 0;
+		//must run on render thread: render thread reads the view while recording/binding descriptors
+		virtual bool UpdateBuffer_OnRenderThread(IGpuDevice* device, IGpuBufferDataBase* buffer)  = 0;
 		IGpuBufferDataBase* GetBuffer() {
 			return Buffer;
 		}

@@ -47,6 +47,7 @@ SamplerState Samp_ResolveGBufferRT1 DX_AUTOBIND;
 Texture2D ResolveGBufferRT2 DX_AUTOBIND;
 SamplerState Samp_ResolveGBufferRT2 DX_AUTOBIND;
 
+VK_IMAGE(b10g11r11f)
 RWTexture2D<float4> SSRResolveOutput DX_AUTOBIND;
 
 // 解析型环境 BRDF (Call of Duty: Black Ops II 的近似)。

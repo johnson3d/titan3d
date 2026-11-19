@@ -263,6 +263,7 @@ namespace NxRHI
 		virtual ICommandList* GetIdleCmdlist() override;
 		virtual void ReleaseIdleCmdlist(ICommandList* cmd) override;
 		virtual UINT64 Flush(EQueueType type) override;
+		void WaitIdle();
 		virtual void WaitFence(IFence* fence, UINT64 value, EQueueType type) override;
 		virtual void BeginEvent(const char* info, DWORD color = 0) override;
 		virtual void EndEvent(const char* info) override;

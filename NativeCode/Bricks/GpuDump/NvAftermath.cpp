@@ -222,10 +222,15 @@ namespace GpuDump
 	{
 		if (gNvGpuCrashTracker.IsInitialized() == false)
 			return;
-		std::vector<uint8_t> data, debugData;
+		std::vector<uint8_t> data;
 		data.resize(size);
 		memcpy(&data[0], pCode, size);
 		gNvGpuCrashTracker.GetShaderDatabase()->AddShaderBinary(name, data);
+		// GetShaderDebugNameSpirv requires separate not-stripped and stripped binaries.
+		// We only have one SPIR-V blob here; automatic checkpoints do not require source-level shader mapping.
+		if (VKShaderDatabase::IsSpirV)
+			return;
+		std::vector<uint8_t> debugData;
 		/*data.resize(size);
 		memcpy(&data[0], pCode, size);*/
 		debugData.resize(size);

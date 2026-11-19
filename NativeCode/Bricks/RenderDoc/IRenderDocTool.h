@@ -1,8 +1,7 @@
 #pragma once
 
 #include "../../../NativeCode/Base/IUnknown.h"
-
-struct RENDERDOC_API_1_6_0;
+#include "../../../3rd/native/renderdoc/renderdoc_app.h"
 
 NS_BEGIN
 

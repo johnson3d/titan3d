@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>Titan.Tests.Cook</AssemblyName>
+    <RootNamespace>Titan.Tests.Cook</RootNamespace>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="CookStateTests.cs" />
+    <Compile Include="..\..\CSharpCode\Editor\Cook\CookWorker.cs" />
+    <Compile Include="..\..\CSharpCode\Editor\Cook\CookManager.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Engine.Window">
+      <HintPath>..\..\binaries\net10.0\Engine.Window.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

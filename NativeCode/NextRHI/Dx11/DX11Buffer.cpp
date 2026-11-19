@@ -993,7 +993,7 @@ namespace NxRHI
 		//mView->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen("ShaderResource"), "ShaderResource");
 		return true;
 	}
-	bool DX11SrView::UpdateBuffer(IGpuDevice* device, IGpuBufferDataBase* pBuffer)
+	bool DX11SrView::UpdateBuffer_OnRenderThread(IGpuDevice* device, IGpuBufferDataBase* pBuffer)
 	{
 		Buffer = pBuffer;
 		D3D11_SHADER_RESOURCE_VIEW_DESC		mDX11SRVDesc;

@@ -26,6 +26,7 @@ SamplerState Samp_SSAORawInput DX_AUTOBIND;
 Texture2D<float> FilterDepthBuffer DX_AUTOBIND;
 SamplerState Samp_FilterDepthBuffer DX_AUTOBIND;
 
+VK_IMAGE(r8)
 RWTexture2D<float> SSAOFilteredOutput DX_AUTOBIND;
 
 float DepthWeight(float centerDepth, float sampleDepth, float sharpness)

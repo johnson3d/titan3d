@@ -124,8 +124,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                 var node = drawcall.TagObject as TtFrustumGrid3DNode;
 
                 var binder = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbFrustumGrid");
-                if (binder.IsValidPointer && node.PerFrustumGridCbv != null)
-                    drawcall.BindCBV(binder, node.PerFrustumGridCbv);
+                if (binder.IsValidPointer)
+                    drawcall.BindCBV(binder, node.GetOrCreateCbv(binder, policy));
 
                 binder = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "RWPointGridHeaders");
                 if (binder.IsValidPointer && node.FrustumGrid.Uav != null)
@@ -163,8 +163,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                 var node = drawcall.TagObject as TtFrustumGrid3DNode;
 
                 var binder = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbFrustumGrid");
-                if (binder.IsValidPointer && node.PerFrustumGridCbv != null)
-                    drawcall.BindCBV(binder, node.PerFrustumGridCbv);
+                if (binder.IsValidPointer)
+                    drawcall.BindCBV(binder, node.GetOrCreateCbv(binder, policy));
 
                 binder = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbPerCamera");
                 if (binder.IsValidPointer)
@@ -227,15 +227,20 @@ namespace EngineNS.Graphics.Pipeline.Common
             InjectLightsShadingEnv = await Graphics.Pipeline.Shader.TtShadingEnv.CreateShadingEnv<TtInjectLightsShading>();
         }
 
-        private void EnsureCbvCreated(NxRHI.TtComputeDraw drawcall)
+        private NxRHI.TtCbView GetOrCreateCbv(NxRHI.FShaderBinder binder, Graphics.Pipeline.TtRenderPolicy policy)
         {
-            if (PerFrustumGridCbv != null)
-                return;
-            var binder = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbFrustumGrid");
-            if (binder.IsValidPointer)
+            bool created = PerFrustumGridCbv == null;
+            if (created)
             {
-                PerFrustumGridCbv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
+                PerFrustumGridCbv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder, NxRHI.EGpuUsage.USAGE_DEFAULT);
+                if (PerFrustumGridCbv == null)
+                    return null;
+                UpdateCBufferFields(policy.GetGpuSceneNode());
+                // Initialize every field before the first bind.
+                PerFrustumGridCbv.MarkDirty();
+                PerFrustumGridCbv.FlushDirty();
             }
+            return PerFrustumGridCbv;
         }
 
         private void ResetComputeDrawcalls()
@@ -319,9 +324,11 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 // Pass 1: Clear both grids (Point + Spot) in one dispatch
                 ClearGridShadingEnv.SetDrawcallDispatch(this, policy, ClearGridDrawcall, totalCells, 1, 1, true);
-                EnsureCbvCreated(ClearGridDrawcall);
                 if (PerFrustumGridCbv != null)
+                {
                     UpdateCBufferFields(gpuScene);
+                    PerFrustumGridCbv.FlushDirty(cmd.mCoreObject);
+                }
                 cmd.PushGpuDraw(ClearGridDrawcall);
 
                 // Pass 2: Inject all lights (Point + Spot) in one dispatch
@@ -350,56 +357,56 @@ namespace EngineNS.Graphics.Pipeline.Common
             if (idx.IsValidPointer)
             {
                 Vector3i gridSize = new Vector3i(FrustumGrid.CulledGridSizeX, FrustumGrid.CulledGridSizeY, FrustumGrid.GridSizeZ);
-                cbv.SetValue(idx, in gridSize);
+                cbv.SetValue(idx, in gridSize, false);
             }
 
             idx = cbv.ShaderBinder.FindField("FrustumGridPixelSizeShift");
             if (idx.IsValidPointer)
             {
                 uint shift = (uint)FrustumGrid.CellPixelSizeShift;
-                cbv.SetValue(idx, in shift);
+                cbv.SetValue(idx, in shift, false);
             }
 
             idx = cbv.ShaderBinder.FindField("FrustumGridZParams");
             if (idx.IsValidPointer)
             {
                 var zParams = FrustumGrid.GridZParams;
-                cbv.SetValue(idx, in zParams);
+                cbv.SetValue(idx, in zParams, false);
             }
 
             idx = cbv.ShaderBinder.FindField("FrustumGridTotalCells");
             if (idx.IsValidPointer)
             {
                 uint totalCells = (uint)FrustumGrid.TotalCellCount;
-                cbv.SetValue(idx, in totalCells);
+                cbv.SetValue(idx, in totalCells, false);
             }
 
             idx = cbv.ShaderBinder.FindField("FrustumGridMaxPerCellPoint");
             if (idx.IsValidPointer)
             {
                 uint maxPoint = MaxPerCellPoint;
-                cbv.SetValue(idx, in maxPoint);
+                cbv.SetValue(idx, in maxPoint, false);
             }
 
             idx = cbv.ShaderBinder.FindField("FrustumGridMaxPerCellSpot");
             if (idx.IsValidPointer)
             {
                 uint maxSpot = MaxPerCellSpot;
-                cbv.SetValue(idx, in maxSpot);
+                cbv.SetValue(idx, in maxSpot, false);
             }
 
             idx = cbv.ShaderBinder.FindField("FrustumGridViewportSize");
             if (idx.IsValidPointer)
             {
                 var vpSize = new Vector2(FrustumGrid.ViewportWidth, FrustumGrid.ViewportHeight);
-                cbv.SetValue(idx, in vpSize);
+                cbv.SetValue(idx, in vpSize, false);
             }
 
             idx = cbv.ShaderBinder.FindField("FrustumGridPointLightNum");
             if (idx.IsValidPointer)
             {
                 uint pointLightNum = (uint)(gpuScene?.PointLights.DataArray.Count ?? 0);
-                cbv.SetValue(idx, in pointLightNum);
+                cbv.SetValue(idx, in pointLightNum, false);
             }
 
             idx = cbv.ShaderBinder.FindField("FrustumGridSpotLightNum");
@@ -407,7 +414,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 var spotAttach = GetAttachBuffer(SpotLightsPinIn);
                 uint spotLightNum = (spotAttach?.Srv != null) ? (uint)(gpuScene?.SpotLights.DataArray.Count ?? 0) : 0u;
-                cbv.SetValue(idx, in spotLightNum);
+                cbv.SetValue(idx, in spotLightNum, false);
             }
         }
         #endregion

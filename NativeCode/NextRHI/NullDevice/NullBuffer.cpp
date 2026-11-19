@@ -182,7 +182,7 @@ namespace NxRHI
 		
 		return true;
 	}
-	bool NullSrView::UpdateBuffer(IGpuDevice* device, IGpuBufferDataBase* pBuffer)
+	bool NullSrView::UpdateBuffer_OnRenderThread(IGpuDevice* device, IGpuBufferDataBase* pBuffer)
 	{
 		return true;
 	}

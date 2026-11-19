@@ -1558,15 +1558,7 @@ namespace EngineNS.NxRHI
             }
 
             StreamingTexture = newTexture;
-            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             LevelOfDetail = level;
-
-            // 旧纹理已不再被 StreamingTexture 引用，必须显式释放：
-            // 替换字段本身不会归还 native 引用，只能等 GC 终结器，退出期等不到就会漏。
-            if (oldTexture != null && ReferenceEquals(oldTexture, newTexture) == false)
-            {
-                oldTexture.Dispose();
-            }
 
             if (AssetName != null)
             {
@@ -1581,7 +1573,45 @@ namespace EngineNS.NxRHI
             //this.mCoreObject = srv;
             //this.mCoreObject.NativeSuper.SetFingerPrint(fp + 1);
             //return true;
-            return this.mCoreObject.UpdateBuffer(rc.mCoreObject, StreamingTexture.mCoreObject.NativeSuper);
+
+            // SRV 底层 view 由渲染线程在绑定描述符时读取，替换必须投递到渲染线程执行。
+            // 旧纹理随同一个渲染动作在替换之后释放：渲染动作按 FIFO 执行，连续两次 LoadLOD 时
+            // 前一次投递的新纹理不会在被 UpdateBuffer 使用前就被后一次 LoadLOD 释放。
+            var engine = TtEngine.Instance;
+            if (engine.Config.UseRenderThread == false || engine.ThreadRender.IsThisThread())
+            {
+                return ApplyStreamingTexture_OnRenderThread(newTexture, oldTexture);
+            }
+            if (engine.ThreadRender.IsFinished)
+            {
+                // 渲染线程已退出，不再有读取方，也无处投递：只归还旧纹理的托管引用
+                // (SRV 的 native Buffer 仍持有它，不会被提前释放)
+                if (oldTexture != null && ReferenceEquals(oldTexture, newTexture) == false)
+                    oldTexture.Dispose();
+                return false;
+            }
+            engine.ThreadRender.QueueRenderAction("TtSrView.ApplyStreamingTexture", static (in Thread.TtThreadRender.FRenderAction RAct) =>
+            {
+                var args = (Tuple<TtSrView, TtTexture, TtTexture>)RAct.Arg;
+                args.Item1.ApplyStreamingTexture_OnRenderThread(args.Item2, args.Item3);
+            }, Tuple.Create(this, newTexture, oldTexture));
+            return true;
+        }
+        private bool ApplyStreamingTexture_OnRenderThread(TtTexture newTexture, TtTexture oldTexture)
+        {
+            Thread.TtContextThread.CheckOnRenderThread();
+            bool result = false;
+            // 投递期间 SRV 被 Dispose 时会级联释放 newTexture，此时跳过替换
+            if (IsDisposed == false && newTexture.IsDisposed == false)
+            {
+                var rc = TtEngine.Instance.GfxDevice.RenderContext;
+                result = this.mCoreObject.UpdateBuffer_OnRenderThread(rc.mCoreObject, newTexture.mCoreObject.NativeSuper);
+            }
+            // 旧纹理已不再被 StreamingTexture 引用，必须显式释放：
+            // 替换字段本身不会归还 native 引用，只能等 GC 终结器，退出期等不到就会漏。
+            if (oldTexture != null && ReferenceEquals(oldTexture, newTexture) == false)
+                oldTexture.Dispose();
+            return result;
         }
         #endregion
 

@@ -80,6 +80,11 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (index.IsValidPointer)
                 {
                     var attachBuffer = aaNode.GetAttachBuffer(aaNode.PreColorPinIn);
+                    if (attachBuffer == null || attachBuffer.Srv == null)
+                    {
+                        // 首帧或 resize 后 history 尚未建立，用当前帧重置 TAA 历史。
+                        attachBuffer = aaNode.GetAttachBuffer(aaNode.ColorPinIn);
+                    }
                     drawcall.BindSRV(index, attachBuffer.Srv);
                 }
                 index = drawcall.FindBinder("Samp_PrevColorBuffer");
@@ -90,6 +95,11 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (index.IsValidPointer)
                 {
                     var attachBuffer = aaNode.GetAttachBuffer(aaNode.PreDepthPinIn);
+                    if (attachBuffer == null || attachBuffer.Srv == null)
+                    {
+                        // 与 PrevColor 同步重置，避免首帧把空 history 当作有效深度。
+                        attachBuffer = aaNode.GetAttachBuffer(aaNode.DepthPinIn);
+                    }
                     drawcall.BindSRV(index, attachBuffer.Srv);
                 }
                 index = drawcall.FindBinder("Samp_PrevDepthBuffer");

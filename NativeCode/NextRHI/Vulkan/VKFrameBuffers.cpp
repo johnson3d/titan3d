@@ -342,6 +342,11 @@ namespace NxRHI
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
+
+		// FramePresentFence tracks graphics submissions, not retirement of present operations.
+		auto cmdQueue = (VKCmdQueue*)device->GetCmdQueue();
+		if (mSwapChain != nullptr && cmdQueue != nullptr)
+			cmdQueue->WaitIdle();
 		
 		for (auto& i : BackBuffers)
 		{
@@ -497,8 +502,10 @@ namespace NxRHI
 		if (Desc.Width == w && Desc.Height == h)
 			return true;
 		
-		//align with DX12SwapChain::Resize: flush all queues before recreating, in-flight commands may still reference the old images
-		device1->GetCmdQueue()->Flush((EQueueType)(EQueueType::QU_Default | EQueueType::QU_Compute | EQueueType::QU_Transfer));
+		// Present operations may still reference the old images after graphics submissions complete.
+		auto cmdQueue = (VKCmdQueue*)device1->GetCmdQueue();
+		if (mSwapChain != nullptr && cmdQueue != nullptr)
+			cmdQueue->WaitIdle();
 
 		if (BackBuffers.size() != Desc.BufferCount)
 		{
@@ -774,11 +781,28 @@ namespace NxRHI
 			return;
 		
 		auto result = vkAcquireNextImageKHR(device->mDevice, mSwapChain, UINT64_MAX, VK_NULL_HANDLE, AcquireFence, &CurrentBackBuffer);
+		if (result == VK_ERROR_DEVICE_LOST)
+		{
+			device->OnDeviceRemoved();
+			return;
+		}
 		// MoltenVK 在窗口刚创建/尺寸变化后的首帧 acquire 常返回 SUBOPTIMAL，索引仍有效可继续渲染
 		ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR);
 
-		vkWaitForFences(device->mDevice, 1, &AcquireFence, VK_TRUE, UINT64_MAX);
-		vkResetFences(device->mDevice, 1, &AcquireFence);
+		result = vkWaitForFences(device->mDevice, 1, &AcquireFence, VK_TRUE, UINT64_MAX);
+		if (result == VK_ERROR_DEVICE_LOST)
+		{
+			device->OnDeviceRemoved();
+			return;
+		}
+		ASSERT(result == VK_SUCCESS);
+		result = vkResetFences(device->mDevice, 1, &AcquireFence);
+		if (result == VK_ERROR_DEVICE_LOST)
+		{
+			device->OnDeviceRemoved();
+			return;
+		}
+		ASSERT(result == VK_SUCCESS);
 		//Sure previos CurrentBackBuffer finished
 		FramePresentFence->Wait(BackBuffers[CurrentBackBuffer].FenceValue);
 	}

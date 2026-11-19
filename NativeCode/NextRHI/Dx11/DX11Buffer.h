@@ -84,7 +84,7 @@ namespace NxRHI
 			return mView;
 		}
 		bool Init(DX11GpuDevice* device, IGpuBufferDataBase* pBffer, const FSrvDesc& desc);
-		virtual bool UpdateBuffer(IGpuDevice* device, IGpuBufferDataBase* buffer) override;
+		virtual bool UpdateBuffer_OnRenderThread(IGpuDevice* device, IGpuBufferDataBase* buffer) override;
 	public:
 		ID3D11ShaderResourceView* mView = nullptr;
 	};

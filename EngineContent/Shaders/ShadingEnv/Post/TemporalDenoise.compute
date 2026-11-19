@@ -41,6 +41,7 @@ Texture2D<float4> MotionVector;        // .rg = encoded motion (与 ReSTIR 一�
 SamplerState Samp_PointClamp;
 SamplerState Samp_LinearClamp;
 
+VK_IMAGE(rgba16f)
 RWTexture2D<float4> DenoiseOutput;
 
 float LuminanceFromRGB(float3 c) { return dot(c, float3(0.2126f, 0.7152f, 0.0722f)); }

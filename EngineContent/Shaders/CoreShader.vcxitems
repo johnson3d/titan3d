@@ -177,6 +177,8 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\FrustumGrid3D.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\SSAO.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\SSAOFilter.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\SSR.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\SSRResolve.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)GI\ProbeVolume\ProbeVolumeUpdate.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRInitialSampling.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)GI\ReSTIR\ReSTIRTemporalReuse.compute" />

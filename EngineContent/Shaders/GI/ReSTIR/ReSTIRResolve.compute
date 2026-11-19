@@ -10,6 +10,7 @@ Texture2D<float>  DepthBuffer;
 SamplerState Samp_PointClamp;
 
 StructuredBuffer<ReSTIRPackedReservoir> InReservoirs;
+VK_IMAGE(rgba16f)
 RWTexture2D<float4> OutIndirectDiffuse;
 
 [numthreads(DispatchX, DispatchY, DispatchZ)]
