@@ -6,9 +6,6 @@ using EngineNS.GamePlay;
 using EngineNS.Plugins.GateServer;
 using EngineNS.Plugins.ServerCommon;
 using EngineNS.Support;
-using MathNet.Numerics.LinearAlgebra.Solvers;
-using NPOI.SS.Formula.Functions;
-using NPOI.SS.Formula.PTG;
 
 namespace EngineNS.Plugins.LevelServer
 {

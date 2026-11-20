@@ -1,5 +1,4 @@
 ﻿using Assimp;
-using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

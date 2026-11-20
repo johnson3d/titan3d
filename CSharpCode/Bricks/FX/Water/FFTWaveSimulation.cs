@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MathNet.Numerics.IntegralTransforms;
 
 namespace EngineNS.Bricks.FX.Water
 {
-    using MathNet.Numerics;
-    using MathNet.Numerics.IntegralTransforms;
-    using Org.BouncyCastle.Tsp;
 
     public class TtFftWaveSimulation
     {

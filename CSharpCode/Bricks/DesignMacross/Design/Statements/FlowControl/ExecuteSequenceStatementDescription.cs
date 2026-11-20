@@ -5,7 +5,6 @@ using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.DesignMacross.Design.Expressions;
 using EngineNS.DesignMacross.Design.Statements;
 using EngineNS.Rtti;
-using NPOI.OpenXmlFormats.Dml;
 
 namespace EngineNS.DesignMacross.Design.Statement
 {

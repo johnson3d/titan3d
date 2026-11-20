@@ -480,7 +480,7 @@ namespace EngineNS.EGui
                                     if (drawcall == null)
                                     {
                                         drawcall = rhiData.CreateGraphicDraw();
-                                        drawcall.BindSRV(rhiData.SlateTextureBindInfo.mCoreObject, null);
+                                        //drawcall.BindSRV(rhiData.SlateTextureBindInfo.mCoreObject, TtEngine.Instance.GfxDevice.TextureManager.DefaultTexture);
                                     }
                                 }
 

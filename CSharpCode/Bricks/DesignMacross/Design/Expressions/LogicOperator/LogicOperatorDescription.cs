@@ -4,7 +4,6 @@ using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.DesignMacross.Design.Statement;
 using EngineNS.Rtti;
-using Org.BouncyCastle.Asn1.X509.Qualified;
 
 namespace EngineNS.DesignMacross.Design.Expressions
 {

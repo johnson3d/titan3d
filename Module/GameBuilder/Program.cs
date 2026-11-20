@@ -4,7 +4,6 @@ using EngineNS;
 using Microsoft.Build.Logging;
 using System.CodeDom.Compiler;
 using System.Xml.Linq;
-using static Org.BouncyCastle.Math.EC.ECCurve;
 
 try
 {

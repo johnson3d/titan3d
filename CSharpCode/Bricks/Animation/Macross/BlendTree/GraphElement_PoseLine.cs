@@ -5,7 +5,6 @@ using EngineNS.DesignMacross.Base.Render;
 using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.DesignMacross.Editor;
 using EngineNS.EGui.Controls;
-using SixLabors.Fonts;
 
 namespace EngineNS.Animation.Macross.BlendTree
 {

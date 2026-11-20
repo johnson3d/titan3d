@@ -11,7 +11,7 @@
 # 编译运行环境
 - Titan3D 启动！
 - ![总览图](Documents/picture/main_edtor.png)
-- 1.安装 Visual Studio 2026（.NET SDK 10.0.4xx 要求 MSBuild 18，且原生工程需要 MSVC v143 生成工具组件）
+- 1.安装 Visual Studio 2026（.NET SDK 10.0.4xx 要求 MSBuild 18，原生工程使用 VS 2026 自带的 MSVC v145 工具集，无需额外安装 v143）
 - 2.安装C#开发环境
 - 3.建议安装C#移动开发环境
 # 引擎特色

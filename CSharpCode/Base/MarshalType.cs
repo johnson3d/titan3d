@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
 using EngineNS;
-using NPOI.SS.Formula.PTG;
 using System.Linq;
-using Org.BouncyCastle.Crypto.Agreement;
 
 public struct Wchar16
 {

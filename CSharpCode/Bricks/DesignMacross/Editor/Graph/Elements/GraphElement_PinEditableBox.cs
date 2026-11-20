@@ -2,7 +2,6 @@
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.EGui.Controls.PropertyGrid;
-using SixLabors.Fonts;
 using static EngineNS.EGui.Controls.PropertyGrid.TtPGCustomValueEditorAttribute;
 
 namespace EngineNS.DesignMacross.Editor

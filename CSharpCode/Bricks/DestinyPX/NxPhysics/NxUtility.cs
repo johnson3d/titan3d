@@ -1,8 +1,6 @@
 ﻿#define NXREAL_F32
 //#define NXREAL_40_24
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using NPOI.SS.Formula.Eval;
-using NPOI.Util;
 using System;
 using System.Collections.Generic;
 using System.Text;

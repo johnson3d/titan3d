@@ -89,13 +89,13 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" />
+    <PackageReference Include="MathNet.Numerics" />
     <PackageReference Include="Mono.Cecil" />
     <PackageReference Include="MvsSln" />
-    <PackageReference Include="NPOI" />
+    <PackageReference Include="ClosedXML" />
     <PackageReference Include="ppy.SDL2-CS" />
     <PackageReference Include="RIPEMD160" />
     <PackageReference Include="System.CodeDom" />
-    <PackageReference Include="System.Runtime.Loader" />
   </ItemGroup>
 
   <ItemGroup>

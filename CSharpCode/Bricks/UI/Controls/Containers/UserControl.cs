@@ -4,8 +4,6 @@ using EngineNS.Macross;
 using EngineNS.Thread.Async;
 using EngineNS.UI.Bind;
 using EngineNS.UI.Canvas;
-using NPOI.OpenXmlFormats.Dml;
-using NPOI.XSSF.Model;
 using System;
 using System.Collections;
 using System.Collections.Generic;

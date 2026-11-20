@@ -6,7 +6,6 @@ using System.ComponentModel;
 using EngineNS.UI.Bind;
 using EngineNS.Bricks.Input;
 using EngineNS.UI.Event;
-using SixLabors.ImageSharp.Advanced;
 using EngineNS.UI.Canvas;
 
 namespace EngineNS.UI.Controls

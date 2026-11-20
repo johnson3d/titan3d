@@ -1,7 +1,6 @@
 ﻿using Assimp;
 using EnvDTE;
 using EnvDTE100;
-using MathNet.Numerics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;

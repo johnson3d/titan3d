@@ -6,7 +6,6 @@ using EngineNS.Bricks.StateMachine.TimedSM;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Design;
 using EngineNS.Rtti;
-using MathNet.Numerics.Differentiation;
 using System.Reflection;
 
 namespace EngineNS.DesignMacross

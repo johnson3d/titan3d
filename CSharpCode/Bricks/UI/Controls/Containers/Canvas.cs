@@ -1,6 +1,5 @@
 ﻿using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.UI.Bind;
-using NPOI.POIFS.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

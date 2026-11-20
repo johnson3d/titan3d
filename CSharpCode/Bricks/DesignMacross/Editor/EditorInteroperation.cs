@@ -2,7 +2,6 @@
 using EngineNS.Animation.Macross.BlendTree;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Outline;
-using NPOI.OpenXmlFormats.Wordprocessing;
 
 namespace EngineNS.DesignMacross.Editor
 {

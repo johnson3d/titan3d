@@ -1,7 +1,5 @@
-﻿using NPOI.SS.Formula.Functions;
-using System.Reflection;
+﻿using System.Reflection;
 using AloneGame;
-using static Org.BouncyCastle.Math.EC.ECCurve;
 
 class Program
 {

@@ -1,7 +1,6 @@
 ﻿using EngineNS.DesignMacross.Base.Render;
 using EngineNS.DesignMacross.Design;
 using EngineNS.DesignMacross.Editor;
-using NPOI.SS.Formula.Functions;
 
 namespace EngineNS.DesignMacross.Base.Graph
 {

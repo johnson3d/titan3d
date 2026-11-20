@@ -11,7 +11,6 @@ using EngineNS.IO;
 using EngineNS.NxRHI;
 using EngineNS.Support;
 using Jither.OpenEXR;
-using MathNet.Numerics.Financial;
 using StbImageSharp;
 using System;
 using System.Collections.Generic;

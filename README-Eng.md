@@ -9,7 +9,7 @@
 # Compilation and Runtime Environment
 - Titan3D Launches!
 - ![Overview](Documents/picture/main_edtor.png)
-- 1. Install Visual Studio 2026 (.NET SDK 10.0.4xx requires MSBuild 18; the MSVC v143 toolset component is required by the native projects)
+- 1. Install Visual Studio 2026 (.NET SDK 10.0.4xx requires MSBuild 18; the native projects use the MSVC v145 toolset bundled with VS 2026, so the v143 component is no longer needed)
 - 2. Install C# development environment
 - 3. Recommended to install C# mobile development environment
 

@@ -9,7 +9,6 @@ using EngineNS.DesignMacross.Design;
 using EngineNS.DesignMacross.Editor;
 using EngineNS.EGui.Controls;
 using EngineNS.Rtti;
-using SixLabors.Fonts;
 using System.Collections;
 using System.Diagnostics;
 using System.Reflection;

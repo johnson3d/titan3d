@@ -27,7 +27,7 @@ Assert-WindowsHost
 $repoRoot = Get-RepoRoot
 $dotnet = Find-DotNet
 $nuget = Find-NuGet
-$msbuild = Find-Vs2022MsBuild
+$msbuild = Find-VsMsBuild
 Import-VsDevEnvironment $msbuild
 #$llvmBin = Find-VsLlvmBin $msbuild
 #Add-PathEntry $llvmBin

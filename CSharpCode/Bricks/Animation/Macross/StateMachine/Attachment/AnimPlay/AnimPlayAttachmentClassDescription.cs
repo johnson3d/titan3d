@@ -12,7 +12,6 @@ using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Outline;
 using EngineNS.DesignMacross.Design;
 using EngineNS.Rtti;
-using NPOI.XSSF.UserModel;
 using System.ComponentModel;
 using System.Net.Mail;
 

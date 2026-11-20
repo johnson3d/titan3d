@@ -5,7 +5,6 @@ using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.DesignMacross.Editor;
 using EngineNS.EGui.Controls;
-using NPOI.SS.UserModel;
 
 namespace EngineNS.DesignMacross.Design.ConnectingLine
 {

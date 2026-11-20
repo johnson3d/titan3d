@@ -1,13 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using NPOI.XSSF.UserModel;
+using ClosedXML.Excel;
 
 namespace EngineNS.Bricks.DataSet
 {
     public partial class TtDataSet
     {
-        internal XSSFWorkbook mWorkbook;
+        // ClosedXML 的行号/列号是 1-based；本类对外（RowInSheet、ColumnIndex、HeadRow）沿用 0-based 索引，
+        // 所有进出 ClosedXML 的位置统一做 ±1 转换。
+        internal XLWorkbook mWorkbook;
+
+        internal static IXLWorksheet FindSheet(XLWorkbook workbook, string name)
+        {
+            if (workbook == null || string.IsNullOrEmpty(name))
+                return null;
+            foreach (var ws in workbook.Worksheets)
+            {
+                if (ws.Name == name)
+                    return ws;
+            }
+            return null;
+        }
+
         partial void LoadDataSet_Exel(ref bool isOk, string name, Type objType)
         {
             System.IO.FileStream fs = System.IO.File.OpenRead(name);
@@ -16,18 +31,23 @@ namespace EngineNS.Bricks.DataSet
                 isOk = false;
             }
 
-            var workbook = new NPOI.XSSF.UserModel.XSSFWorkbook(fs);
+            var workbook = new XLWorkbook(fs);
             isOk = LoadDataSetFromExcel(workbook, objType);
         }
-        private void UpdateBinderManagerByExcel(XSSFWorkbook workbook)
+        private void UpdateBinderManagerByExcel(XLWorkbook workbook)
         {
             mWorkbook = workbook;
             foreach (var i in BinderManager.Binders)
             {
                 if (i.Value.HeadRow >= 0)
                 {
-                    var sheet = (XSSFSheet)workbook.GetSheet(i.Value.SheetName);
-                    var headRow = sheet.GetRow(i.Value.HeadRow);
+                    var sheet = FindSheet(workbook, i.Value.SheetName);
+                    if (sheet == null)
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"DataSet: don't have sheet {i.Value.SheetName}");
+                        continue;
+                    }
+                    var headRow = sheet.Row(i.Value.HeadRow + 1);
                     foreach (var j in i.Value.Fields)
                     {
                         if (j.ColumnIndex == -1)
@@ -42,23 +62,24 @@ namespace EngineNS.Bricks.DataSet
                 }
             }
         }
-        private int FindColumeIndex(NPOI.SS.UserModel.IRow row, string name)
+        private int FindColumeIndex(IXLRow row, string name)
         {
-            for (int i = 0; i < row.LastCellNum; i++)
+            var lastCellNum = row.LastCellUsed()?.Address.ColumnNumber ?? 0;
+            for (int i = 1; i <= lastCellNum; i++)
             {
-                var cell = row.GetCell(i);
-                if (cell == null)
+                var cell = row.Cell(i);
+                if (cell == null || cell.IsEmpty())
                 {
                     continue;
                 }
                 bool hasError = false;
                 var text = TtTable.CellParse(cell, typeof(string), null, out hasError) as string;
                 if (text == name)
-                    return i;
+                    return i - 1;
             }
             return -1;
         }
-        private bool LoadDataSetFromExcel(XSSFWorkbook workbook, Type type)
+        private bool LoadDataSetFromExcel(XLWorkbook workbook, Type type)
         {
             var sheetTypes = new List<Type>();
             BinderManager.CollectSheetTypes(type, sheetTypes);
@@ -86,17 +107,19 @@ namespace EngineNS.Bricks.DataSet
             isOk = false;
             try
             {
-                var workbook = new XSSFWorkbook();
+                var workbook = new XLWorkbook();
                 foreach (var i in Tables)
                 {
                     var sheet = GetSheetSure(workbook, i.Value.Binder.SheetName);
                     i.Value.SaveTableToExcel(this, sheet);
                 }
 
-                var file = new System.IO.FileStream(filepath, System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.Write);
-                workbook.Write(file);
-                file.Close();
-                workbook.Close();
+                // 用 Create 而不是 OpenOrCreate：旧文件比新内容长时，残留尾部字节会破坏 xlsx(zip) 结构。
+                using (var file = new System.IO.FileStream(filepath, System.IO.FileMode.Create, System.IO.FileAccess.Write))
+                {
+                    workbook.SaveAs(file);
+                }
+                workbook.Dispose();
                 isOk = true;
             }
             catch (Exception e)
@@ -104,33 +127,36 @@ namespace EngineNS.Bricks.DataSet
                 Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"DataSet SaveToExcel Error:{e.Message}");
             }
         }
-        protected NPOI.XSSF.UserModel.XSSFSheet GetSheetSure(XSSFWorkbook workbook, string name)
+        protected IXLWorksheet GetSheetSure(XLWorkbook workbook, string name)
         {
-            for (int i = 0; i < workbook.NumberOfSheets; i++)
-            {
-                var sheet = workbook.GetSheetAt(i);
-                if (sheet.SheetName == name)
-                    return (NPOI.XSSF.UserModel.XSSFSheet)sheet;
-            }
-            return (NPOI.XSSF.UserModel.XSSFSheet)workbook.CreateSheet(name);
+            var sheet = FindSheet(workbook, name);
+            if (sheet != null)
+                return sheet;
+            return workbook.AddWorksheet(name);
         }
     }
     public partial class TtTable
     {
-        XSSFSheet mSheet;
+        IXLWorksheet mSheet;
         internal bool LoadTableFromExcel(TtDataSet dataSet, TtDataProviderBinder binder, Type objType)
         {
-            XSSFWorkbook workbook = dataSet.mWorkbook;
+            XLWorkbook workbook = dataSet.mWorkbook;
             Binder = dataSet.BinderManager.GetBinder(objType);
             if (Binder == null)
                 return false;
-            var sheet = (XSSFSheet)workbook.GetSheet(binder.SheetName);
-            for (int i = Binder.DataStartRow; i <= sheet.LastRowNum; i++)
+            var sheet = TtDataSet.FindSheet(workbook, binder.SheetName);
+            if (sheet == null)
+            {
+                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"DataSet: don't have sheet {binder.SheetName}");
+                return false;
+            }
+            var lastRowNum = (sheet.LastRowUsed()?.RowNumber() ?? 0) - 1;
+            for (int i = Binder.DataStartRow; i <= lastRowNum; i++)
             {
                 if (i == binder.HeadRow)
                     continue;
-                var row = sheet.GetRow(i);
-                if (row == null)
+                var row = sheet.Row(i + 1);
+                if (row.IsEmpty())
                 {
                     break;
                 }
@@ -145,8 +171,8 @@ namespace EngineNS.Bricks.DataSet
                     if (j.SheetName != null || j.ColumnIndex == -1)
                         continue;
 
-                    var cell = row.GetCell(j.ColumnIndex);
-                    if (cell != null)
+                    var cell = row.Cell(j.ColumnIndex + 1);
+                    if (cell != null && cell.IsEmpty() == false)
                     {
                         bool hasError = false;
                         var value = CellParse(cell, j.PropInfo.PropertyType, j.Conveter, out hasError);
@@ -167,7 +193,7 @@ namespace EngineNS.Bricks.DataSet
             mSheet = sheet;
             return true;
         }
-        internal void SaveTableToExcel(TtDataSet dataSet, XSSFSheet sheet)
+        internal void SaveTableToExcel(TtDataSet dataSet, IXLWorksheet sheet)
         {
             foreach (var i in DataProviders)
             {
@@ -181,25 +207,15 @@ namespace EngineNS.Bricks.DataSet
                 }   
             }
         }
-        protected NPOI.SS.UserModel.IRow GetRowSure(NPOI.SS.UserModel.ISheet sheet, int index)
+        protected IXLRow GetRowSure(IXLWorksheet sheet, int index)
         {
-            var row = sheet.GetRow(index);
-            if (row == null)
-            {
-                row = sheet.CreateRow(index);
-            }
-            return row;
+            return sheet.Row(index + 1);
         }
-        protected NPOI.SS.UserModel.ICell GetCellSure(NPOI.SS.UserModel.IRow row, int index)
+        protected IXLCell GetCellSure(IXLRow row, int index)
         {
-            var cell = row.GetCell(index);
-            if (cell == null)
-            {
-                cell = row.CreateCell(index);
-            }
-            return cell;
+            return row.Cell(index + 1);
         }
-        public static object CellParse(NPOI.SS.UserModel.ICell cell, Type type, TtDataConverter converter, out bool hasError)
+        public static object CellParse(IXLCell cell, Type type, TtDataConverter converter, out bool hasError)
         {
             if (type.IsGenericType && type.GetInterface("IList") != null)
             {
@@ -212,10 +228,10 @@ namespace EngineNS.Bricks.DataSet
                 }
                 else
                 {
-                    var text = cell.ToString();
+                    var text = cell.GetFormattedString();
                     if (string.IsNullOrEmpty(text) == false)
                     {
-                        var segs = cell.ToString().Split(',');
+                        var segs = text.Split(',');
                         foreach (var j in segs)
                         {
                             lst.Add(Support.TConvert.ToObject(elemType, j, out hasError));
@@ -226,19 +242,19 @@ namespace EngineNS.Bricks.DataSet
             }
             else
             {
-                var result = Support.TConvert.ToObject(type, cell.ToString(), out hasError);
+                var result = Support.TConvert.ToObject(type, cell.GetFormattedString(), out hasError);
                 if (hasError)
                 {
-                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"XLSX Cell({type.FullName}) convert failed: {cell.ToString()}");
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"XLSX Cell({type.FullName}) convert failed: {cell.GetFormattedString()}");
                 }
                 return result;
             }
         }
-        private void SetCellValue(object value, NPOI.SS.UserModel.ICell cell, TtDataConverter converter)
+        private void SetCellValue(object value, IXLCell cell, TtDataConverter converter)
         {
             if (value == null)
             {
-                cell.SetCellValue("");
+                cell.Value = "";
                 return;
             }
             var type = value.GetType();
@@ -258,7 +274,7 @@ namespace EngineNS.Bricks.DataSet
                     }
                     if (text.EndsWith(","))
                         text = text.Substring(0, text.Length - 1);
-                    cell.SetCellValue(text);
+                    cell.Value = text;
                 }
                 else
                 {
@@ -275,75 +291,50 @@ namespace EngineNS.Bricks.DataSet
                         }
                         if (text.EndsWith(","))
                             text = text.Substring(0, text.Length - 1);
-                        cell.SetCellValue(text);
+                        cell.Value = text;
                     }
                 }
             }
             else if (type == typeof(bool))
             {
-                cell.SetCellValue((bool)value);
+                cell.Value = (bool)value;
             }
-            else if (type == typeof(SByte))
+            else if (type == typeof(SByte) || type == typeof(Int16) || type == typeof(Int32) ||
+                     type == typeof(byte) || type == typeof(UInt16) || type == typeof(UInt32) ||
+                     type == typeof(float) || type == typeof(double))
             {
-                cell.SetCellValue((SByte)value);
-            }
-            else if (type == typeof(Int16))
-            {
-                cell.SetCellValue((Int16)value);
-            }
-            else if (type == typeof(Int32))
-            {
-                cell.SetCellValue((Int32)value);
-            }
-            else if (type == typeof(byte))
-            {
-                cell.SetCellValue((byte)value);
-            }
-            else if (type == typeof(UInt16))
-            {
-                cell.SetCellValue((UInt16)value);
-            }
-            else if (type == typeof(UInt32))
-            {
-                cell.SetCellValue((UInt32)value);
+                // ClosedXML 的单元格数值本质是 double，整数/单精度分支统一转 double 写入。
+                cell.Value = Convert.ToDouble(value);
             }
             else if (type == typeof(string))
             {
-                cell.SetCellValue((string)value);
-            }
-            else if (type == typeof(float))
-            {
-                cell.SetCellValue((float)value);
-            }
-            else if (type == typeof(double))
-            {
-                cell.SetCellValue((double)value);
+                cell.Value = (string)value;
             }
             else if (type == typeof(DateTime))
             {
-                cell.SetCellValue((DateTime)value);
+                cell.Value = (DateTime)value;
             }
             else if (type.GetInterface("IDataProvider") != null)
             {
                 var subObj = value as TtDataProvider;
-                cell.SetCellValue(subObj.RowInSheet.ToString());
+                cell.Value = subObj.RowInSheet.ToString();
             }
             else
             {
-                cell.SetCellValue(value.ToString());
+                cell.Value = value.ToString();
             }
         }
         partial void GetCellText(int row, int col, ref string outText)
         {
             if (mSheet == null)
                 return;
-            var rowObj = mSheet.GetRow(row);
-            if (rowObj == null)
+            var rowObj = mSheet.Row(row + 1);
+            if (rowObj == null || rowObj.IsEmpty())
                 return;
-            var cell = rowObj.GetCell(col);
-            if (cell == null)
+            var cell = rowObj.Cell(col + 1);
+            if (cell == null || cell.IsEmpty())
                 return;
-            outText = cell.ToString();
+            outText = cell.GetFormattedString();
         }
     }
 }

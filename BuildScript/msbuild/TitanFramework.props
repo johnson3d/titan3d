@@ -21,4 +21,5 @@
   <Target Name="TitanRequireTargetFramework" Condition="'$(_TitanTargetFramework)' == ''">
     <Error Text="_TitanTargetFramework 为空：无法从 $(_TitanDepsJsonPath) 解析 dotnetSdk.targetFramework（该字段是全库 TFM 单一事实源，缺失或改名都会在此 fail-fast）" />
   </Target>
+
 </Project>

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
-using NPOI.SS.Formula.Functions;
 
 namespace EngineNS.Bricks.VirtualShadowMaps
 {

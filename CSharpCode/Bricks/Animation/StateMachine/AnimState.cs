@@ -8,7 +8,6 @@ using EngineNS.Animation.Command;
 using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
 using EngineNS.Bricks.StateMachine.Macross.StateAttachment;
 using EngineNS.Bricks.StateMachine.TimedSM;
-using NPOI.SS.Formula.Functions;
 
 namespace EngineNS.Animation.StateMachine
 {

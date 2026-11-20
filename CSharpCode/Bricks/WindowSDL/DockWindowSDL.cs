@@ -1,5 +1,4 @@
 ﻿using EngineNS.Graphics.Pipeline;
-using MathNet.Numerics;
 using SDL;
 using System;
 using System.Collections.Generic;

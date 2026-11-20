@@ -1,5 +1,4 @@
-﻿using MathNet.Numerics.Differentiation;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using EngineNS.GamePlay.Scene;
 

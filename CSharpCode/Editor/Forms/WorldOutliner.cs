@@ -1,7 +1,6 @@
 using EngineNS.EGui.Controls;
 using EngineNS.GamePlay.Scene;
 using EngineNS.IO;
-using NPOI.POIFS.Properties;
 using SDL;
 using System;
 using System.Collections.Generic;

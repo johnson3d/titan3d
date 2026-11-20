@@ -3,7 +3,6 @@ using EngineNS.EGui;
 using EngineNS.Macross;
 using EngineNS.Thread.Async;
 using EngineNS.UI.Controls;
-using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections;
 using System.Collections.Generic;

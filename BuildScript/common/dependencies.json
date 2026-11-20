@@ -5,8 +5,8 @@
     "targetFramework": "net10.0"
   },
   "visualStudio": {
-    "version": "2022",
-    "msbuildVersionRange": "[17.0,18.0)",
+    "version": "2026",
+    "msbuildVersionRange": "[18.0,19.0)",
     "requires": [
       "Microsoft.Component.MSBuild",
       "Microsoft.VisualStudio.Component.VC.Tools.x86.x64"

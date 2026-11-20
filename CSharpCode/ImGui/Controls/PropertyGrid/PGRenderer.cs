@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 using EngineNS;
-using NPOI.HSSF.Record.AutoFilter;
 
 namespace EngineNS.EGui.Controls.PropertyGrid
 {

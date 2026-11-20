@@ -5,7 +5,6 @@ using EngineNS.UI.Bind;
 using EngineNS.UI.Canvas;
 using EngineNS.UI.Controls;
 using EngineNS.UI.Controls.Containers;
-using NPOI.POIFS.Properties;
 
 namespace EngineNS.Bricks.UI.Controls.Containers
 {

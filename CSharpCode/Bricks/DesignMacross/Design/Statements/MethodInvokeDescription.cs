@@ -7,8 +7,6 @@ using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.DesignMacross.Design.Expressions;
 using EngineNS.DesignMacross.Design.Statement;
 using EngineNS.Rtti;
-using NPOI.SS.Formula.Functions;
-using Org.BouncyCastle.Asn1.X509.Qualified;
 using System.Reflection;
 
 namespace EngineNS.DesignMacross.Design.Statement

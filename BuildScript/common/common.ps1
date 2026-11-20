@@ -42,17 +42,6 @@ function Get-TitanTargetFramework {
     return $tfm
 }
 
-function Get-TitanTargetFramework {
-    $depsJson = Join-Path (Get-RepoRoot) 'BuildScript\common\dependencies.json'
-    $manifest = Get-Content -LiteralPath $depsJson -Raw | ConvertFrom-Json
-    $tfm = $manifest.dotnetSdk.targetFramework
-    if ([string]::IsNullOrWhiteSpace($tfm)) {
-        throw "dotnetSdk.targetFramework is missing or empty in '$depsJson'."
-    }
-
-    return $tfm
-}
-
 function Find-CMake {
     $cmake = Get-Command cmake -ErrorAction SilentlyContinue
     if ($null -eq $cmake) {
@@ -80,7 +69,19 @@ function Find-NuGet {
     return (Resolve-Path -LiteralPath $nugetPath).ProviderPath
 }
 
-function Find-Vs2022MsBuild {
+# VS 的可用版本区间由 dependencies.json 声明，避免 vswhere 硬编码与清单漂移。
+function Get-TitanVsVersionRange {
+    $depsJson = Join-Path (Get-RepoRoot) 'BuildScript\common\dependencies.json'
+    $manifest = Get-Content -LiteralPath $depsJson -Raw | ConvertFrom-Json
+    $versionRange = $manifest.visualStudio.msbuildVersionRange
+    if ([string]::IsNullOrWhiteSpace($versionRange)) {
+        throw "visualStudio.msbuildVersionRange is missing or empty in '$depsJson'."
+    }
+
+    return $versionRange
+}
+
+function Find-VsMsBuild {
     if ($env:MSBUILD_EXE -and (Test-Path -LiteralPath $env:MSBUILD_EXE)) {
         return (Resolve-Path -LiteralPath $env:MSBUILD_EXE).ProviderPath
     }
@@ -92,13 +93,14 @@ function Find-Vs2022MsBuild {
 
     $vswhere = Join-Path $programFilesX86 'Microsoft Visual Studio\Installer\vswhere.exe'
     if (-not (Test-Path -LiteralPath $vswhere)) {
-        throw "vswhere.exe was not found at '$vswhere'. Install Visual Studio 2022 or Build Tools 2022."
+        throw "vswhere.exe was not found at '$vswhere'. Install Visual Studio 2026 or Build Tools 2026."
     }
 
+    $versionRange = Get-TitanVsVersionRange
     $commonArgs = @(
         '-latest',
         '-products', '*',
-        '-version', '[17.0,18.0)',
+        '-version', $versionRange,
         '-find', 'MSBuild\**\Bin\MSBuild.exe'
     )
 
@@ -108,7 +110,7 @@ function Find-Vs2022MsBuild {
     }
 
     if (-not $msbuild -or -not (Test-Path -LiteralPath $msbuild)) {
-        throw 'Visual Studio 2022 MSBuild was not found. Install VS 2022 with MSBuild and Desktop development with C++.'
+        throw "Visual Studio MSBuild was not found in range $versionRange. Install Visual Studio 2026 with MSBuild and Desktop development with C++."
     }
 
     return (Resolve-Path -LiteralPath $msbuild).ProviderPath

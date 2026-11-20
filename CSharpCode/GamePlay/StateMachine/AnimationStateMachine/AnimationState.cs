@@ -7,7 +7,6 @@ using EngineNS.Animation.Command;
 using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
 using EngineNS.Bricks.StateMachine.TimedSM;
 using EngineNS.Thread.Async;
-using NPOI.SS.Formula.Functions;
 
 namespace EngineNS.GamePlay.StateMachine.AnimationStateMachine
 {

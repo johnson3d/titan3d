@@ -1,6 +1,5 @@
 ﻿using EngineNS.UI.Bind;
 using EngineNS.UI.Event;
-using NPOI.POIFS.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

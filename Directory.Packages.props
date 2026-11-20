@@ -1,17 +1,21 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- 允许下面的 PackageVersion 覆盖传递依赖版本（防止传递依赖把有已知漏洞的旧版本带回来）。 -->
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageVersion Include="AssimpNetter" Version="6.0.2.1" />
     <PackageVersion Include="BCnEncoder.Net" Version="2.2.1" />
     <PackageVersion Include="ClangSharp" Version="20.1.2.1" />
+    <PackageVersion Include="ClosedXML" Version="0.105.1" />
     <PackageVersion Include="envdte100" Version="17.14.40260" />
     <PackageVersion Include="libclang.runtime.win-x64" Version="20.1.2" />
     <PackageVersion Include="libclang.runtime.osx-arm64" Version="20.1.2" />
     <PackageVersion Include="libClangSharp.runtime.win-x64" Version="20.1.2" />
     <PackageVersion Include="libClangSharp.runtime.osx-arm64" Version="20.1.2" />
+    <PackageVersion Include="MathNet.Numerics" Version="5.0.0" />
     <PackageVersion Include="MemoryInterop.ILPatcher" Version="2.2.1" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="5.9.0" />
@@ -25,7 +29,6 @@
     <PackageVersion Include="Mono.Cecil" Version="0.11.6" />
     <PackageVersion Include="MvsSln" Version="2.6.0" />
     <PackageVersion Include="NLua" Version="1.7.6" />
-    <PackageVersion Include="NPOI" Version="2.7.2" />
     <PackageVersion Include="NUnit" Version="4.2.2" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
@@ -36,7 +39,8 @@
     <PackageVersion Include="RIPEMD160" Version="1.0.1" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <PackageVersion Include="System.CodeDom" Version="9.0.0" />
-    <PackageVersion Include="System.Runtime.Loader" Version="4.3.0" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.15" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.15" />
     <PackageVersion Include="TencentCloudSDK" Version="3.0.1268" />
   </ItemGroup>
 </Project>

@@ -5,7 +5,6 @@ using TencentCloud.Common;
 using TencentCloud.Common.Profile;
 using TencentCloud.Hunyuan.V20230901;
 using TencentCloud.Hunyuan.V20230901.Models;
-using static NPOI.HSSF.Util.HSSFColor;
 
 namespace EngineNS.Rtti
 {

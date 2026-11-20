@@ -25,7 +25,7 @@ foreach ($expectedText in @(
     "ValidateSet('Debug', 'Release', 'All')",
     'CMAKE_MSVC_RUNTIME_LIBRARY',
     'LEANCLR_GC_DEBUG',
-    'Visual Studio 17 2022',
+    'Visual Studio 18 2026',
     'leanclr.lib'
 )) {
     if (-not $scriptContent.Contains($expectedText)) {

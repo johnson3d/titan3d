@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using EngineNS.Bricks.NodeGraph;
 using EngineNS.EGui.Controls;
-using Org.BouncyCastle.Asn1.X509.Qualified;
 
 namespace EngineNS.Bricks.Particle.Editor
 {
