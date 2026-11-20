@@ -1,5 +1,5 @@
 {
-  "NativeDll": "release",
+  "NativeDll": "debug",
   "ImGuiIniPath": "imgui.ini",
   "CookAssetType": "Scene\u002BMesh\u002BMaterial\u002BMaterialInst\u002BAnimClip\u002BMeshPrimitive\u002BUI\u002BPrefab\u002BMacross\u002BUVAnim\u002BRPolicy\u002BAnimationClip\u002BBlendSpace\u002BMaterialFunction",
   "IsReverseZ": true,

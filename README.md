@@ -11,7 +11,7 @@
 # 编译运行环境
 - Titan3D 启动！
 - ![总览图](Documents/picture/main_edtor.png)
-- 1.安装2022
+- 1.安装 Visual Studio 2026（.NET SDK 10.0.4xx 要求 MSBuild 18，且原生工程需要 MSVC v143 生成工具组件）
 - 2.安装C#开发环境
 - 3.建议安装C#移动开发环境
 # 引擎特色
@@ -108,7 +108,7 @@ ExeCmd=SaveAsLastest AssetType=Scene+Mesh+Material+MaterialInst+Texture CookCfg=
 - 方法1：ExeCmd=StartLoginServer CookCfg=\$(SolutionDir)content\config\engineconfig_windows_rootserver.jscfg 
 - 方法2：ExtraCmd=1 CookCfg=$(SolutionDir)content\config\engineconfig_windows_rootserver.jscfg 在控制台输入ExeCmd=StartLoginServer
 ## 升级CppWeavingTools
-- 升级Nuget的libclang，本机查找Microsoft Visual Studio\2022\Enterprise\VC\Tools\Llvm\x64\bin拷贝到binaries\Tools\对应.net版本
+- 升级Nuget的libclang，本机查找Microsoft Visual Studio\18\Community\VC\Tools\Llvm\x64\bin拷贝到binaries\Tools\对应.net版本
 - 右键libClangSharp查看nuget文件位置
 ## 授权许可证
 - 采用[LGPL v3 许可](LICENSE.md)

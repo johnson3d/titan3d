@@ -412,8 +412,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "editor", "editor", "{8E8463
 		Documents\editor\NebulaParticleEditor.md = Documents\editor\NebulaParticleEditor.md
 		Documents\editor\PGCEditor.md = Documents\editor\PGCEditor.md
 		Documents\editor\PIEController.md = Documents\editor\PIEController.md
-		Documents\editor\RendPolicyEditor.md = Documents\editor\RendPolicyEditor.md
 		Documents\editor\RenderDocMCP.md = Documents\editor\RenderDocMCP.md
+		Documents\editor\RendPolicyEditor.md = Documents\editor\RendPolicyEditor.md
 		Documents\editor\SceneEditor.md = Documents\editor\SceneEditor.md
 		Documents\editor\TextureEditor.md = Documents\editor\TextureEditor.md
 		Documents\editor\TitanCMD.md = Documents\editor\TitanCMD.md
@@ -2203,7 +2203,6 @@ Global
 		3rd\native\xatlas\xatlas.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\zlib\zlib.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\zstd\zstd.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
-		codegen\Android\NativeBinder\CodeGen.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Base\Base.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\Animation\Animation.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\Canvas\Canvas.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
