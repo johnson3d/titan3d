@@ -28,12 +28,16 @@ internal static class SourceGenerationRunner
         if (modes.Any(m => m != "Rpc" && m != "AutoSync" && m != "Macross")) throw new ArgumentException("未知源码生成模式");
         var outputRoot = Path.Combine(root, "codegen", platform);
         Directory.CreateDirectory(outputRoot);
+        var clock = Stopwatch.StartNew();
         using var gate = AcquireGate(Path.Combine(outputRoot, ".source.lock"));
+        // 冷缓存下完整生成要连续跑几十次 MSBuild 求值，耗时以分钟计；外层 Exec 期间没有输出会被误判成卡死。
+        Console.WriteLine($"SourceGen: 开始生成 Platform={platform} Configuration={configuration} Modes={string.Join(",", modes)} Output={outputRoot}");
         // 不使用外层 MSBuild 的时间戳跳过求值，宏和 Compile 成员变化始终可见。
         var inputs = ProjectSourceInputs.LoadPlatformProjects(root, project, platform, configuration);
         var excludes = ReadExcludes(config);
         var stagingRoot = Path.Combine(outputRoot, ".staging-" + Guid.NewGuid().ToString("N"));
         var pending = new List<PendingOutput>();
+        var skipped = 0;
         try
         {
             for (var index = 0; index < inputs.Length; index++)
@@ -56,6 +60,7 @@ internal static class SourceGenerationRunner
                     if (IsCurrent(directory, previous, fingerprint) && (callerDirectory == null || IsCurrent(callerDirectory, previousCallers, fingerprint)))
                     {
                         Console.WriteLine("SourceGen: no-op");
+                        skipped++;
                         continue;
                     }
                     var staging = Path.Combine(stagingRoot, category, ownership);
@@ -99,6 +104,7 @@ internal static class SourceGenerationRunner
                 }
             }
             // 所有工程和模式解析成功后才发布、清理旧文件、更新成功清单。
+            Console.WriteLine($"SourceGen: 解析完成，待发布 {pending.Count} 组，开始写入...");
             foreach (var output in pending)
             {
                 Directory.CreateDirectory(output.Directory);
@@ -139,6 +145,7 @@ internal static class SourceGenerationRunner
                     if (!Directory.EnumerateFileSystemEntries(owner).Any()) Directory.Delete(owner);
                 }
             }
+            Console.WriteLine($"SourceGen: 完成：{inputs.Length} 个工程，跳过 {skipped} 组，写入 {pending.Count} 组，总耗时 {clock.Elapsed.TotalSeconds:F1}s");
         }
         finally
         {
@@ -237,13 +244,29 @@ internal static class SourceGenerationRunner
         WriteIfChanged(listFile, string.Join("\n", files) + (files.Count == 0 ? "" : "\n"));
     }
 
+    // Visual Studio 会在同一解决方案里并行/后台构建多个工程，它们共用同一把生成锁；
+    // 只要有一个进程在做完整生成，其它工程的校验必须能等足够久，否则会误报锁冲突。
+    private static readonly TimeSpan GateTimeout = TimeSpan.FromMinutes(10);
+
     private static FileStream AcquireGate(string path)
     {
         var clock = Stopwatch.StartNew();
+        var announced = false;
         while (true)
         {
             try { return File.Open(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None); }
-            catch (IOException) when (clock.Elapsed < TimeSpan.FromMinutes(2)) { System.Threading.Thread.Sleep(100); }
+            catch (IOException ex)
+            {
+                if (clock.Elapsed >= GateTimeout)
+                    throw new InvalidOperationException(
+                        $"等待代码生成锁超过 {GateTimeout.TotalMinutes:0} 分钟：{path}。通常是有残留的 CSharpCodeTools 进程，或 Visual Studio 的后台构建正在生成代码；结束该进程后重试。", ex);
+                if (!announced)
+                {
+                    Console.WriteLine($"SourceGen: 代码生成锁被占用，等待中：{path}");
+                    announced = true;
+                }
+                System.Threading.Thread.Sleep(100);
+            }
         }
     }
 

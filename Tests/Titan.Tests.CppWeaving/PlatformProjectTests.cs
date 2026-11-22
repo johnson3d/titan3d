@@ -10,6 +10,10 @@ namespace Titan.Tests.CppWeaving;
 public class PlatformProjectTests
 {
     private string mDir = "";
+    // 探针工程只 Import TitanCodeGen.targets，拿不到 TitanFramework.props 提供的 _TitanTargetFramework；
+    // 而工具部署目录已表达式化为 binaries/Tools/$(_TitanTargetFramework)，假仓库的工具又固定输出到 net8.0，
+    // 必须显式传入该属性，否则 targets 会去 binaries/Tools/ 根下找 exe。
+    private const string toolTfm = "-p:_TitanTargetFramework=net8.0";
     [SetUp] public void Setup() { mDir = Path.Combine(Path.GetTempPath(), "TitanPlatform_" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(mDir); }
     [TearDown] public void Cleanup() { Directory.Delete(mDir, true); }
 
@@ -368,7 +372,7 @@ public class PlatformProjectTests
         Assert.That(initial.Code, Is.Zero, initial.Log);
         var probe = Path.Combine(mDir, "Probe.proj");
         new XDocument(new XElement("Project", new XElement("Import", new XAttribute("Project", Path.Combine(Root(), "BuildScript/msbuild/TitanCodeGen.targets"))))).Save(probe);
-        var baseline = RunDotnet("msbuild", probe, "-nologo", "-t:_EnsureCppWeavingBuilt", "-p:TitanRoot=" + mDir + "/");
+        var baseline = RunDotnet("msbuild", probe, "-nologo", "-t:_EnsureCppWeavingBuilt", "-p:TitanRoot=" + mDir + "/", toolTfm);
         Assert.That(baseline.Code, Is.Zero, baseline.Log);
         var cppTemplate = Path.Combine(output, "Templates/Empty_CodeGen.vcxitems");
         var csTemplate = Path.Combine(output, "Templates/Empty_CodeGenCSharp.projitems");
@@ -404,7 +408,7 @@ public class PlatformProjectTests
             File.AppendAllText(changedFile, "\n<!-- changed -->");
             File.SetLastWriteTimeUtc(changedFile, DateTime.UtcNow);
         }
-        var result = RunDotnet("msbuild", probe, "-nologo", "-t:_EnsureCppWeavingBuilt", "-p:TitanRoot=" + mDir + "/", "-p:SkipTitanCodeGen=" + (scenario == "Skip" ? "true" : "false"));
+        var result = RunDotnet("msbuild", probe, "-nologo", "-t:_EnsureCppWeavingBuilt", "-p:TitanRoot=" + mDir + "/", "-p:SkipTitanCodeGen=" + (scenario == "Skip" ? "true" : "false"), toolTfm);
         Assert.That(result.Code, Is.Zero, result.Log);
         Assert.That(result.Log.Contains("Building CppWeavingTools"), Is.EqualTo(rebuild), result.Log);
         if (scenario == "Skip") Assert.That(File.Exists(cppTemplate), Is.False);
@@ -425,7 +429,7 @@ public class PlatformProjectTests
         }
         if (scenario is "StaleProject" or "PlatformProps")
         {
-            var repeated = RunDotnet("msbuild", probe, "-nologo", "-t:_EnsureCppWeavingBuilt", "-p:TitanRoot=" + mDir + "/");
+            var repeated = RunDotnet("msbuild", probe, "-nologo", "-t:_EnsureCppWeavingBuilt", "-p:TitanRoot=" + mDir + "/", toolTfm);
             Assert.That(repeated.Code, Is.Zero, repeated.Log);
             Assert.That(repeated.Log, Does.Not.Contain("Building CppWeavingTools"), repeated.Log);
         }
@@ -523,7 +527,9 @@ public class PlatformProjectTests
         inputs["CSharpTool"] = Path.Combine(mDir, "Module/CSharpCodeTools/Program.cs");
         var probe = Path.Combine(mDir, "Probe.proj");
         new XDocument(new XElement("Project", new XElement("Import", new XAttribute("Project", Path.Combine(Root(), "BuildScript/msbuild/TitanCodeGen.targets"))))).Save(probe);
-        var args = new[] { "msbuild", probe, "-nologo", "-t:TitanGenerateGlueCode", "-p:TitanRoot=" + mDir, "-p:TitanPlatform=Windows", "-p:Configuration=Debug" };
+        // codegen 的 Configuration 由 jscfg 的 NativeDll 决定（TitanNativeDll.props 用真实仓库根解析）；
+        // 探针是自包含的假仓库，显式钉成 debug 才能与下面断言的 Configuration=Debug 一致，不随本机 engine.jscfg 摇摆。
+        var args = new[] { "msbuild", probe, "-nologo", "-t:TitanGenerateGlueCode", "-p:TitanRoot=" + mDir, "-p:TitanPlatform=Windows", "-p:Configuration=Debug", "-p:TitanNativeDll=debug", toolTfm };
         var first = RunDotnet(args); Assert.That(first.Code, Is.Zero, first.Log);
         Assert.That(File.ReadAllLines(Path.Combine(mDir, "calls.txt")), Has.Length.EqualTo(1));
         var input = inputs[changed];
@@ -544,7 +550,7 @@ public class PlatformProjectTests
         if (changed == "CSharpTool")
         {
             Assert.That(second.Log, Does.Contain("managed generation updated"), second.Log);
-            var repeated = RunDotnet("msbuild", probe, "-nologo", "-t:_EnsureCSharpCodeToolsBuilt", "-p:TitanRoot=" + mDir + "/");
+            var repeated = RunDotnet("msbuild", probe, "-nologo", "-t:_EnsureCSharpCodeToolsBuilt", "-p:TitanRoot=" + mDir + "/", toolTfm);
             Assert.That(repeated.Code, Is.Zero, repeated.Log);
             Assert.That(repeated.Log, Does.Not.Contain("Building CSharpCodeTools"), repeated.Log);
         }

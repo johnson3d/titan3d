@@ -19,4 +19,11 @@
     <TitanEngineAssemblyPath Condition="'$(TitanEngineAssemblyPath)' == '' and '$(TitanPlatform)' == 'Android'">$(TtTitanRoot)binaries/android/$(_TitanTargetFramework)/Engine.Android.dll</TitanEngineAssemblyPath>
     <TitanEngineAssemblyPath Condition="'$(TitanEngineAssemblyPath)' == ''">$(TtTitanRoot)binaries/$(_TitanTargetFramework)/$(TitanEngineAssemblyName).dll</TitanEngineAssemblyPath>
   </PropertyGroup>
+  <!--
+    只 import 本文件的工程（MainEditor / TitanCMD / AloneGame 等）自己不声明 PackageReference，
+    包全部经 ProjectReference 闭包传递。VS(CPS) 的隐式还原会把这类工程的 assets 写退化成只剩
+    project 条目，deps.json 随之丢掉 runtimeTargets（于是运行时 DllImport 找不到原生 dll）。
+    TitanManagedEngine.props 已用同一份校验，这里补上这条路径；非 exe 工程在目标里被条件滤掉。
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)TitanPackageAssetsGuard.targets" />
 </Project>

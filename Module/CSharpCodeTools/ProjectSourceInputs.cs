@@ -150,19 +150,28 @@ namespace CSharpCodeTools
 
         public static ProjectSourceInputs[] LoadPlatformProjects(string titanRoot, string projectFile, string platform, string configuration)
         {
+            // 冷缓存下每个工程要跑两次 MSBuild 求值，整体耗时以分钟计：逐工程打印进度，
+            // 否则外层 Exec 在这段时间里没有任何输出，看起来就像构建卡死了。
+            var clock = Stopwatch.StartNew();
+            Console.WriteLine("SourceGen: 评估引擎工程输入...");
             var engine = LoadFromRoot(titanRoot, projectFile, platform, configuration);
+            Console.WriteLine($"SourceGen: 引擎工程 {engine.AssemblyName} 输入就绪（{clock.Elapsed.TotalSeconds:F1}s）");
             var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
             var pluginsRoot = Path.TrimEndingDirectorySeparator(Path.Combine(Path.GetFullPath(titanRoot), "Plugins"));
             if (engine.ProjectFile.StartsWith(pluginsRoot + Path.DirectorySeparatorChar, comparison))
                 throw new InvalidDataException("csproj 入口必须是引擎源码工程；插件由平台声明逐工程选择：" + engine.ProjectFile);
             var result = new List<ProjectSourceInputs> { engine };
-            foreach (var plugin in FindPluginProjects(titanRoot, engine.Platform))
+            var plugins = FindPluginProjects(titanRoot, engine.Platform)
+                .Where(plugin => !string.Equals(plugin.ProjectFile, engine.ProjectFile, comparison)).ToArray();
+            for (var index = 0; index < plugins.Length; index++)
             {
-                if (string.Equals(plugin.ProjectFile, engine.ProjectFile, comparison)) continue;
+                var plugin = plugins[index];
+                Console.WriteLine($"SourceGen: 评估插件工程 {index + 1}/{plugins.Length} {plugin.Name}（已用 {clock.Elapsed.TotalSeconds:F1}s）");
                 var inputs = LoadFromRoot(titanRoot, plugin.ProjectFile, engine.Platform, engine.Configuration);
                 inputs.ImportedFiles = inputs.ImportedFiles.Append(plugin.DescriptorFile).OrderBy(p => p, StringComparer.Ordinal).ToArray();
                 result.Add(inputs);
             }
+            Console.WriteLine($"SourceGen: 工程输入评估完成，共 {result.Count} 个工程（{clock.Elapsed.TotalSeconds:F1}s）");
             return result.ToArray();
         }
 

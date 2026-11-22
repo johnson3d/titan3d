@@ -1,0 +1,64 @@
+<Project>
+  <!--
+    native Core.Window 的配置由 jscfg 的 NativeDll 决定，解析集中在 TitanNativeDll.props；
+    TitanCodeGen.targets 也 Import 同一份文件，因此“编译 native”与“代码生成”永远用同一个配置。
+    本文件只追加 VS 侧行为：UpToDateCheck 登记与 Core.Window 的嵌套构建。
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)TitanNativeDll.props" Condition="'$(TitanNativeDllResolved)' != 'true'" />
+
+  <!--
+    VS 的“快速最新检查”只看托管输入；把 jscfg 与 native 产物登记进去，
+    否则托管工程没改动时会整个跳过构建，native 就永远不会按新配置重编。
+  -->
+  <ItemGroup Condition="'$(BuildingInsideVisualStudio)' == 'true' and '$(TitanEnginePlatform)' == 'Windows'">
+    <UpToDateCheckInput Include="$(_TitanNativeCoreBaseJscfg)" Condition="Exists('$(_TitanNativeCoreBaseJscfg)')" />
+    <UpToDateCheckInput Include="$(_TitanNativeCoreCacheJscfg)" Condition="Exists('$(_TitanNativeCoreCacheJscfg)')" />
+    <UpToDateCheckBuilt Include="$(TitanNativeCoreOutput)" />
+  </ItemGroup>
+
+  <!--
+    只在 VS 内生效：命令行 dotnet build 没有 VC targets，native 仍由 BuildScript\build.ps1 按 -Configuration 构建。
+    SolutionDir 必须显式传：vcxproj 的 OutDir/IntDir 都以它为基准，单工程构建时该全局属性为空。
+  -->
+  <PropertyGroup>
+    <!-- 锁文件放在已被 .gitignore 忽略的 intermediate 下，与 Core.Window 的 tlog 同盘同层。 -->
+    <_TitanNativeBuildLockPath>$(_TitanNativeCoreRepoRoot)intermediate\cpp\.native-build.lock</_TitanNativeBuildLockPath>
+    <_TitanNativeBuildLockScript>$(_TitanNativeCoreRepoRoot)BuildScript\msbuild\TitanNativeBuildLock.ps1</_TitanNativeBuildLockScript>
+  </PropertyGroup>
+
+  <Target Name="TitanBuildNativeCoreForVS"
+          BeforeTargets="PrepareForBuild"
+          Condition="'$(BuildingInsideVisualStudio)' == 'true' and '$(TitanEnginePlatform)' == 'Windows' and Exists('$(TitanNativeCoreProject)')">
+    <Warning Condition="'$(_TitanNativeDllLower)' != 'debug' and '$(_TitanNativeDllLower)' != 'release'"
+             Text="TitanNativeCore: jscfg 的 NativeDll='$(TitanNativeDll)' 不是 debug/release（auto 无法在构建期解析），已回退 $(TitanNativeConfiguration)。" />
+    <!--
+      VS 多节点下同一个 vcxproj 可能被请求两次（顶层 Engine.Window + 作为 MainEditor 的 ProjectReference），
+      并发写同一份 CL.*.tlog 会报 MSB6008/MSB6003。用锁文件把嵌套构建串行化，后到的节点等前一个完成后走增量。
+    -->
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(_TitanNativeBuildLockScript)&quot; -Action Acquire -Path &quot;$(_TitanNativeBuildLockPath)&quot;"
+          WorkingDirectory="$(_TitanNativeCoreRepoRoot)" LogStandardErrorAsError="true" />
+    <Message Importance="high"
+             Condition="'$(_TitanNativeDllFromCache)' != ''"
+             Text="TitanNativeCore: cache/config/engine.jscfg 覆盖 NativeDll=$(TitanNativeDll) → 构建 Core.Window ($(TitanNativeConfiguration)|x64) 到 binaries\$(TitanNativeOutputDirName)\" />
+    <Message Importance="high"
+             Condition="'$(_TitanNativeDllFromCache)' == '' and '$(_TitanNativeDllFromBase)' != ''"
+             Text="TitanNativeCore: engineconfig_windows_$(_TitanNativeCoreBaseConfig).jscfg 指定 NativeDll=$(TitanNativeDll) → 构建 Core.Window ($(TitanNativeConfiguration)|x64) 到 binaries\$(TitanNativeOutputDirName)\" />
+    <!--
+      PreferredToolArchitecture=x64 必须显式给：从 32 位 MSBuild 启动时会选 HostX86 的 link.exe，
+      Release 开了 LTCG，32 位链接器进程地址空间不够会报 C1002（编译器堆空间不足）。
+    -->
+    <MSBuild Projects="$(TitanNativeCoreProject)"
+             Targets="Build"
+             BuildInParallel="false"
+             Properties="Configuration=$(TitanNativeConfiguration);Platform=x64;SolutionDir=$(_TitanNativeCoreRepoRoot);PreferredToolArchitecture=x64" />
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(_TitanNativeBuildLockScript)&quot; -Action Release -Path &quot;$(_TitanNativeBuildLockPath)&quot;"
+          WorkingDirectory="$(_TitanNativeCoreRepoRoot)" ContinueOnError="true" />
+    <!-- 构建失败时也要释放锁，否则后续构建会一直等待锁文件。 -->
+    <OnError ExecuteTargets="_TitanReleaseNativeBuildLock" />
+  </Target>
+
+  <Target Name="_TitanReleaseNativeBuildLock">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(_TitanNativeBuildLockScript)&quot; -Action Release -Path &quot;$(_TitanNativeBuildLockPath)&quot;"
+          WorkingDirectory="$(_TitanNativeCoreRepoRoot)" ContinueOnError="true" />
+  </Target>
+</Project>

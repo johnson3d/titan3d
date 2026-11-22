@@ -94,7 +94,6 @@
   <ItemGroup>
     <PackageReference Include="AssimpNetter" />
     <PackageReference Include="BCnEncoder.Net" />
-    <PackageReference Include="MemoryInterop.ILPatcher" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" />
     <PackageReference Include="MathNet.Numerics" />
@@ -112,4 +111,19 @@
     <Error Condition="'$(TitanPlatform)' != '$(TitanEnginePlatform)'" Text="$(MSBuildProjectName) requires TitanPlatform=$(TitanEnginePlatform); got $(TitanPlatform)." />
     <Error Condition="'$(Configuration)' != 'Debug' and '$(Configuration)' != 'Release'" Text="Configuration must be Debug or Release." />
   </Target>
+
+  <!--
+    VS 的快速最新检查（Microsoft.Managed.DesignTime.targets 的 CollectUpToDateCheckBuiltDesignTime）只会跟踪
+    TargetPath / IntermediateAssembly / PDB，引用程序集 ref\<Assembly>.dll 不在其中。obj 被 Clean 掉之后 VS 仍可能
+    把工程判成“最新”并剪掉，下游工程于是拿着不存在的 ref 去编译，报 CS0006。把 ref 显式登记为输出，
+    缺失时就会正常触发重编。
+  -->
+  <Target Name="_TitanTrackReferenceAssemblyUpToDateCheck" BeforeTargets="CollectUpToDateCheckBuiltDesignTime">
+    <ItemGroup Condition="'$(ProduceReferenceAssembly)' == 'true'">
+      <UpToDateCheckBuilt Include="$(IntermediateOutputPath)ref\$(TargetFileName)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- 校验 PackageReference 与 project.assets.json 是否一致，不一致时用 MSBuild 还原路径自愈。 -->
+  <Import Project="$(MSBuildThisFileDirectory)TitanPackageAssetsGuard.targets" />
 </Project>

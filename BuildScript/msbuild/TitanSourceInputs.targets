@@ -10,6 +10,9 @@
       <_TitanProjectGeneratedRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', 'codegen'))</_TitanProjectGeneratedRoot>
       <_TitanProjectBinRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', 'bin'))</_TitanProjectBinRoot>
       <_TitanProjectObjRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', 'obj'))</_TitanProjectObjRoot>
+      <!-- C# 的 obj / bin 已迁到 intermediate/csharp，按实际路径剔除（绝对路径时才采用）。 -->
+      <_TitanProjectObjRoot Condition="$([System.IO.Path]::IsPathRooted('$(BaseIntermediateOutputPath)'))">$([MSBuild]::NormalizeDirectory('$(BaseIntermediateOutputPath)'))</_TitanProjectObjRoot>
+      <_TitanProjectBinRoot Condition="$([System.IO.Path]::IsPathRooted('$(BaseOutputPath)'))">$([MSBuild]::NormalizeDirectory('$(BaseOutputPath)'))</_TitanProjectBinRoot>
       <_TitanPathComparison Condition="$([MSBuild]::IsOSPlatform('Windows'))">OrdinalIgnoreCase</_TitanPathComparison>
       <_TitanPathComparison Condition="'$(_TitanPathComparison)' == ''">Ordinal</_TitanPathComparison>
     </PropertyGroup>

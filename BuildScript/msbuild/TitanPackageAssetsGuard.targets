@@ -1,0 +1,86 @@
+<Project>
+  <!--
+    VS(CPS) 的隐式还原在重型托管工程上会退化成“一个包都没有”的 project.assets.json
+    （dgspec 里 dependencies 无版本、centralPackageVersions 为空，甚至 dependencies 整体缺失）。
+    命令行 msbuild -t:Restore 出来的结果完全正常——两条还原路径的分歧不在 MSBuild 求值这一侧。
+
+    这份退化结果有两种表现：
+      1) 工程自己声明了 PackageReference，assets 里却一条都找不到 —— CoreCompile 抛出成百条 CS0246；
+      2) 只 import TitanManagedProject.props 的 exe（MainEditor / TitanCMD）自己不声明包，
+         退化后 assets 里只剩 ProjectReference 对应的 project 条目、一条 "type": "package" 都没有。
+         编译照常通过（引擎 dll 早已在 binaries 里），但 deps.json 跟着失去 runtimeTargets，
+         运行时 DllImport("SDL3") 找不到 runtimes/<rid>/native/SDL3.dll —— 表现为 SDL_Init 返回
+         false 后的断言，或直接 DllNotFoundException。命令行构建不经过 CPS 隐式还原，只在 VS 里复现。
+
+    这里在解析包资源之前做一次一致性校验，两种表现都判为“这份还原结果不可用”，用 MSBuild 的
+    还原语义重跑一次 Restore 再复核；复核仍不可用才 fail-fast，把问题收敛成一条可读错误，
+    而不是两百条 CS0246 或者运行时才炸。exe 分支只在 VS 内构建时启用，命令行构建零额外开销。
+  -->
+  <Target Name="TitanVerifyPackageAssets"
+          BeforeTargets="ResolvePackageAssets"
+          Condition="'$(DesignTimeBuild)' != 'true' And '$(SkipTitanPackageAssetsVerify)' != 'true' And ('@(PackageReference)' != '' Or (('$(OutputType)' == 'Exe' Or '$(OutputType)' == 'WinExe') And '@(ProjectReference)' != '' And '$(BuildingInsideVisualStudio)' == 'true'))">
+
+    <PropertyGroup>
+      <_TitanAssetsPath>$(ProjectAssetsFile)</_TitanAssetsPath>
+      <!-- 老工程可能没定义 ProjectAssetsFile，按 SDK 约定兜底 -->
+      <_TitanAssetsPath Condition="'$(_TitanAssetsPath)' == ''">$(MSBuildProjectExtensionsPath)project.assets.json</_TitanAssetsPath>
+      <!-- exe 分支允许 assets 缺失：缺了就当作退化结果，直接还原 -->
+      <_TitanAssetsText Condition="Exists('$(_TitanAssetsPath)')">$([System.IO.File]::ReadAllText('$(_TitanAssetsPath)'))</_TitanAssetsText>
+    </PropertyGroup>
+
+    <Error Condition="'@(PackageReference)' != '' And !Exists('$(_TitanAssetsPath)')"
+           Text="TitanPackageAssets: $(MSBuildProjectName) 声明了 PackageReference，但 $(_TitanAssetsPath) 不存在（工程从未还原）。请先执行 msbuild -t:Restore。" />
+
+    <ItemGroup>
+      <_TitanPackageProbe Include="@(PackageReference)">
+        <_TitanFound>$([System.String]::Copy('$(_TitanAssetsText)').Contains('%(Identity)'))</_TitanFound>
+      </_TitanPackageProbe>
+      <_TitanPackageAbsent Include="@(_TitanPackageProbe)" Condition="'%(_TitanFound)' != 'True'" />
+    </ItemGroup>
+
+    <!--
+      exe 分支：只有一个 ProjectReference、自己不声明包的重型 exe，退化后整份 assets 里没有任何 package
+      条目（健康状态至少有 ProjectReference 闭包带进来的几十条）。判据取“一条都没有”，不猜具体包名。
+    -->
+    <PropertyGroup>
+      <_TitanAssetsHasPackage>false</_TitanAssetsHasPackage>
+      <_TitanAssetsHasPackage Condition="'$(_TitanAssetsText)' != ''">$([System.String]::Copy('$(_TitanAssetsText)').Contains('"type": "package"'))</_TitanAssetsHasPackage>
+      <_TitanAssetsDegraded>false</_TitanAssetsDegraded>
+      <_TitanAssetsDegraded Condition="('$(OutputType)' == 'Exe' Or '$(OutputType)' == 'WinExe') And '@(ProjectReference)' != '' And '$(_TitanAssetsHasPackage)' != 'true'">true</_TitanAssetsDegraded>
+      <_TitanNeedsRestore>false</_TitanNeedsRestore>
+      <_TitanNeedsRestore Condition="'@(_TitanPackageAbsent)' != ''">true</_TitanNeedsRestore>
+      <_TitanNeedsRestore Condition="'$(_TitanAssetsDegraded)' == 'true'">true</_TitanNeedsRestore>
+    </PropertyGroup>
+
+    <Message Condition="'@(_TitanPackageAbsent)' != ''" Importance="high"
+             Text="TitanPackageAssets: $(_TitanAssetsPath) 中找不到 @(_TitanPackageAbsent, ', ') —— 判定为不完整的还原结果（VS 隐式还原的退化产物），改用 MSBuild 还原路径重新还原。" />
+
+    <Message Condition="'$(_TitanAssetsDegraded)' == 'true'" Importance="high"
+             Text="TitanPackageAssets: $(MSBuildProjectName) 是带 ProjectReference 的 exe，但 $(_TitanAssetsPath) 里没有任何 package 条目 —— 判定为不完整的还原结果（VS 隐式还原的退化产物，deps.json 会因此丢掉 runtimeTargets），改用 MSBuild 还原路径重新还原。" />
+
+    <MSBuild Condition="'$(_TitanNeedsRestore)' == 'true'"
+             Projects="$(MSBuildProjectFullPath)"
+             Targets="Restore"
+             BuildInParallel="false"
+             Properties="RestoreForce=true" />
+
+    <PropertyGroup Condition="'$(_TitanNeedsRestore)' == 'true'">
+      <_TitanAssetsText>$([System.IO.File]::ReadAllText('$(_TitanAssetsPath)'))</_TitanAssetsText>
+      <_TitanAssetsHasPackage>false</_TitanAssetsHasPackage>
+      <_TitanAssetsHasPackage Condition="'$(_TitanAssetsText)' != ''">$([System.String]::Copy('$(_TitanAssetsText)').Contains('"type": "package"'))</_TitanAssetsHasPackage>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'@(_TitanPackageAbsent)' != ''">
+      <_TitanPackageProbeStill Include="@(PackageReference)">
+        <_TitanFound>$([System.String]::Copy('$(_TitanAssetsText)').Contains('%(Identity)'))</_TitanFound>
+      </_TitanPackageProbeStill>
+      <_TitanPackageAbsentStill Include="@(_TitanPackageProbeStill)" Condition="'%(_TitanFound)' != 'True'" />
+    </ItemGroup>
+
+    <Error Condition="'@(_TitanPackageAbsentStill)' != ''"
+           Text="TitanPackageAssets: 用 MSBuild 还原路径重新还原后，$(_TitanAssetsPath) 仍缺少 @(_TitanPackageAbsentStill, ', ')。请在命令行执行 msbuild $(MSBuildProjectFullPath) -t:Restore 排查。" />
+
+    <Error Condition="'$(_TitanAssetsDegraded)' == 'true' And '$(_TitanAssetsHasPackage)' != 'true'"
+           Text="TitanPackageAssets: 用 MSBuild 还原路径重新还原后，$(_TitanAssetsPath) 里仍然没有任何 package 条目，deps.json 会缺少 runtimeTargets。请检查 $(MSBuildProjectFullPath) 的 ProjectReference 闭包，或在命令行执行 msbuild $(MSBuildProjectFullPath) -t:Restore 排查。" />
+  </Target>
+</Project>

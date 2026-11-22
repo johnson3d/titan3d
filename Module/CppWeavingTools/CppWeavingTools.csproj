@@ -3,15 +3,12 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>$(_TitanTargetFramework)</TargetFramework>
-    <BaseOutputPath></BaseOutputPath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>../../binaries/Tools</OutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>../../binaries/Tools</OutputPath>
+  <!-- 同 CSharpCodeTools：构建输出跟着仓库根的 BaseOutputPath 落在 intermediate\csharp 下，部署到 binaries/Tools
+       由 -p:TitanToolDeployDir 显式触发，避免解决方案“重新生成”覆盖正在运行的生成工具实例。 -->
+  <PropertyGroup>
+    <OutputPath Condition="'$(TitanToolDeployDir)' != ''">$([MSBuild]::NormalizeDirectory('$(TitanToolDeployDir)'))</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>

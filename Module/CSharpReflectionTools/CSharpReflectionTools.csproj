@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TitanPlatform Condition="'$(TitanPlatform)' == '' and $([MSBuild]::IsOSPlatform('OSX'))">Mac</TitanPlatform>
     <TitanPlatform Condition="'$(TitanPlatform)' == ''">Windows</TitanPlatform>
-    <BaseIntermediateOutputPath>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..', 'intermediate', 'csharp', 'tools', 'CSharpReflectionTools', '$(TitanPlatform)'))</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..', 'intermediate', 'csharp', 'tools', 'CSharpReflectionTools', '$(TitanPlatform)', 'obj'))</BaseIntermediateOutputPath>
   </PropertyGroup>
   <Import Project="../../BuildScript/msbuild/TitanManagedProject.props" />
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />

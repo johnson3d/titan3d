@@ -26,6 +26,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)partition.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)quantization.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)rasterizer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)remesher.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)simplifier.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)spatialorder.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)stripifier.cpp" />

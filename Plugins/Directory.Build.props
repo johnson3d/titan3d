@@ -36,7 +36,8 @@
   
   <!-- for csharp project -->
   <PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
-    <BaseIntermediateOutputPath>$(TtIntermediateBasePath)$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <!-- 与仓库根统一：每个插件的中间产物落在 intermediate\csharp\plugins\<工程名>\obj\。 -->
+    <BaseIntermediateOutputPath>$(TtIntermediateBasePath)$(MSBuildProjectName)\obj\</BaseIntermediateOutputPath>
     <!--<BaseOutputPath>$(TtOutputBasePath)</BaseOutputPath>-->
     <!--<IntDir>$(myIntermediatePath)$(MSBuildProjectName)\$(Configuration)\</IntDir>-->
     <OutDir>$(TtOutputBasePath)</OutDir >

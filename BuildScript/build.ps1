@@ -4,6 +4,10 @@ param(
     [ValidateSet('Debug', 'Release', 'All')]
     [string]$Configuration = 'All',
 
+    # native Core.Window 的编译配置由 jscfg 的 NativeDll 决定（与 VS 内构建同一规则）；
+    # 显式传入等价于 VS 的 /p:TitanNativeDll=debug|release。
+    [string]$NativeDll = '',
+
     [switch]$SkipRestore,
     [switch]$SkipCodeGen,
     [switch]$SkipNative,
@@ -35,6 +39,12 @@ Import-VsDevEnvironment $msbuild
 # Manifests are already isolated under owner+configuration subdirectories, so the order of the two All passes no longer affects manifest validity.
 $configs = if ($Configuration -eq 'All') { @('Debug', 'Release') } else { @($Configuration) }
 $toolConfig = if ($Configuration -eq 'Release') { 'Release' } else { 'Debug' }
+
+# Core.Window 不再跟随 -Configuration：按 jscfg 的 NativeDll 决定编 Debug 还是 Release，
+# 与 VS 内 TitanNativeCore.props 的解析规则完全一致（cache/config/engine.jscfg 覆盖优先）。
+$native = Resolve-TitanNativeConfiguration -Override $NativeDll
+$nativeConfig = $native.Configuration
+$nativeBuilt = $false
 
 # The two generator tools compile their own sources independently; generation per configuration only starts after bootstrap succeeds.
 $cppWeavingProject = 'Module\CppWeavingTools\CppWeavingTools.csproj'
@@ -91,10 +101,14 @@ function Invoke-DotNetBuild {
         [string]$Project,
 
         [Parameter(Mandatory = $true)]
-        [string]$BuildConfiguration
+        [string]$BuildConfiguration,
+
+        [string[]]$ExtraProperties = @()
     )
 
     $projectPath = Test-RepoFile $Project
+    # 上一次构建被强杀时可能留下写了一半的 PDB，之后每次增量构建都会在读符号时失败，先自检一次。
+    $null = Repair-CorruptSymbols $projectPath $BuildConfiguration
     Invoke-DotNetRestore $Project
 
     $args = @(
@@ -107,7 +121,7 @@ function Invoke-DotNetBuild {
         '/p:TitanPlatform=Windows',
         '/p:SkipTitanCodeGen=true',
         '--no-restore'
-    )
+    ) + $ExtraProperties
 
     Invoke-External $dotnet $args $repoRoot
 }
@@ -203,6 +217,10 @@ Write-Host "  dotnet:        $dotnet"
 Write-Host "  NuGet:         $nuget"
 #Write-Host "  LLVM/libclang: $llvmBin"
 Write-Host "  Configuration: $($configs -join ', ')"
+Write-Host "  NativeDll:     $($native.NativeDll) ($($native.Origin)) -> Core.Window $nativeConfig"
+if ($Configuration -ne 'All' -and $Configuration -ne $nativeConfig) {
+    Write-Host "  Note:          managed projects build $Configuration, native & codegen build $nativeConfig (jscfg wins, same as Visual Studio)"
+}
 
 if (-not $SkipDependencyCheck) {
     Write-Host ''
@@ -217,46 +235,62 @@ if (-not $SkipDependencyCheck) {
 
 if (-not $SkipTools) {
     Write-Host ''
+    # 工具工程自身的构建输出在 bin/，必须显式部署到 binaries/Tools 才能被 Get-GeneratorTool 找到；
+    # 两者分离后，解决方案重新生成不会去覆盖正在运行的生成工具实例。
+    $toolDeployProperty = '/p:TitanToolDeployDir=' + $repoRoot + '\binaries\Tools'
     Write-Host "== Build CppWeavingTools ($toolConfig) =="
-    Invoke-DotNetBuild $cppWeavingProject $toolConfig
+    Invoke-DotNetBuild $cppWeavingProject $toolConfig -ExtraProperties @($toolDeployProperty)
     Write-Host "== Build CSharpCodeTools ($toolConfig) =="
-    Invoke-DotNetBuild $csharpCodeToolsProject $toolConfig
+    Invoke-DotNetBuild $csharpCodeToolsProject $toolConfig -ExtraProperties @($toolDeployProperty)
+}
+
+# 代码生成与 native 编译同源，由 jscfg 的 NativeDll 决定配置（本脚本解析出的 $nativeConfig 与
+# TitanCodeGen.targets 的 _TitanCodeGenConfiguration 读的是同一份 jscfg），与 -Configuration 无关，
+# 因此只在循环外跑一次；-Configuration All 时不再重复生成两遍。
+if (-not $SkipCodeGen) {
+    Write-Host ''
+    # NativeBinder 必须按真正参与编译的 native 配置解析 Core.Window 的宏，
+    # CSharpCodeTools 也用同一份配置求值源码，否则命令行与 VS 内的生成物会互相覆盖。
+    Write-Host "== Generate NativeBinder code ($nativeConfig) =="
+    Invoke-CppWeaving $nativeConfig
+    Write-Host "== Generate RPC/AutoSync/Macross code ($nativeConfig) =="
+    Invoke-CSharpCodeTools $nativeConfig
+}
+
+if ($CodeGenOnly) {
+    Write-Host ''
+    if ($SkipCodeGen) { Write-Host 'Code generation skipped.' }
+    else { Write-Host 'Code generation completed.' }
+    return
 }
 
 # The same platform output root is consumed serially per configuration, so All publishing Release first does not race with the Debug build.
 foreach ($config in $configs) {
-    if (-not $SkipCodeGen) {
+
+    # native 只有一份配置（由 jscfg 决定），-Configuration All 时也只编一次。
+    if (-not $SkipNative -and -not $nativeBuilt) {
         Write-Host ''
-        Write-Host "== Generate NativeBinder code ($config) =="
-        Invoke-CppWeaving $config
-        Write-Host "== Generate RPC/AutoSync/Macross code ($config) =="
-        Invoke-CSharpCodeTools $config
-    }
+        Write-Host "== Build LeanCLR Windows x64 static libraries ($nativeConfig) =="
+        & "$PSScriptRoot\leanclr\build-leanclr.ps1" -Configuration $nativeConfig
 
-    if ($CodeGenOnly) {
-        continue
-    }
-
-    if (-not $SkipNative) {
-        Write-Host ''
-        Write-Host "== Build LeanCLR Windows x64 static libraries ($config) =="
-        & "$PSScriptRoot\leanclr\build-leanclr.ps1" -Configuration $config
-
-        Write-Host "== Build Core.Window x64 ($config) =="
+        Write-Host "== Build Core.Window x64 ($nativeConfig, NativeDll=$($native.NativeDll)) =="
         Invoke-External $msbuild @(
             (Test-RepoFile 'Core.Window\Core.Window.vcxproj'),
             '/m',
             '/nr:false',
             '/restore',
             '/t:Build',
-            ('/p:Configuration=' + $config),
+            ('/p:Configuration=' + $nativeConfig),
             ('/p:SolutionDir=' + $repoRoot + '\'),
             ('/p:TitanRoot=' + $repoRoot + '\'),
             '/p:TitanPlatform=Windows',
             '/p:SkipTitanCodeGen=true',
-            '/p:Platform=x64'
+            '/p:Platform=x64',
+            # Release 开 LTCG，32 位宿主的 HostX86 链接器地址空间不够会报 C1002。
+            '/p:PreferredToolArchitecture=x64'
         ) $repoRoot
-        Copy-NativeRuntimeDependencies $config
+        Copy-NativeRuntimeDependencies $nativeConfig
+        $nativeBuilt = $true
     }
 
     if (-not $SkipManaged) {
@@ -303,13 +337,6 @@ foreach ($config in $configs) {
             ) $repoRoot
         }
     }
-}
-
-if ($CodeGenOnly) {
-    Write-Host ''
-    if ($SkipCodeGen) { Write-Host 'Code generation skipped.' }
-    else { Write-Host 'Code generation completed.' }
-    return
 }
 
 Write-Host ''

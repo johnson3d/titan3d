@@ -1,5 +1,4 @@
-﻿using BCnEncoder.Shared;
-using EngineNS;
+﻿using EngineNS;
 using EngineNS.GamePlay.Scene;
 using System;
 using System.Collections.Generic;

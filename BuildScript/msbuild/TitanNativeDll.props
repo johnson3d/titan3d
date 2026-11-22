@@ -1,0 +1,46 @@
+<Project>
+  <!--
+    native Core.Window 的编译配置不跟随 VS 的 solution 配置（Debug/Release），
+    而是跟随 jscfg 里的 NativeDll 字段，与运行时加载 native dll 的规则保持一致：
+
+      1. 基础配置 content/config/engineconfig_windows_<TitanNativeCoreBaseConfig>.jscfg
+         （默认 dx12；目前只有 dx12 声明了 NativeDll，dx11/vk 缺字段时与运行时一致按 release 处理）
+      2. cache/config/engine.jscfg 覆盖（运行时生成，改动后以它为准）
+
+    解析在属性求值期完成（与 TitanFramework.props 解析 dependencies.json 同一手法），
+    不额外起进程；MSBuild 属性 /p:TitanNativeDll=debug 可强制指定。
+
+    本文件只有属性求值，没有 Item/Target 副作用，因此可以同时被
+    TitanNativeCore.props（VS 内构建 native）和 TitanCodeGen.targets（代码生成的配置来源）Import：
+    两条链路必须读到同一份配置，否则托管 Debug / native Release 时生成物与真正参与编译的产物会不一致。
+  -->
+  <PropertyGroup>
+    <TitanNativeDllResolved>true</TitanNativeDllResolved>
+    <_TitanNativeCoreRepoRoot Condition="'$(_TitanNativeCoreRepoRoot)' == ''">$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..'))</_TitanNativeCoreRepoRoot>
+    <_TitanNativeCoreBaseConfig Condition="'$(_TitanNativeCoreBaseConfig)' == ''">dx12</_TitanNativeCoreBaseConfig>
+    <_TitanNativeCoreBaseJscfg Condition="'$(_TitanNativeCoreBaseJscfg)' == ''">$(_TitanNativeCoreRepoRoot)content\config\engineconfig_windows_$(_TitanNativeCoreBaseConfig).jscfg</_TitanNativeCoreBaseJscfg>
+    <_TitanNativeCoreCacheJscfg Condition="'$(_TitanNativeCoreCacheJscfg)' == ''">$(_TitanNativeCoreRepoRoot)cache\config\engine.jscfg</_TitanNativeCoreCacheJscfg>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- jscfg 是扁平 json，NativeDll 只在顶层出现一次，用正则取字符串值即可 -->
+    <_TitanNativeDllFromBase Condition="Exists('$(_TitanNativeCoreBaseJscfg)')">$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(_TitanNativeCoreBaseJscfg)')), '&quot;NativeDll&quot;\s*:\s*&quot;([^&quot;]*)&quot;').Groups[1].Value)</_TitanNativeDllFromBase>
+    <_TitanNativeDllFromCache Condition="Exists('$(_TitanNativeCoreCacheJscfg)')">$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(_TitanNativeCoreCacheJscfg)')), '&quot;NativeDll&quot;\s*:\s*&quot;([^&quot;]*)&quot;').Groups[1].Value)</_TitanNativeDllFromCache>
+
+    <!-- 优先级：显式指定 > cache 覆盖 > 基础配置 > release -->
+    <TitanNativeDll Condition="'$(TitanNativeDll)' == '' and '$(_TitanNativeDllFromCache)' != ''">$(_TitanNativeDllFromCache)</TitanNativeDll>
+    <TitanNativeDll Condition="'$(TitanNativeDll)' == '' and '$(_TitanNativeDllFromBase)' != ''">$(_TitanNativeDllFromBase)</TitanNativeDll>
+    <TitanNativeDll Condition="'$(TitanNativeDll)' == ''">release</TitanNativeDll>
+    <_TitanNativeDllLower>$([System.String]::Copy('$(TitanNativeDll)').Trim().ToLowerInvariant())</_TitanNativeDllLower>
+
+    <TitanNativeConfiguration Condition="'$(_TitanNativeDllLower)' == 'debug'">Debug</TitanNativeConfiguration>
+    <TitanNativeConfiguration Condition="'$(_TitanNativeDllLower)' == 'release'">Release</TitanNativeConfiguration>
+    <!-- auto（运行时按命令行决定）在构建期无从解析，退回 Release -->
+    <TitanNativeConfiguration Condition="'$(TitanNativeConfiguration)' == ''">Release</TitanNativeConfiguration>
+
+    <TitanNativeOutputDirName>$([System.String]::Copy('$(TitanNativeConfiguration)').ToLowerInvariant())</TitanNativeOutputDirName>
+    <TitanNativeCoreProject Condition="'$(TitanNativeCoreProject)' == ''">$(_TitanNativeCoreRepoRoot)Core.Window\Core.Window.vcxproj</TitanNativeCoreProject>
+    <!-- 与 Core.Window.vcxproj 的 OutDir（$(SolutionDir)binaries\debug|release）一致 -->
+    <TitanNativeCoreOutput Condition="'$(TitanNativeCoreOutput)' == ''">$(_TitanNativeCoreRepoRoot)binaries\$(TitanNativeOutputDirName)\Core.Window.dll</TitanNativeCoreOutput>
+  </PropertyGroup>
+</Project>

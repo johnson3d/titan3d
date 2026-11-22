@@ -291,6 +291,12 @@
   <ItemGroup>
     <ProjectReference Include="..\3rd\native\crunch\crnlib\crnlib.2008.vcxproj">
       <Project>{cf2e70e8-7133-4d96-92c7-68bb406c0664}</Project>
+      <!-- 本工程的编译配置由 jscfg 的 NativeDll 决定（BuildScript/msbuild/TitanNativeDll.props），
+           而 VS 会按 .sln 的配置映射覆盖引用工程的配置：sln 的 Debug|Any CPU 被映射为 crnlib 的
+           Debug|x64，于是 Release 构建 Core.Window 时仍链接 Debug 版 crnlib（MTd），触发 LNK2038/LNK2001。
+           显式跟随本工程的 Configuration/Platform，避免这层 sln 映射。 -->
+      <SetConfiguration>Configuration=$(Configuration)</SetConfiguration>
+      <SetPlatform>Platform=$(Platform)</SetPlatform>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
@@ -312,5 +318,19 @@
       <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。使用“NuGet 程序包还原”可下载这些程序包。有关更多信息，请参见 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(TitanPackagesDir)WinPixEventRuntime.$(WinPixEventRuntimeVersion)\build\WinPixEventRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(TitanPackagesDir)WinPixEventRuntime.$(WinPixEventRuntimeVersion)\build\WinPixEventRuntime.targets'))" />
+  </Target>
+  <!-- crnlib 必须与本工程使用同一编译配置。从 .sln 构建时 MSBuild 的 AssignProjectConfiguration 会用
+       sln 的配置映射覆盖 ProjectReference 的配置（Debug|Any CPU 映射到 crnlib 的 Debug|x64），
+       于是 Release 构建 Core.Window 会链接 Debug 版 crnlib（MTd），报 LNK2038/LNK2001。
+       在引用拆分之后、使用引用之前把配置改回跟随本工程；同时清空 GlobalPropertiesToRemove，
+       否则不经 .sln 直接构建时会丢弃父级 Configuration/Platform，引用工程退回自身默认配置。 -->
+  <Target Name="_TitanAlignCrnlibConfiguration" AfterTargets="_SplitProjectReferencesByFileExistence">
+    <ItemGroup>
+      <_MSBuildProjectReferenceExistent Update="..\3rd\native\crunch\crnlib\crnlib.2008.vcxproj">
+        <SetConfiguration>Configuration=$(Configuration)</SetConfiguration>
+        <SetPlatform>Platform=$(Platform)</SetPlatform>
+        <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+      </_MSBuildProjectReferenceExistent>
+    </ItemGroup>
   </Target>
 </Project>

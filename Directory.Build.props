@@ -1,4 +1,34 @@
 <Project>
   <!-- 仓库根默认 TFM 注入；Plugins/ 与 Module/AloneGame.Maui/ 子树有各自的 Directory.Build.props，须由它们自行 Import 同一份文件。 -->
   <Import Project="$(MSBuildThisFileDirectory)BuildScript\msbuild\TitanFramework.props" />
+
+  <!--
+    C# 的 obj 与 bin 统一落在仓库 intermediate/csharp 下，按工程在仓库中的相对目录分层：
+      Module\Engine.Window\...   → intermediate/csharp/Module/Engine.Window/{obj,bin}/
+      Tests\Titan.Tests.Base\... → intermediate/csharp/Tests/Titan.Tests.Base/{obj,bin}/
+    源码与工程目录里因此不再出现 obj / bin，整体清理只需要删 intermediate\csharp 一个目录。
+
+    BaseIntermediateOutputPath 必须在 Microsoft.Common.props 赋值前确定，在 SDK 风格 csproj 正文里
+    再设会晚于 NuGet 求值并触发 MSB3539，所以只能写在 Directory.Build.props；
+    BaseOutputPath 同理（Microsoft.Common.CurrentVersion.targets 只在其为空时补默认值 bin\）。
+    两者都只在工程自己没设的时候生效，Debug/Release 与 TFM 分层仍由 MSBuild 默认规则追加。
+
+    已被覆盖的场景：
+      - 工程自己设了 OutputPath / BaseOutputPath（引擎产物落 binaries\、工具按平台隔离、SlateApp 各程序落 binaries\<名>）
+      - 3rd 下的第三方工程保持原状
+      - Plugins\ 子树由 Plugins\Directory.Build.props 指向 intermediate\csharp\plugins（OutDir = binaries\Plugins）
+      - AloneGame.Maui 由自己的 Directory.Build.props 走 intermediate\android，bin 是 APK 交付物、保持原位
+  -->
+  <PropertyGroup>
+    <_TitanCSharpProjectRelative>$([MSBuild]::MakeRelative('$(MSBuildThisFileDirectory)', '$(MSBuildProjectDirectory)'))</_TitanCSharpProjectRelative>
+    <TitanCSharpIntermediateRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', 'intermediate', 'csharp'))</TitanCSharpIntermediateRoot>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.csproj' AND !$(_TitanCSharpProjectRelative.StartsWith('3rd\'))">
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$([MSBuild]::NormalizeDirectory('$(TitanCSharpIntermediateRoot)', '$(_TitanCSharpProjectRelative)', 'obj'))</BaseIntermediateOutputPath>
+    <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">$([MSBuild]::NormalizePath('$(TitanCSharpIntermediateRoot)', '$(_TitanCSharpProjectRelative)', 'bin'))</BaseOutputPath>
+    <!-- SDK 的默认 glob 只排除新的 BaseIntermediateOutputPath；迁移前留在工程目录 obj\ 里的
+         AssemblyInfo.cs / GlobalUsings.g.cs 等生成源仍会被当成普通源码，导致 CS0579 属性重复。
+         显式排除旧位置，让本改动不依赖“先把旧 obj 删干净”。 -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', 'obj'))**</DefaultItemExcludes>
+  </PropertyGroup>
 </Project>

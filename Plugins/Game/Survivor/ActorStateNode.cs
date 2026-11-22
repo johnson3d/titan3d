@@ -1,4 +1,3 @@
-using BCnEncoder.Shared;
 using EngineNS;
 using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;

@@ -1,5 +1,4 @@
-﻿using Assimp;
-using EngineNS;
+﻿using EngineNS;
 using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Thread.Async;

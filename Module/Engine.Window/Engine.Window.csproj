@@ -59,6 +59,9 @@
     <Content Remove="C:\Users\johnsonsong\.nuget\packages\microsoft.codeanalysis.workspaces.msbuild\4.11.0\contentFiles\any\any\BuildHost-netcore\zh-Hant\System.CommandLine.resources.dll" />
   </ItemGroup>
 
+  <!-- native Core.Window 的 Debug/Release 由 jscfg 的 NativeDll 决定，不跟随 VS 的 solution 配置 -->
+  <Import Project="..\..\BuildScript\msbuild\TitanNativeCore.props" />
+
   <Import Project="..\..\BuildScript\msbuild\TitanCodeGen.targets" />
 
 </Project>
