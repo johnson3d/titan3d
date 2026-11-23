@@ -10,7 +10,7 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).ProviderPath
 $buildScriptRoot = Join-Path $repoRoot 'BuildScript'
 
 $rootScriptAllowList = @('build.ps1', 'test.ps1')
-$rootDirAllowList = @('android', 'check', 'cmake', 'common', 'EngineConfig', 'leanclr', 'msbuild', 'scaffold', 'tests')
+$rootDirAllowList = @('android', 'check', 'cmake', 'common', 'EngineConfig', 'leanclr', 'mcp', 'msbuild', 'scaffold', 'tests')
 
 # file name -> owning subdirectory (relative to BuildScript)
 $grouped = [ordered]@{
@@ -28,6 +28,7 @@ $grouped = [ordered]@{
     'LeanClrDeploy.targets'      = 'leanclr'
     'LeanClrPlugin.targets'      = 'leanclr'
     'LeanClrStub.targets'        = 'leanclr'
+    'Setup-MCPServers.ps1'       = 'mcp'
     'New-LeanClrStub.ps1'        = 'scaffold'
     'New-TitanPlugin.ps1'        = 'scaffold'
     'TitanPlatform.props'        = 'msbuild'

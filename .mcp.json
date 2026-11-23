@@ -3,14 +3,16 @@
     "titan-engine-mcp": {
       "command": "python",
       "args": [
-        "D:/GitHub/titanengine/Plugins/AIGC/MCPServer/Python/titan_mcp_server.py",
+        "Plugins/AIGC/MCPServer/Python/titan_mcp_server.py",
         "--port",
         "18118"
-      ]
+      ],
+      "cwd": "."
     },
     "renderdoc": {
-      "command": "C:/Users/lxn86/AppData/Local/Programs/Python/Python313/python.exe",
+      "command": "py",
       "args": [
+        "-3.13",
         "-m",
         "renderdoc_mcp"
       ]
