@@ -22,5 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Module\CppWeavingTools\CppWeavingTools.csproj" />
+    <ProjectReference Include="..\..\Module\TitanProjectEval\TitanProjectEval.csproj" />
   </ItemGroup>
 </Project>

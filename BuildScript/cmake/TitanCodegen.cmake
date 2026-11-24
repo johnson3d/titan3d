@@ -65,6 +65,8 @@ function(titan_codegen_inputs_fingerprint out_hash out_files titan_root)
     "${titan_root}/${TITAN_PLATFORM_DIR}/*.h" "${titan_root}/${TITAN_PLATFORM_DIR}/*.hpp" "${titan_root}/${TITAN_PLATFORM_DIR}/*.hxx"
     "${titan_root}/${TITAN_PLATFORM_DIR}/*.inl" "${titan_root}/${TITAN_PLATFORM_DIR}/*.ipp" "${titan_root}/${TITAN_PLATFORM_DIR}/*.inc"
     "${titan_root}/Module/CppWeavingTools/*.cs" "${titan_root}/Module/CppWeavingTools/*.csproj"
+    # CppWeavingTools 的头/宏/include 由工程求值器产出，求值器改动会影响胶水。
+    "${titan_root}/Module/TitanProjectEval/*.cs" "${titan_root}/Module/TitanProjectEval/*.csproj"
     "${titan_root}/Module/CSharpCodeTools/*.cs" "${titan_root}/Module/CSharpCodeTools/*.csproj"
     "${titan_root}/Module/CompilingGenerator/*.cs" "${titan_root}/Module/CompilingGenerator/*.csproj"
     "${titan_root}/Module/TtEngineLints/*.cs" "${titan_root}/Module/TtEngineLints/*.csproj"
@@ -98,8 +100,6 @@ function(titan_codegen_inputs_fingerprint out_hash out_files titan_root)
       ${TITAN_PLATFORM_DIR}/GenerateCodegen.cmake
       ${TITAN_PLATFORM_DIR}/cmake/Titan${TITAN_PLATFORM}Flags.cmake
       BuildScript/cmake/TitanPlatformContext.cmake
-      BuildScript/cmake/TitanProjectMetadata.cmake
-      BuildScript/cmake/TitanSourceList.cmake
       BuildScript/cmake/TitanRefreshSources.cmake
       BuildScript/cmake/TitanCodegen.cmake
       BuildScript/cmake/TitanCodegenGen.cmake)

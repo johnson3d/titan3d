@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Titan.Build;
 
 namespace CppWeaving
 {
@@ -14,16 +15,8 @@ namespace CppWeaving
         public string CsOutput;
         public string BuildCondition => $"'$(Configuration)|$(Platform)'=='{Configuration}|{(Platform == TargetPlatform.Windows ? "x64" : "ARM64")}'";
 
-        internal static string FindRoot(string start)
-        {
-            var dir = new DirectoryInfo(start);
-            while (dir != null)
-            {
-                if (File.Exists(Path.Combine(dir.FullName, "EngineAll.sln"))) return dir.FullName;
-                dir = dir.Parent;
-            }
-            return null;
-        }
+        // 仓库根识别与求值器同一份实现，避免两条路径各自向上找 EngineAll.sln。
+        internal static string FindRoot(string start) => ProjectEvaluator.FindRoot(start);
 
         public static PlatformProject Resolve(string[] args)
         {

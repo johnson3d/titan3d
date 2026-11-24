@@ -155,8 +155,9 @@ public class ClangProfileTests
         collector.Collect(proj, @"'$(Configuration)|$(Platform)'=='Debug|x64'", TargetPlatform.Windows);
 
         var dir = Path.GetDirectoryName(proj)!.Replace('\\', '/') + "/";
-        Assert.That(collector.IncludePath, Does.Contain(dir + "../inc"));
-        Assert.That(collector.IncludePath, Does.Contain(dir + "../pthread/include"));
+        // include 现在由求值模型统一投影成规范化的绝对路径
+        Assert.That(collector.IncludePath, Does.Contain(Path.GetFullPath(dir + "../inc").Replace('\\', '/')));
+        Assert.That(collector.IncludePath, Does.Contain(Path.GetFullPath(dir + "../pthread/include").Replace('\\', '/')));
         Assert.That(collector.MacroDefines, Is.EqualTo(new[] { "PLATFORM_WIN", "_DEBUG" }));
     }
 
@@ -225,10 +226,14 @@ public class ClangProfileTests
     private string WriteVcxproj()
     {
         var proj = Path.Combine(mTempDir, "Test.vcxproj");
+        // 平台工程必须是共享项的聚合者（求值器不变量）；这里只需要一个空的共享项。
+        File.WriteAllText(Path.Combine(mTempDir, "Empty.vcxitems"), "<Project><ItemGroup /></Project>");
         File.WriteAllText(proj, """
             <?xml version="1.0" encoding="utf-8"?>
             <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-              <ImportGroup Label="Shared" />
+              <ImportGroup Label="Shared">
+                <Import Project="Empty.vcxitems" Label="Shared" />
+              </ImportGroup>
               <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
                 <ClCompile>
                   <AdditionalIncludeDirectories>../inc;../pthread/include;../atlmfc/include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>

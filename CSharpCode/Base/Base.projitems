@@ -26,6 +26,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Macross\MacrossModule.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\MacrossStackTracer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Profiler\Trace\Channel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Profiler\Trace\EventStreamAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Profiler\Trace\Session.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Profiler\Trace\TraceEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Profiler\Trace\TraceFile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Profiler\Trace\Tracer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Profiler\NativeMemory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RName.Cloud.cs" />

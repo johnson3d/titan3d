@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>$(_TitanTargetFramework)</TargetFramework>
+    <AssemblyName>TitanProjectEval</AssemblyName>
+    <RootNamespace>Titan.Build</RootNamespace>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+
+  <!-- 原生工程求值的唯一实现：CMake 源清单、codegen 头/宏/Include、Windows 一致性核对
+       都消费同一份模型，不允许再出现第二套 XML/正则求值。 -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Titan.Tests.CppWeaving" />
+  </ItemGroup>
+
+</Project>

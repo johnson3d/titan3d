@@ -95,6 +95,8 @@ namespace EngineNS.Profiler
             }
         }
         Int64 mBeginTime;
+        /// <summary>事件流用的名字表下标缓存。名字表 id 单调递增且永不回收, 所以缓存一次终身有效</summary>
+        internal int TraceNameId = -1;
         public void Begin(string file, int line)
         {
             if (TimeScopeManager.IsFinalCleanup)
@@ -106,6 +108,13 @@ namespace EngineNS.Profiler
                 NeedDispose = false;
                 mEnable = mCoreObject.mEnable;
             }
+            // 事件流旁路: 与 native 聚合统计口径不同 —— native 里同名重入不计时,
+            // 这里照常记录完整的嵌套事件树, 分析侧才能看到真实的调用结构。
+            // 必须放在 mEnable 短路之前: native Profiler 面板的开关关掉时 mEnable 为 false,
+            // 若跟着一起返回, 事件流就一条也采不到(capture 只看 IsCapturing)
+            if (Trace.TtTraceSession.IsCapturing)
+                Trace.TtTraceSession.Instance.BeginEvent(this);
+
             if (mEnable == false)
                 return;
 
@@ -115,6 +124,10 @@ namespace EngineNS.Profiler
         {
             if (TimeScopeManager.IsFinalCleanup)
                 return;
+
+            // 与 Begin 对称: mEnable 短路也得放在旁路之后
+            if (Trace.TtTraceSession.IsCapturing)
+                Trace.TtTraceSession.Instance.EndEvent(this);
 
             if (mEnable == false)
                 return;
@@ -520,13 +533,34 @@ namespace EngineNS.Profiler
     public class TtProfilerModule : TtModule<TtEngine>
     {
         public NxRHI.TtGpuTimeScopeManager GpuTimeScopeManager { get; } = new NxRHI.TtGpuTimeScopeManager();
+        // 每帧 GPU 计时采样的收集与结算器: BeginFrame/TickPostEvents 驱动它的入队与回收
+        public NxRHI.TtGpuFrameContainerManager GpuFrameContainerManager { get; } = new NxRHI.TtGpuFrameContainerManager();
+        // EditorConfig 里的过期阈值: 配置对象是稳定的, 拿一次就够, 不必每帧走 ConfigManager
+        Editor.TtEditorConfig mEditorConfig;
         public override unsafe void TickModule(TtEngine host)
         {
-            GpuTimeScopeManager.UpdateSync();
+            // GPU 采样的结算主路径在 TtGpuDevice.TickPostEvents, 这里只做一次幂等的回收
+            GpuFrameContainerManager.Tick();
+            // 全局采样实例池: 高水位连续若干帧没涨才缩容, 避免与偶发峰值对抗
+            GpuTimeScopeManager.Pool.TickShrink();
+            // 场景切走/节点关闭后旧 pass 不再录制: 超时没命中的 scope 从表里摘掉, 面板不留陈旧读数。
+            // 阈值走 EditorConfig(秒, 0=不摘); 时钟用 Stopwatch 单调毫秒, host.ElapsedSecond 是每帧增量不能当累计时间用
+            if (mEditorConfig == null)
+                mEditorConfig = TtEngine.Instance?.ConfigManager?.GetConfig<Editor.TtEditorConfig>();
+            if (mEditorConfig != null)
+                GpuTimeScopeManager.ExpireMS = (int)(mEditorConfig.GpuScopeExpireSeconds * 1000.0f);
+            GpuTimeScopeManager.TickExpire(Support.TtTime.GetTickCount());
+            // 事件流采集会话: 推进封帧/挂事件流/发送。放在 EndFrame 之前,
+            // 此时当前帧槽还是 Recording, 本帧事件不会在半途被当成"完成"处理
+            host.Tracer.Tick();
         }
         public override void Cleanup(TtEngine host)
         {
+            // 引擎退出前把录制的文件收尾: 回填帧数并 flush, 否则文件头永远是 0 帧
+            host.Tracer.StopRecord();
+            mEditorConfig = null;
             GpuTimeScopeManager.Dispose();
+            GpuFrameContainerManager.Dispose();
         }
     }
 }

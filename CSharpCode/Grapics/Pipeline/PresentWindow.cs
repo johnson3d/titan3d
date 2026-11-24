@@ -24,12 +24,26 @@ namespace EngineNS.Graphics.Pipeline
             get => SwapChain != null && IsRenderable;
         }
         
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeBeginFrame;
+        private static Profiler.TimeScope ScopeBeginFrame
+        {
+            get
+            {
+                if (mScopeBeginFrame == null)
+                    mScopeBeginFrame = new Profiler.TimeScope(typeof(TtPresentWindow), nameof(BeginFrame));
+                return mScopeBeginFrame;
+            }
+        }
         public void BeginFrame()
         {
             if (CanRender == false)
                 return;
-            ApplyPendingResize();
-            SwapChain.BeginFrame();
+            using (new Profiler.TimeScopeHelper(ScopeBeginFrame))
+            {
+                ApplyPendingResize();
+                SwapChain.BeginFrame();
+            }
         }
         public void EndFrame()
         {
@@ -133,6 +147,17 @@ namespace EngineNS.Graphics.Pipeline
             //    return true;
             //});
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeApplyPendingResize;
+        private static Profiler.TimeScope ScopeApplyPendingResize
+        {
+            get
+            {
+                if (mScopeApplyPendingResize == null)
+                    mScopeApplyPendingResize = new Profiler.TimeScope(typeof(TtPresentWindow), nameof(ApplyPendingResize));
+                return mScopeApplyPendingResize;
+            }
+        }
         private void ApplyPendingResize()
         {
             if (mHasPendingResize == false || SwapChain == null)
@@ -152,8 +177,11 @@ namespace EngineNS.Graphics.Pipeline
             var height = mPendingResizeHeight;
             mHasPendingResize = false;
 
-            TtEngine.Instance.GfxDevice.RenderQueue.Flush(true);
-            SwapChain.OnResize(width, height);
+            using (new Profiler.TimeScopeHelper(ScopeApplyPendingResize))
+            {
+                TtEngine.Instance.GfxDevice.RenderQueue.Flush(true);
+                SwapChain.OnResize(width, height);
+            }
         }
     }
 }

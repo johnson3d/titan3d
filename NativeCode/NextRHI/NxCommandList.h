@@ -289,6 +289,10 @@ namespace NxRHI
 	public:
 		virtual bool IsFinished() = 0;
 		virtual UINT64 GetDeltaTime() = 0;
+		// query 的原始时间戳, 单位与提交队列的 mDefaultQueueFrequence 相同(不同后端/驱动可能不同)。
+		// 两个都是 0 或 end <= begin 表示后端没采到时间, 调用方要退回按 delta 估算
+		virtual UINT64 GetBeginTime() { return 0; }
+		virtual UINT64 GetEndTime() { return 0; }
 		virtual void Begin(ICommandList * cmdlist) = 0;
 		virtual void End(ICommandList * cmdlist) = 0;
 		virtual const char* GetName() = 0;

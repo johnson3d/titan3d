@@ -300,24 +300,89 @@ namespace EngineNS.EGui
                 return mScopeDrawPass;
             }
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeGetCmdList;
+        private static Profiler.TimeScope ScopeGetCmdList
+        {
+            get
+            {
+                if (mScopeGetCmdList == null)
+                    mScopeGetCmdList = new Profiler.TimeScope(typeof(TtImDrawDataRHI), "RenderImDrawData.GetCmdList");
+                return mScopeGetCmdList;
+            }
+        }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeProcessTextures;
+        private static Profiler.TimeScope ScopeProcessTextures
+        {
+            get
+            {
+                if (mScopeProcessTextures == null)
+                    mScopeProcessTextures = new Profiler.TimeScope(typeof(TtImDrawDataRHI), "RenderImDrawData.ProcessTextures");
+                return mScopeProcessTextures;
+            }
+        }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeUploadTexture;
+        private static Profiler.TimeScope ScopeUploadTexture
+        {
+            get
+            {
+                if (mScopeUploadTexture == null)
+                    mScopeUploadTexture = new Profiler.TimeScope(typeof(TtImDrawDataRHI), "RenderImDrawData.UploadTexture");
+                return mScopeUploadTexture;
+            }
+        }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeBeginFrame;
+        private static Profiler.TimeScope ScopeBeginFrame
+        {
+            get
+            {
+                if (mScopeBeginFrame == null)
+                    mScopeBeginFrame = new Profiler.TimeScope(typeof(TtImDrawDataRHI), "RenderImDrawData.BeginFrame");
+                return mScopeBeginFrame;
+            }
+        }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeEnsureBuffers;
+        private static Profiler.TimeScope ScopeEnsureBuffers
+        {
+            get
+            {
+                if (mScopeEnsureBuffers == null)
+                    mScopeEnsureBuffers = new Profiler.TimeScope(typeof(TtImDrawDataRHI), "RenderImDrawData.EnsureBuffers");
+                return mScopeEnsureBuffers;
+            }
+        }
         private unsafe static void RenderImDrawDataImpl(ref ImDrawData draw_data, Graphics.Pipeline.TtPresentWindow presentWindow, TtImDrawDataRHI rhiData)
         {
             if (presentWindow?.CanRender != true)
                 return;
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            var drawCmd = NxRHI.TtCommandList.GetCmdList();
+            NxRHI.TtCommandList drawCmd;
+            using (new Profiler.TimeScopeHelper(ScopeGetCmdList))
+            {
+                drawCmd = NxRHI.TtCommandList.GetCmdList();
+            }
             uint vertexOffsetInVertices = 0;
             uint indexOffsetInElements = 0;
 
-            ProcessImGuiTextureRequests(ref draw_data);
+            using (new Profiler.TimeScopeHelper(ScopeProcessTextures))
+            {
+                ProcessImGuiTextureRequests(ref draw_data);
+            }
 
             if (draw_data.CmdListsCount == 0)
             {
                 return;
             }
 
-            presentWindow.BeginFrame();
+            using (new Profiler.TimeScopeHelper(ScopeBeginFrame))
+            {
+                presentWindow.BeginFrame();
+            }
 
             var swapChain = presentWindow.SwapChain;
             var frameBufferCount = Math.Max((int)swapChain.BackBufferCount, 1);
@@ -326,40 +391,43 @@ namespace EngineNS.EGui
             rhiData.VertexBuffer = rhiData.mFrameVertexBuffers[frameBufferIndex];
             rhiData.IndexBuffer = rhiData.mFrameIndexBuffers[frameBufferIndex];
 
-            uint totalVBSize = (uint)(draw_data.TotalVtxCount * sizeof(ImDrawVert));
-            if (rhiData.VertexBuffer == null || totalVBSize > rhiData.VertexBuffer.mCoreObject.Desc.Size)
+            using (new Profiler.TimeScopeHelper(ScopeEnsureBuffers))
             {
-                CoreSDK.DisposeObject(ref rhiData.mFrameVertexBuffers[frameBufferIndex]);
-                //var vbDesc = new NxRHI.FBufferDesc();
-                //vbDesc.SetDefault();
-                //vbDesc.Type = NxRHI.EBufferType.BFT_Vertex;
-                //vbDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
-                //vbDesc.StructureStride = (uint)sizeof(ImDrawVert);
-                //vbDesc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
-                //vbDesc.Size = (uint)(totalVBSize * 1.5f);
-                //vbDesc.StructureStride = (uint)sizeof(ImDrawVert);
-                var vbDesc = new NxRHI.FVbvDesc();
-                vbDesc.m_Size = (uint)(totalVBSize * 1.5f);
-                vbDesc.m_Stride = (uint)sizeof(ImDrawVert);
-                vbDesc.m_CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
-                vbDesc.m_Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
-                rhiData.mFrameVertexBuffers[frameBufferIndex] = rc.CreateVBV(null, in vbDesc);
-                rhiData.VertexBuffer = rhiData.mFrameVertexBuffers[frameBufferIndex];
-                rhiData.GeomMesh.mCoreObject.GetVertexArray().BindVB(NxRHI.EVertexStreamType.VST_Position, rhiData.VertexBuffer.mCoreObject);
-            }
+                uint totalVBSize = (uint)(draw_data.TotalVtxCount * sizeof(ImDrawVert));
+                if (rhiData.VertexBuffer == null || totalVBSize > rhiData.VertexBuffer.mCoreObject.Desc.Size)
+                {
+                    CoreSDK.DisposeObject(ref rhiData.mFrameVertexBuffers[frameBufferIndex]);
+                    //var vbDesc = new NxRHI.FBufferDesc();
+                    //vbDesc.SetDefault();
+                    //vbDesc.Type = NxRHI.EBufferType.BFT_Vertex;
+                    //vbDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
+                    //vbDesc.StructureStride = (uint)sizeof(ImDrawVert);
+                    //vbDesc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
+                    //vbDesc.Size = (uint)(totalVBSize * 1.5f);
+                    //vbDesc.StructureStride = (uint)sizeof(ImDrawVert);
+                    var vbDesc = new NxRHI.FVbvDesc();
+                    vbDesc.m_Size = (uint)(totalVBSize * 1.5f);
+                    vbDesc.m_Stride = (uint)sizeof(ImDrawVert);
+                    vbDesc.m_CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
+                    vbDesc.m_Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
+                    rhiData.mFrameVertexBuffers[frameBufferIndex] = rc.CreateVBV(null, in vbDesc);
+                    rhiData.VertexBuffer = rhiData.mFrameVertexBuffers[frameBufferIndex];
+                    rhiData.GeomMesh.mCoreObject.GetVertexArray().BindVB(NxRHI.EVertexStreamType.VST_Position, rhiData.VertexBuffer.mCoreObject);
+                }
 
-            uint totalIBSize = (uint)(draw_data.TotalIdxCount * sizeof(ushort));
-            if (rhiData.IndexBuffer == null || totalIBSize > rhiData.IndexBuffer.mCoreObject.Desc.Size)
-            {
-                CoreSDK.DisposeObject(ref rhiData.mFrameIndexBuffers[frameBufferIndex]);
-                var ibDesc = new NxRHI.FIbvDesc();
-                ibDesc.m_Size = (uint)(totalIBSize * 1.5f);
-                ibDesc.m_Stride = (uint)sizeof(ushort);
-                ibDesc.m_CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
-                ibDesc.m_Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
-                rhiData.mFrameIndexBuffers[frameBufferIndex] = rc.CreateIBV(null, in ibDesc);
-                rhiData.IndexBuffer = rhiData.mFrameIndexBuffers[frameBufferIndex];
-                rhiData.GeomMesh.mCoreObject.BindIndexBuffer(rhiData.IndexBuffer.mCoreObject);
+                uint totalIBSize = (uint)(draw_data.TotalIdxCount * sizeof(ushort));
+                if (rhiData.IndexBuffer == null || totalIBSize > rhiData.IndexBuffer.mCoreObject.Desc.Size)
+                {
+                    CoreSDK.DisposeObject(ref rhiData.mFrameIndexBuffers[frameBufferIndex]);
+                    var ibDesc = new NxRHI.FIbvDesc();
+                    ibDesc.m_Size = (uint)(totalIBSize * 1.5f);
+                    ibDesc.m_Stride = (uint)sizeof(ushort);
+                    ibDesc.m_CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
+                    ibDesc.m_Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
+                    rhiData.mFrameIndexBuffers[frameBufferIndex] = rc.CreateIBV(null, in ibDesc);
+                    rhiData.IndexBuffer = rhiData.mFrameIndexBuffers[frameBufferIndex];
+                    rhiData.GeomMesh.mCoreObject.BindIndexBuffer(rhiData.IndexBuffer.mCoreObject);
+                }
             }
 
             using (new Profiler.TimeScopeHelper(ScopeUpdateBuffer))
@@ -584,22 +652,25 @@ namespace EngineNS.EGui
 
         private unsafe static void UploadImGuiTexture(void* texture)
         {
-            NxRHI.TtTexture newTexture;
-            NxRHI.TtSrView newSrv;
-            if (CreateImGuiTextureResources(texture, out newTexture, out newSrv) == false)
-                return;
-
-            var binding = GetImGuiTextureBinding(texture);
-            if (binding == null)
+            using (new Profiler.TimeScopeHelper(ScopeUploadTexture))
             {
-                binding = new ImGuiTextureBinding();
-                mImGuiTextureBindings.Add(binding);
-                ImGuiAPI.ImTextureData_SetBackendUserData(texture, binding.HandlePtr.ToPointer());
-                ImGuiAPI.ImTextureData_SetTexID(texture, (ulong)binding.HandlePtr);
-            }
+                NxRHI.TtTexture newTexture;
+                NxRHI.TtSrView newSrv;
+                if (CreateImGuiTextureResources(texture, out newTexture, out newSrv) == false)
+                    return;
 
-            binding.SetResources(newTexture, newSrv);
-            ImGuiAPI.ImTextureData_SetStatus(texture, ImTextureStatus_OK);
+                var binding = GetImGuiTextureBinding(texture);
+                if (binding == null)
+                {
+                    binding = new ImGuiTextureBinding();
+                    mImGuiTextureBindings.Add(binding);
+                    ImGuiAPI.ImTextureData_SetBackendUserData(texture, binding.HandlePtr.ToPointer());
+                    ImGuiAPI.ImTextureData_SetTexID(texture, (ulong)binding.HandlePtr);
+                }
+
+                binding.SetResources(newTexture, newSrv);
+                ImGuiAPI.ImTextureData_SetStatus(texture, ImTextureStatus_OK);
+            }
         }
 
         private unsafe static bool CreateImGuiTextureResources(void* texture, out NxRHI.TtTexture resultTexture, out NxRHI.TtSrView resultSrv)

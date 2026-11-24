@@ -46,6 +46,15 @@ namespace EngineNS.Bricks.Network.RPC
                 return pSrc + count;
             }
         }
+        /// <summary>包解析中途失败后缓冲区里可能残留半包数据, 不清掉后续字节会永远对不上包边界</summary>
+        public void ResetBroken()
+        {
+            lock (this)
+            {
+                Writer.Seek(0);
+                PacketSize = 0;
+            }
+        }
         const UInt32 PacketHeadSize = sizeof(ushort);
         public unsafe bool ParsePackage(byte* pData, UInt32 length, INetConnect conn)
         {
@@ -75,6 +84,8 @@ namespace EngineNS.Bricks.Network.RPC
 
                         if (PacketSize == 0 || PacketSize >= FPkgHeader.MaxPackageSize)
                         {//被修改或者错误的包
+                            Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Error,
+                                $"bad package size {PacketSize}, stream is out of sync");
                             return false;
                         }
 

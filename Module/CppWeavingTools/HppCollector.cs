@@ -1,10 +1,11 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Titan.Build;
 
 namespace CppWeaving
 {
@@ -70,252 +71,100 @@ namespace CppWeaving
                 MacroDefines.Add(i);
             }
         }
+        /// <summary>
+        /// 读取平台工程在该配置下的头文件清单、include 目录与宏。
+        /// 工程求值由 Module/TitanProjectEval 承担（与 CMake 源清单同一实现），
+        /// 这里只保留 clang 相关的投影：绝对路径、host-only 过滤、平台工程宏的采用规则。
+        /// </summary>
         public void Collect(string proj, string buildConfig = @"'$(Configuration)|$(Platform)'=='Debug|x64'", TargetPlatform platform = TargetPlatform.Windows)
         {
-            proj = proj.Replace("\\", "/");
-            var path = proj.Substring(0, proj.LastIndexOf("/") + 1);
-
-            System.Xml.XmlDocument myXmlDoc = new System.Xml.XmlDocument();
-            myXmlDoc.Load(proj);
-            var root = myXmlDoc.DocumentElement;
-            var portable = platform != TargetPlatform.Windows;
-            var platformMacro = platform == TargetPlatform.Android ? "PLATFORM_DROID" : "PLATFORM_MAC";
-            var platformProject = portable && root.GetElementsByTagName("PreprocessorDefinitions")
-                .Cast<System.Xml.XmlNode>().Any(n => n.InnerText.Split(';').Any(d => d.Trim() == platformMacro));
-
-            System.Xml.XmlNode sharedNode = null;
-            bool foundConfiguration = false;
-            foreach (System.Xml.XmlNode node in root.ChildNodes)
-            {
-                if (node.Name == "ImportGroup" && node.Attributes["Label"] != null && node.Attributes["Label"].Value == "Shared")
-                {
-                    sharedNode = node;
-                }
-                else if (node.Name == "ItemDefinitionGroup")
-                {
-                    var attr = node.Attributes["Condition"];
-                    if (attr == null && !portable)
-                        continue;
-
-                    if (portable ? !MatchesPortableCondition(attr?.InnerText, buildConfig) : attr.InnerText != buildConfig)
-                    {
-                        continue;
-                    }
-
-                    if (attr != null) foundConfiguration = true;
-                    var clCompile = FindChild(node.ChildNodes, "ClCompile");
-                    if (clCompile != null)
-                    {
-                        if (portable)
-                        {
-                            CollectPortableCompileMetadata(clCompile, proj, buildConfig, platformProject, platform);
-                            continue;
-                        }
-                        var cur = FindChild(clCompile.ChildNodes, "AdditionalIncludeDirectories");
-                        if (cur != null)
-                        {
-                            var segs = cur.InnerText.Split(';');
-                            foreach (var i in segs)
-                            {
-                                if (i.StartsWith("%(AdditionalIncludeDirectories)"))
-                                    continue;
-                                if (ClangArgs.IsHostOnlyInclude(platform, i))
-                                    continue;
-                                if (i=="$(WindowsSDK_IncludePath)" && OperatingSystem.IsWindows())
-                                {
-                                    var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows Kits\Installed Roots");
-                                    var kitsRoot10 = key?.GetValue("KitsRoot10") as string;
-
-                                    if (!string.IsNullOrEmpty(kitsRoot10))
-                                    {
-                                        var latestVersion = Directory.GetDirectories(Path.Combine(kitsRoot10, "Include"))
-                                                                     .OrderByDescending(v => v)  // 选最新版本
-                                                                     .First();
-
-                                        var ucrt = Path.Combine(latestVersion, "ucrt");
-                                        var shared = Path.Combine(latestVersion, "shared");
-                                        var um = Path.Combine(latestVersion, "um");
-
-                                        IncludePath.Add(ucrt);
-                                        IncludePath.Add(shared);
-                                        IncludePath.Add(um);
-                                    }
-                                }
-                                if (System.IO.Path.IsPathRooted(i))
-                                    IncludePath.Add(i);
-                                else
-                                    IncludePath.Add(path + i);
-                            }
-                        }
-                        cur = FindChild(clCompile.ChildNodes, "PreprocessorDefinitions");
-                        if (cur != null)
-                        {
-                            var segs = cur.InnerText.Split(';');
-                            foreach (var i in segs)
-                            {
-                                if (string.IsNullOrWhiteSpace(i) || i.StartsWith("%(PreprocessorDefinitions)"))
-                                    continue;
-                                MacroDefines.Add(i);
-                            }
-                        }
-                    }
-                }
-            }
-            if (!foundConfiguration)
-                throw new InvalidDataException($"工程 {proj} 不包含配置 {buildConfig}");
-            if (sharedNode == null)
-                throw new InvalidDataException($"工程 {proj} 没有 Shared ImportGroup");
-
             Headers.Clear();
-            foreach (System.Xml.XmlNode node in sharedNode.ChildNodes)
+            IncludePath.Clear();
+            MacroDefines.Clear();
+
+            var project = Path.GetFullPath(proj.Replace("\\", "/"));
+            var (configuration, platformName) = ParseBuildCondition(buildConfig);
+            var projectDir = Path.GetDirectoryName(project);
+            var root = PlatformProject.FindRoot(projectDir) ?? projectDir;
+
+            var properties = HostProperties.ForPlatform(platform.ToString());
+            var eval = ProjectEvaluator.Evaluate(new EvalOptions
             {
-                if (node.Name == "Import")
+                Root = root,
+                ProjectRel = VcxReader.Relative(root, project),
+                Platform = platform.ToString(),
+                PlatformDir = Path.GetFileName(projectDir),
+                Prefix = platform.ToString().ToUpperInvariant(),
+                Configuration = configuration,
+                PlatformName = platformName,
+                Properties = properties,
+            });
+
+            CollectHeaders(eval);
+            CollectCompileFlags(eval, platform, platform != TargetPlatform.Windows);
+        }
+
+        /// <summary>只消费共享项声明的头文件；平台工程自身的 ClInclude 不是解析入口。</summary>
+        void CollectHeaders(ProjectEvaluation eval)
+        {
+            foreach (var input in eval.RawInputs)
+            {
+                if (input.IsProject)
+                    continue;
+                var module = VcxReader.ModuleNameOf(input.RelPath);
+                foreach (var header in input.Headers)
                 {
-                    var attr = node.Attributes["Project"];
-                    if (attr == null)
+                    if (header.Value.EndsWith("TypeUtility.h") || header.Value.EndsWith(".inl.h"))
                         continue;
+                    var file = Path.GetFullPath(header.Value).Replace('\\', '/');
+                    if (!File.Exists(file))
+                        throw new TitanEvalException($"共享工程 {input.RelPath} 的头文件不存在: {file}");
+                    Headers[file.ToLowerInvariant()] = new HppUnit { File = file, Module = module };
+                }
+            }
+        }
 
-                    var sharedProjFile = attr.Value.Replace('\\', '/');
-                    // 生成胶水不是声明输入，首次生成前允许不存在，并避免重复解析生成输出。
-                    if (Path.GetFileName(sharedProjFile).Equals("CodeGen.vcxitems", StringComparison.OrdinalIgnoreCase))
+        void CollectCompileFlags(ProjectEvaluation eval, TargetPlatform platform, bool portable)
+        {
+            var platformMacro = platform == TargetPlatform.Android ? "PLATFORM_DROID" : "PLATFORM_MAC";
+            // 非 Windows 平台下，平台工程只有自身声明了目标平台宏时它的宏才被采用，避免把 Windows 工程的宏
+            // （PLATFORM_WIN/NOMINMAX/...）塞进 Mac/Android 的解析；共享项的宏始终采用。
+            var useProjectDefines = !portable || eval.RawInputs
+                .Where(i => i.IsProject)
+                .SelectMany(i => i.Metadata)
+                .Where(m => !m.IsInclude)
+                .SelectMany(m => VcxReader.SplitValues(m.Value))
+                .Contains(platformMacro);
+
+            foreach (var applied in eval.AppliedValues)
+            {
+                if (applied.IsInclude)
+                {
+                    if (ClangArgs.IsHostOnlyInclude(platform, applied.Value))
                         continue;
-                    sharedProjFile = Path.GetFullPath(Path.Combine(path, sharedProjFile)).Replace('\\', '/');
-                    if (!File.Exists(sharedProjFile))
-                        throw new FileNotFoundException($"工程 {proj} 的 Shared Import 不存在", sharedProjFile);
-
-                    bool error;
-                    sharedProjFile = NormalizePath(sharedProjFile, out error);
-                    if (error)
-                    {
-                        Console.WriteLine($"header file {sharedProjFile} is error path");
-                    }
-
-                    System.Xml.XmlDocument sharedProjXmlDoc = new System.Xml.XmlDocument();
-                    sharedProjXmlDoc.Load(sharedProjFile);
-                    //var spjRoot = sharedProjXmlDoc.SelectSingleNode("Project");
-                    var spjRoot = sharedProjXmlDoc.DocumentElement;
-                    if (portable)
-                        CollectSharedMetadata(spjRoot, sharedProjFile, buildConfig, platform);
-                    foreach (System.Xml.XmlNode sn in spjRoot.ChildNodes)
-                    {
-                        if (sn.Name == "ItemGroup")
-                        {
-                            CollectInclude(sn, sharedProjFile, Headers);
-                        }
-                    }
+                    var path = Path.GetFullPath(applied.AbsPath).Replace('\\', '/');
+                    if (!IncludePath.Contains(path))
+                        IncludePath.Add(path);
+                    continue;
                 }
-            }
-        }
-        void CollectSharedMetadata(System.Xml.XmlNode root, string file, string buildConfig, TargetPlatform platform)
-        {
-            foreach (System.Xml.XmlNode group in root.ChildNodes)
-            {
-                if (group.Name != "ItemDefinitionGroup") continue;
-                var condition = group.Attributes?["Condition"]?.Value;
-                if (!MatchesPortableCondition(condition, buildConfig)) continue;
-                var compile = FindChild(group.ChildNodes, "ClCompile");
-                if (compile == null) continue;
-                CollectPortableCompileMetadata(compile, file, buildConfig, true, platform);
+                if (!useProjectDefines && applied.OwnerRel == eval.ProjectRel)
+                    continue;
+                if (!MacroDefines.Contains(applied.Value))
+                    MacroDefines.Add(applied.Value);
             }
         }
 
-        void CollectPortableCompileMetadata(System.Xml.XmlNode compile, string file, string buildConfig, bool definesEnabled, TargetPlatform platform)
+        static (string Configuration, string PlatformName) ParseBuildCondition(string buildConfig)
         {
-            var baseDir = Path.GetDirectoryName(Path.GetFullPath(file)).Replace('\\', '/') + "/";
-            if (!MatchesPortableCondition(compile.Attributes?["Condition"]?.Value, buildConfig)) return;
-            foreach (System.Xml.XmlNode element in compile.ChildNodes)
-            {
-                var isPath = element.Name == "AdditionalIncludeDirectories";
-                if (!isPath && element.Name != "PreprocessorDefinitions") continue;
-                if (!MatchesPortableCondition(element.Attributes?["Condition"]?.Value, buildConfig)) continue;
-                // 显式读取 Windows 工程的旧诊断调用仍过滤其工程宏。
-                if (!isPath && !definesEnabled) continue;
-                foreach (var raw in element.InnerText.Split(';', StringSplitOptions.RemoveEmptyEntries))
-                {
-                    var value = raw.Trim();
-                    if (value.Length == 0 || value.StartsWith("%(")) continue;
-                    value = value.Replace("$(MSBuildThisFileDirectory)", baseDir);
-                    if (isPath && ClangArgs.IsHostOnlyInclude(platform, value)) continue;
-                    if (value.Contains("$(")) throw new InvalidDataException($"工程 {file} 的未解析属性: {value}");
-                    if (isPath)
-                    {
-                        value = Path.GetFullPath(Path.Combine(baseDir, value.Replace('\\', '/'))).Replace('\\', '/');
-                        if (!IncludePath.Contains(value)) IncludePath.Add(value);
-                    }
-                    else if (!MacroDefines.Contains(value)) MacroDefines.Add(value);
-                }
-            }
+            var withPlatform = Regex.Match(buildConfig, @"=='(Debug|Release)\|([A-Za-z0-9_]+)'");
+            if (withPlatform.Success)
+                return (withPlatform.Groups[1].Value, withPlatform.Groups[2].Value);
+            var configOnly = Regex.Match(buildConfig, @"=='(Debug|Release)'");
+            if (configOnly.Success)
+                return (configOnly.Groups[1].Value, "ARM64");
+            throw new TitanEvalException($"[titan-eval] 不支持的配置: {buildConfig}");
         }
 
-        static bool MatchesPortableCondition(string condition, string buildConfig)
-        {
-            if (string.IsNullOrWhiteSpace(condition)) return true;
-            condition = System.Text.RegularExpressions.Regex.Replace(condition, @"\s", "");
-            var selected = System.Text.RegularExpressions.Regex.Match(buildConfig, @"=='(Debug|Release)\|[^']+'$");
-            if (!selected.Success) throw new InvalidDataException($"不支持配置: {buildConfig}");
-            var config = selected.Groups[1].Value;
-            if (condition == $"'$(Configuration)'=='{config}'" || condition == System.Text.RegularExpressions.Regex.Replace(buildConfig, @"\s", "")) return true;
-            if (System.Text.RegularExpressions.Regex.IsMatch(condition, @"^'\$\(Configuration\)'=='(Debug|Release)'$") ||
-                System.Text.RegularExpressions.Regex.IsMatch(condition, @"^'\$\(Configuration\)\|\$\(Platform\)'=='(Debug|Release)\|(ARM64|x64|Win32)'$")) return false;
-            throw new InvalidDataException($"不支持条件: {condition}");
-        }
-
-        static System.Xml.XmlNode FindChild(System.Xml.XmlNodeList lst, string name)
-        {
-            foreach (System.Xml.XmlNode node in lst)
-            {
-                if (node.Name == name)
-                {
-                    return node;
-                }
-            }
-            return null;
-        }
-        static bool CollectInclude(System.Xml.XmlNode sn, string vcxFile, Dictionary<string, HppUnit> headers)
-        {
-            var spjPath = UTypeManagerBase.GetFileDirectory(vcxFile);
-            bool bFinded = false;
-            foreach (System.Xml.XmlNode i in sn.ChildNodes)
-            {
-                if (i.Name == "ClInclude")
-                {
-                    var attr = i.Attributes["Include"];
-                    if (attr != null)
-                    {
-                        if (attr.Value.EndsWith("TypeUtility.h"))
-                            continue;
-                        if (attr.Value.EndsWith(".inl.h"))
-                            continue;
-                        var hf = attr.Value.Replace("$(MSBuildThisFileDirectory)", spjPath);
-                        bool error;
-                        hf = Path.GetFullPath(Path.Combine(spjPath, hf.Replace('\\', '/'))).Replace('\\', '/');
-                        hf = NormalizePath(hf, out error);
-                        if (!File.Exists(hf)) throw new FileNotFoundException($"共享工程 {vcxFile} 的头文件不存在", hf);
-                        if (error)
-                        {
-                            Console.WriteLine($"header file {hf} is error path");
-                        }
-                        var tmp = new HppUnit();
-                        tmp.File = hf;
-                        tmp.Module = UTypeManagerBase.GetPureFileName(vcxFile);
-                        tmp.Module = tmp.Module.Replace('.', '_');
-
-                        headers[hf.ToLower()] = tmp;
-                        bFinded = true;
-                    }
-                }
-            }
-            return bFinded;
-        }
-        static string FindArgument(string[] args, string startWith)
-        {
-            foreach (var i in args)
-            {
-                if (i.StartsWith(startWith))
-                    return i;
-            }
-            return null;
-        }
         static string NormalizePath(string path, out bool error)
         {
             error = false;

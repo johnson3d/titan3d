@@ -725,28 +725,50 @@ namespace NxRHI
 	{
 		return true;
 	}
+	void DX11GpuScope::ReadTimes()
+	{
+		if (mTimesReady)
+			return;
+		auto device = mDeviceRef.GetPtr();
+		if (device == nullptr)
+			return;
+		UINT64 start = 0, end = 0;
+
+		auto context = ((DX11CmdQueue*)device->GetCmdQueue())->mHardwareContext->mContext;
+		// GetData 带 0 标志时未就绪返回 S_FALSE, 下一帧再试
+		if (context->GetData(mQueryStart, &start, sizeof(UINT64), 0) == S_FALSE)
+			return;
+		if (context->GetData(mQueryEnd, &end, sizeof(UINT64), 0) == S_FALSE)
+			return;
+		mTimesReady = true;
+		if (end <= start)
+			return;
+		mBeginTime = start;
+		mEndTime = end;
+		mDeltaTime = end - start;
+	}
+	UINT64 DX11GpuScope::GetBeginTime()
+	{
+		ReadTimes();
+		return mBeginTime;
+	}
+	UINT64 DX11GpuScope::GetEndTime()
+	{
+		ReadTimes();
+		return mEndTime;
+	}
 	UINT64 DX11GpuScope::GetDeltaTime()
 	{
-		auto device = mDeviceRef.GetPtr();
-		UINT64 start = 0,end = 0;
-		
-		auto context = ((DX11CmdQueue*)device->GetCmdQueue())->mHardwareContext->mContext;
-		HRESULT hr = S_OK;
-		
-		if ((hr = context->GetData(mQueryStart, &start, sizeof(UINT64), 0)) == S_FALSE)
-		{
-			return mDeltaTime;
-		}
-		if ((hr = context->GetData(mQueryEnd, &end, sizeof(UINT64), 0)) == S_FALSE)
-		{
-			return mDeltaTime;
-		}
-		mDeltaTime = end - start;
+		ReadTimes();
 		return mDeltaTime;
 	}
 	void DX11GpuScope::Begin(ICommandList* cmdlist)
 	{
 		auto cmd = (DX11CommandList*)cmdlist;
+		// 实例在池里被反复借出, 上一轮的读回结果必须作废
+		mTimesReady = false;
+		mBeginTime = 0;
+		mEndTime = 0;
 		cmd->mContext->End(mQueryStart);
 	}
 	void DX11GpuScope::End(ICommandList* cmdlist)

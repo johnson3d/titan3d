@@ -37,7 +37,17 @@ namespace EngineNS.Bricks.TcpServer
         Bricks.Network.RPC.PacketBuilder mPkgBuilder = new Bricks.Network.RPC.PacketBuilder();
         protected unsafe virtual void OnRcvData(byte* ptr, int size)
         {
-            mPkgBuilder.ParsePackage(ptr, (uint)size, this);
+            // 这是原生接收线程回调进来的托管帧, 异常没有托管调用根: 不在这里兜住,
+            // CLR 会直接终止整个进程(退出码 0xE0434352, 而且 stderr 可能什么都不留)
+            try
+            {
+                mPkgBuilder.ParsePackage(ptr, (uint)size, this);
+            }
+            catch (System.Exception e)
+            {
+                System.Console.Error.WriteLine($"[Net] package parse failed({size} bytes): {e}");
+                mPkgBuilder.ResetBroken();
+            }
         }
         public Bricks.Network.RPC.EAuthority Authority { get; set; } = Bricks.Network.RPC.EAuthority.Client;
         public bool Connected 

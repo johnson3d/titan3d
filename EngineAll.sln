@@ -132,6 +132,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Animation", "NativeCode\Bri
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CppWeavingTools", "Module\CppWeavingTools\CppWeavingTools.csproj", "{4B151A28-784F-4ED5-9490-FA959B23C9E0}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TitanProjectEval", "Module\TitanProjectEval\TitanProjectEval.csproj", "{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core.Android", "Core.Android\Core.Android.vcxproj", "{8DE1FCD5-27C3-4AF6-8FC3-3590240A7A5F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Android", "NativeCode\Platform\Android\Android.vcxitems", "{5325AAB3-27C6-4B3B-BC33-4A7C1E1272E2}"
@@ -596,9 +598,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cmake", "cmake", "{6A1D3E10
 		BuildScript\cmake\TitanCodegen.cmake = BuildScript\cmake\TitanCodegen.cmake
 		BuildScript\cmake\TitanCodegenGen.cmake = BuildScript\cmake\TitanCodegenGen.cmake
 		BuildScript\cmake\TitanPlatformContext.cmake = BuildScript\cmake\TitanPlatformContext.cmake
-		BuildScript\cmake\TitanProjectMetadata.cmake = BuildScript\cmake\TitanProjectMetadata.cmake
 		BuildScript\cmake\TitanRefreshSources.cmake = BuildScript\cmake\TitanRefreshSources.cmake
-		BuildScript\cmake\TitanSourceList.cmake = BuildScript\cmake\TitanSourceList.cmake
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{6A1D3E10-1C01-4C01-9A01-000000000004}"
@@ -869,6 +869,24 @@ Global
 		{4B151A28-784F-4ED5-9490-FA959B23C9E0}.Release|x64.Build.0 = Release|Any CPU
 		{4B151A28-784F-4ED5-9490-FA959B23C9E0}.Release|x86.ActiveCfg = Release|Any CPU
 		{4B151A28-784F-4ED5-9490-FA959B23C9E0}.Release|x86.Build.0 = Release|Any CPU
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}.Debug|x64.Build.0 = Debug|Any CPU
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}.Debug|x86.Build.0 = Debug|Any CPU
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}.DebugOnlyCS|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}.DebugOnlyCS|Any CPU.Build.0 = Debug|Any CPU
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}.DebugOnlyCS|x64.ActiveCfg = Debug|Any CPU
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}.DebugOnlyCS|x64.Build.0 = Debug|Any CPU
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}.DebugOnlyCS|x86.ActiveCfg = Debug|Any CPU
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}.DebugOnlyCS|x86.Build.0 = Debug|Any CPU
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}.Release|x64.ActiveCfg = Release|Any CPU
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}.Release|x64.Build.0 = Release|Any CPU
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}.Release|x86.ActiveCfg = Release|Any CPU
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05}.Release|x86.Build.0 = Release|Any CPU
 		{8DE1FCD5-27C3-4AF6-8FC3-3590240A7A5F}.Debug|Any CPU.ActiveCfg = Debug|ARM64
 		{8DE1FCD5-27C3-4AF6-8FC3-3590240A7A5F}.Debug|Any CPU.Build.0 = Debug|ARM64
 		{8DE1FCD5-27C3-4AF6-8FC3-3590240A7A5F}.Debug|x64.ActiveCfg = Debug|ARM64
@@ -1724,6 +1742,7 @@ Global
 		{C88C6D79-B722-489E-BCA2-0E5309C0CECD} = {389897D9-A9AB-403D-B3A7-AF814D5A6A69}
 		{A415EB90-CF3A-4CBC-BD98-14EED4D0FCD1} = {041F2057-6090-446E-8CEF-D524C973477F}
 		{4B151A28-784F-4ED5-9490-FA959B23C9E0} = {389897D9-A9AB-403D-B3A7-AF814D5A6A69}
+		{A7C31E42-5D18-4F6B-9C2E-3B8D4F1A6C05} = {389897D9-A9AB-403D-B3A7-AF814D5A6A69}
 		{8DE1FCD5-27C3-4AF6-8FC3-3590240A7A5F} = {892AFF4D-69EA-4061-8F59-320A21A0814A}
 		{5325AAB3-27C6-4B3B-BC33-4A7C1E1272E2} = {5DF48BD8-2DD5-4225-B211-929683D01CB7}
 		{9F919C6F-01E0-4560-9706-7F9CDEA2C1C9} = {041F2057-6090-446E-8CEF-D524C973477F}

@@ -25,6 +25,8 @@
 
   <ItemGroup>
     <ProjectReference Include="$(TitanEngineProject)" />
+    <!-- eval 子命令的工程求值只用 Module/TitanProjectEval（与 CMake 源清单同一实现）。 -->
+    <ProjectReference Include="..\TitanProjectEval\TitanProjectEval.csproj" />
   </ItemGroup>
 
 </Project>

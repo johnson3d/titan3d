@@ -15,6 +15,12 @@
     <PackageReference Include="ClangSharp" />
   </ItemGroup>
 
+  <!-- 工程求值（vcxproj/vcxitems → 头文件/include/宏）只走 Module/TitanProjectEval，
+       与 CMake 源清单同一份实现，不再自带第二套 XML 读取。 -->
+  <ItemGroup>
+    <ProjectReference Include="..\TitanProjectEval\TitanProjectEval.csproj" />
+  </ItemGroup>
+
   <ItemGroup>
     <InternalsVisibleTo Include="Titan.Tests.CppWeaving" />
     <Content Include="../../codegen/Templates/*" Link="Templates/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />

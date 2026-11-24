@@ -17,9 +17,16 @@ public class WeavingEntryTests
         {
             Directory.CreateDirectory(Path.Combine(mRoot, dir));
             File.WriteAllText(Path.Combine(mRoot, dir, "pch.h"), "#pragma once\n");
+            // 普通 Shared Import 是求值器的不变量（平台工程必须是共享项的聚合者）；这里只验入口参数传递，
+            // 所以给一个空共享项，不声明任何头文件。
+            File.WriteAllText(Path.Combine(mRoot, dir, "Modules.vcxitems"), """
+                <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003"><ItemGroup /></Project>
+                """);
             File.WriteAllText(Path.Combine(mRoot, dir, dir + ".vcxproj"), $"""
                 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-                  <ImportGroup Label="Shared" />
+                  <ImportGroup Label="Shared">
+                    <Import Project="Modules.vcxitems" Label="Shared" />
+                  </ImportGroup>
                   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|{arch}'"><ClCompile><PreprocessorDefinitions>{platform};_DEBUG</PreprocessorDefinitions></ClCompile></ItemDefinitionGroup>
                   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|{arch}'"><ClCompile><PreprocessorDefinitions>{platform};NDEBUG</PreprocessorDefinitions></ClCompile></ItemDefinitionGroup>
                 </Project>
@@ -71,7 +78,7 @@ public class WeavingEntryTests
         var project = Path.Combine(mRoot, "Core.Window/Core.Window.vcxproj");
         File.WriteAllText(Path.Combine(mRoot, "Core.Window/Broken.h"), "// TR_CLASS\nstruct Broken { int a }\n");
         File.WriteAllText(Path.Combine(mRoot, "Core.Window/Broken.vcxitems"), "<Project><ItemGroup><ClInclude Include=\"$(MSBuildThisFileDirectory)Broken.h\" /></ItemGroup></Project>");
-        File.WriteAllText(project, File.ReadAllText(project).Replace("<ImportGroup Label=\"Shared\" />", "<ImportGroup Label=\"Shared\"><Import Project=\"Broken.vcxitems\" Label=\"Shared\" /></ImportGroup>"));
+        File.WriteAllText(project, File.ReadAllText(project).Replace("<ImportGroup Label=\"Shared\">", "<ImportGroup Label=\"Shared\"><Import Project=\"Broken.vcxitems\" Label=\"Shared\" />"));
         var output = Path.Combine(mRoot, "output"); Directory.CreateDirectory(output);
         var pod = Path.Combine(output, "PODStructDefine.h"); File.WriteAllText(pod, "existing sentinel");
         var result = Run("Platform=Windows", "TitanRoot=" + mRoot, "CppOut=" + output, "CsOut=" + output);

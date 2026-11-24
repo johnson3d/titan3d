@@ -1033,25 +1033,56 @@ namespace NxRHI
 	{
 		return true;
 	}
-	UINT64 DX12GpuScope::GetDeltaTime()
+	void DX12GpuScope::ReadTimes()
 	{
+		if (mTimesReady)
+			return;
+		mTimesReady = true;
+		mBeginTime = 0;
+		mEndTime = 0;
+		if (mResultBuffer == nullptr)
+			return;
+
 		auto pTarGpuResource = ((DX12GpuHeap*)mResultBuffer->GpuMem->GpuHeap)->mGpuResource;
 		D3D12_RANGE range{};
 		range.Begin = mResultBuffer->GpuMem->Offset;
 		range.End = range.Begin + 2 * sizeof(UINT64);
 		BYTE* pData = nullptr;
 		if (pTarGpuResource->Map(0, &range, (void**)&pData) != S_OK)
-			return 0;
+			return;
 
 		auto pTimes = (UINT64*)(pData + range.Begin);
-		auto result = pTimes[1] - pTimes[0];
+		mBeginTime = pTimes[0];
+		mEndTime = pTimes[1];
 		pTarGpuResource->Unmap(0, nullptr);
 
-		return result;
+		// 脏数据/未就绪都可能给出倒置区间, 统一归零让调用方走回退路径
+		if (mEndTime <= mBeginTime)
+		{
+			mBeginTime = 0;
+			mEndTime = 0;
+		}
+	}
+	UINT64 DX12GpuScope::GetBeginTime()
+	{
+		ReadTimes();
+		return mBeginTime;
+	}
+	UINT64 DX12GpuScope::GetEndTime()
+	{
+		ReadTimes();
+		return mEndTime;
+	}
+	UINT64 DX12GpuScope::GetDeltaTime()
+	{
+		ReadTimes();
+		return mEndTime > mBeginTime ? mEndTime - mBeginTime : 0;
 	}
 	void DX12GpuScope::Begin(ICommandList* cmdlist)
 	{
 		auto cmd = (DX12CommandList*)cmdlist;
+		// 实例在池里被反复借出, 上一轮的读回结果必须作废
+		mTimesReady = false;
 		cmd->mContext->EndQuery(mQueryHeap, D3D12_QUERY_TYPE_TIMESTAMP, 0);
 	}
 	void DX12GpuScope::End(ICommandList* cmdlist)

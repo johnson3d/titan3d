@@ -119,9 +119,23 @@ namespace EngineNS.NxRHI
                 return mCoreObject.GetCurrentBackBuffer();
             }
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeSwapChainBeginFrame;
+        private static Profiler.TimeScope ScopeBeginFrame
+        {
+            get
+            {
+                if (mScopeSwapChainBeginFrame == null)
+                    mScopeSwapChainBeginFrame = new Profiler.TimeScope(typeof(TtSwapChain), nameof(BeginFrame));
+                return mScopeSwapChainBeginFrame;
+            }
+        }
         public void BeginFrame()
         {
-            mCoreObject.BeginFrame();
+            using (new Profiler.TimeScopeHelper(ScopeBeginFrame))
+            {
+                mCoreObject.BeginFrame();
+            }
         }
         [ThreadStatic]
         private static Profiler.TimeScope mScopePresent;

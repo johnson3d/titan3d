@@ -1,5 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!--
+    Tracer 与 MainEditor / TitanCMD 同属“自己不声明包、全靠 ProjectReference 闭包”的 exe。
+    VS(CPS) 的隐式还原会把这类工程的 assets 写成只剩 project 条目，deps.json 随之丢掉
+    runtimeTargets，运行时 DllImport("SDL3") 就找不到 runtimes/<rid>/native/SDL3.dll。
+    这里接上同一份校验/自愈，避免每次在 VS 里编译都退化一次。
+  -->
+  <Import Project="..\..\..\BuildScript\msbuild\TitanPackageAssetsGuard.targets" />
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>$(_TitanTargetFramework)</TargetFramework>

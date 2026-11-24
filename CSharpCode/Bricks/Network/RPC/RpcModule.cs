@@ -249,7 +249,40 @@ namespace EngineNS.Bricks.Network.RPC
         public INetConnect DefaultNetConnect { get; set; }
         public UInt16 DefaultExeIndex = UInt16.MaxValue;
         //public UNetConnetProvider ConnectProvider { get; set; } = null;
-        public TtRpcManager RpcManager;
+        // 必须是惰性创建: 模块初始化是异步链, 中间任何一步抛异常都会让后面的模块
+        // (包括本模块) 永远收不到 Initialize, 而监听/接收线程可能已经在访问它了
+        TtRpcManager mRpcManager = null;
+        public TtRpcManager RpcManager
+        {
+            get
+            {
+                if (mRpcManager != null)
+                    return mRpcManager;
+                return EnsureRpcManager();
+            }
+            set { mRpcManager = value; }
+        }
+        TtRpcManager EnsureRpcManager()
+        {
+            bool fallback;
+            lock (this)
+            {
+                if (mRpcManager != null)
+                    return mRpcManager;
+                var type = Rtti.TtTypeDesc.TypeOf(TtEngine.Instance.Config.RpcRootType);
+                mRpcManager = Rtti.TtTypeDescManager.CreateInstance(type) as TtRpcManager;
+                fallback = mRpcManager == null;
+                if (fallback)
+                    mRpcManager = new TtRpcManager();
+            }
+            // 日志放在锁外: log handler 里可能回头访问 RpcManager
+            if (fallback)
+            {
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning,
+                    $"create RpcManager({TtEngine.Instance.Config.RpcRootType}) failed, fallback to TtRpcManager");
+            }
+            return mRpcManager;
+        }
 		public Dictionary<UInt32, TtReturnAwaiterBase> ReturnAwaiters = new Dictionary<uint, TtReturnAwaiterBase>();
 		public TtNetPackageManager NetPackageManager = new TtNetPackageManager();
 		public void PushReturnAwaiter(TtReturnAwaiterBase awaiter)
@@ -281,12 +314,7 @@ namespace EngineNS.Bricks.Network.RPC
 		{
 			await Thread.TtAsyncDummyClass.DummyFunc();
 			DefaultNetConnect = FakeConnect;
-            var type = Rtti.TtTypeDesc.TypeOf(host.Config.RpcRootType);
-			RpcManager = Rtti.TtTypeDescManager.CreateInstance(type) as TtRpcManager;
-			if (RpcManager == null)
-			{
-				RpcManager = new TtRpcManager();
-			}
+			EnsureRpcManager();
 			return true;
 		}
         public unsafe override void TickModule(TtEngine host)

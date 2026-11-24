@@ -8152,6 +8152,15 @@
       }
     ]
   },
+  "StartTraceRecord": {
+    "Translation": "开始录制跟踪",
+    "Sources": [
+      {
+        "File": "CSharpCode/Editor/MainEditorApplication.cs",
+        "Line": 463
+      }
+    ]
+  },
   "State": {
     "Translation": "状态",
     "Sources": [
@@ -8206,6 +8215,15 @@
       {
         "File": "CSharpCode/Editor/Forms/SceneEditor.cs",
         "Line": 1172
+      }
+    ]
+  },
+  "StopTraceRecord": {
+    "Translation": "结束录制跟踪",
+    "Sources": [
+      {
+        "File": "CSharpCode/Editor/MainEditorApplication.cs",
+        "Line": 480
       }
     ]
   },

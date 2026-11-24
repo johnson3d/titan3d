@@ -3,6 +3,7 @@ using NUnit.Framework;
 using System.Xml.Linq;
 using System.Diagnostics;
 using System.Text.Json;
+using Titan.Build;
 
 namespace Titan.Tests.CppWeaving;
 
@@ -84,7 +85,7 @@ public class PlatformProjectTests
         var project = Fixture();
         var shared = Path.Combine(mDir, "Module.vcxitems");
         File.WriteAllText(shared, File.ReadAllText(shared).Replace("<ItemGroup>", "<ItemDefinitionGroup Condition=\"'$(Unknown)'=='Yes'\"><ClCompile><PreprocessorDefinitions>UNKNOWN</PreprocessorDefinitions></ClCompile></ItemDefinitionGroup><ItemGroup>"));
-        Assert.Throws<InvalidDataException>(() => new HppCollector().Collect(project, "'$(Configuration)|$(Platform)'=='Debug|ARM64'", TargetPlatform.Mac));
+        Assert.Throws<TitanEvalException>(() => new HppCollector().Collect(project, "'$(Configuration)|$(Platform)'=='Debug|ARM64'", TargetPlatform.Mac));
     }
 
     [TestCase("Debug", "ELEMENT_DEBUG", "ELEMENT_RELEASE", "debug-inc")]
@@ -125,14 +126,14 @@ public class PlatformProjectTests
         var project = Fixture();
         var shared = Path.Combine(mDir, "Module.vcxitems");
         File.WriteAllText(shared, File.ReadAllText(shared).Replace("<ItemGroup>", "<ItemDefinitionGroup><ClCompile>" + metadata + "</ClCompile></ItemDefinitionGroup><ItemGroup>"));
-        Assert.Throws<InvalidDataException>(() => new HppCollector().Collect(project, "'$(Configuration)|$(Platform)'=='Debug|ARM64'", TargetPlatform.Mac));
+        Assert.Throws<TitanEvalException>(() => new HppCollector().Collect(project, "'$(Configuration)|$(Platform)'=='Debug|ARM64'", TargetPlatform.Mac));
     }
 
     [Test] public void Collector_RejectsMissingDeclaredHeader()
     {
         var project = Fixture();
         File.Delete(Path.Combine(mDir, "Module.h"));
-        Assert.Throws<FileNotFoundException>(() => new HppCollector().Collect(project, "'$(Configuration)|$(Platform)'=='Debug|ARM64'", TargetPlatform.Mac));
+        Assert.Throws<TitanEvalException>(() => new HppCollector().Collect(project, "'$(Configuration)|$(Platform)'=='Debug|ARM64'", TargetPlatform.Mac));
     }
 
     [Test] public void Collector_UnconditionalMetadataDoesNotHideMissingConfiguration()
@@ -142,12 +143,12 @@ public class PlatformProjectTests
         xml.Root.Elements(ns + "ItemDefinitionGroup").First().Remove();
         xml.Root.Add(new XElement(ns + "ItemDefinitionGroup", new XElement(ns + "ClCompile", new XElement(ns + "PreprocessorDefinitions", "COMMON"))));
         xml.Save(project);
-        Assert.Throws<InvalidDataException>(() => new HppCollector().Collect(project, "'$(Configuration)|$(Platform)'=='Debug|ARM64'", TargetPlatform.Mac));
+        Assert.Throws<TitanEvalException>(() => new HppCollector().Collect(project, "'$(Configuration)|$(Platform)'=='Debug|ARM64'", TargetPlatform.Mac));
     }
 
     [Test] public void Collector_RejectsAbsentConfiguration()
     {
-        Assert.Throws<InvalidDataException>(() => new HppCollector().Collect(Fixture(), "'$(Configuration)|$(Platform)'=='Profile|ARM64'", TargetPlatform.Mac));
+        Assert.Throws<TitanEvalException>(() => new HppCollector().Collect(Fixture(), "'$(Configuration)|$(Platform)'=='Profile|ARM64'", TargetPlatform.Mac));
     }
 
     private string AndroidFixture()
@@ -159,7 +160,7 @@ public class PlatformProjectTests
 
     [Test] public void Collector_AndroidRejectsAbsentConfiguration()
     {
-        Assert.Throws<InvalidDataException>(() => new HppCollector().Collect(AndroidFixture(), "'$(Configuration)|$(Platform)'=='Profile|ARM64'", TargetPlatform.Android));
+        Assert.Throws<TitanEvalException>(() => new HppCollector().Collect(AndroidFixture(), "'$(Configuration)|$(Platform)'=='Profile|ARM64'", TargetPlatform.Android));
     }
 
     [Test] public void Collector_AndroidReadsUnconditionalSharedMetadata()
@@ -176,10 +177,14 @@ public class PlatformProjectTests
 
     [Test] public void Collector_AndroidDropsWindowsProjectMacros()
     {
+        // 普通 Shared Import 是求值器的不变量（平台工程必须是共享项的聚合者）。
+        File.WriteAllText(Path.Combine(mDir, "Empty.vcxitems"), "<Project><ItemGroup /></Project>");
         var project = Path.Combine(mDir, "Windows.vcxproj");
         File.WriteAllText(project, """
             <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-              <ImportGroup Label="Shared" />
+              <ImportGroup Label="Shared">
+                <Import Project="Empty.vcxitems" Label="Shared" />
+              </ImportGroup>
               <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"><ClCompile>
                 <AdditionalIncludeDirectories>inc;../pthread/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
                 <PreprocessorDefinitions>PLATFORM_WIN;PTR_64;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -196,7 +201,7 @@ public class PlatformProjectTests
     {
         var project = Fixture();
         File.Delete(Path.Combine(mDir, "Module.vcxitems"));
-        Assert.Throws<FileNotFoundException>(() => new HppCollector().Collect(project, "'$(Configuration)|$(Platform)'=='Debug|ARM64'", TargetPlatform.Mac));
+        Assert.Throws<TitanEvalException>(() => new HppCollector().Collect(project, "'$(Configuration)|$(Platform)'=='Debug|ARM64'", TargetPlatform.Mac));
     }
 
     internal static string Root()

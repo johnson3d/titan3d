@@ -153,6 +153,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.BeginFrame();
             DescriptorPoolManager?.mCoreObject.AllocFramePool();
+            TtEngine.Instance.ProfilerModule?.GpuFrameContainerManager?.BeginFrame();
         }
         public void EndFrame()
         {
@@ -174,15 +175,6 @@ namespace EngineNS.NxRHI
         {
             var result = new TtCommandList();
             result.mCoreObject = mCoreObject.CreateCommandList(filePath, lineNumber);
-            if (result.mCoreObject.IsValidPointer == false)
-                return null;
-            return result;
-        }
-        public TtGpuScope CreateGpuScope([CallerFilePath] string filePath = "",
-        [CallerLineNumber] int lineNumber = 0)
-        {
-            var result = new TtGpuScope();
-            result.mCoreObject = mCoreObject.CreateGpuScope(filePath, lineNumber);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
@@ -663,6 +655,8 @@ namespace EngineNS.NxRHI
             {
                 mCoreObject.TickPostEvents();
                 CmdListManager.Tick();
+                // 这一帧最后一次 IncreaseSignal 之后的期望值, 就是本帧容器要等的收尾 fence
+                TtEngine.Instance.ProfilerModule?.GpuFrameContainerManager?.EndFrame(mCoreObject.GetFrameFence().GetExpectValue());
             }   
         }
     }

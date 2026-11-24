@@ -16,6 +16,7 @@
   - [LoadPlugin / StartRobot / StartRootServer / StartLoginServer / StartLevelServer / StartGateServer](#loadplugin--startrobot--startrootserver--startloginserver--startlevelserver--startgateserver)
   - [StartDS](#startds)
   - [macross-patch](#macross-patch)
+  - [eval](#eval)
 - [扩展新命令](#扩展新命令)
 - [注意事项](#注意事项)
 
@@ -29,6 +30,9 @@
 | `ExeCmd=` | 是 | 要执行的命令名，见[命令一览](#命令一览)。未知命令打印 `Unknown ExeCmd` 并返回 2 |
 | `ExtraCmd=` | 否 | 指定一个数字 N，程序启动时会从标准输入再读取 N 行，逐行追加到参数列表中（用于命令行长度受限或脚本拼接场景） |
 | `NativeDLL=` | 否 | native 库配置：`debug` 或 `release`（默认 `release`）。若未在命令行指定，会读取 `cache/config/engine.jscfg` 中缓存的 `NativeDll` 值 |
+
+> `eval` 是例外：它不启动引擎，因此不读 `CookCfg=`、不认 `NativeDLL=`、也不处理 `ExtraCmd=`，
+> 只认 ExeCmd 与自己的参数（见 [eval](#eval)）。
 
 典型调用（工作目录必须为 `binaries` 或 `binaries/net10.0`，程序以当前目录推导引擎根路径）：
 
@@ -50,6 +54,10 @@ TitanCMD.exe CookCfg=..\..\content\config\engineconfig_windows_alonegame.jscfg E
 > `TtEngine.Instance.PostQuitMessage()` 退出（见 `Command\CookServer.cs`），否则光靠
 > `IsServiceCommand` 返回 true 会让进程永远空转。
 
+另有一类**引擎无关命令**：`eval` 在 `Program.Main` 里于引擎启动前直接派发，既不 Tick 主循环也不加载
+native 库，连 `engine.jscfg` 都不读。因此它不受“工作目录必须是 `binaries`”与 `NativeDLL=` 的约束，
+可以在仓库根直接执行；返回码就是进程退出码，不需要 `IsServiceCommand` 登记。
+
 ## 命令一览
 
 | 命令 | 类型 | 用途 |
@@ -67,6 +75,7 @@ TitanCMD.exe CookCfg=..\..\content\config\engineconfig_windows_alonegame.jscfg E
 | `StartGateServer` | service | 加载 `GateServer` 插件 |
 | `StartDS` | service | 启动 Dedicated Server（仅 `PWindow` 编译配置，Windows 桌面） |
 | `macross-patch` | one-shot | 编译/校验/打包 Macross 热更补丁 |
+| `eval` | one-shot（引擎启动前派发） | 输出平台工程的求值模型 JSON（源清单/宏/include/指纹），供排查与脚本消费 |
 
 ## 命令详情
 
@@ -278,12 +287,62 @@ ExeCmd=macross-patch PatchProject=<目录> BaselinePath=<基线文件> OutputDir
 
 缺失参数时打印用法并返回 1；构建诊断信息逐行输出到控制台。返回码：0 成功；1 失败。
 
+### eval
+
+输出平台工程在指定配置下的**求值模型**（`Module/TitanProjectEval` 的求值结果）为 JSON：
+源清单、模块清单、include 目录、宏、逐源文件宏、逐输入指纹。用于回答“某个 `.cpp` 为什么没进清单”、
+“这个宏从哪来”、“这个目录为什么是 include”，不必配一次 CMake，更不必等 codegen。
+
+```
+ExeCmd=eval Project=Core.Mac/Core.Mac.vcxproj Platform=Mac [Configuration=Debug] [Json=out/model.json]
+```
+
+| 参数 | 必填 | 说明 |
+|---|---|---|
+| `Project=` | 是 | 平台工程路径，相对 `TitanRoot`，如 `Core.Android/Core.Android.vcxproj` |
+| `Platform=` | 是 | `Mac` / `Android` / `Windows` |
+| `Configuration=` | 否 | `Debug`（缺省）或 `Release` |
+| `PlatformName=` | 否 | 工程条件里的平台名：`Windows` 缺省 `x64`，其余缺省 `ARM64` |
+| `PlatformDir=` | 否 | 缺省 `Core.<Platform>`，只作为提示语与默认输出位置 |
+| `Prefix=` | 否 | 缺省 `Platform` 的大写，决定 `TITAN_<PREFIX>_*` 变量名 |
+| `ModulesFile=` | 否 | 平台模块文件（只含排除规则）；缺省 `<PlatformDir>/<Platform>Modules.cmake`，不存在就不用 |
+| `Exclude=` | 否 | 源排除正则（CMake 语义），**可重复**；不按 `+` 拆分，正则里可以有 `+` |
+| `Json=` | 否 | 输出路径（相对当前目录），缺省打到 stdout，`-` 同义 |
+| `TitanRoot=` | 否 | 仓库根；缺省从当前目录向上找 `EngineAll.sln`，再退到 exe 所在目录 |
+
+返回码：0 成功；1 参数错误或找不到仓库；2 求值失败（工程不存在、条件不支持、缺配置、未解析属性等）。
+
+输出字段：`platform`、`platformDir`、`configuration`、`platformName`、`project`、`fingerprint`、
+`inputs`、`inputHashes`、`modules`、`moduleDefines`、`moduleDirs`、`sources`、`includes`、`defines`、
+`sourceDefines`（每行一条 `<源文件>|<配置>|<宏>`）。
+
+行为要点：
+
+- **引擎无关**：在 `Program.Main` 里于引擎启动前直接派发；不读 `engine.jscfg`、不加载 native 库，
+  不要求工作目录是 `binaries`，也不认识 `CookCfg=` / `NativeDLL=`
+- **只读**：不写 `generated/` 下的入库产物，也不动指纹；刷新入库产物只有
+  `cmake -P Core.<Platform>/RefreshSources.cmake` 这一条路
+- **stdout 只放结果**：不传 `Json=` 时 stdout 就是完整 JSON；传了就只打一行 `[eval] model: <路径>`。
+  摘要（指纹/源数/模块数）一律走 stderr，便于管道直接吃 stdout
+- **与真实构建同源**：和 CMake 源清单、codegen 头/宏/include 共用 `Module/TitanProjectEval` 一份求值，
+  所以结论不会与实际构建不一致
+
+示例（仓库根；排除一个目录并落盘）：
+
+```powershell
+.\binaries\net10.0\TitanCMD.exe ExeCmd=eval Project=Core.Mac/Core.Mac.vcxproj Platform=Mac `
+    Exclude="^NativeCode/Bricks/Canvas/" Json=intermediate/model_mac.json
+```
+
 ## 扩展新命令
 
 1. 在 `Module/TitanCMD/Command/` 下新建处理器类，继承 `TtCookCommand`（或直接实现
    `async TtTask<int> ExecuteCommand(string[] args)`），文件名不加 `Tt`/`U` 等前缀，类名统一 `Tt` 前缀。
 2. 在 `Module/TitanCMD/Program.cs` 的 `ExecuteCommandAsync` switch 中补一个 `case "命令名":`，
    否则参数再正确也无人处理（未知命令返回 2）。
+   > 如果新命令**不需要引擎**（纯构建期/文本处理），别加进 switch：仿 `Command/TtProjectEval.cs`，
+   > 在 `Program.Main` 里于 `Run(args)` 之前用 `IsRequested` 派发。否则会被迫要求
+   > `binaries` 工作目录、`NativeDLL` 与一份可启动的 `engine.jscfg`。
 3. 若命令需要进程常驻，在 `TtCommandExecutionPolicy.IsServiceCommand` 中登记；否则默认 one-shot。
 4. 参数解析复用基类工具：`FindArgument(args, "Key=")`（取单值）、`GetArguments(args, "Key=")`（取 `+` 分隔列表）、
    `Param_Types`/`Param_Blacklist`/`Param_Asset` 常量。
@@ -295,6 +354,7 @@ ExeCmd=macross-patch PatchProject=<目录> BaselinePath=<基线文件> OutputDir
 
 - **工作目录**：程序以 `Directory.GetCurrentDirectory()` 推导引擎根与 `cache/config` 路径，
   通常在 `binaries`（或 `binaries/net10.0`）目录下执行；若在多级目录中，`CookCfg=` 请给相对该目录的正确路径。
+  `eval` 不需要引擎，可在仓库根直接跑（根目录自动向上找 `EngineAll.sln`）。
 - **引擎初始化完整**：TitanCMD 会完整启动引擎（含 GfxDevice），资产 cook 过程中材质/RVT 等 GPU 资源
   会照常创建 —— 保真但比纯 CPU 处理慢。
 - **`AssetType=` 可能被配置覆盖**：见上文 `engine.jscfg` 的 `CookAssetType`。

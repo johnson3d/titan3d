@@ -869,8 +869,12 @@ namespace EngineNS.Bricks.FX.Weather
 
             if (RenderNode != null)
             {
-                RenderNode.RuntimeEnable = CloudEnable;
-                if (CloudEnable)
+                // Outliner 的眼睛(IsEditorVisible)和 SetVisible(false)(SelfInvisible)都只被
+                // CpuCull 的可见 mesh 收集路径消费(World.cs/Node.GatherFollowVisibleMeshes),
+                // 体积云是全屏后处理 RenderGraph 节点, 从不走那条路径, 必须在这里自己并入;
+                // 否则隐藏节点后场景物体消失、云却照画
+                RenderNode.RuntimeEnable = CloudEnable && IsVisibleInHierarchy;
+                if (RenderNode.RuntimeEnable)
                 {
                     var sun = GetWorld().GetSun();
                     if (sun != null)
@@ -889,6 +893,25 @@ namespace EngineNS.Bricks.FX.Weather
         {
             get => GetNodeData<TtThisNodeData>().mShadingStruct.LightDir;
             set => GetNodeData<TtThisNodeData>().mShadingStruct.LightDir = value;
+        }
+        /// <summary>
+        /// 层级可见性: 编辑器眼睛(EditorHidden runtime style) 加存盘的 SelfInvisible,
+        /// 父节点隐藏则子节点也隐藏。口径与场景物体的可见性判定一致。
+        /// </summary>
+        [Browsable(false)]
+        public bool IsVisibleInHierarchy
+        {
+            get
+            {
+                TtNode node = this;
+                while (node != null)
+                {
+                    if (node.IsEditorVisible == false || node.HasStyle(TtNode.ENodeStyles.SelfInvisible))
+                        return false;
+                    node = node.Parent;
+                }
+                return true;
+            }
         }
     }
 }

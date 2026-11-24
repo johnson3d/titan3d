@@ -102,6 +102,8 @@ namespace NxRHI
 
 		virtual bool IsFinished() override;
 		virtual UINT64 GetDeltaTime() override;
+		virtual UINT64 GetBeginTime() override;
+		virtual UINT64 GetEndTime() override;
 		virtual void Begin(ICommandList* cmdlist) override;
 		virtual void End(ICommandList* cmdlist) override;
 
@@ -109,6 +111,9 @@ namespace NxRHI
 			return mName.c_str();
 		}
 		virtual void SetName(const char* name) override;
+	private:
+		// GetData 拿到结果后就不再变了, 回读一次缓存起来
+		void ReadTimes();
 	public:
 		TWeakRefHandle<DX11GpuDevice>	mDeviceRef;
 		std::string					mName;
@@ -116,6 +121,9 @@ namespace NxRHI
 		AutoRef<ID3D11Query>		mQueryEnd;
 		//AutoRef<IFence>				mFence;
 		UINT64						mDeltaTime = 0;
+		UINT64						mBeginTime = 0;
+		UINT64						mEndTime = 0;
+		bool						mTimesReady = false;
 	};
 }
 

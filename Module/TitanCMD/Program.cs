@@ -21,6 +21,11 @@ namespace ProjectCooker
         {
             try
             {
+                // eval 是纯构建期命令（求值 vcxproj/vcxitems，不开引擎、不读 engine.jscfg），
+                // 在引擎启动前直接派发：不需要工作目录=binaries，也不需要 NativeDLL。
+                if (Command.TtProjectEval.IsRequested(args))
+                    return Command.TtProjectEval.Run(args);
+
                 return Run(args);
             }
             catch (Exception ex)
@@ -79,6 +84,7 @@ namespace ProjectCooker
                     return 0;
                 case "macross-patch":
                     return await new Command.TtMacrossPatch().ExecuteCommand(args);
+                // eval 不走这里：它是引擎无关命令，在 Main 里于引擎启动前派发（见 Command/TtProjectEval.cs）。
                 default:
                     Console.Error.WriteLine($"Unknown ExeCmd: {cmd ?? "<null>"}");
                     return 2;

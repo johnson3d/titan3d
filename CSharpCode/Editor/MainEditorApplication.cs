@@ -419,52 +419,75 @@ namespace EngineNS.Editor
                             MenuName = TtLocalization.Tr("OpenTracer"),
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
-                                //test and start tracer process...
+                                // 注意: 这条路径上的代码必须一直留在引擎线程上。
+                                // 引擎的 async 续体只有在 TtContextThread.CurrentContext 非空时才会被排队
+                                // (ContextThread.cs: if(e.ContinueThread != null) 否则静默丢弃)。一旦用 await Task.Delay
+                                // 把控制权交给线程池, 后续 OpenTrace 的 await 就再也不会回来——现象是原生 log 已经
+                                // connect success, 但 Enabled 永远 false, 一帧都发不出去。所以等待子进程启动交给 TickTracerLaunch 轮询。
                                 Action action = async ()=>
                                 {
-                                    if(false == await TtEngine.Instance.Tracer.OpenTrace())
+                                    if (msTracerLaunching)
+                                        return;     // 上一次启动还在等, 不要叠着再起一个
+                                    if (await TtEngine.Instance.Tracer.OpenTrace())
+                                        return;
+                                    var apps = Process.GetProcessesByName("Tracer");
+                                    if (apps.Length != 0)
                                     {
-                                        var apps = Process.GetProcessesByName("Tracer");
-                                        if(apps.Length == 0)
-                                        {
-                                            bool bDSStarted = false;
-                                            var startInfo = new ProcessStartInfo();
-                                            var dir = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
-                                            startInfo.FileName = IO.TtFileManager.CombinePath(dir, $"Binaries/Tracer/debug/{TtEngine.DotNetVersion}/Tracer.exe");
-                                            startInfo.Arguments = $"EngineRoot={dir} config={dir}content\\config\\engineconfig_windows_tracer.jscfg NativeDLL={TtEngine.Instance.Config.NativeDll}";
-                                            startInfo.UseShellExecute = false;
-                                            startInfo.RedirectStandardOutput = true;
-                                            var ProcessTracer = new Process();
-                                            ProcessTracer.StartInfo = startInfo;
-                                            ProcessTracer.EnableRaisingEvents = true;
-                                            ProcessTracer.OutputDataReceived += (sender, e) =>
-                                            {
-                                                if (e.Data == "Tracer Server start success.")
-                                                {
-                                                    bDSStarted = true;
-                                                }
-                                            };
-                                            ProcessTracer.Start();
-                                            ProcessTracer.BeginOutputReadLine();
-                                            while (bDSStarted==false)
-                                            {
-                                                System.Threading.Thread.Sleep(100);
-                                            }
-                                            ProcessTracer.CancelOutputRead();
-    
-                                            //ProcessTracer.StandardOutput?.Close();
-                                            if(await TtEngine.Instance.Tracer.OpenTrace()==false)
-                                            {
-                                                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Tracer server start failed!");
-                                            }
-                                        }
-                                        else
-                                        {
-                                            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Tracer server down!");
-                                        }
+                                        Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Tracer server down!");
+                                        return;
                                     }
+                                    StartTracerProcess();
                                 };
                                 action();
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = TtLocalization.Tr("CaptureTraceEvents"),
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                // 事件流量是快照通道的几十倍, 只能显式抓 N 帧, 抓满自停
+                                TtEngine.Instance.Tracer.StartCapture();
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = TtLocalization.Tr("StopCaptureTraceEvents"),
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                TtEngine.Instance.Tracer.StopCapture();
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = TtLocalization.Tr("StartTraceRecord"),
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                // 对齐 UE 的 Trace.Start: 引擎进程自己开 trace writer 边跑边写,
+                                // 不依赖 Tracer 是否连着
+                                var tracer = TtEngine.Instance.Tracer;
+                                if (tracer.StartRecord(null, out var err) == false)
+                                {
+                                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Trace record start failed: {err}");
+                                    return;
+                                }
+                                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Trace recording -> {tracer.RecordFile}");
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = TtLocalization.Tr("StopTraceRecord"),
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                var tracer = TtEngine.Instance.Tracer;
+                                int frames = tracer.RecordedFrames;
+                                var path = tracer.StopRecord();
+                                if (string.IsNullOrEmpty(path))
+                                {
+                                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, "Trace record is not running");
+                                    return;
+                                }
+                                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Trace recorded {frames} frames -> {path}");
                             },
                         },
                         new EGui.UIProxy.MenuItemProxy()
@@ -631,6 +654,17 @@ namespace EngineNS.Editor
         static string mNeedFocusWindowName;
         public static string NeedFocusPanelName;
         static int mFrameDelay = 0;
+        // 由编辑器拉起的 Tracer 进程必须一直持有引用: Process 被回收会关掉重定向管道,
+        // 子进程后续写 stdout 就会因管道断开而抛异常
+        static Process msTracerProcess;
+        static bool msTracerLaunching;
+        static bool msTracerExitReported;
+        static volatile bool msTracerStartSignaled;
+        // 子进程 stdout/stderr 的尾部: 它崩在原生层时不会有托管异常, 唯一的线索就是崩之前打了什么
+        static readonly System.Text.StringBuilder msTracerErr = new System.Text.StringBuilder();
+        static int msTracerWaitFrames;
+        // 按帧数而不是墙钟估超时: 主线程跑满时帧数增长慢, 但子进程启动也是同量级的慢
+        const int TracerWaitMaxFrames = 2400;
         public static string NeedFocusWindowName
         {
             get => mNeedFocusWindowName;
@@ -812,6 +846,7 @@ namespace EngineNS.Editor
             }
 
             TickToOperationMenus();
+            TickTracerLaunch();
 
             if(!string.IsNullOrEmpty(NeedFocusWindowName))
             {
@@ -863,6 +898,157 @@ namespace EngineNS.Editor
                 mDelayFrame = 2;
                 return true;
             }, Thread.Async.EAsyncTarget.Main);
+        }
+        void TickTracerLaunch()
+        {
+            var proc = msTracerProcess;
+            if (proc == null)
+            {
+                msTracerLaunching = false;
+                return;
+            }
+            bool exited;
+            try
+            {
+                exited = proc.HasExited;
+            }
+            catch
+            {
+                exited = true;
+            }
+
+            if (msTracerLaunching == false)
+            {
+                // 连上之后也要盯一眼: 子进程静默崩掉时必须把原因(exit code + stderr)写进日志,
+                // 否则只会表现为"跟踪器窗口没了、一帧也不来", 完全无从下手
+                if (exited && msTracerExitReported == false)
+                {
+                    msTracerExitReported = true;
+                    int code = 0;
+                    try
+                    {
+                        code = proc.ExitCode;
+                    }
+                    catch
+                    {
+                    }
+                    var errText = TracerOutputTail();
+                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning,
+                        $"Tracer process exited after connect(code={code}), output:{errText}");
+                }
+                return;
+            }
+
+            if (msTracerStartSignaled == false && exited == false && --msTracerWaitFrames > 0)
+                return;
+
+            msTracerLaunching = false;
+            if (msTracerStartSignaled)
+            {
+                // 这里不能丢引用: Process 被回收时终结器会关掉重定向管道, 而且异步读取也挂着它。
+                // 一旦管道断了, 子进程下一次写 stdout 就抛异常退出(上一次就是这么把 Tracer 弄死的)。
+                // 必须在本函数所处的主线程上发起: OpenTrace 内部的 await 依赖 CurrentContext
+                ConnectTracerAsync();
+                return;
+            }
+            msTracerProcess = null;
+            var err = TracerOutputTail();
+            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning,
+                $"Tracer server start failed(exit={exited}), output:{err}");
+            try
+            {
+                proc.Dispose();
+            }
+            catch
+            {
+            }
+        }
+        async void ConnectTracerAsync()
+        {
+            if (await TtEngine.Instance.Tracer.OpenTrace() == false)
+            {
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Tracer server start failed!");
+            }
+            else
+            {
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Tracer connected, ready to CaptureTraceEvents");
+            }
+        }
+        static void AppendTracerOutput(string line)
+        {
+            // 诊断性输出必须实时可见: 子进程只要不退出, 攒在缓冲里的东西就永远看不到
+            if (line.Contains("[Net]") || line.Contains("[Tracer]") || line.Contains("Exception") || line.Contains("   at "))
+            {
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"tracer:{line}");
+            }
+            lock (msTracerErr)
+            {
+                // 只留尾部: 崩溃原因永远在最后几行, 而 stdout 会一直流
+                msTracerErr.AppendLine(line);
+                if (msTracerErr.Length > 8192)
+                    msTracerErr.Remove(0, msTracerErr.Length - 4096);
+            }
+        }
+        static string TracerOutputTail()
+        {
+            lock (msTracerErr)
+            {
+                // 堆栈可能很长, 但比起丢掉真正的原因, 多刷几行日志是值得的
+                return msTracerErr.ToString();
+            }
+        }
+        void StartTracerProcess()
+        {
+            var startInfo = new ProcessStartInfo();
+            var dir = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
+            startInfo.FileName = IO.TtFileManager.CombinePath(dir, $"Binaries/Tracer/debug/{TtEngine.DotNetVersion}/Tracer.exe");
+            startInfo.Arguments = $"EngineRoot={dir} config={dir}content\\config\\engineconfig_windows_tracer.jscfg NativeDLL={TtEngine.Instance.Config.NativeDll}";
+            startInfo.UseShellExecute = false;
+            startInfo.RedirectStandardOutput = true;
+            // 必须接住 stdout/stderr: 子进程崩在启动阶段(比如缺原生 DLL)或原生层时,
+            // 原因只会出现在这两处输出里, 而它自己不会把异常传上来
+            startInfo.RedirectStandardError = true;
+            var proc = new Process();
+            proc.StartInfo = startInfo;
+            proc.EnableRaisingEvents = true;
+            msTracerStartSignaled = false;
+            lock (msTracerErr)
+            {
+                msTracerErr.Clear();
+            }
+            proc.OutputDataReceived += (sender, e) =>
+            {
+                if (e.Data == null)
+                    return;
+                if (e.Data.Contains("Tracer Server start success."))
+                {
+                    msTracerStartSignaled = true;
+                    return;
+                }
+                // 不能只挑启动标记: Tracer 自己打的诊断(比如 drop broken frame)也只在 stdout 上
+                AppendTracerOutput($"[out]{e.Data}");
+            };
+            proc.ErrorDataReceived += (sender, e) =>
+            {
+                if (e.Data != null)
+                    AppendTracerOutput($"[err]{e.Data}");
+            };
+            try
+            {
+                proc.Start();
+            }
+            catch (System.Exception ex)
+            {
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Tracer process start exception: {ex.Message}");
+                proc.Dispose();
+                return;
+            }
+            msTracerProcess = proc;
+            msTracerLaunching = true;
+            msTracerExitReported = false;
+            msTracerWaitFrames = TracerWaitMaxFrames;
+            proc.BeginOutputReadLine();
+            proc.BeginErrorReadLine();
         }
         void TickToOperationMenus()
         {

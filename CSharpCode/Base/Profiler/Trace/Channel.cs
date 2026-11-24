@@ -6,6 +6,21 @@ namespace EngineNS.Profiler.Trace
 {
     public class TtAction
     {
+        /// <summary>协议 id。用固定常量而不是按注册顺序分配, 收发两端才不会错位</summary>
+        public virtual ushort GetTypeId()
+        {
+            return 0;
+        }
+        public static TtAction CreateByTypeId(ushort id)
+        {
+            switch (id)
+            {
+                case TtCpuFrameProfilerAction.TypeId: return new TtCpuFrameProfilerAction();
+                case TtLogAction.TypeId: return new TtLogAction();
+                case TtEventStreamAction.TypeId: return new TtEventStreamAction();
+                default: return null;
+            }
+        }
         public virtual ETraceChannel GetChannel()
         {
             return ETraceChannel.None;
@@ -24,12 +39,15 @@ namespace EngineNS.Profiler.Trace
         public ETraceChannel Channel { get; set; }
         public string Name { get; set; } = "";
         public List<TtAction> Actions = new List<TtAction>();
+        /// <summary>读到未知 action id: 流从这里开始错位, 后面的字段全部不可信</summary>
+        public bool Broken = false;
         public void Write(IO.IWriter writer)
         {
             writer.Write(Actions.Count);
             foreach (var act in Actions)
             {
-                writer.Write(Rtti.TtTypeDesc.TypeStr(act.GetType()));
+                // 以前写 Rtti 类型名(每个 action 一次字符串), 现在只写 2 字节 id
+                writer.Write(act.GetTypeId());
                 act.Write(writer);
             }
         }
@@ -37,12 +55,23 @@ namespace EngineNS.Profiler.Trace
         {
             int count;
             reader.Read(out count);
+            // action 数量不可能到这个量级, 超了就是流已经坏了
+            if (count < 0 || count > 4096)
+            {
+                Broken = true;
+                return;
+            }
             for (int i = 0; i<count; i++)
             {
-                string typeStr;
-                reader.Read(out typeStr);
-                var type = Rtti.TtTypeDesc.TypeOf(typeStr);
-                var act = Rtti.TtTypeDescManager.CreateInstance(type) as TtAction;
+                ushort typeId;
+                reader.Read(out typeId);
+                var act = TtAction.CreateByTypeId(typeId);
+                if (act == null)
+                {
+                    // 协议版本不匹配或新增了 action 而接收端还是旧的: 必须整帧丢弃, 否则会错位读下去
+                    Broken = true;
+                    return;
+                }
                 act.Read(reader);
                 Actions.Add(act);
             }   
@@ -51,6 +80,8 @@ namespace EngineNS.Profiler.Trace
 
     public class TtCpuFrameProfilerAction : TtAction
     {
+        public const ushort TypeId = 1;
+        public override ushort GetTypeId() => TypeId;
         public override ETraceChannel GetChannel()
         {
             return ETraceChannel.Cpu;
@@ -140,6 +171,8 @@ namespace EngineNS.Profiler.Trace
     }
     public class TtLogAction : TtAction
     {
+        public const ushort TypeId = 2;
+        public override ushort GetTypeId() => TypeId;
         public ELogTag Tag;
         public string Category;
         public string MemberName;

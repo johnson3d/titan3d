@@ -122,6 +122,8 @@ namespace NxRHI
 
 		virtual bool IsFinished() override;
 		virtual UINT64 GetDeltaTime() override;
+		virtual UINT64 GetBeginTime() override;
+		virtual UINT64 GetEndTime() override;
 		virtual void Begin(ICommandList* cmdlist) override;
 		virtual void End(ICommandList* cmdlist) override;
 
@@ -129,11 +131,17 @@ namespace NxRHI
 			return mName.c_str();
 		}
 		virtual void SetName(const char* name) override;
+	private:
+		// 回读只做一次: 结算后这两个值就固定了, 而 Begin/End 会被池化实例反复用到
+		void ReadTimes();
 	public:
 		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
 		std::string					mName;
 		AutoRef<ID3D12QueryHeap>	mQueryHeap;
 		AutoRef<FGpuMemHolder>	mResultBuffer;
+		UINT64						mBeginTime = 0;
+		UINT64						mEndTime = 0;
+		bool						mTimesReady = false;
 		//AutoRef<IFence>				mFence;
 	};
 }

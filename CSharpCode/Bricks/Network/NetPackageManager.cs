@@ -32,6 +32,22 @@ namespace EngineNS.Bricks.Network
         TtCallContextPool CallContextPool = new TtCallContextPool();
         public unsafe void PushPackage(void* ptr, uint size, INetConnect connect)
         {
+            // 模块初始化是异步的: 监听一旦启动就可能收到包, 此时 RpcModule/RpcManager 可能还没建好。
+            // 这里是原生接收线程回调进来的托管帧, 抛 NRE 会直接终止整个进程
+            var rpcModule = TtEngine.Instance?.RpcModule;
+            if (rpcModule == null)
+            {
+                Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning,
+                    $"RpcModule is null, drop package({size} bytes)");
+                return;
+            }
+            var rpcManager = rpcModule.RpcManager;
+            if (rpcManager == null)
+            {
+                Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning,
+                    $"RpcManager is null, drop package({size} bytes)");
+                return;
+            }
             using (var reader = IO.TtMemReader.CreateInstance((byte*)ptr, size))
             {
                 var pkg = new IO.AuxReader<IO.TtMemReader>(reader, null);
@@ -41,9 +57,9 @@ namespace EngineNS.Bricks.Network
                 {
                     FReturnContext retContext;
                     pkg.Read(out retContext, false);
-                    if (retContext.RunTarget != TtEngine.Instance.RpcModule.RpcManager.CurrentTarget)
+                    if (retContext.RunTarget != rpcManager.CurrentTarget)
                     {
-                        var conn = TtEngine.Instance.RpcModule.RpcManager.GetRunTargetConnect(in retContext, connect);
+                        var conn = rpcManager.GetRunTargetConnect(in retContext, connect);
                         if (conn != null)
                         {
                             conn.Send(ptr, size);
@@ -59,12 +75,12 @@ namespace EngineNS.Bricks.Network
                 {
                     FRouter router1 = new FRouter();
                     pkg.Read(out router1, false);
-                    if (router1.RunTarget != ERunTarget.None && router1.RunTarget != TtEngine.Instance.RpcModule.RpcManager.CurrentTarget)
+                    if (router1.RunTarget != ERunTarget.None && router1.RunTarget != rpcManager.CurrentTarget)
                     {
                         var pRouterAddr = (FRouter*)((byte*)ptr + sizeof(RPC.FPkgHeader));
-                        if (TtEngine.Instance.RpcModule.RpcManager.OnRelay(pRouterAddr, connect))
+                        if (rpcManager.OnRelay(pRouterAddr, connect))
                         {
-                            var conn = TtEngine.Instance.RpcModule.RpcManager.GetRunTargetConnect(in *pRouterAddr, connect);
+                            var conn = rpcManager.GetRunTargetConnect(in *pRouterAddr, connect);
                             if (conn != null)
                             {
                                 conn.Send(ptr, size);

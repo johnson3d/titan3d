@@ -104,6 +104,14 @@ namespace EngineNS.Editor
         /// </summary>
         [Rtti.Meta("")]
         public bool AutoCookTerrainVgDag { get; set; } = false;
+
+        /// <summary>
+        /// GPU 分析器: 连续这么多秒没被命中的 pass 从统计表里摘掉(0=永不摘)。
+        /// 场景切走/节点关掉后旧 pass 不再录制, 不摘的话面板会一直挂着它们的陈旧读数;
+        /// 代价是重新打开场景时这些行的历史平均值从零重算。
+        /// </summary>
+        [Rtti.Meta("")]
+        public float GpuScopeExpireSeconds { get; set; } = 5.0f;
     }
 
     public partial class TtEditor : TtModule<TtEngine>
