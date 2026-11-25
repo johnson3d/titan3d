@@ -12,7 +12,8 @@ namespace EngineNS.Editor.AndroidBuild
         public bool CookFirst;
         public string CookConfig = "content/config/engineconfig_windows_cook.jscfg";
         public string CookBlacklist = string.Empty;
-        public string TitanCmd = "binaries/net8.0/TitanCMD.exe";
+        // 留空 = binaries/<TFM>/TitanCMD.exe，TFM 由 TtTitanBuildOutput 从 dependencies.json 解析，不写死版本号。
+        public string TitanCmd = string.Empty;
         public string PowerShell = "powershell.exe";
 
         // 空值返回空串：命令行层遇到空串就不传参，让脚本使用自己的默认位置。
@@ -21,6 +22,17 @@ namespace EngineNS.Editor.AndroidBuild
             if (string.IsNullOrEmpty(ToolchainConfig))
                 return string.Empty;
             return TtAndroidRepository.ToFullPath(RepositoryRoot, ToolchainConfig);
+        }
+
+        // TitanCMD 留空时按托管 TFM 定位 binaries/<TFM>/TitanCMD.exe；TFM 无法解析时返回空串。
+        public string GetTitanCmdFullPath()
+        {
+            var relative = string.IsNullOrWhiteSpace(TitanCmd)
+                ? TtTitanBuildOutput.GetManagedOutputRelativePath(RepositoryRoot, TtTitanBuildOutput.TitanCmdFileName)
+                : TitanCmd;
+            if (string.IsNullOrEmpty(relative))
+                return string.Empty;
+            return TtAndroidRepository.ToFullPath(RepositoryRoot, relative);
         }
 
         // 返回中文错误列表；空列表表示可以发起构建。
@@ -39,8 +51,11 @@ namespace EngineNS.Editor.AndroidBuild
                 var cook = TtAndroidRepository.ToFullPath(RepositoryRoot, CookConfig);
                 if (!File.Exists(cook))
                     errors.Add("cook 配置不存在：" + cook);
-                if (!File.Exists(TtAndroidRepository.ToFullPath(RepositoryRoot, TitanCmd)))
-                    errors.Add("找不到 TitanCMD.exe，请先完成托管构建：" + TtAndroidRepository.ToFullPath(RepositoryRoot, TitanCmd));
+                var titanCmd = GetTitanCmdFullPath();
+                if (string.IsNullOrEmpty(titanCmd))
+                    errors.Add("无法解析托管 TFM（BuildScript/common/dependencies.json 的 dotnetSdk.targetFramework），请先检查清单或显式设置 TitanCmd。");
+                else if (!File.Exists(titanCmd))
+                    errors.Add("找不到 TitanCMD.exe，请先完成托管构建：" + titanCmd);
             }
             return errors;
         }

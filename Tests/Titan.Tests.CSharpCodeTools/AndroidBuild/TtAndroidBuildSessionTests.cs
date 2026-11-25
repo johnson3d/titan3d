@@ -45,7 +45,12 @@ public class TtAndroidBuildSessionTests
         var cookPath = System.IO.Path.Combine(mRepoRoot, "content", "config");
         System.IO.Directory.CreateDirectory(cookPath);
         System.IO.File.WriteAllText(System.IO.Path.Combine(cookPath, "engineconfig_windows_cook.jscfg"), "{}");
-        var cmdPath = System.IO.Path.Combine(mRepoRoot, "binaries", "net8.0");
+        // TitanCMD 的缺省位置跟随 dependencies.json 的 TFM；用一个非默认值证明它是从清单解析的，不是写死的。
+        var depsPath = System.IO.Path.Combine(mRepoRoot, "BuildScript", "common");
+        System.IO.Directory.CreateDirectory(depsPath);
+        System.IO.File.WriteAllText(System.IO.Path.Combine(depsPath, "dependencies.json"),
+            "{ \"dotnetSdk\": { \"targetFramework\": \"net9.9\" } }");
+        var cmdPath = System.IO.Path.Combine(mRepoRoot, "binaries", "net9.9");
         System.IO.Directory.CreateDirectory(cmdPath);
         System.IO.File.WriteAllText(System.IO.Path.Combine(cmdPath, "TitanCMD.exe"), "");
     }

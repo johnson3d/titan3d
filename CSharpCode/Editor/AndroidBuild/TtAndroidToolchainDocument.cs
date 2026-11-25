@@ -65,26 +65,29 @@ namespace EngineNS.Editor.AndroidBuild
 
         public void Save(string path)
         {
-            EnsureBuildScriptContract();
-            var dir = Path.GetDirectoryName(path);
+            // 仓库根从落盘位置向上找（cache/config 在仓库内），缺省值才能从 dependencies.json 的 androidToolchain 读。
+            var fullPath = Path.GetFullPath(path);
+            EnsureBuildScriptContract(TtTitanBuildOutput.FindRepositoryRoot(Path.GetDirectoryName(fullPath)));
+            var dir = Path.GetDirectoryName(fullPath);
             if (!string.IsNullOrEmpty(dir))
                 Directory.CreateDirectory(dir);
             // 无 BOM：AndroidTools.ps1 用 Get-Content -Encoding UTF8 读取，保持与手写文件一致，diff 更干净。
-            File.WriteAllText(path, Serialize(), new UTF8Encoding(false));
+            File.WriteAllText(fullPath, Serialize(), new UTF8Encoding(false));
         }
 
         // AndroidTools.ps1 对 abi/generator/stl 等字段是“缺失即报错”，不会静默取默认值。
-        // 落盘前把构建契约字段补齐（只补缺，不覆盖用户已填的值），与 AndroidToolchain.example.json 保持同构。
-        private void EnsureBuildScriptContract()
+        // 落盘前把构建契约字段补齐（只补缺，不覆盖用户已填的值），与 AndroidToolchain.example.json 保持同构；
+        // 缺省值取 dependencies.json 的 androidToolchain（升级 NDK / 改 apiLevel 只改清单），清单缺失时才用字面量兜底。
+        private void EnsureBuildScriptContract(string repositoryRoot)
         {
             if (string.IsNullOrWhiteSpace(Get("schemaVersion")))
                 mRoot["schemaVersion"] = 1;
             if (string.IsNullOrWhiteSpace(Get("abi")))
-                Set("abi", "arm64-v8a");
+                Set("abi", TtTitanBuildOutput.ReadAndroidToolchainString(repositoryRoot, "abi", "arm64-v8a"));
             if (string.IsNullOrWhiteSpace(Get("generator")))
-                Set("generator", "Ninja");
+                Set("generator", TtTitanBuildOutput.ReadAndroidToolchainString(repositoryRoot, "generator", "Ninja"));
             if (string.IsNullOrWhiteSpace(Get("stl")))
-                Set("stl", "c++_static");
+                Set("stl", TtTitanBuildOutput.ReadAndroidToolchainString(repositoryRoot, "stl", "c++_static"));
             // adb 仅 Device 阶段需要；SDK 存在时默认指向 platform-tools\adb.exe。
             if (string.IsNullOrWhiteSpace(Get("adb")))
             {
@@ -93,11 +96,11 @@ namespace EngineNS.Editor.AndroidBuild
                     Set("adb", Path.Combine(sdk, "platform-tools", "adb.exe"));
             }
             if (string.IsNullOrWhiteSpace(GetRequirementString("minimumCMakeVersion")))
-                SetRequirementString("minimumCMakeVersion", "3.24");
+                SetRequirementString("minimumCMakeVersion", TtTitanBuildOutput.ReadAndroidToolchainString(repositoryRoot, "minimumCMakeVersion", "3.24"));
             if (GetRequirementInt("dotnetSdkMajor", 0) <= 0)
-                SetRequirementInt("dotnetSdkMajor", 10);
+                SetRequirementInt("dotnetSdkMajor", TtTitanBuildOutput.ReadAndroidToolchainInt(repositoryRoot, "dotnetSdkMajor", 10));
             if (GetRequirementInt("ndkMajor", 0) <= 0)
-                SetRequirementInt("ndkMajor", TtAndroidToolchainLocator.DefaultNdkMajor);
+                SetRequirementInt("ndkMajor", TtTitanBuildOutput.ReadAndroidToolchainInt(repositoryRoot, "ndkMajor", TtAndroidToolchainLocator.DefaultNdkMajor));
         }
 
         private string GetRequirementString(string name)

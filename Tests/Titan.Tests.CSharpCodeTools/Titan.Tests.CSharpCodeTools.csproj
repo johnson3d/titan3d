@@ -33,5 +33,7 @@
     <Compile Include="../../CSharpCode/Editor/AndroidBuild/TtAndroidSdkInventory.cs" Link="Editor/AndroidBuild/TtAndroidSdkInventory.cs" />
     <Compile Include="../../CSharpCode/Editor/AndroidBuild/TtAndroidToolchainLocator.cs" Link="Editor/AndroidBuild/TtAndroidToolchainLocator.cs" />
     <Compile Include="../../CSharpCode/Editor/AndroidBuild/TtAndroidDeployCommand.cs" Link="Editor/AndroidBuild/TtAndroidDeployCommand.cs" />
+    <!-- TitanCMD 缺省路径按 TFM 解析，同样只依赖 BCL 与 System.Text.Json。 -->
+    <Compile Include="../../CSharpCode/Editor/TtTitanBuildOutput.cs" Link="Editor/TtTitanBuildOutput.cs" />
   </ItemGroup>
 </Project>

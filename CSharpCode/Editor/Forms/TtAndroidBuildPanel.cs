@@ -163,8 +163,11 @@ namespace EngineNS.Editor.Forms
             foreach (var key in mToolchainKeys)
                 mToolchainValues[key] = mToolchain.Get(key);
             mApiLevel = mToolchain.GetApiLevel();
-            // NDK 版本要求以配置为准，配置缺失时回落到引擎建议值。
-            mNdkMajor = mToolchain.GetRequirementInt("ndkMajor", AndroidBuild.TtAndroidToolchainLocator.DefaultNdkMajor);
+            // 版本要求以 android-toolchain.json 为准；配置缺失时回落到 dependencies.json 的 androidToolchain，不在代码里写死。
+            if (mApiLevel <= 0)
+                mApiLevel = TtTitanBuildOutput.ReadAndroidToolchainInt(mRepositoryRoot, "apiLevel", AndroidBuild.TtAndroidToolchainLocator.RepoApiLevel);
+            mNdkMajor = mToolchain.GetRequirementInt("ndkMajor",
+                TtTitanBuildOutput.ReadAndroidToolchainInt(mRepositoryRoot, "ndkMajor", AndroidBuild.TtAndroidToolchainLocator.DefaultNdkMajor));
 
             var specPath = AndroidBuild.TtAndroidRepository.ToFullPath(mRepositoryRoot, AndroidBuild.TtAndroidRepository.ContentSpecRelativePath);
             mContentSpec = AndroidBuild.TtAndroidContentSpec.Load(specPath);
@@ -300,9 +303,9 @@ namespace EngineNS.Editor.Forms
                                 filled.Add(key);
                             }
                         }
-                        // apiLevel 可配（>= 28，CMakeLists 只校验下限）；Auto Detect 只在字段为 0/未设时回填建议值，不覆盖用户选择。
+                        // apiLevel 可配（>= 28，CMakeLists 只校验下限）；Auto Detect 只在字段为 0/未设时回填建议值（取 dependencies.json 的 androidToolchain.apiLevel），不覆盖用户选择。
                         if (mApiLevel <= 0)
-                            mApiLevel = AndroidBuild.TtAndroidToolchainLocator.RepoApiLevel;
+                            mApiLevel = TtTitanBuildOutput.ReadAndroidToolchainInt(mRepositoryRoot, "apiLevel", AndroidBuild.TtAndroidToolchainLocator.RepoApiLevel);
                         if (detected.Missing.Count > 0)
                             mStatus = TtLocalization.Format("Auto detect filled: {0}. Missing (install first): {1}.",
                                 filled.Count > 0 ? string.Join(", ", filled) : TtLocalization.Tr("none"),

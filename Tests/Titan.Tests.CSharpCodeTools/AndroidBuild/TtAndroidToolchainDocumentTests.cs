@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
+using EngineNS.Editor;
 using EngineNS.Editor.AndroidBuild;
 
 namespace Titan.Tests.CSharpCodeTools.AndroidBuild;
@@ -120,6 +121,46 @@ public class TtAndroidToolchainDocumentTests
     public void Parse_InvalidJson_ThrowsFormatException()
     {
         Assert.Throws<FormatException>(() => TtAndroidToolchainDocument.Parse("{ not json"));
+    }
+
+    [Test]
+    public void Save_FillsContractDefaultsFromDependenciesJson()
+    {
+        // 版本/契约缺省值不写死：从 dependencies.json 的 androidToolchain 读，升级只改清单。
+        var repo = Path.Combine(mTempRoot, "repo");
+        Directory.CreateDirectory(Path.Combine(repo, "BuildScript", "common"));
+        File.WriteAllText(Path.Combine(repo, "BuildScript", "common", "dependencies.json"), @"{
+  ""androidToolchain"": {
+    ""ndkMajor"": 29, ""minimumCMakeVersion"": ""4.1"", ""dotnetSdkMajor"": 11,
+    ""abi"": ""arm64-v8a"", ""generator"": ""Ninja"", ""stl"": ""c++_shared"", ""apiLevel"": 33
+  }
+}");
+        var path = Path.Combine(repo, "cache", "config", "android-toolchain.json");
+        TtAndroidToolchainDocument.CreateEmpty().Save(path);
+
+        var saved = TtAndroidToolchainDocument.Load(path);
+        var text = File.ReadAllText(path, Encoding.UTF8);
+        Assert.Multiple(() =>
+        {
+            Assert.That(saved.Get("abi"), Is.EqualTo("arm64-v8a"));
+            Assert.That(saved.Get("stl"), Is.EqualTo("c++_shared"), "stl 缺省值应跟随清单，不写死 c++_static");
+            Assert.That(saved.GetRequirementInt("ndkMajor", 0), Is.EqualTo(29));
+            Assert.That(saved.GetRequirementInt("dotnetSdkMajor", 0), Is.EqualTo(11));
+            Assert.That(text, Does.Contain("\"minimumCMakeVersion\": \"4.1\""));
+        });
+    }
+
+    [Test]
+    public void ReadAndroidToolchain_FallsBackWhenManifestMissing()
+    {
+        var emptyRoot = Path.Combine(mTempRoot, "no-manifest");
+        Directory.CreateDirectory(emptyRoot);
+        Assert.Multiple(() =>
+        {
+            Assert.That(TtTitanBuildOutput.ReadAndroidToolchainInt(emptyRoot, "apiLevel", 28), Is.EqualTo(28));
+            Assert.That(TtTitanBuildOutput.ReadAndroidToolchainInt(null, "ndkMajor", 27), Is.EqualTo(27));
+            Assert.That(TtTitanBuildOutput.ReadAndroidToolchainString(emptyRoot, "stl", "c++_static"), Is.EqualTo("c++_static"));
+        });
     }
 
     [Test]

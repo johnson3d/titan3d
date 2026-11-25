@@ -108,7 +108,7 @@ namespace EngineNS.Editor.Cook
         /// </summary>
         public const int MaxUnattributedExits = 3;
 
-        /// <summary>worker 可执行文件; 留 null 则按 cwd 推导 cwd/net10.0/TitanCMD.exe</summary>
+        /// <summary>worker 可执行文件; 留 null 则按 cwd/binaries 推导 binaries/&lt;TFM&gt;/TitanCMD.exe（TFM 取 dependencies.json）</summary>
         public string WorkerExePath;
         /// <summary>worker 配置; 相对 cwd, 默认与冒烟一致</summary>
         public string WorkerCfgPath = @"..\content\config\engineconfig_windows_cook.jscfg";
@@ -270,9 +270,18 @@ namespace EngineNS.Editor.Cook
             mLastQuitReason = null;
 
             var cwd = Directory.GetCurrentDirectory();
-            var exe = string.IsNullOrEmpty(WorkerExePath)
-                ? Path.Combine(cwd, "net10.0", "TitanCMD.exe")
-                : WorkerExePath;
+            var exe = WorkerExePath;
+            if (string.IsNullOrEmpty(exe))
+            {
+                // TFM 由 dependencies.json 解析（退回程序集自身 TFM），不写死版本号
+                exe = TtTitanBuildOutput.GetManagedOutputPathIn(cwd, TtTitanBuildOutput.TitanCmdFileName);
+                if (string.IsNullOrEmpty(exe))
+                {
+                    Notice("cannot resolve the managed TFM from BuildScript/common/dependencies.json; set WorkerExePath explicitly");
+                    FailBatch("worker executable missing");
+                    return;
+                }
+            }
             if (WorkerFactory == null && File.Exists(exe) == false)
             {
                 // 只有真进程通路才需要校验可执行文件; 工厂接管时 exe 路径不参与创建

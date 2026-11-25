@@ -153,23 +153,39 @@ namespace EngineNS.Profiler.Trace
     }
 
     /// <summary>
-    /// 引擎侧流式写入器: 帧 Ready 一帧就写一帧, 内存里只挂队列不攒历史。
+    /// 引擎侧流式写入器: 帧 Ready 一帧就序列化一帧, 真正的磁盘 IO 在后台线程做。
     ///
+    /// 调用线程只承担“序列化到内存”的成本, 写盘慢/磁盘抖动不会拖住引擎帧;
+    /// 待写队列按字节数封顶(MaxPendingBytes), 满了直接丢帧并计数 —— 宁可少几帧也不能卡引擎。
     /// 名字增量游标是独立的(mNameCount 从文件头快照的末尾开始), 与网络发送的
     /// LastSentNameCount 互不干扰 —— 两个消费者各自知道自己写到第几个名字了。
-    /// 代价是 AttachNameDelta 会覆盖帧对象上的 NewNames, 所以必须先写网络再写文件。
+    /// 因为 AttachNameDelta 会覆盖帧对象上的 NewNames, 序列化必须在调用线程当场做完,
+    /// 队列里传的是已经序列化好的内存块。
     /// </summary>
     public class TtTraceFileWriter
     {
+        /// <summary>待写数据上限: 超过就丢帧, 保证写盘跟不上时调用方不被阻塞</summary>
+        public const long MaxPendingBytes = 64L << 20;
+        /// <summary>每写这么多帧回填一次帧数: 进程被强杀后文件也能打开(顶多丢末尾几帧)</summary>
+        const int FrameCountFlushHint = 64;
+
         IO.TtFileWriter mFile;
-        // 装箱存一次: AuxWriter 是 struct, 存成接口避免每次 Write 都复制/装箱
-        IO.IWriter mWriter;
         long mFrameCountOffset;
+        System.Threading.Thread mThread;
+
+        readonly Queue<IO.TtMemWriter> mPending = new Queue<IO.TtMemWriter>();
+        long mPendingBytes;
+        bool mStopRequested;
+
         int mFrameCount;
+        int mDroppedFrames;
         int mNameCount;
 
         public string Path { get; private set; }
-        public int FrameCount { get { return mFrameCount; } }
+        /// <summary>已落盘的帧数(后台线程更新)</summary>
+        public int FrameCount { get { return System.Threading.Volatile.Read(ref mFrameCount); } }
+        /// <summary>因队列满/写盘失败被丢掉的帧数</summary>
+        public int DroppedFrames { get { return System.Threading.Volatile.Read(ref mDroppedFrames); } }
         public bool IsOpen { get { return mFile != null; } }
 
         public bool Start(string path, out string err)
@@ -179,20 +195,31 @@ namespace EngineNS.Profiler.Trace
             try
             {
                 mFile = new IO.TtFileWriter(path);
-                mWriter = new IO.AuxWriter<IO.TtFileWriter>(mFile);
                 Path = path;
                 mFrameCount = 0;
+                mDroppedFrames = 0;
+                mPendingBytes = 0;
+                mStopRequested = false;
 
-                mWriter.Write(TtTraceFile.Magic);
-                mWriter.Write(TtTraceFile.Version);
-                mWriter.Write(TtFrame.ProtocolVersion);
-                mNameCount = TtTraceNameTable.Count;
-                mWriter.Write(mNameCount);
-                for (int i = 0; i < mNameCount; i++)
-                    mWriter.Write(TtTraceNameTable.GetName(i));
-                // frameCount 要等录制结束才知道, 先占位, Stop 时 seek 回来填
-                mFrameCountOffset = (long)mFile.GetPosition();
-                mWriter.Write(0);
+                // 文件头只有名字表, 数据量小, 启动时同步写完即可
+                using (var writer = new IO.AuxWriter<IO.TtFileWriter>(mFile))
+                {
+                    writer.Write(TtTraceFile.Magic);
+                    writer.Write(TtTraceFile.Version);
+                    writer.Write(TtFrame.ProtocolVersion);
+                    mNameCount = TtTraceNameTable.Count;
+                    writer.Write(mNameCount);
+                    for (int i = 0; i < mNameCount; i++)
+                        writer.Write(TtTraceNameTable.GetName(i));
+                    // frameCount 要等录制结束才知道, 先占位, Stop 时 seek 回来填
+                    mFrameCountOffset = (long)mFile.GetPosition();
+                    writer.Write(0);
+                }
+
+                mThread = new System.Threading.Thread(FlushLoop);
+                mThread.IsBackground = true;
+                mThread.Name = "TtTraceFileWriter";
+                mThread.Start();
                 return true;
             }
             catch (Exception e)
@@ -207,27 +234,114 @@ namespace EngineNS.Profiler.Trace
         {
             if (mFile == null || frame == null)
                 return;
-            // 录制期间新出现的名字靠增量补, 文件头只快照了开始那一刻的全表
-            TtEventStreamAction.AttachNameDelta(frame, ref mNameCount);
-            frame.Write(mWriter);
-            mFrameCount++;
-        }
 
-        public void Stop()
-        {
-            if (mFile == null)
-                return;
+            // 序列化必须在调用线程当场做完: 帧对象写完就可能被回收复用
+            var mem = IO.TtMemWriter.CreateInstance();
             try
             {
-                mFile.Seek((ulong)mFrameCountOffset);
-                mWriter.Write(mFrameCount);
+                TtEventStreamAction.AttachNameDelta(frame, ref mNameCount);
+                IO.IWriter memWriter = new IO.AuxWriter<IO.TtMemWriter>(mem);
+                frame.Write(memWriter);
             }
             catch
             {
-                // 回填失败就等于文件头帧数不对; 内容还在, Load 会按实际字节数读不出多余帧
+                mem.Dispose();
+                throw;
             }
-            // AuxWriter.Dispose 只跑 DisposeAction, 真正 flush/关文件靠 TtFileWriter.Dispose
-            mWriter = null;
+
+            var size = (long)mem.GetPosition();
+            lock (mPending)
+            {
+                if (mPendingBytes + size > MaxPendingBytes)
+                {
+                    // 写盘跟不上: 丢这一帧, 绝不阻塞调用线程
+                    mem.Dispose();
+                    System.Threading.Interlocked.Increment(ref mDroppedFrames);
+                    return;
+                }
+                mPending.Enqueue(mem);
+                mPendingBytes += size;
+                System.Threading.Monitor.Pulse(mPending);
+            }
+        }
+
+        /// <summary>后台写线程: 取块 -> 写盘 -> 回收内存块</summary>
+        void FlushLoop()
+        {
+            while (true)
+            {
+                IO.TtMemWriter item;
+                lock (mPending)
+                {
+                    while (mPending.Count == 0 && mStopRequested == false)
+                        System.Threading.Monitor.Wait(mPending);
+                    if (mPending.Count == 0)
+                        return;   // 已经要求停止且排空
+                    item = mPending.Dequeue();
+                    mPendingBytes -= (long)item.GetPosition();
+                }
+
+                try
+                {
+                    item.WriteToFile(mFile);
+                    if ((System.Threading.Interlocked.Increment(ref mFrameCount) % FrameCountFlushHint) == 0)
+                        WriteFrameCountToHeader();
+                }
+                catch
+                {
+                    // 磁盘满/句柄失效: 计数后继续消费队列, 不让调用方感知
+                    System.Threading.Interlocked.Increment(ref mDroppedFrames);
+                }
+                finally
+                {
+                    item.Dispose();
+                }
+            }
+        }
+
+        /// <summary>写线程专用: 回填帧数再把位置还原到文件尾</summary>
+        unsafe void WriteFrameCountToHeader()
+        {
+            var pos = (long)mFile.GetPosition();
+            try
+            {
+                mFile.Seek((ulong)mFrameCountOffset);
+                int count = System.Threading.Volatile.Read(ref mFrameCount);
+                mFile.WritePtr(&count, sizeof(int));
+            }
+            finally
+            {
+                mFile.Seek((ulong)pos);
+            }
+        }
+
+        public unsafe void Stop()
+        {
+            if (mFile == null)
+                return;
+
+            lock (mPending)
+            {
+                mStopRequested = true;
+                System.Threading.Monitor.PulseAll(mPending);
+            }
+            var thread = mThread;
+            mThread = null;
+            if (thread != null && thread != System.Threading.Thread.CurrentThread)
+                thread.Join();   // 排空队列后才回填帧数
+
+            try
+            {
+                var pos = (long)mFile.GetPosition();
+                mFile.Seek((ulong)mFrameCountOffset);
+                int count = System.Threading.Volatile.Read(ref mFrameCount);
+                mFile.WritePtr(&count, sizeof(int));
+                mFile.Seek((ulong)pos);
+            }
+            catch
+            {
+                // 回填失败只影响文件头帧数; 数据仍在文件里
+            }
             mFile.Dispose();
             mFile = null;
         }

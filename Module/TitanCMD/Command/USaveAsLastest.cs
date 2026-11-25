@@ -1,5 +1,4 @@
-﻿using Assimp;
-using EngineNS;
+﻿using EngineNS;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.CodeBuilder.MacrossNode;
 using EngineNS.GamePlay.Scene;

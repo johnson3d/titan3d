@@ -45,6 +45,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidSdkInventory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidToolchainLocator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AndroidBuild\TtAndroidDeployCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TtTitanBuildOutput.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\FileDialog.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\Inspector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\MaterialInstanceEditor.cs" />

@@ -12,6 +12,8 @@ namespace EngineNS.Editor.AndroidBuild
         // 与 AndroidToolchain.example.json / CMakeLists.txt 的仓库契约保持一致。
         // ndkMajor 只是缺省建议值：实际版本要求以 android-toolchain.json 的 requirements.ndkMajor 为准，
         // 面板可改，升级 NDK 时只动配置，不用改代码。
+        // DefaultNdkMajor / RepoApiLevel 是“清单不可读时的最后兜底”：真正的值在
+        // BuildScript/common/dependencies.json 的 androidToolchain（面板通过 TtTitanBuildOutput.ReadAndroidToolchain* 读取）。
         public const int DefaultNdkMajor = 27;
         public const int RepoApiLevel = 28;
         // 兼容旧引用的别名。

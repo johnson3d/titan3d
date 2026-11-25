@@ -65,6 +65,21 @@
     <_CSharpCodeToolsExe>$(_TitanToolsDir)CSharpCodeTools.exe</_CSharpCodeToolsExe>
     <_CSharpCodeToolsDll>$(_TitanToolsDir)CSharpCodeTools.dll</_CSharpCodeToolsDll>
     <_CSharpCodeToolsBuildStamp>$(_TitanToolsDir).CSharpCodeTools.build.stamp</_CSharpCodeToolsBuildStamp>
+    <!-- libclang / libClangSharp 由 NuGet runtime 包提供，原生库落在 runtimes\<rid>\native\ 下，
+         不一定平铺在工具目录根部；两种布局都要认，否则部署自检恒为“缺失”，每次构建都会重编工具。 -->
+    <_CppWeavingLibclang>$(_TitanToolsDir)libclang.dll</_CppWeavingLibclang>
+    <_CppWeavingLibclang Condition="!Exists('$(_CppWeavingLibclang)')">$(_TitanToolsDir)runtimes\win-x64\native\libclang.dll</_CppWeavingLibclang>
+    <_CppWeavingLibClangSharp>$(_TitanToolsDir)libClangSharp.dll</_CppWeavingLibClangSharp>
+    <_CppWeavingLibClangSharp Condition="!Exists('$(_CppWeavingLibClangSharp)')">$(_TitanToolsDir)runtimes\win-x64\native\libClangSharp.dll</_CppWeavingLibClangSharp>
+    <!-- 部署自检结果：任一项缺失即视为部署不完整。逐项累加而不是写成一条超长 Condition。 -->
+    <_CppWeavingDeploymentBroken Condition="!Exists('$(_CppWeavingExe)')">true</_CppWeavingDeploymentBroken>
+    <_CppWeavingDeploymentBroken Condition="!Exists('$(_CppWeavingDll)')">true</_CppWeavingDeploymentBroken>
+    <_CppWeavingDeploymentBroken Condition="!Exists('$(_TitanToolsDir)CppWeavingTools.deps.json')">true</_CppWeavingDeploymentBroken>
+    <_CppWeavingDeploymentBroken Condition="!Exists('$(_TitanToolsDir)CppWeavingTools.runtimeconfig.json')">true</_CppWeavingDeploymentBroken>
+    <_CppWeavingDeploymentBroken Condition="!Exists('$(_TitanToolsDir)ClangSharp.dll')">true</_CppWeavingDeploymentBroken>
+    <_CppWeavingDeploymentBroken Condition="!Exists('$(_TitanToolsDir)ClangSharp.Interop.dll')">true</_CppWeavingDeploymentBroken>
+    <_CppWeavingDeploymentBroken Condition="!Exists('$(_CppWeavingLibclang)')">true</_CppWeavingDeploymentBroken>
+    <_CppWeavingDeploymentBroken Condition="!Exists('$(_CppWeavingLibClangSharp)')">true</_CppWeavingDeploymentBroken>
     <_CodeGenSentinel>$(TitanNativeBinderDirectory)\.codegen.stamp</_CodeGenSentinel>
     <_CodeGenPOD>$(TitanNativeBinderDirectory)\PODStructDefine.h</_CodeGenPOD>
     <_CodeGenCppProject>$(TitanNativeBinderDirectory)\CodeGen.vcxitems</_CodeGenCppProject>
@@ -125,7 +140,7 @@
           DependsOnTargets="_ValidateTitanCodeGenHost;_InvalidateMissingCppWeavingDeployment;_BuildCppWeavingTool;_DeployCppWeavingTemplates" />
 
   <Target Name="_InvalidateMissingCppWeavingDeployment"
-          Condition="'$(SkipTitanCodeGen)' != 'true' AND (!Exists('$(_CppWeavingExe)') OR !Exists('$(_CppWeavingDll)') OR !Exists('$(_TitanToolsDir)CppWeavingTools.deps.json') OR !Exists('$(_TitanToolsDir)CppWeavingTools.runtimeconfig.json') OR !Exists('$(_TitanToolsDir)ClangSharp.dll') OR !Exists('$(_TitanToolsDir)ClangSharp.Interop.dll') OR !Exists('$(_TitanToolsDir)libclang.dll') OR !Exists('$(_TitanToolsDir)libClangSharp.dll'))">
+          Condition="'$(SkipTitanCodeGen)' != 'true' AND '$(_CppWeavingDeploymentBroken)' == 'true'">
     <Delete Files="$(_CppWeavingBuildStamp)" />
   </Target>
 

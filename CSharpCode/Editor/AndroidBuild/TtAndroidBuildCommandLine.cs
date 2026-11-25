@@ -23,7 +23,8 @@ namespace EngineNS.Editor.AndroidBuild
         public static string Cook(TtAndroidBuildRequest request)
         {
             var builder = new StringBuilder();
-            builder.Append('"').Append(TtAndroidRepository.ToFullPath(request.RepositoryRoot, request.TitanCmd)).Append('"');
+            // TitanCmd 留空时按 dependencies.json 的 TFM 解析到 binaries/<TFM>/TitanCMD.exe
+            builder.Append('"').Append(request.GetTitanCmdFullPath()).Append('"');
             builder.Append(" ExeCmd=SaveAsLastest");
             builder.Append(" CookCfg=\"").Append(TtAndroidRepository.ToFullPath(request.RepositoryRoot, request.CookConfig)).Append('"');
             if (!string.IsNullOrWhiteSpace(request.CookBlacklist))

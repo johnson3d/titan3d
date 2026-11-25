@@ -103,6 +103,37 @@ public class TtAndroidBuildCommandLineTests
     }
 
     [Test]
+    public void Cook_ResolvesTitanCmdFromDependenciesJson()
+    {
+        // TitanCmd 留空时不应写死 TFM：缺省目录由 dependencies.json 的 dotnetSdk.targetFramework 决定。
+        var depsDirectory = Path.Combine(mRepoRoot, "BuildScript", "common");
+        Directory.CreateDirectory(depsDirectory);
+        File.WriteAllText(Path.Combine(depsDirectory, "dependencies.json"),
+            "{ \"dotnetSdk\": { \"targetFramework\": \"net9.9\" } }");
+
+        var request = MakeRequest();
+        var cmd = TtAndroidBuildCommandLine.Cook(request);
+        Assert.That(cmd, Does.Contain(Path.Combine(mRepoRoot, "binaries", "net9.9", "TitanCMD.exe")));
+    }
+
+    [Test]
+    public void Validate_CookFirst_MissingTitanCmdUnderResolvedTfm()
+    {
+        var depsDirectory = Path.Combine(mRepoRoot, "BuildScript", "common");
+        Directory.CreateDirectory(depsDirectory);
+        File.WriteAllText(Path.Combine(depsDirectory, "dependencies.json"),
+            "{ \"dotnetSdk\": { \"targetFramework\": \"net9.9\" } }");
+        var cookDirectory = Path.Combine(mRepoRoot, "content", "config");
+        Directory.CreateDirectory(cookDirectory);
+        File.WriteAllText(Path.Combine(cookDirectory, "engineconfig_windows_cook.jscfg"), "{}");
+
+        var request = MakeRequest();
+        request.CookFirst = true;
+        var errors = request.Validate();
+        Assert.That(errors.Any(e => e.Contains(Path.Combine("binaries", "net9.9", "TitanCMD.exe"))), Is.True, string.Join(";", errors));
+    }
+
+    [Test]
     public void Validate_ReportsMissingRootAndConfig()
     {
         var request = new TtAndroidBuildRequest { RepositoryRoot = string.Empty, Configuration = string.Empty };
